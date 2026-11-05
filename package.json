@@ -6,7 +6,7 @@
     "build": "node scripts/build-console.cjs",
     "typecheck": "tsc --noEmit",
     "deck:pdf": "node scripts/render-deck.cjs",
-    "deck:test": "playwright test deck.spec.ts"
+    "deck:test": "node scripts/render-topology.cjs && playwright test deck.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

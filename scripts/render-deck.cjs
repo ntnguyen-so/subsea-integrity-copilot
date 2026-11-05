@@ -2,8 +2,10 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { chromium } = require("@playwright/test");
+const { renderTopology } = require("./render-topology.cjs");
 
 async function main() {
+  await renderTopology();
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
@@ -11,6 +13,7 @@ async function main() {
     page.on("pageerror", error => errors.push(error.message));
     const source = path.join(__dirname, "..", "docs", "INTERVIEW_DECK.html");
     await page.goto(pathToFileURL(source).href);
+    await page.locator("img").evaluateAll(images => Promise.all(images.map(image => image.decode())));
     if (errors.length) throw new Error(errors.join("\n"));
     const expected = await page.locator(".slide").count();
     await page.locator("a[href]").evaluateAll(anchors => {

@@ -7,6 +7,8 @@ leak from sensor faults or shared telemetry outages, then choose what to inspect
 The agent is a read-only evidence layer over existing monitoring workflows,
 not a replacement dashboard or safety system.
 
+![Synthetic Y-shaped pipeline network: three 800m segments, four sensor pairs per segment, 24 nodes.](assets/pipeline-topology.svg)
+
 **Why I chose this problem.** It builds on my PhD research in marine sensor
 data quality and anomaly detection. The practical question is whether unusual
 readings point to a real pipeline problem or faulty sensors. This is a useful
@@ -34,15 +36,15 @@ environmental confounders and reproducible physical assumptions. Main objections
 "Could these sensors share a failed gateway?", "Could currents or acoustic noise
 explain this?" and "Can I reproduce the location from raw evidence?"
 
-**What the demo demonstrates.** An original synthetic network of 24 sensor nodes
-streams acoustic relative power, dissolved methane and temperature through a
-60-second window advancing every five simulated seconds. Data includes gaps,
-spikes, mixed units/time formats and conflicting duplicates. Three scoped agents
-answer: (1) possible leak or instrumentation issue? (2) which pipeline section
-should an engineer inspect first, and why? (3) which sensors are unreliable and
-what evidence is missing? Numerical tools own normalization, corroboration and
-fitting; agents interpret checked evidence. Raw records, pinned answers and execution
-receipts are inspectable. A shared outage demonstrates abstention, not an all-clear.
+**What the demo demonstrates.** Acoustic, methane and temperature data move through
+60-second windows every five simulated seconds. Inputs include gaps, spikes, mixed
+formats and conflicting duplicates. Three agents answer: possible leak or sensor
+issue? Where should we inspect? What evidence is missing? **Leak example:** the
+recorded S1 window suggests P1 near 375m, between the 300m and 500m stations.
+**Sensor-fault example:** S2 has scattered spikes at P1-ST1-A, P2-ST2-A and
+P3-ST4-A. Numerical tools calculate; agents interpret checked evidence. Raw records,
+pinned answers and execution receipts remain inspectable; insufficient coverage
+means abstention, not an all-clear.
 
 **Assumptions and limitations.** The customer, network and telemetry are synthetic;
 no confidential employer data is used. Methane/acoustic signatures model gas,

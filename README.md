@@ -103,11 +103,17 @@ integrity engineers retain inspection and safety authority.
 
 The verified one-page attachment is `docs\ONE_PAGE_BRIEF.pdf`; regenerate it with
 `node scripts\render-brief.cjs` after editing the brief.
+The brief and deck share `docs\assets\pipeline-topology.svg`, generated from
+`packs\northsea.json` by their renderers. It shows the actual branching connectivity
+and station placement: three 800m segments, four A/B pairs per segment, 24 nodes.
+Offsets are exaggerated for readability; this is not a geographic scale drawing.
+The brief gives concrete S1 leak-candidate and S2 scattered-spike examples.
 
 ## Interview deck
 
 Open `docs\INTERVIEW_DECK.html` directly in Chrome or Edge; no server is required
 for the presentation. `docs\INTERVIEW_DECK.pdf` is the widescreen audience export.
+Keep `docs\assets` alongside the HTML when copying the presentation.
 Its evidence/code links point to GitHub rather than this computer's local paths;
 reviewers need private repository access.
 The 18-slide main story follows **5m problem / 10m live demo / 30m technical

@@ -1,8 +1,89 @@
 import { test, expect } from "@playwright/test";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { readFileSync } from "node:fs";
 
 const deck = pathToFileURL(path.join(process.cwd(), "docs", "INTERVIEW_DECK.html")).href;
+
+test("topology depicts the source pack's connectivity, station distribution and sensor identities", async ({ page }) => {
+  const pack: {
+    segments: { id: string; length_m: number; points: { x: number; y: number }[] }[];
+    sensors: {
+      id: string; station_id: string; segment_id: string; chainage_m: number;
+      failure_domain_id: string; position: { x: number; y: number };
+    }[];
+  } = JSON.parse(readFileSync(path.join(process.cwd(), "packs", "northsea.json"), "utf8"));
+  await page.goto(pathToFileURL(path.join(process.cwd(), "docs", "assets", "pipeline-topology.svg")).href);
+  const segments = await page.locator("g[data-length-m]").evaluateAll(nodes => nodes.map(node => ({
+    id: node.getAttribute("data-segment-id"),
+    length: Number(node.getAttribute("data-length-m")),
+    sourceStart: [Number(node.getAttribute("data-start-x")), Number(node.getAttribute("data-start-y"))],
+    sourceEnd: [Number(node.getAttribute("data-end-x")), Number(node.getAttribute("data-end-y"))],
+    line: node.querySelector("path")!.getAttribute("d")!.match(/-?\d+(?:\.\d+)?/g)!.map(Number),
+  })));
+  const sensors = await page.locator("circle[data-sensor-id]").evaluateAll(nodes => nodes.map(node => ({
+    id: node.getAttribute("data-sensor-id"),
+    station: node.getAttribute("data-station-id"),
+    segment: node.getAttribute("data-segment-id"),
+    chainage: Number(node.getAttribute("data-chainage-m")),
+    failureDomain: node.getAttribute("data-failure-domain"),
+    sourceX: Number(node.getAttribute("data-source-x")),
+    sourceY: Number(node.getAttribute("data-source-y")),
+    x: Number(node.getAttribute("cx")), y: Number(node.getAttribute("cy")),
+    radius: Number(node.getAttribute("r")), stroke: Number(node.getAttribute("stroke-width")),
+  })));
+  expect(sensors).toHaveLength(pack.sensors.length);
+  for (let i = 0; i < sensors.length; i++) {
+    for (let j = i + 1; j < sensors.length; j++) {
+      const first = sensors[i], second = sensors[j];
+      expect(Math.hypot(first.x - second.x, first.y - second.y),
+        `${first.id} and ${second.id} remain individually visible`)
+        .toBeGreaterThanOrEqual(first.radius + second.radius + (first.stroke + second.stroke) / 2);
+    }
+  }
+  for (const source of pack.segments) {
+    const drawn = segments.find(segment => segment.id === source.id)!;
+    expect(drawn.length).toBe(source.length_m);
+    expect(drawn.sourceStart).toEqual([source.points[0].x, source.points[0].y]);
+    expect(drawn.sourceEnd).toEqual([source.points[1].x, source.points[1].y]);
+  }
+  const trunk = segments.find(segment => segment.id === "P1")!;
+  for (const id of ["P2", "P3"]) {
+    expect(segments.find(segment => segment.id === id)!.line.slice(0, 2)).toEqual(trunk.line.slice(2));
+  }
+  for (const source of pack.sensors) {
+    const drawn = sensors.find(sensor => sensor.id === source.id)!;
+    expect(drawn).toMatchObject({
+      station: source.station_id, segment: source.segment_id,
+      chainage: source.chainage_m, failureDomain: source.failure_domain_id,
+      sourceX: source.position.x, sourceY: source.position.y,
+    });
+    const segment = segments.find(segment => segment.id === source.segment_id)!;
+    const [x0, y0, x1, y1] = segment.line;
+    const dx = x1 - x0, dy = y1 - y0;
+    const fraction = ((drawn.x - x0) * dx + (drawn.y - y0) * dy) / (dx * dx + dy * dy);
+    expect(fraction).toBeCloseTo(source.chainage_m / segment.length, 4);
+    const physical = pack.segments.find(item => item.id === source.segment_id)!;
+    const sx = physical.points[1].x - physical.points[0].x;
+    const sy = physical.points[1].y - physical.points[0].y;
+    const offset = Math.abs(sx * (source.position.y - physical.points[0].y) -
+      sy * (source.position.x - physical.points[0].x)) / Math.hypot(sx, sy);
+    expect(offset).toBeCloseTo(8);
+  }
+  const clippedLabels = await page.locator("svg text").evaluateAll(nodes => nodes.some(node => {
+    if (!(node instanceof SVGGraphicsElement)) throw new Error("Expected an SVG text label");
+    const svg = document.querySelector("svg");
+    if (!(svg instanceof SVGSVGElement)) throw new Error("Expected an SVG diagram");
+    const box = node.getBBox();
+    return box.x < 0 || box.y < 0 || box.x + box.width > svg.viewBox.baseVal.width ||
+      box.y + box.height > svg.viewBox.baseVal.height;
+  }));
+  expect(clippedLabels).toBe(false);
+  await page.goto(deck + "#demo-contract");
+  await expect(page.locator(".topology img")).toBeVisible();
+  expect(await page.locator(".topology img").evaluate(image =>
+    image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0)).toBe(true);
+});
 
 test("deck follows the interview schedule and supports chapter, keyboard and notes navigation", async ({ page }) => {
   const errors: string[] = [];
