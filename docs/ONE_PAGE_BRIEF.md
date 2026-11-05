@@ -7,12 +7,12 @@ leak from sensor faults or shared telemetry outages, then choose what to inspect
 The agent is a read-only evidence layer over existing monitoring workflows,
 not a replacement dashboard or safety system.
 
-**Why I chose this problem.** My thesis's RE 2023 study identifies pipeline
-monitoring as demanding accuracy, currentness, completeness and consistency.
-My defense motivates distributed sensing and expert-informed quality assessment.
-This translates research into a defensible operational decision: correlate usable
-physical evidence, expose gaps and abstain when necessary. Localization is a
-simplified demo extension, not a thesis-validated capability.
+**Why I chose this problem.** It builds on my PhD research in marine sensor
+data quality and anomaly detection. The practical question is whether unusual
+readings point to a real pipeline problem or faulty sensors. This is a useful
+FDE case because engineers need evidence they can check before deciding what to
+inspect, not just another alarm or chatbot answer. Leak localization is a
+simplified demo extension, not a capability validated by my thesis.
 
 **Why the prospect has not signed.** Their existing dashboard is cheaper, and
 errors have two costly sides. False alarms can trigger unnecessary offshore
