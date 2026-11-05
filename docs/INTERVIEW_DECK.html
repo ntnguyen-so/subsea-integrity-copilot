@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subsea Integrity Copilot | FDE customer meeting</title>
+<style>
+:root{font-family:"Segoe UI",Arial,sans-serif;color:#edf4fa;background:#08131d;--accent:#70e2bf;--muted:#b5c8d7;--line:#325366;--panel:#142a38;--amber:#ffd18c;--red:#ffaaaa}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;padding-bottom:90px}a{color:var(--accent);text-underline-offset:4px}button,select{font:inherit;font-size:14px;color:#edf4fa;background:#193343;border:1px solid #527387;border-radius:5px;padding:9px 12px;cursor:pointer}button:disabled{opacity:.4;cursor:default}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:4px}
+.timeline{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line);background:#0d1e2b}.timeline button{background:transparent;border-color:transparent;text-align:left;padding:8px 12px}.timeline button[aria-current="step"]{border-color:var(--accent);color:var(--accent)}.timeline small{display:block;color:var(--muted);margin-top:3px}.brand{font-weight:700;font-size:14px;margin-right:20px;letter-spacing:.04em}
+main{max-width:1440px;margin:auto}.slide{min-height:calc(100vh - 161px);padding:34px 52px;display:flex;flex-direction:column;justify-content:center;gap:22px;background:radial-gradient(ellipse at 90% 10%,#1b4250 0,transparent 55%),#0e202d}
+.eyebrow{margin:0;color:var(--accent);text-transform:uppercase;font-size:13px;letter-spacing:.1em;font-weight:700}h1{font-size:clamp(34px,3.5vw,54px);line-height:1.12;letter-spacing:-.035em;margin:0;max-width:1240px}h1 em{color:var(--accent);font-style:normal}h2{font-size:24px;line-height:1.25;margin:0 0 12px}h3{font-size:19px;margin:0 0 10px}p{margin:0;font-size:21px;line-height:1.45}.lead{font-size:25px;line-height:1.4;max-width:1100px;color:var(--muted)}.muted{color:var(--muted)}.small{font-size:16px;line-height:1.5;color:var(--muted)}.tag{display:inline-block;padding:5px 10px;border:1px solid var(--line);font-size:14px;line-height:1.3;color:var(--accent);border-radius:4px}.tags{display:flex;gap:10px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:30px}.grid.three{grid-template-columns:repeat(3,1fr)}.grid.four{grid-template-columns:repeat(4,1fr)}.card{border-top:3px solid var(--accent);padding:20px 22px;background:linear-gradient(135deg,#1b3645,#122632)}.card p{font-size:20px;color:var(--muted)}.card p+p{margin-top:12px}.card.amber{border-color:var(--amber)}.card.red{border-color:var(--red)}.card.amber h2{color:var(--amber)}.card.red h2{color:var(--red)}
+.takeaway{border-top:1px solid var(--accent);padding-top:16px;font-size:25px;line-height:1.35}.takeaway strong{color:var(--accent)}.source{font-size:13px;color:#a8becd;margin-top:2px}.source a{color:#b2dfd0}.list{margin:0;padding-left:23px}.list li{font-size:21px;line-height:1.4;margin-bottom:12px}.list li:last-child{margin-bottom:0}.list li::marker{color:var(--accent)}.list.compact li{font-size:18px;margin-bottom:10px}
+.flow{display:flex;align-items:stretch;gap:14px}.flow>div{flex:1;border-top:3px solid var(--accent);padding:16px;background:var(--panel)}.flow p{font-size:18px;color:var(--muted)}.flow .arrow{flex:0;align-self:center;background:none;border:0;padding:0;color:var(--accent);font-size:28px}
+.diagram{margin:0;background:#112b38;border:1px solid var(--line);border-radius:8px;padding:15px}.diagram svg{display:block;width:100%;height:auto;max-height:285px}.diagram figcaption{font-size:15px;color:var(--muted);margin-top:10px}.pipeline{stroke:#87a9bb;stroke-width:5;fill:none}.sensor{fill:#163642;stroke:#70e2bf;stroke-width:2}.alarm{fill:#ffbe72;stroke:#ffbe72}.lost{fill:#17212a;stroke:#ffaaaa;stroke-dasharray:4 3}.diagram text{fill:#edf4fa;font:17px "Segoe UI",Arial,sans-serif}.diagram .caption{fill:#b5c8d7;font-size:14px}
+.answer{background:#eff6f6;color:#132c39;border-left:6px solid var(--accent);padding:23px 28px}.answer p{font-size:23px;line-height:1.4}.answer .small{color:#385366;font-size:17px;margin-top:12px}.answer .tag{color:#285a4b;border-color:#aec9bf;margin-bottom:14px}.metric{font-size:46px;letter-spacing:-.025em;font-weight:700;color:var(--accent);line-height:1.15;margin-bottom:8px}.metric.amber{color:var(--amber)}.equation{font:22px/1.55 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#132e3a;padding:20px;border-left:3px solid var(--accent);margin:0}.stack{display:grid;gap:10px}.layer{display:grid;grid-template-columns:225px 1fr;gap:20px;border-left:4px solid var(--accent);background:#163340;padding:15px 20px}.layer h2{font-size:22px;margin:0}.layer p{font-size:19px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:19px;line-height:1.35}th,td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{color:var(--accent);font-weight:600}td{color:var(--muted)}td:first-child{color:#edf4fa}.dense{font-size:17px}.dense th,.dense td{padding:10px 12px}.schedule{display:grid;grid-template-columns:5fr 10fr 30fr 10fr 5fr;gap:5px;margin:5px 0}.schedule div{background:#214656;border-top:3px solid var(--accent);min-width:0;padding:15px 10px;font-size:17px}.schedule strong{display:block;font-size:25px;margin-bottom:8px}.schedule span{font-size:14px;color:var(--muted)}
+.code-links{display:flex;gap:15px;flex-wrap:wrap;font-size:16px}.code-links a{overflow-wrap:anywhere}.quote{font-size:27px;line-height:1.35;border-left:3px solid var(--accent);padding-left:24px}
+.controls{position:fixed;bottom:0;left:0;right:0;background:#0a1a26;border-top:1px solid var(--line);padding:12px 20px;z-index:10;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}.controls select{max-width:310px}.position{font-size:13px;color:var(--muted);min-width:65px}.clock{font:17px Consolas,monospace;margin-left:10px;white-space:nowrap}.clock.over{color:var(--red)}#notes-toggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}#speaker-panel{position:fixed;right:16px;top:85px;bottom:100px;z-index:9;width:370px;overflow:auto;padding:22px;background:#071621;border:1px solid var(--accent);box-shadow:0 8px 30px #0008;border-radius:8px}#speaker-panel h2{font-size:20px;color:var(--accent)}#speaker-panel p,#speaker-panel li{font-size:16px;line-height:1.55;margin-bottom:13px}#speaker-panel ul{padding-left:21px}.notes-open main{margin-right:400px}.notes-open .slide{padding:28px 30px}.notes-open h1{font-size:36px}.notes-open .lead{font-size:21px}.notes-open .grid{gap:18px}.notes-open p{font-size:18px}.notes-open .card{padding:16px}.notes-open table{font-size:16px}.notes-open .layer{grid-template-columns:160px 1fr}.notes-open .layer p{font-size:16px}
+@media(max-width:1050px){.brand{display:none}.timeline{gap:0;padding:7px 2px}.timeline button{padding:7px;font-size:12px}.timeline small{font-size:10px}.slide{padding:28px 30px}.controls{gap:6px;padding:9px}.controls button,.controls select{font-size:12px;padding:8px}.controls select{max-width:230px}.schedule{grid-template-columns:repeat(5,1fr)}.schedule strong{font-size:20px}.schedule div{font-size:14px;padding:10px 7px}.notes-open main{margin-right:0}.notes-open .slide{padding-right:30px}#speaker-panel{width:min(370px,calc(100vw - 32px));top:70px}}
+@media(max-width:700px){body{padding-bottom:145px}.slide{padding:28px 22px;gap:20px;min-height:calc(100vh - 210px)}h1{font-size:34px}.lead{font-size:22px}.grid,.grid.three,.grid.four{grid-template-columns:1fr}.flow{flex-direction:column}.flow .arrow{transform:rotate(90deg);padding:0}.layer{grid-template-columns:1fr;gap:8px}.schedule{grid-template-columns:1fr 1fr}.schedule div:last-child{grid-column:1 / -1}.timeline button{font-size:11px;padding:6px}.timeline small{font-size:9px}.card p{font-size:18px}.takeaway{font-size:22px}.list li{font-size:19px}.equation{font-size:17px}.controls select{max-width:195px}.clock{margin-left:0}.controls{justify-content:center}.position{min-width:auto}table{font-size:15px}th,td{padding:9px 6px}.dense{font-size:14px}.dense th,.dense td{padding:8px 5px}.metric{font-size:37px}#speaker-panel{bottom:150px}.notes-open .layer{grid-template-columns:1fr}.source{overflow-wrap:anywhere}.diagram{overflow-x:auto}.diagram svg{min-width:900px}}
+@media(min-width:1051px) and (max-height:800px){.slide{padding-top:24px;padding-bottom:24px;gap:16px}h1{font-size:40px}.lead{font-size:22px}.card{padding:16px 20px}.card p,.list li{font-size:19px}h2{font-size:22px}.layer{padding:12px 18px}.layer p{font-size:18px}.metric{font-size:38px}.equation{font-size:20px;padding:15px}.takeaway{font-size:22px}.slide table{font-size:16px}.slide th,.slide td{padding:8px 10px}.diagram svg{max-height:235px}}
+@page{size:320mm 180mm;margin:0}
+@media print{html,body{background:#0e202d!important;color:#edf4fa!important;padding:0;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.timeline,.controls,#speaker-panel{display:none!important}main,.notes-open main{margin:0;max-width:none}.slide,.slide[hidden]{display:flex!important;width:320mm;height:180mm;min-height:0;break-after:page;break-inside:avoid;padding:10mm 14mm;gap:5mm}.slide:last-child{break-after:auto}.slide h1,.notes-open h1{font-size:32pt}.slide .lead{font-size:17pt}.slide h2{font-size:17pt}.slide p,.slide .card p{font-size:14pt}.slide .small{font-size:10pt}.slide .source{font-size:9pt}.slide .list li{font-size:14pt}.slide .list.compact li{font-size:12pt}.slide .takeaway{font-size:17pt}.slide table{font-size:12pt}.slide .dense{font-size:11pt}.slide th,.slide td{padding:8px 10px}.slide .metric{font-size:29pt}.slide .equation{font-size:14pt}.slide .layer p{font-size:12pt}.slide .diagram svg{max-height:62mm}.slide .card{padding:14px 18px}.slide .answer p{font-size:16pt}.slide .quote{font-size:18pt}.slide .tag{font-size:10pt}.slide .code-links{font-size:10pt}.slide .flow p{font-size:12pt}.slide .schedule div{font-size:12pt}.slide .schedule strong{font-size:18pt}.slide .schedule span{font-size:10pt}.slide a{color:var(--accent);text-decoration:none}.slide .eyebrow{font-size:9pt}}
+</style>
+</head>
+<body>
+<header class="timeline" aria-label="60-minute interview chapters">
+  <span class="brand">SUBSEA / FDE CASE</span>
+  <button type="button" data-jump="promise" data-chapter="problem">Problem <small>00-05 min &middot; 5m</small></button>
+  <button type="button" data-jump="demo-contract" data-chapter="demo">Live demo <small>05-15 min &middot; 10m</small></button>
+  <button type="button" data-jump="architecture" data-chapter="technical">Whiteboard <small>15-45 min &middot; 30m</small></button>
+  <button type="button" data-jump="value" data-chapter="business">Business <small>45-55 min &middot; 10m</small></button>
+  <button type="button" data-jump="questions" data-chapter="questions">Out of role <small>55-60 min &middot; 5m</small></button>
+</header>
+<main aria-label="Interview slides">
+<section class="slide" id="promise" data-chapter="problem" data-minutes="1" data-title="The customer decision">
+  <p class="eyebrow">01 / Problem &middot; 00-01 min &middot; fictional prospect</p>
+  <h1>Know when to inspect.<br><em>Know when not to guess.</em></h1>
+  <p class="lead">NorthSea Integrity Operations monitors subsea gas pipelines. Its engineers need to distinguish a possible leak from unreliable sensors before mobilizing an offshore investigation.</p>
+  <div class="grid three">
+    <article class="card"><h2>Possible release?</h2><p>Corroborate physical evidence across usable sensors and failure domains.</p></article>
+    <article class="card"><h2>Where to inspect?</h2><p>Offer a compatible pipeline candidate only when the numerical fit supports it.</p></article>
+    <article class="card"><h2>Can we trust the data?</h2><p>Expose gaps, conflicts and competing explanations. Unknown is not healthy.</p></article>
+  </div>
+  <div class="tags"><span class="tag">Synthetic data only</span><span class="tag">Read-only decision support</span><span class="tag">Human safety authority</span></div>
+  <template class="notes"><p><strong>Before the clock:</strong> start the services using README; load credentials only in your private terminal. Verify LIVE access, prepare mature S1/S2/S5 replays and keep retained evidence available. Do not expose credentials on screen.</p><p><strong>Say:</strong> I picked a fictional offshore oil-and-gas operator because my marine data-quality research makes this a credible discovery problem. This implementation models gas signatures, not oil-spill detection.</p><p><strong>At 01:00:</strong> move to the two-sided cost of being wrong. The promise is inspectable decision support, not certified leak protection.</p></template>
+</section>
+<section class="slide" id="risk" data-chapter="problem" data-minutes="2" data-title="Two costly errors">
+  <p class="eyebrow">02 / Problem &middot; 01-03 min</p>
+  <h1>The prospect is buying <em>less investigation risk.</em></h1>
+  <div class="grid">
+    <article class="card amber"><h2>False alarm</h2><p>Unnecessary offshore personnel, vessel or ROV mobilization.</p><p>High inspection cost, operational disruption and declining trust in alarms.</p></article>
+    <article class="card red"><h2>Missed release</h2><p>Environmental harm and liability; oil-line spills add cleanup exposure.</p><p>Serious regulatory violations can threaten licences, including possible revocation under applicable law.</p></article>
+  </div>
+  <p class="quote">"Our dashboard is cheaper. Show that AI reduces triage effort without hiding real leaks or exporting our operational data."</p>
+  <p class="takeaway">Do not optimize alarm reduction while <strong>concealing missed-event risk.</strong></p>
+  <p class="source">Mobilization economics are discovery assumptions. Licence revocation is conditional, not automatic; source boundaries: <a href="REPORT.md">engineering report</a>.</p>
+  <template class="notes"><p><strong>Discovery hypothesis:</strong> costly inspection is the false-positive side; environmental damage is the false-negative side. Do not invent vessel rates, spill probabilities or a licence-loss certainty.</p><p><strong>Objections:</strong> existing dashboard cost, integration, safety liability, localization credibility and hosted inference. Acknowledge them rather than claiming AI fixes all five.</p><p><strong>At 03:00:</strong> introduce the two stakeholders and the research-to-product boundary.</p></template>
+</section>
+<section class="slide" id="stakeholders" data-chapter="problem" data-minutes="2" data-title="People and discovery">
+  <p class="eyebrow">03 / Problem &middot; 03-05 min</p>
+  <h1>One decision. <em>Two acceptance contracts.</em></h1>
+  <div class="grid">
+    <article class="card"><h2>Head of Subsea Operations</h2><p>Budget owner: inspection effort, adoption, delivery time and accountability.</p><p><strong>"What will four weeks prove, and who owns a wrong recommendation?"</strong></p></article>
+    <article class="card"><h2>Integrity &amp; Instrumentation Lead</h2><p>Calibration, provenance, failure domains, environmental confounders and reproducibility.</p><p><strong>"Could a shared gateway explain these alarms? Show me the raw evidence."</strong></p></article>
+  </div>
+  <p class="takeaway">My RE 2023 research motivates <strong>accuracy, currentness, completeness and consistency.</strong> The demo's localization is a new simplified extension, not a thesis-validated capability.</p>
+  <p class="source">Thesis Paper C, PDF pp. 162-164; defense slides 16, 18-21 and 47. Prospect and requirements are hypotheses, not a claimed customer interview.</p>
+  <template class="notes"><p><strong>Ask in role:</strong> Is your larger bottleneck deciding whether to mobilize, identifying an inspection section, or validating instrumentation? What evidence would change that decision?</p><p><strong>Research boundary:</strong> distributed sensing and use-case-specific quality requirements inform the design. I do not claim to have deployed edge AdapAD or calibrated leak localization from the thesis.</p><p><strong>At 05:00:</strong> switch into the live demonstration. This ends the five-minute problem segment.</p></template>
+</section>
+<section class="slide" id="demo-contract" data-chapter="demo" data-minutes="2" data-title="Demo setup and proof">
+  <p class="eyebrow">04 / Live demo &middot; 05-07 min</p>
+  <h1>Watch the window move.<br><em>Then pin the answer to evidence.</em></h1>
+  <div class="flow">
+    <div><h2>01 / Replay</h2><p>24 nodes; acoustic power, methane and temperature. LIVE mode; accelerated synthetic time.</p></div><span class="arrow" aria-hidden="true">&rarr;</span>
+    <div><h2>02 / Inspect</h2><p>60-second window, 5-second hop. Pause; select a sensor; show all three charts and raw records.</p></div><span class="arrow" aria-hidden="true">&rarr;</span>
+    <div><h2>03 / Investigate</h2><p>Ask a question. Show its pinned window, role tasks, checked answer and actual model receipts.</p></div>
+  </div>
+  <p class="takeaway">Numerical monitoring keeps running <strong>independently of hosted inference.</strong></p>
+  <div class="code-links"><a href="http://127.0.0.1:8086" target="_blank" rel="noopener">Open live console</a><a href="evidence/visible-e2e.json" target="_blank" rel="noopener">Retained walkthrough evidence</a></div>
+  <p class="small">Live answers can take tens of seconds. If the provider is unavailable, show retained evidence explicitly as recorded; never relabel SCRIPTED as LIVE.</p>
+  <template class="notes"><p><strong>Do:</strong> open the console; select LIVE before creating a generation; use S1, speed 10x and Play. Explain simulated time, source clock and window status. Pause a mature window and inspect a sensor with mouse or keyboard Enter.</p><p><strong>Defect proof:</strong> show one gap, spike or duplicate conflict in raw/canonical records. Explain that exclusions and source provenance remain visible.</p><p><strong>Fallback:</strong> use the existing mature LIVE replay when fresh work is slow; announce it. If hosted inference blocks, open the retained JSON and state it is previous qualification, not a live response.</p><p><strong>At 07:00:</strong> spend four minutes on possible leak and inspection candidate.</p></template>
+</section>
+<section class="slide" id="demo-leak" data-chapter="demo" data-minutes="4" data-title="S1: possible leak and candidate">
+  <p class="eyebrow">05 / Live demo &middot; 07-11 min &middot; S1</p>
+  <h1>Corroboration supports a <em>suspected leak.</em></h1>
+  <div class="grid">
+    <div><h2>Ask the operator's questions</h2><ol class="list"><li>"The alarms started together. Is this a possible leak or an instrumentation issue?"</li><li>"Which pipeline section should our integrity engineer inspect first, and why?"</li></ol><p class="small">Open Agents: quality evidence, diagnosis dependency, accepted response, pinned scope and real CLI model identity.</p></div>
+    <div class="answer"><span class="tag">Retained LIVE snapshot / S1 / 00:03:00</span><p><strong>Suspected leak, not confirmed.</strong><br>P1: compatible candidate at <strong>375m</strong>.<br>Fit residual: <strong>0.162</strong>.<br>Usable coverage: <strong>99.3%</strong> (4289/4320).</p><p class="small">Not a calibrated confidence interval. Only 8/72 channel-health claims reviewed in this bounded answer; the full report is retained.</p></div>
+  </div>
+  <p class="takeaway">The LLM did not calculate 375m. <strong>The numerical fit did.</strong></p>
+  <p class="source">Values above are from a retained pinned window, not guaranteed values for every live window: <a href="evidence/visible-e2e.json">visible-e2e.json</a>.</p>
+  <template class="notes"><p><strong>Do:</strong> ask the first question and inspect the role tree while it runs. Then ask the location question on the same paused scope and show compatible result reuse if it occurs.</p><p><strong>Explain:</strong> physical support needs usable acoustic persistence plus methane and spatial/failure-domain evidence. A location recommendation is a candidate for an engineer to inspect, not a dispatch command.</p><p><strong>Do not:</strong> claim the displayed 375m is necessarily the value of a different live snapshot. Use the retained 00:03:00 window to reproduce that number.</p><p><strong>At 11:00:</strong> switch to faults and the safety-relevant unknown case.</p></template>
+</section>
+<section class="slide" id="demo-faults" data-chapter="demo" data-minutes="4" data-title="S2/S5: faults and unknown">
+  <p class="eyebrow">06 / Live demo &middot; 11-15 min &middot; S2 + S5</p>
+  <h1>Scattered faults are different.<br><em>Missing coverage is not an all-clear.</em></h1>
+  <div class="grid">
+    <article class="card amber"><h2>S2 / Instrumentation issue</h2><p>"Which sensors are unreliable, and what evidence is missing?"</p><p>Retained coverage: <strong>95.3%</strong>. Quality facts are supported; no supported inspection location.</p><p>Inspect scattered gaps/spikes and competing physical evidence.</p></article>
+    <article class="card red"><h2>S5 / Too few observers</h2><p>"Can you locate a leak with this missing data?"</p><p>Retained coverage: <strong>8.3%</strong>. Physical-event/location abstention; observed quality facts remain reportable.</p><p>A physical signal with too few usable observers is not enough to diagnose or locate.</p></article>
+  </div>
+  <p class="takeaway">An accepted abstention is <strong>a useful, checked answer</strong> &mdash; not a successful leak diagnosis.</p>
+  <p class="source">Retained S2/S5 scopes: <a href="evidence/visible-e2e.json">visible-e2e.json</a>; final answer outcomes: <a href="evidence/agents-live.json">agents-live.json</a>.</p>
+  <template class="notes"><p><strong>Do:</strong> select prepared S2 and show scattered sensor patterns, then ask the quality question. Select mature S5 and show coverage loss before asking the location question.</p><p><strong>During model latency:</strong> show the immutable question scope, quality report and numerical state. Do not spend the segment waiting silently.</p><p><strong>Explain:</strong> missing data does not prove either a leak or a specific broken hardware component. A task may succeed by correctly withholding a physical claim.</p><p><strong>At 15:00:</strong> stop the demo. Begin the 30-minute whiteboard discussion; use the slides as prompts, not a second product tour.</p></template>
+</section>
+<section class="slide" id="architecture" data-chapter="technical" data-minutes="4" data-title="Architecture and stack">
+  <p class="eyebrow">07 / Technical whiteboard &middot; 15-19 min</p>
+  <h1>Two execution loops.<br><em>One immutable evidence contract.</em></h1>
+  <div class="stack">
+    <div class="layer"><h2>Source + numerical loop</h2><p>Synthetic arrivals &rarr; canonical buffer &rarr; 60s/5s/5s windows &rarr; quality, hypothesis and fit ledger.</p></div>
+    <div class="layer"><h2>Durable boundary</h2><p>PostgreSQL 16: versioned snapshots, scoped task state, receipts and LangGraph checkpoints.</p></div>
+    <div class="layer"><h2>Agent worker</h2><p>Response workplan &rarr; quality &rarr; diagnosis &rarr; checked response. LangChain wraps hosted Copilot CLI inference.</p></div>
+    <div class="layer"><h2>Operator + telemetry</h2><p>FastAPI/Pydantic &rarr; authenticated SSE &rarr; TypeScript/esbuild console. Native OTel &rarr; local Langfuse/Jaeger.</p></div>
+  </div>
+  <p class="takeaway">CustomerOps-style durable authority. <strong>NumPy adds the marine numerical layer.</strong></p>
+  <template class="notes"><p><strong>Draw:</strong> two loops, the shared snapshot boundary and the UI projection. Put the hosted inference boundary outside the customer's intended deployment boundary.</p><p><strong>Discuss:</strong> backpressure, bounded episode-triggered roots and why an LLM request is not scheduled for every five-second hop.</p><p><strong>Code:</strong> src/subsea_copilot/monitoring.py, runtime/workflow.py, store.py and telemetry.py.</p><p><strong>At 19:00:</strong> move from system boxes to one dirty observation's journey.</p></template>
+</section>
+<section class="slide" id="quality" data-chapter="technical" data-minutes="4" data-title="Data quality and event time">
+  <p class="eyebrow">08 / Technical whiteboard &middot; 19-23 min</p>
+  <h1>Bad data stays visible.<br><em>It does not become leak evidence.</em></h1>
+  <div class="grid">
+    <div><h2>Canonicalization contract</h2><ul class="list"><li>Known units and explicit timezones normalize; unknown formats are not guessed.</li><li>Keep raw provenance. Flag gaps, spikes, late arrivals and duplicate conflicts.</li><li>Conflicting values cannot silently corroborate a release.</li></ul></div>
+    <div><h2>Event-time contract</h2><pre class="equation">Window: [end - 60s, end)
+Hop: 5s   Allowed lateness: 5s
+Use only observations released
+by the source clock.</pre><p class="small">Late evidence creates immutable revisions. Baseline pre-roll must be verified normal and available before the replay epoch.</p></div>
+  </div>
+  <p class="takeaway">Quality is <strong>use-case-specific</strong>, not a single "good/bad sensor" score.</p>
+  <div class="code-links"><a href="../src/subsea_copilot/ingest.py">ingest.py</a><a href="../src/subsea_copilot/diagnostics.py">diagnostics.py</a><a href="../src/subsea_copilot/monitoring.py">monitoring.py</a></div>
+  <template class="notes"><p><strong>Draw:</strong> one raw record with observed_at and received_at; normalize it, attach its provenance, then show a conflicting duplicate and a later immutable revision.</p><p><strong>Challenge to invite:</strong> Can a future observation leak into a historical window or the baseline? Point to diagnostics.analyze_window's source-clock and pre-roll filters.</p><p><strong>Thesis link:</strong> accuracy, currentness, completeness and consistency have different operational consequences. Numeric quality flags from different standards must not be blindly merged; full standards integration is not claimed here.</p><p><strong>At 23:00:</strong> derive the physical hypothesis.</p></template>
+</section>
+<section class="slide" id="detection" data-chapter="technical" data-minutes="4" data-title="Leak versus fault reasoning">
+  <p class="eyebrow">09 / Technical whiteboard &middot; 23-27 min</p>
+  <h1>Simultaneous anomalies <em>are not sufficient.</em></h1>
+  <figure class="diagram">
+    <svg viewBox="0 0 1080 155" role="img" aria-labelledby="patterns-title patterns-desc">
+      <title id="patterns-title">Three qualitative sensor patterns, not measured topology</title><desc id="patterns-desc">Leak-compatible nearby acoustic and methane evidence, scattered faulty sensors, and correlated gateway coverage loss.</desc>
+      <path class="pipeline" d="M30 79 H325 M390 79 H685 M750 79 H1045"/>
+      <g class="sensor"><circle cx="65" cy="53" r="10"/><circle cx="115" cy="104" r="10"/><circle cx="275" cy="53" r="10"/><circle cx="315" cy="104" r="10"/><circle cx="440" cy="104" r="10"/><circle cx="490" cy="53" r="10"/><circle cx="550" cy="104" r="10"/><circle cx="610" cy="53" r="10"/></g>
+      <g class="alarm"><circle cx="165" cy="53" r="11"/><circle cx="205" cy="104" r="11"/><circle cx="245" cy="53" r="11"/><circle cx="405" cy="53" r="11"/><circle cx="665" cy="104" r="11"/></g>
+      <g class="lost"><circle cx="785" cy="53" r="11"/><circle cx="835" cy="104" r="11"/><circle cx="885" cy="53" r="11"/><circle cx="935" cy="104" r="11"/><circle cx="985" cy="53" r="11"/><circle cx="1035" cy="104" r="11"/></g>
+      <text x="30" y="20">Leak-compatible cluster</text><text x="390" y="20">Scattered sensor faults</text><text x="750" y="20">Shared coverage loss</text>
+      <text class="caption" x="30" y="143">Needs usable, independent corroboration</text><text class="caption" x="390" y="143">Spikes/gaps are quality evidence</text><text class="caption" x="750" y="143">Unknown physical state</text>
+    </svg>
+    <figcaption>Qualitative illustration, not copied defense geometry or a calibrated spatial model.</figcaption>
+  </figure>
+  <div class="grid"><pre class="equation">z = (value - baseline median) / scale
+scale = max(1.4826 &times; MAD, channel floor)</pre><p>Persistent usable acoustic excursions + methane corroboration + neighborhood support + independent failure domains. Check counterevidence before allowing a physical hypothesis.</p></div>
+  <p class="takeaway">Missingness alone never proves a leak. <strong>A shared failure can also be spatially coherent.</strong></p>
+  <template class="notes"><p><strong>Draw:</strong> a pipeline with nearby sensors and a separate gateway map. Show why geography and independence are different graphs.</p><p><strong>Derive:</strong> the robust score from verified-normal history; explain positive physical persistence versus isolated absolute excursions used in quality analysis.</p><p><strong>Counterexamples:</strong> acoustic confounding without methane support; one gateway removing several nearby instruments; crossing-pipeline ambiguity. Thresholds are site-pack parameters, not learned field optima.</p><p><strong>Code:</strong> diagnostics.py and packs. At 27:00, derive localization rather than asking the LLM to explain metres.</p></template>
+</section>
+<section class="slide" id="localization" data-chapter="technical" data-minutes="4" data-title="Derive localization">
+  <p class="eyebrow">10 / Technical whiteboard &middot; 27-31 min</p>
+  <h1>A reproducible inspection candidate.<br><em>Not a confidence interval.</em></h1>
+  <div class="grid">
+    <div><pre class="equation">k_i(x) = 1 / (distance_i(x)^2 + r0^2)
+w_i = quality weight_i / scale_i^2
+A = max(0, sum(w_i k_i y_i)
+             / sum(w_i k_i^2))
+residual = sqrt(
+  sum(w_i (y_i - A k_i)^2) / n)</pre></div>
+    <div><h2>Inspectable search + rejection</h2><ul class="list"><li>Search relevant centerlines on a 25m grid; fit nonnegative source strength.</li><li>Withhold for insufficient usable observers or poor fit.</li><li>Retain compatible candidates; expose multiple-segment ambiguity or excessive width.</li></ul><p class="small">Currents, mixing, attenuation, calibration and geometry need field validation. Grid spacing is not accuracy.</p></div>
+  </div>
+  <p class="takeaway">Matched synthetic generation explains ideal zero error. <strong>It does not prove field localization.</strong></p>
+  <div class="code-links"><a href="../src/subsea_copilot/localization.py">localization.py: locate()</a><a href="../src/subsea_copilot/synthetic.py">synthetic.py: assumptions</a></div>
+  <template class="notes"><p><strong>Draw/derive:</strong> candidate x, observer distances, acoustic excess y, scale/quality weights and the one-parameter weighted fit. Explain why source strength is a nuisance parameter.</p><p><strong>Invite:</strong> What breaks if the plume/current or attenuation differs? Show that poor fits/ambiguity withhold precision; explain why matched-assumption synthetic error is optimistic.</p><p><strong>Open:</strong> localization.py, locate(). The residual is a normalized fit metric, not a leak probability. The compatible set uses configured tolerance, not a calibrated statistical interval.</p><p><strong>At 31:00:</strong> distinguish the three agents from these numerical tools.</p></template>
+</section>
+<section class="slide" id="agents" data-chapter="technical" data-minutes="4" data-title="Agent collaboration and checks">
+  <p class="eyebrow">11 / Technical whiteboard &middot; 31-35 min</p>
+  <h1>Three scoped specialists.<br><em>One checked operator answer.</em></h1>
+  <div class="grid three">
+    <article class="card"><h2>Sensor Quality</h2><p>Coverage, conflicts, sensor patterns and neighbors.</p><p>Can support observed quality facts without proving a physical event.</p></article>
+    <article class="card"><h2>Event Diagnosis</h2><p>Consumes accepted quality; inspects hypothesis, counterevidence and numerical fit.</p><p>Cannot turn missingness into a categorical leak/location.</p></article>
+    <article class="card"><h2>Operator Response</h2><p>Owns the workplan, routes/reuses compatible specialist results and synthesizes.</p><p>Returns accepted claim IDs and allowed review recommendations.</p></article>
+  </div>
+  <p class="takeaway">Workplan &rarr; quality &rarr; diagnosis &rarr; synthesis. <strong>Real abstention propagates.</strong></p>
+  <p class="small">Application-owned, audited mandatory intake; separate live role interpretation. Deterministic checks verify scope, claim kind, evidence membership and certainty. Readable text is rendered from accepted claims.</p>
+  <div class="code-links"><a href="../src/subsea_copilot/runtime/registry.py">role authority</a><a href="../src/subsea_copilot/runtime/workflow.py">workflow</a><a href="../src/subsea_copilot/validation.py">claim checks</a></div>
+  <template class="notes"><p><strong>Draw:</strong> response as root, two specialist tasks, ordered quality dependency, then accepted synthesis. Compatible reuse is a linked prior result, not a fabricated new model execution.</p><p><strong>Clarify:</strong> the application performs mandatory reads through the audited gateway. Models interpret those bundles; I am not claiming the LLM selected every evidence request.</p><p><strong>Checker:</strong> accepted numbers come from claims, not model prose. A role cannot broaden its static registry via a prompt. An unsupported physical claim is rejected.</p><p><strong>At 35:00:</strong> explain what happens when execution is interrupted.</p></template>
+</section>
+<section class="slide" id="durability" data-chapter="technical" data-minutes="4" data-title="Durability and observability">
+  <p class="eyebrow">12 / Technical whiteboard &middot; 35-39 min</p>
+  <h1>Execution must survive interruption.<br><em>The evidence must survive review.</em></h1>
+  <div class="grid">
+    <div><h2>Bounded, durable work</h2><ul class="list"><li>LangGraph interrupt/checkpoint before external I/O; durable task/receipt transactions.</li><li>Generation fences and idempotent intake IDs bound replay and stale workers.</li><li>Root: at most 2 children, 10 model calls, 18 tool calls, 300 seconds.</li></ul></div>
+    <div><h2>Observable failure</h2><ul class="list"><li>Auth/quota block is explicit; numerical monitoring continues.</li><li>OTel spans show agent, generation, tool and guardrail in Langfuse/Jaeger.</li><li>Stored observations are verified; exporter HTTP success alone is insufficient.</li></ul></div>
+  </div>
+  <p class="takeaway">An evidence layer needs <strong>recoverable state and truthful counters</strong>, not just agent prompts.</p>
+  <div class="code-links"><a href="http://127.0.0.1:3001" target="_blank" rel="noopener">Local Langfuse</a><a href="../src/subsea_copilot/runtime/workflow.py">workflow.py</a><a href="../src/subsea_copilot/telemetry.py">telemetry.py</a><a href="#trace">Trace appendix</a></div>
+  <template class="notes"><p><strong>Draw:</strong> task reservation, checkpoint/WAIT handoff, external inference and fenced result acceptance. Do not claim distributed exactly-once provider execution or production HA.</p><p><strong>Show:</strong> the retained stored trace with role/tool/guardrail observations. Trace ID: f00e9c77773918c0fbaa9b7f0e35fa2d. Keep telemetry credentials off the projector.</p><p><strong>Lessons:</strong> missing checkpoint bootstrap and long ingestion locks only surfaced in integrated testing. Bounded transactions and fail-fast migrations fixed those paths.</p><p><strong>At 39:00:</strong> evaluate what the system actually got right, including abstentions.</p></template>
+</section>
+<section class="slide" id="evaluation" data-chapter="technical" data-minutes="3" data-title="Qualification and limitations">
+  <p class="eyebrow">13 / Technical whiteboard &middot; 39-42 min</p>
+  <h1>Evidence of a working demo.<br><em>Not evidence of field reliability.</em></h1>
+  <div class="grid three">
+    <article class="card"><div class="metric">27/27</div><h2>Final LIVE accepted-correct</h2><p>9 scenario/question cases, repeated 3 times. Includes required abstentions. Actual gpt-6.1-sol receipts.</p></article>
+    <article class="card"><div class="metric">120</div><h2>Numerical mature windows</h2><p>20 seeds &times; 6 scenarios. Controlled leak precision/recall 1.0/1.0; not operational probabilities.</p></article>
+    <article class="card amber"><div class="metric amber">0.8 / 1.0</div><h2>Fault precision / recall</h2><p>100 false-positive fault attributions retained. Ideal zero location error reflects matched assumptions.</p></article>
+  </div>
+  <p class="small">167 Python regressions; 4 browser cases; Ruff, strict mypy, TypeScript/build. Mismatch stress: 18 locations, 2 abstentions, p95 error 25m. Compute p95 0.476s is not detection latency.</p>
+  <p class="takeaway">The early LIVE cohorts failed <strong>2/27 &rarr; 24/27 &rarr; 27/27</strong>. Failures are retained, not overwritten.</p>
+  <p class="source"><a href="RESULTS.md">Full results and boundaries</a> &middot; <a href="evidence/agents-live-failed.json">failed cohort</a> &middot; <a href="evidence/agents-live.json">final cohort</a></p>
+  <template class="notes"><p><strong>Clarify denominator:</strong> 27 answers are repeated questions on a small synthetic scenario set, not 27 independent offshore incidents. Accepted-correct includes correct location/physical abstention.</p><p><strong>Failure correction:</strong> audited mandatory intake, exact schemas and final-turn protection addressed budget exhaustion; quality support was separated from physical-event certainty. Certainty gates were not relaxed.</p><p><strong>Next evidence:</strong> field labels, environmental mismatch, real failure domains and localization calibration. Never replace those with the synthetic 1.0 metric.</p><p><strong>At 42:00:</strong> justify the extra agent complexity against the measured baseline.</p></template>
+</section>
+<section class="slide" id="tradeoff" data-chapter="technical" data-minutes="3" data-title="LLM versus numerical methods">
+  <p class="eyebrow">14 / Technical whiteboard &middot; 42-45 min</p>
+  <h1>Use the LLM where language helps.<br><em>Keep physics and authority outside it.</em></h1>
+  <table>
+    <thead><tr><th>Boundary</th><th>Choice</th><th>Reason / cost</th></tr></thead>
+    <tbody><tr><td>Continuous detection + fit</td><td>Robust statistics, rules, numerical search</td><td>Reproducible, fast, inspectable; simplified physics needs validation.</td></tr><tr><td>Question interpretation + role work</td><td>Hosted Copilot CLI, gpt-6.1-sol</td><td>Flexible language; latency, allowance and privacy constraints.</td></tr><tr><td>Accepted claim + permissions</td><td>Typed schemas, deterministic checker, static registry</td><td>The model cannot invent accepted metres or extend authority.</td></tr></tbody>
+  </table>
+  <p>LIVE roots with fresh specialists: <strong>4.27 calls / 60.49s mean</strong>; compatible reuse: <strong>2 calls / 29.21s</strong>. Same-evidence single-agent baseline: <strong>1 call / 19.13s</strong>.</p>
+  <p class="takeaway">Multi-agent buys <strong>role isolation and durable audit</strong>, not demonstrated speed or accuracy improvement.</p>
+  <p class="source">Different fresh/reused cohorts, not a controlled latency experiment. Provider USD cost is unknown: <a href="RESULTS.md">RESULTS.md</a>.</p>
+  <template class="notes"><p><strong>Own the tradeoff:</strong> a simpler single agent passed with fewer calls. Separate roles make authority, handoffs, reuse and debugging explicit; the small dataset does not prove an accuracy benefit.</p><p><strong>Future ML:</strong> trained detectors or calibrated plume/propagation models need labels and domain validation. Do not imply a trained traditional ML model is already implemented.</p><p><strong>At 45:00:</strong> stop the technical segment, even if appendices remain. Move to budget, rollout and risk.</p></template>
+</section>
+<section class="slide" id="value" data-chapter="business" data-minutes="3" data-title="Value without invented ROI">
+  <p class="eyebrow">15 / Business discussion &middot; 45-48 min</p>
+  <h1>Measure triage value.<br><em>Do not sell imagined avoided spills.</em></h1>
+  <div class="grid">
+    <div><h2>Illustrative capacity calculation</h2><pre class="equation">120 alerts/month &times; 0.25h saved/alert
+&times; USD100/h &times; 12 months
+= USD36,000/year</pre><p class="small">All inputs are assumptions. Capacity released is not automatically cash saved; inspection avoidance is not guaranteed.</p></div>
+    <div><h2>Customer numbers needed</h2><ul class="list"><li>Reviewed alert volume and median investigation effort.</li><li>Mobilization cost, escalation workflow and analyst adoption.</li><li>Integration/support effort, hosted allowance and deployment constraints.</li></ul></div>
+  </div>
+  <p class="takeaway">Compare against the existing workflow. <strong>Never trade safety sensitivity for a prettier ROI.</strong></p>
+  <template class="notes"><p><strong>Ask the budget owner:</strong> What fraction of alerts requires expensive offshore escalation, and what can be safely resolved with better evidence? Who approves the decision?</p><p><strong>Cost model:</strong> pilot engineering/integration, data/QC work, infrastructure, inference entitlement and ongoing operations. No vendor price or USD model cost is available.</p><p><strong>Do not:</strong> multiply speculative avoided spills or licence loss into a guaranteed savings headline.</p><p><strong>At 48:00:</strong> offer a bounded delivery contract with measurable gates.</p></template>
+</section>
+<section class="slide" id="pilot" data-chapter="business" data-minutes="4" data-title="Four-week pilot and gates">
+  <p class="eyebrow">16 / Business discussion &middot; 48-52 min</p>
+  <h1>A four-week shadow pilot.<br><em>One network. Explicit stop gates.</em></h1>
+  <div class="grid four">
+    <article class="card"><h2>Week 1</h2><p>Connector/schema, baseline, failure-domain map and security review.</p><p><strong>Gate:</strong> approved data path and usable source contract.</p></article>
+    <article class="card"><h2>Week 2</h2><p>Historical replay; expert adjudication; known gaps and confounders.</p><p><strong>Gate:</strong> labels/tests support separate error analysis.</p></article>
+    <article class="card"><h2>Week 3</h2><p>Read-only shadow workflow; operator review and escalation ownership.</p><p><strong>Gate:</strong> evidence is usable and every action stays human-approved.</p></article>
+    <article class="card"><h2>Week 4</h2><p>Joint baseline comparison; triage, false alarms, sensitivity, coverage and latency.</p><p><strong>Gate:</strong> continue, revise or stop.</p></article>
+  </div>
+  <p class="takeaway">Commit only after <strong>scope, pricing, safety thresholds and acceptance criteria</strong> are jointly agreed.</p>
+  <p class="small">Conditional plan, not a guaranteed integration deadline. No sensitivity claim without labeled events or validated tests.</p>
+  <template class="notes"><p><strong>Business contract:</strong> fixed scope is one network, read-only access and named integrity/security owners. Pricing and staffing are agreed after discovery; four weeks is contingent on data approval and availability.</p><p><strong>Acceptance:</strong> compare median triage effort and reviewed false alarms to baseline; separately assess missed-event sensitivity. Coverage failure remains unknown, not healthy. Agree numerical targets with the customer, not after seeing the results.</p><p><strong>Exit:</strong> stop if approved data access, credible labels/tests, physical support or operator adoption cannot be established. No automatic move to plant control.</p><p><strong>At 52:00:</strong> address the remaining data/safety objection and ask for the conditional pilot.</p></template>
+</section>
+<section class="slide" id="commitment" data-chapter="business" data-minutes="3" data-title="Deployment risk and conditional ask">
+  <p class="eyebrow">17 / Business discussion &middot; 52-55 min</p>
+  <h1>Keep the safety workflow.<br><em>Add a reviewable evidence layer.</em></h1>
+  <div class="grid">
+    <article class="card"><h2>What is true today</h2><p>Original synthetic demo, scoped read-only tools, authenticated console, durable evidence and hosted Copilot inference.</p><p>No historian/platform connector, certified leak protection, control endpoints, production identity or security certification.</p></article>
+    <article class="card amber"><h2>What must be approved</h2><p>Customer deployment boundary, source connector, data retention and inference destination.</p><p>This demo is <strong>not local-only</strong>. If hosted inference is unacceptable, resolve the architecture before real data is used.</p></article>
+  </div>
+  <p class="quote">"Will you sponsor a scoped shadow pilot, subject to integrity and security approval, with agreed stop gates and a joint baseline review?"</p>
+  <p class="takeaway">Expert knowledge becomes <strong>reviewable criteria and evidence</strong> &mdash; not unchecked model authority.</p>
+  <template class="notes"><p><strong>Positioning:</strong> AITOMATIC-relevant domain expertise, governed agent collaboration and forward-deployed integration ownership. Do not claim DanaOS or Falkor integration.</p><p><strong>Handle privacy:</strong> the CLI runs locally but inference is hosted. Only synthetic evidence was sent. Customer data must not enter this route without an approved policy and architecture.</p><p><strong>Ask:</strong> sponsorship for a conditional pilot, not a production purchase justified by synthetic metrics. Engineers retain inspection, emergency response and regulatory responsibilities.</p><p><strong>At 55:00:</strong> explicitly leave the customer role and begin your questions.</p></template>
+</section>
+<section class="slide" id="questions" data-chapter="questions" data-minutes="5" data-title="Out-of-role questions">
+  <p class="eyebrow">18 / Out of role &middot; 55-60 min</p>
+  <h1>Questions for <em>AITOMATIC.</em></h1>
+  <ol class="list"><li>How do your strongest FDEs turn an expert's operating judgment into governed agent behavior &mdash; and who owns ongoing validation?</li><li>Where do customer pilots most often stall: data access, integration, evidence quality or workflow adoption?</li><li>What would you expect me to own from discovery through production handoff in my first 90 days?</li></ol>
+  <div class="schedule" aria-label="Interview schedule totals sixty minutes"><div><strong>5m</strong>Problem<span>00-05</span></div><div><strong>10m</strong>Demo<span>05-15</span></div><div><strong>30m</strong>Whiteboard<span>15-45</span></div><div><strong>10m</strong>Business<span>45-55</span></div><div><strong>5m</strong>Questions<span>55-60</span></div></div>
+  <div class="code-links"><a href="https://github.com/ntnguyen-so/subsea-integrity-copilot" target="_blank" rel="noopener">Private repository</a><a href="ONE_PAGE_BRIEF.pdf">One-page brief</a><a href="#quality-appendix">Technical appendix</a></div>
+  <template class="notes"><p><strong>Say:</strong> I am now out of role. Choose the two questions most relevant to the discussion rather than rushing through all three.</p><p><strong>Leave space:</strong> use the five minutes to listen and ask a focused follow-up. Do not restart the technical pitch.</p><p><strong>At 60:00:</strong> close the meeting. The appendix is for interviewer-led questions, not extra scheduled presentation time.</p></template>
+</section>
+<section class="slide" id="quality-appendix" data-chapter="appendix" data-title="Appendix A: scenario coverage" hidden>
+  <p class="eyebrow">Appendix A / On demand &middot; no extra scheduled time</p>
+  <h1>Test the counterexamples.<br><em>Not just the easy leak.</em></h1>
+  <table class="dense"><thead><tr><th>Scenario</th><th>Challenge</th><th>What the reviewer should inspect</th></tr></thead><tbody><tr><td>S1</td><td>Coherent leak-compatible evidence</td><td>Usable acoustic/methane support, compatible position, uncertainty.</td></tr><tr><td>S2</td><td>Scattered sensor faults</td><td>Quality patterns and unsupported physical/location claims.</td></tr><tr><td>S3</td><td>Shared gateway / full-source outage</td><td>Advancing source clock despite missing arrivals; physical state unknown.</td></tr><tr><td>S4</td><td>Broad environmental disturbance</td><td>Counterevidence and missing methane corroboration.</td></tr><tr><td>S5</td><td>Physical signal with too few observers</td><td>Coverage threshold and physical/location abstention.</td></tr><tr><td>S6</td><td>Verified-normal variability</td><td>Normal baseline behavior without fabricating a physical event.</td></tr></tbody></table>
+  <p class="small">Six scenarios are synthetic. Final LIVE question qualification covers S1/S2/S5; the numerical hold-out covers all six. These are different denominators.</p>
+  <template class="notes"><p><strong>Use only if asked:</strong> open synthetic.py and the frozen numerical evaluation report. Show labels belong to evaluation truth, not detector/model features.</p><p><strong>Return:</strong> use the chapter buttons or slide selector. The global interview clock is not reset by appendix navigation.</p></template>
+</section>
+<section class="slide" id="trace" data-chapter="appendix" data-title="Appendix B: receipts and trace" hidden>
+  <p class="eyebrow">Appendix B / On demand</p>
+  <h1>Can you prove the agents <em>actually ran?</em></h1>
+  <div class="grid"><div><h2>Receipts, not role labels</h2><ul class="list"><li>LIVE mode, requested/observed gpt-6.1-sol, identity source cli_event.</li><li>Task/generation/window scope, model/tool counters and durable accepted result.</li><li>Reuse linked explicitly; not counted as a new specialist model execution.</li></ul></div><div><h2>Stored observability</h2><p class="small">Verified final cohort trace:</p><pre class="equation">f00e9c77773918c0fbaa9b7f0e35fa2d</pre><p class="small">Agent, generation, tool and guardrail observations in Langfuse. Fresh browser audit feeds start at the current cursor; historical backend events remain separately retrievable.</p></div></div>
+  <p class="takeaway">Visible walkthrough evidence was <strong>recovered across sessions</strong>, not an uninterrupted six-question run.</p>
+  <div class="code-links"><a href="evidence/agents-live.json">Final LIVE cohort</a><a href="evidence/visible-e2e.json">Visible walkthrough</a><a href="RESULTS.md">Qualification boundaries</a></div>
+  <template class="notes"><p><strong>Show:</strong> one original manual question, its persisted task and observed model receipt. Then inspect stored observations rather than an exporter success message.</p><p><strong>Do not:</strong> interpret an empty fresh-browser audit panel as historical data loss or rerun hosted calls merely to recreate a receipt.</p></template>
+</section>
+<section class="slide" id="failure" data-chapter="appendix" data-title="Appendix C: engineering ownership" hidden>
+  <p class="eyebrow">Appendix C / On demand</p>
+  <h1>Failures changed the implementation.<br><em>They did not change the truth standard.</em></h1>
+  <table class="dense"><thead><tr><th>Observed failure</th><th>Root-cause correction</th><th>Evidence boundary</th></tr></thead><tbody><tr><td>2/27 initial LIVE answers</td><td>Audited application intake, exact schemas and final-turn protection.</td><td>Failed receipt retained; tool/model budgets not inflated.</td></tr><tr><td>24/27 intermediate cohort</td><td>Quality facts separated from physical certainty; real abstention still propagates.</td><td>No relaxed physical-event/location gate.</td></tr><tr><td>Missing checkpoint bootstrap</td><td>Explicit migration, fail-fast startup, fresh/reopen/handoff tests.</td><td>Integrated database proof beyond isolated unit tests.</td></tr><tr><td>Long ingest lock / UI race</td><td>Bounded idempotent chunks; Agents focus before async task read.</td><td>Targeted contention and held-read browser regression.</td></tr></tbody></table>
+  <p class="takeaway">Senior FDE ownership means <strong>reproducing, fixing and retaining evidence</strong>, not hiding demo failures.</p>
+  <template class="notes"><p><strong>Pick one story:</strong> budget exhaustion to audited intake, or UI navigation race to deliberately held-read regression. Explain the actual symptom, root cause and test that would fail before the fix.</p><p><strong>Boundaries:</strong> a private clone installed/built/generated successfully, but its pytest launcher was blocked by Windows Application Control; no second full-suite pass is claimed there.</p></template>
+</section>
+<section class="slide" id="boundaries" data-chapter="appendix" data-title="Appendix D: security and sources" hidden>
+  <p class="eyebrow">Appendix D / On demand</p>
+  <h1>Implemented boundaries.<br><em>Unfinished production work.</em></h1>
+  <div class="grid"><div><h2>Implemented in the demo</h2><ul class="list compact"><li>Argon2 login, scoped cookies/CSRF and authenticated API/SSE.</li><li>Forced tenant/site PostgreSQL RLS; separate tool/checkpoint roles.</li><li>Static read-only authority; inference subprocess strips app/database/viewer credentials.</li><li>Loopback-bound local services and secrets outside the repository.</li></ul></div><div><h2>Not certified or integrated</h2><ul class="list compact"><li>Production SSO/multi-user identity, HA and security certification.</li><li>Historian, Falkor or DanaOS connector.</li><li>Field-calibrated gas/oil detection or localization.</li><li>Local-only inference or autonomous shutdown/control.</li></ul></div></div>
+  <p class="small">Research grounding: thesis Paper C (RE 2023), defense 16/18-21/47. Public industry positioning: <a href="https://falkor.com/products/falkor">Falkor</a>. Regulatory scenario: archived Norwegian Petroleum Act translation, sections 10-13/10-16; not current legal advice.</p>
+  <p class="source">Original deck and diagrams. CustomerOps informs customer-first narrative, scoped specialists, durable evidence, failure ownership and explicit tradeoffs; its content/assets and private discussions are not copied. Detailed source boundaries: <a href="REPORT.md">REPORT.md</a>.</p>
+  <template class="notes"><p><strong>If asked about security:</strong> show implemented controls, then name the production gaps. Do not label dependency scans or synthetic testing a security certification.</p><p><strong>If asked about oil/licences:</strong> the prospect's wider business has oil-and-gas risks, but this implementation uses methane/acoustic gas signatures. Regulatory revocation is conditional for serious/repeated violations, not a guaranteed consequence of every release.</p></template>
+</section>
+</main>
+<aside id="speaker-panel" aria-label="Presenter notes" hidden><h2 id="notes-title">Presenter notes</h2><div id="notes-body"></div></aside>
+<nav class="controls" aria-label="Presentation controls">
+  <span class="position" id="position" aria-live="polite"></span>
+  <button id="previous" type="button" aria-label="Previous slide">&larr; Previous</button>
+  <button id="next" type="button" aria-label="Next slide">Next &rarr;</button>
+  <select id="slide-select" aria-label="Jump to slide"></select>
+  <button id="notes-toggle" type="button" aria-pressed="false" aria-controls="speaker-panel">Notes (N)</button>
+  <button type="button" data-jump="quality-appendix">Appendix</button>
+  <span class="clock" id="clock" role="timer" aria-label="Elapsed interview time">00:00 / 60:00</span>
+  <button id="timer-toggle" type="button">Start clock</button>
+  <button id="timer-reset" type="button" aria-label="Reset interview clock">Reset</button>
+  <button id="fullscreen" type="button">Fullscreen</button>
+</nav>
+<script>
+(() => {
+  "use strict";
+  const slides = [...document.querySelectorAll(".slide")];
+  const mainSlides = slides.filter(slide => slide.dataset.chapter !== "appendix");
+  const chapters = ["problem", "demo", "technical", "business", "questions"];
+  const budgets = [5, 10, 30, 10, 5];
+  for (const [index, chapter] of chapters.entries()) {
+    const minutes = mainSlides.filter(slide => slide.dataset.chapter === chapter)
+      .reduce((sum, slide) => sum + Number(slide.dataset.minutes), 0);
+    if (minutes !== budgets[index]) throw new Error(`Invalid ${chapter} timing: ${minutes}`);
+  }
+  const select = document.querySelector("#slide-select");
+  for (const [index, slide] of slides.entries()) {
+    const option = document.createElement("option");
+    option.value = slide.id;
+    option.textContent = `${index < mainSlides.length ? index + 1 : "A" + (index - mainSlides.length + 1)}. ${slide.dataset.title}`;
+    select.append(option);
+  }
+  let current = 0;
+  function render() {
+    const requested = location.hash.slice(1);
+    const found = slides.findIndex(slide => slide.id === requested);
+    current = found < 0 ? 0 : found;
+    if (found < 0) history.replaceState(null, "", "#" + slides[0].id);
+    slides.forEach((slide, index) => { slide.hidden = index !== current; });
+    const slide = slides[current];
+    select.value = slide.id;
+    document.querySelector("#position").textContent = current < mainSlides.length
+      ? `${current + 1} / ${mainSlides.length}` : `A${current - mainSlides.length + 1} / ${slides.length - mainSlides.length}`;
+    document.querySelector("#previous").disabled = current === 0;
+    document.querySelector("#next").disabled = current === slides.length - 1;
+    document.querySelectorAll("[data-chapter][data-jump]").forEach(button => {
+      if (button.dataset.chapter === slide.dataset.chapter) button.setAttribute("aria-current", "step");
+      else button.removeAttribute("aria-current");
+    });
+    document.querySelector("#notes-title").textContent = `Presenter: ${slide.dataset.title}`;
+    document.querySelector("#notes-body").replaceChildren(slide.querySelector("template.notes").content.cloneNode(true));
+    window.scrollTo(0, 0);
+  }
+  function jump(id) { location.hash = id; }
+  function move(delta) { jump(slides[Math.max(0, Math.min(slides.length - 1, current + delta))].id); }
+  document.querySelector("#previous").addEventListener("click", () => move(-1));
+  document.querySelector("#next").addEventListener("click", () => move(1));
+  select.addEventListener("change", () => jump(select.value));
+  document.querySelectorAll("[data-jump]").forEach(button =>
+    button.addEventListener("click", () => jump(button.dataset.jump)));
+  function toggleNotes() {
+    const panel = document.querySelector("#speaker-panel");
+    panel.hidden = !panel.hidden;
+    document.body.classList.toggle("notes-open", !panel.hidden);
+    document.querySelector("#notes-toggle").setAttribute("aria-pressed", String(!panel.hidden));
+  }
+  document.querySelector("#notes-toggle").addEventListener("click", toggleNotes);
+  document.addEventListener("keydown", event => {
+    if (event.target.closest("button,select,input,textarea,a") || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key === "ArrowRight" || event.key === "PageDown") { event.preventDefault(); move(1); }
+    if (event.key === "ArrowLeft" || event.key === "PageUp") { event.preventDefault(); move(-1); }
+    if (event.key === "Home") { event.preventDefault(); jump(slides[0].id); }
+    if (event.key === "End") { event.preventDefault(); jump(mainSlides.at(-1).id); }
+    if (event.key.toLowerCase() === "n") { event.preventDefault(); toggleNotes(); }
+  });
+  let elapsed = 0, startedAt = null;
+  const clock = document.querySelector("#clock");
+  const timerButton = document.querySelector("#timer-toggle");
+  function updateClock() {
+    const seconds = Math.floor((elapsed + (startedAt === null ? 0 : performance.now() - startedAt)) / 1000);
+    clock.textContent = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")} / 60:00`;
+    clock.classList.toggle("over", seconds >= 3600);
+  }
+  timerButton.addEventListener("click", () => {
+    if (startedAt === null) { startedAt = performance.now(); timerButton.textContent = "Pause clock"; }
+    else { elapsed += performance.now() - startedAt; startedAt = null; timerButton.textContent = "Resume clock"; }
+    updateClock();
+  });
+  document.querySelector("#timer-reset").addEventListener("click", () => {
+    elapsed = 0; startedAt = null; timerButton.textContent = "Start clock"; updateClock();
+  });
+  const fullscreen = document.querySelector("#fullscreen");
+  fullscreen.addEventListener("click", async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch (error) {
+      fullscreen.textContent = "Fullscreen unavailable";
+      fullscreen.title = error instanceof Error ? error.message : String(error);
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    fullscreen.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+  });
+  window.addEventListener("hashchange", render);
+  setInterval(updateClock, 250);
+  render();
+})();
+</script>
+</body>
+</html>

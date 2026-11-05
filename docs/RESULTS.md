@@ -18,6 +18,7 @@ thesis PDF, credentials or copied marketing artwork is included.
 | Browser | All four real-Chrome cases passed: controls, moving windows, keyboard sensor selection, charts/raw evidence, pinned questions/tasks, truthful counters, all pipeline chips, reconnect stability and Agents navigation before a pending task-detail read completes. |
 | Visible walkthrough | Completed with recovery across browser sessions: real login, S1/S2/S5 replays, six original manual hosted questions, exact pinned scopes and stored trace/historical-event verification. `evidence\visible-e2e.json`; not an uninterrupted six-question run. |
 | One-page brief | Original PDF rendered with installed Chrome; exactly one page verified. |
+| Interview deck | 18 timed slides follow the 5/10/30/10/5-minute interview; four on-demand appendices. Three standalone Chrome tests cover navigation/notes, clock and desktop/mobile/print layouts; widescreen PDF has 22 pages. Separate from the four product-console browser cases. |
 | Private publication | Original project pushed to the requested private owner/repository. Actual private clone installed, typechecked, built and generated S1/S2 data; corrected validation source import verified. |
 
 Numerical leak precision/recall are 1.0 only in the controlled mature-window

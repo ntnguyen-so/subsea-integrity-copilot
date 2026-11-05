@@ -40,8 +40,9 @@ Create S1, select 10x speed, Play, then pause when a possible leak appears. Sele
 a sensor with mouse or keyboard; inspect all three channels and raw/canonical
 records. Ask the three suggested questions and inspect the **pinned window,
 specialist tasks, cited evidence and counters**. Compare S2's scattered faults and
-S5's shared-gateway outage. S3/S4/S6 expose ambiguity, environmental confounding and
-warming/coverage loss. No actuator or shutdown endpoint exists.
+S5's physical signal with too few observers. S3 demonstrates a shared-gateway/full-source
+outage, S4 a broad environmental disturbance, and S6 verified-normal variability.
+No actuator or shutdown endpoint exists.
 
 For an explicit synthetic availability check or live qualification:
 
@@ -102,3 +103,29 @@ integrity engineers retain inspection and safety authority.
 
 The verified one-page attachment is `docs\ONE_PAGE_BRIEF.pdf`; regenerate it with
 `node scripts\render-brief.cjs` after editing the brief.
+
+## Interview deck
+
+Open `docs\INTERVIEW_DECK.html` directly in Chrome or Edge; no server is required
+for the presentation. `docs\INTERVIEW_DECK.pdf` is the widescreen audience export.
+Its evidence/code links point to GitHub rather than this computer's local paths;
+reviewers need private repository access.
+The 18-slide main story follows **5m problem / 10m live demo / 30m technical
+whiteboard / 10m business / 5m out-of-role questions**. Four on-demand appendices
+do not add scheduled time.
+
+Use Left/Right or Page Up/Down to navigate, Home for the first slide, End for the
+out-of-role questions, and **N** for presenter notes. Chapter buttons and the slide
+selector jump directly. Start/pause/reset the elapsed interview clock explicitly;
+navigation does not reset it. Notes include live-demo steps, whiteboard prompts,
+timed handoffs and an honestly labeled recorded-evidence fallback.
+
+The deck is original; CustomerOps informs its customer-first narrative, evidence
+chain, scoped specialists, durable execution and explicit tradeoffs. Diagrams are
+original SVGs, not copied reference/marketing assets. LIVE measurements and synthetic
+limits link to retained receipts; the deck does not introduce new field claims.
+
+```powershell
+npm run deck:test
+npm run deck:pdf
+```
