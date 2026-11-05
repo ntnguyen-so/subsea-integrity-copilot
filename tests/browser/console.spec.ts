@@ -51,3 +51,47 @@ test("real replay, sensor evidence, pinned questions and keyboard navigation", a
   expect(failures).toEqual([]);
   await page.screenshot({ path: "runtime/console.png", fullPage: true });
 });
+
+test("asking a question opens Agents before its task detail read completes", async ({ page }) => {
+  const password = process.env.SUBSEA_OPERATOR_PASSWORD;
+  if (!password) throw new Error("Load the owned environment before browser qualification");
+  const login = await page.context().request.post("/api/login", {
+    data: { username: "operator", password },
+  });
+  expect(login.status()).toBe(200);
+  const response = await page.context().request.get("/api/replays");
+  expect(response.status()).toBe(200);
+  const history: {
+    replays: { id: string; latest_window_id: string | null; mode: string }[];
+  } = await response.json();
+  const replay = history.replays.find(item => item.mode === "scripted" && item.latest_window_id);
+  if (!replay) throw new Error("Navigation regression requires an existing scripted replay");
+  await page.goto("/");
+  await expect(page.locator("#create-replay")).toBeEnabled();
+  await page.locator("#replay-history").selectOption(replay.id);
+  await expect(page.locator("#ask-submit")).toBeEnabled();
+  await page.locator("#questions button").first().click();
+
+  let releaseRead = () => {};
+  const heldRead = new Promise<void>(resolve => { releaseRead = () => resolve(); });
+  await page.route("**/api/tasks/*", async route => {
+    if (!/^\/api\/tasks\/[^/]+$/.test(new URL(route.request().url()).pathname)) {
+      await route.continue();
+      return;
+    }
+    await heldRead;
+    await route.continue();
+  });
+  const firstRead = page.waitForRequest(request =>
+    /^\/api\/tasks\/[^/]+$/.test(new URL(request.url()).pathname));
+  try {
+    await page.locator("#ask-submit").click();
+    await firstRead;
+    await expect(page.locator("#tab-agents")).toHaveAttribute("aria-selected", "true", {
+      timeout: 3000,
+    });
+  } finally {
+    releaseRead();
+    await expect(page.locator("#task-detail")).toContainText("Public investigation");
+  }
+});

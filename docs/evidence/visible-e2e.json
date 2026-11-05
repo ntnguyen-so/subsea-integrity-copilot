@@ -1,0 +1,460 @@
+{
+  "started_at": "2026-11-05T05:14:14.503Z",
+  "mode": "live",
+  "cases": [
+    {
+      "scenario": "S1",
+      "generation_id": "replay-bbaaee11bca2ff99a25c7798",
+      "snapshot_id": "window-9aa320bac055c1a96b1fbebc1e783eed34408507cb3ee82348f53d14e0ef4d77",
+      "hypothesis": "suspected_leak",
+      "questions": [
+        {
+          "question": "The alarms started together. Is this a possible leak or an instrumentation issue?",
+          "task_id": "a50f99a3-d62a-5945-a722-aa892e191b29",
+          "state": "SUCCEEDED",
+          "outcome": "supported",
+          "answer": "LIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nLocation uses a simplified numerical propagation model.\nThe numerical grid spacing is not localization accuracy.\nCompatible candidates are not a confidence interval.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\nReview observation coverage and data gaps.\nReview the computed competing hypotheses.\nReview the compatible numerical location candidates.",
+          "model_receipts": [
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 10812,
+                "output_tokens": 271,
+                "reasoning_tokens": 34,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 9517
+              },
+              "duration_ms": 13109.99999998603,
+              "error": null,
+              "request_id": "1060d1dd-da41-46db-9562-08b1df711714"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 6001,
+                "output_tokens": 31,
+                "reasoning_tokens": 0,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 4706
+              },
+              "duration_ms": 10422.00000002049,
+              "error": null,
+              "request_id": "70e8af6b-102a-4771-9c25-e32bc95bd71e"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 13110,
+                "output_tokens": 224,
+                "reasoning_tokens": 29,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 11815
+              },
+              "duration_ms": 11421.999999904074,
+              "error": null,
+              "request_id": "b4cf42a9-1e6d-4375-a6fc-4f4f892f3b89"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 8702,
+                "output_tokens": 239,
+                "reasoning_tokens": 25,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 7407
+              },
+              "duration_ms": 12344.000000040978,
+              "error": null,
+              "request_id": "05474cee-539e-4fa5-8823-ec77c7007225"
+            }
+          ]
+        },
+        {
+          "question": "Which pipeline section should our integrity engineer inspect first, and why?",
+          "task_id": "42b10e14-6fa7-5b62-b90a-f363a44c398d",
+          "state": "SUCCEEDED",
+          "outcome": "supported",
+          "answer": "LIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nLocation uses a simplified numerical propagation model.\nThe numerical grid spacing is not localization accuracy.\nCompatible candidates are not a confidence interval.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the compatible numerical location candidates.\nReview the cited sensor evidence.",
+          "model_receipts": [
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 6392,
+                "output_tokens": 143,
+                "reasoning_tokens": 110,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 5097
+              },
+              "duration_ms": 12812.000000034459,
+              "error": null,
+              "request_id": "c4d14075-e58d-42bb-b040-49f5e6f0abbf"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 10830,
+                "output_tokens": 257,
+                "reasoning_tokens": 32,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 9535
+              },
+              "duration_ms": 13780.999999959022,
+              "error": null,
+              "request_id": "1f239a84-f671-4f79-8f49-d013ef3f2ec6"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 13097,
+                "output_tokens": 228,
+                "reasoning_tokens": 33,
+                "cache_read_tokens": 0,
+                "cache_write_tokens": 13094
+              },
+              "duration_ms": 12968.999999924563,
+              "error": null,
+              "request_id": "727368e2-dcae-465d-85f2-25447f1cd4bc"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 8701,
+                "output_tokens": 235,
+                "reasoning_tokens": 21,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 7406
+              },
+              "duration_ms": 13297.00000002049,
+              "error": null,
+              "request_id": "011f424d-b445-4cdc-86c4-75834af0d8f3"
+            }
+          ]
+        },
+        {
+          "question": "Which sensors are unreliable, what evidence is missing, and what should we do next?",
+          "task_id": "0e9d06d8-8d45-5802-a181-984213c573b3",
+          "state": "SUCCEEDED",
+          "outcome": "supported",
+          "answer": "LIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nLocation uses a simplified numerical propagation model.\nThe numerical grid spacing is not localization accuracy.\nCompatible candidates are not a confidence interval.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\nReview observation coverage and data gaps.",
+          "model_receipts": [
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 6397,
+                "output_tokens": 79,
+                "reasoning_tokens": 23,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 5102
+              },
+              "duration_ms": 12421.999999904074,
+              "error": null,
+              "request_id": "301a3de5-412d-46f7-a66d-48aac5093ff9"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 9669,
+                "output_tokens": 204,
+                "reasoning_tokens": 0,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 8374
+              },
+              "duration_ms": 11250.0,
+              "error": null,
+              "request_id": "2a6f8347-7aba-44d0-9945-88728560428c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "S2",
+      "generation_id": "replay-88cbf8c08214deccf9896a67",
+      "snapshot_id": "window-0d49d9e254736ab84526c39c365085abdd7526368c0082175c9b080e827a0837",
+      "hypothesis": "sensor_or_telemetry_issue",
+      "questions": [
+        {
+          "question": "The alarms started together. Is this a possible leak or an instrumentation issue?",
+          "task_id": "573b1110-8d95-5fbd-9b6c-606e28de207f",
+          "state": "SUCCEEDED",
+          "outcome": "supported",
+          "answer": "LIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\nReview observation coverage and data gaps.\nReview the computed competing hypotheses.",
+          "model_receipts": [
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 10077,
+                "output_tokens": 202,
+                "reasoning_tokens": 0,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 8782
+              },
+              "duration_ms": 11922.00000002049,
+              "error": null,
+              "request_id": "523e5e89-380a-4ccc-9936-c900dafc29a3"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 6000,
+                "output_tokens": 31,
+                "reasoning_tokens": 0,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 4705
+              },
+              "duration_ms": 10797.00000002049,
+              "error": null,
+              "request_id": "32ff589a-28cd-426a-93da-0d9f69424c97"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 12941,
+                "output_tokens": 202,
+                "reasoning_tokens": 34,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 11646
+              },
+              "duration_ms": 11657.00000000652,
+              "error": null,
+              "request_id": "1dd5853c-6487-4a39-9cae-be6e49eb56b5"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 7989,
+                "output_tokens": 257,
+                "reasoning_tokens": 72,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 6694
+              },
+              "duration_ms": 13140.999999945052,
+              "error": null,
+              "request_id": "90d27d47-a294-4eab-ace1-4abbc9f3c0cf"
+            }
+          ]
+        },
+        {
+          "question": "Which sensors are unreliable, what evidence is missing, and what should we do next?",
+          "task_id": "f36dc394-5846-5f2f-835a-300ef7b188bd",
+          "state": "SUCCEEDED",
+          "outcome": "supported",
+          "answer": "LIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\nReview observation coverage and data gaps.",
+          "model_receipts": [
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 6342,
+                "output_tokens": 85,
+                "reasoning_tokens": 30,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 5047
+              },
+              "duration_ms": 13405.999999959022,
+              "error": null,
+              "request_id": "efcb704e-e2cb-442e-a6c3-f29bd6b48ab8"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 9429,
+                "output_tokens": 177,
+                "reasoning_tokens": 0,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 8134
+              },
+              "duration_ms": 11436.999999918044,
+              "error": null,
+              "request_id": "6679b8a3-45a1-48e8-a07b-a51af6be16a9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "S5",
+      "generation_id": "replay-99fc78cfcb134ce39121d252",
+      "snapshot_id": "window-b7ed22dd96ed28ffeb0ae60be82040a3dcb83383508b42f77fb0b6481ff34411",
+      "hypothesis": "insufficient_evidence",
+      "questions": [
+        {
+          "question": "Which pipeline section should our integrity engineer inspect first, and why?",
+          "task_id": "568084fb-0885-5069-9a91-2a74f1fab8ba",
+          "state": "ABSTAINED",
+          "outcome": "insufficient_evidence",
+          "answer": "LIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\nReview observation coverage and data gaps.",
+          "model_receipts": [
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 10706,
+                "output_tokens": 190,
+                "reasoning_tokens": 0,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 9411
+              },
+              "duration_ms": 10812.999999965541,
+              "error": null,
+              "request_id": "238e0dea-86bb-4696-9d64-2cecdc6df24c"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 5990,
+                "output_tokens": 55,
+                "reasoning_tokens": 22,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 4695
+              },
+              "duration_ms": 10984.99999998603,
+              "error": null,
+              "request_id": "3b4d9a8c-e278-4629-b385-a19270567cee"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 12879,
+                "output_tokens": 207,
+                "reasoning_tokens": 42,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 11584
+              },
+              "duration_ms": 12359.99999998603,
+              "error": null,
+              "request_id": "c89305fc-4380-4b59-8cc2-7598cbfc011f"
+            },
+            {
+              "mode": "live",
+              "requested_model": "gpt-6.1-sol",
+              "observed_model": "gpt-6.1-sol",
+              "model_identity_source": "cli_event",
+              "cli_version": "1.0.105",
+              "cli_version_source": "executable_version",
+              "usage": {
+                "input_tokens": 8580,
+                "output_tokens": 223,
+                "reasoning_tokens": 47,
+                "cache_read_tokens": 1292,
+                "cache_write_tokens": 7285
+              },
+              "duration_ms": 11905.999999959022,
+              "error": null,
+              "request_id": "415def16-9c8a-475b-bce0-6b641eb51bd7"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "browser_errors": [],
+  "resumed_from": "Five questions completed; opening original S5 manual answer after fixing the Agents navigation race.",
+  "passed": true,
+  "finished_at": "2026-11-05T05:18:23.900Z",
+  "completed_with_recovery": true,
+  "uninterrupted_run": false,
+  "final_review": {
+    "historical_event": "replay.state",
+    "stored_trace_visible": true,
+    "trace_id": "8a9d6fa19d21fc591cbfb5eade6fa42c",
+    "browser_errors": []
+  },
+  "observed_models": [
+    "gpt-6.1-sol"
+  ],
+  "limitation": "Synthetic data; completed across recovered browser sessions, not an uninterrupted six-question run. Fresh browser audit feeds do not reconstruct historical events."
+}

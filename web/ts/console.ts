@@ -625,6 +625,7 @@ function renderTasks(): void {
 async function loadTask(id: string, focus = true): Promise<void> {
   selectedTaskId = id;
   const token = ++taskToken, generation = generationToken;
+  if (focus) switchTab("agents");
   try {
     const detail = await request<TaskDetail>(`/api/tasks/${enc(id)}`);
     if (token !== taskToken || generation !== generationToken) return;
@@ -632,7 +633,6 @@ async function loadTask(id: string, focus = true): Promise<void> {
     taskDetail = detail;
     renderTaskDetail();
     renderAnswer();
-    if (focus) switchTab("agents");
     try {
       const trace = await request<Record<string, Json>>(`/api/tasks/${enc(id)}/trace`);
       if (token === taskToken && generation === generationToken) renderTrace(trace);

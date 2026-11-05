@@ -15,7 +15,8 @@ thesis PDF, credentials or copied marketing artwork is included.
 | Live Copilot agents | First cohort: 2/27 accepted-correct; 25 child failures, mostly turn/tool-budget exhaustion. Release gate failed; protocol correction and requalification are required. |
 | Intake live cohort | 24/27 accepted-correct: all S1 leak/localization and S5 missing-data answers passed. Three first-repetition S2 answers failed abstention propagation. Live baseline passed. |
 | Final live qualification | 27/27 accepted-correct; all nine distinct scenario/question cases repeated three times. Actual `gpt-6.1-sol`, CLI `1.0.105`, identity source `cli_event`; baseline passed and stored Langfuse tree verified. |
-| Browser | All three real-Chrome cases passed: controls, moving windows, keyboard sensor selection, charts/raw evidence, pinned questions/tasks, truthful counters, all pipeline chips and reconnect stability. |
+| Browser | All four real-Chrome cases passed: controls, moving windows, keyboard sensor selection, charts/raw evidence, pinned questions/tasks, truthful counters, all pipeline chips, reconnect stability and Agents navigation before a pending task-detail read completes. |
+| Visible walkthrough | Completed with recovery across browser sessions: real login, S1/S2/S5 replays, six original manual hosted questions, exact pinned scopes and stored trace/historical-event verification. `evidence\visible-e2e.json`; not an uninterrupted six-question run. |
 | One-page brief | Original PDF rendered with installed Chrome; exactly one page verified. |
 | Private publication | Original project pushed to the requested private owner/repository. Actual private clone installed, typechecked, built and generated S1/S2 data; corrected validation source import verified. |
 
@@ -34,6 +35,17 @@ observability API and bounded-window scheduling boundaries; failed receipts are
 retained locally rather than overwritten.
 Idle paused/completed history is not regenerated during monitor startup; only
 playing streams or unfinished window backlogs rehydrate source buffers.
+
+The visible walkthrough exposed a UI navigation race: background refreshes could
+supersede the initial task-detail fetch before its requested Agents-tab focus.
+Focus now occurs before asynchronous reads. A deliberately held-read browser
+regression failed against the old bundle and passed with the fix; all four browser
+journeys then passed. The domain and hosted-inference contracts were unchanged.
+The narrated walkthrough also corrected observer-only assumptions about idle
+HTTP connections, SVG group hit targets and historical events in a fresh browser
+feed. Completed investigations were recovered rather than re-submitted. The
+fresh feed's current-cursor behavior is explicit; an authenticated historical
+cursor independently retrieved retained backend events.
 
 Monitoring continues through missing input and unavailable inference. Completed
 sources drain their bounded processing backlog. The console must expose actual
