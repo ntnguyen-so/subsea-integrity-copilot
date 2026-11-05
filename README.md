@@ -87,6 +87,13 @@ held-out results are in `fixtures\synthetic\evaluation-results.json`; fresh coho
 receipts go to ignored `eval\results`. Never substitute scripted success for live
 qualification or synthetic accuracy for field reliability.
 
+Final live qualification accepted 27/27 answers across S1/S2/S5, including required
+location abstentions, with actual `gpt-6.1-sol` receipts and a verified stored trace.
+The same-evidence single-agent baseline also passed with fewer calls and lower latency
+in this cohort; separate roles provide bounded authority and audit, not demonstrated accuracy
+improvement. See `docs\RESULTS.md` and `docs\evidence\agents-live.json` for measurements,
+retained failures and synthetic-only limitations.
+
 See [the brief](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/ONE_PAGE_BRIEF_DRAFT.md),
 [engineering report](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/REPORT.md)
 and the retained milestone/design plans in `docs`. Localization is a compatible
