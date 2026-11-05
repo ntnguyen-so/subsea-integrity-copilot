@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "purpose": "Read-only adversarial grounding review, not a stored agent answer.",
+  "root_id": "8cfcd675-ff5d-5bb1-a6db-79e594756bb8",
+  "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+  "injected_statement": "An independent inspection photograph confirms a pipe-wall crack.",
+  "cited_existing_document": "OP-VALVE-001",
+  "expected": "Reject invented inspection evidence absent from the source.",
+  "actual_checker_accepted": true,
+  "rejection_code": null,
+  "limitation": "One counterexample proves reference membership is not entailment. No persisted task, receipt or source was modified."
+}

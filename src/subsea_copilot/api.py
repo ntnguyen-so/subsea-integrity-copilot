@@ -18,12 +18,14 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import Field
 from starlette.concurrency import run_in_threadpool
 
+from .casefile import InvestigationCase, build_casefile
 from .config import Settings
-from .contracts import AgentRole, Contract, Mode, utc_now
+from .contracts import AgentRole, Contract, Mode, WindowSnapshot, utc_now
 from .ingest import normalize_records
 from .llm.copilot_cli import CopilotCLIChatModel
 from .monitoring import Monitor
 from .runtime.checkpointer import postgres_checkpointer
+from .runtime.gateway import ToolGateway
 from .runtime.scripted import ScriptedChatModel
 from .runtime.workflow import AgentService
 from .security import (
@@ -34,17 +36,15 @@ from .security import (
     SessionManager,
 )
 from .store import Store, StoreError
-from .synthetic import SCENARIOS
+from .synthetic import CUSTOMER_QUESTIONS, SCENARIOS
 from .telemetry import Telemetry
 from .validation import ValidationError as AgentValidationError
+from .validation import validate_result
+from .warning import monitoring_warning
 
 logger = logging.getLogger(__name__)
 
-QUESTIONS = [
-    "The alarms started together. Is this a possible leak or an instrumentation issue?",
-    "Which pipeline section should our integrity engineer inspect first, and why?",
-    "Which sensors are unreliable, what evidence is missing, and what should we do next?",
-]
+QUESTIONS = CUSTOMER_QUESTIONS
 
 
 class LoginForm(Contract):
@@ -123,9 +123,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             ) -> CopilotCLIChatModel | ScriptedChatModel:
                 if mode == "scripted":
                     return ScriptedChatModel(role=role)
-                return CopilotCLIChatModel(
-                    runtime_dir=settings.runtime_dir, model_id="gpt-6.1-sol"
-                )
+                return CopilotCLIChatModel(runtime_dir=settings.runtime_dir, model_id="gpt-6.1-sol")
 
             service = AgentService(store, model_factory, checkpointer, telemetry)
             monitor = Monitor(store, service, telemetry)
@@ -198,9 +196,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         monitor = resources.get("monitor")
         service = resources.get("service")
         provider = service.health() if isinstance(service, AgentService) else {}
-        agent_status = (
-            worker.error or "running" if isinstance(worker, AgentWorker) else "starting"
-        )
+        agent_status = worker.error or "running" if isinstance(worker, AgentWorker) else "starting"
         if provider.get("available") is False:
             agent_status = str(provider.get("error_code") or "agent_unavailable")
         return {
@@ -299,8 +295,12 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def projection(generation_id: str, request: Request) -> dict[str, object]:
         principal(request)
         view: dict[str, object] = dict(store.get_projection(generation_id))
+        latest = view["latest_window"]
         view.update(
             {
+                "warning": monitoring_warning(
+                    WindowSnapshot.model_validate(latest) if latest is not None else None
+                ),
                 "pack": monitor_service().pack_for(generation_id),
                 "health": health(),
                 "server_time": utc_now().isoformat(),
@@ -365,12 +365,76 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             raise HTTPException(status_code=404, detail="Episode not found in this replay")
         return submit(snapshot.generation_id, form, episode_id)
 
+    def task_detail(task_id: str) -> dict[str, object]:
+        task = store.get_task(task_id)
+        children = [row for row in store.list_tasks(task.generation_id) if row.parent_id == task.id]
+        sources = [row for row in children if row.role == "event_diagnosis"]
+        if task.role == "event_diagnosis":
+            sources = [task]
+        for identifier in store.reuse_task_ids(task.id):
+            source = store.get_task(identifier)
+            if source.role == "event_diagnosis" and source.generation_id == task.generation_id:
+                sources.append(source)
+        history_receipts = [
+            {"task_id": source.id, **receipt}
+            for source in sources
+            for receipt in store.tool_receipts(source.id)
+            if str(receipt["name"]).startswith("history.")
+        ]
+        casefile: InvestigationCase | None = None
+        if (
+            task.role == "operator_response"
+            and task.response_protocol in {"engineer-v1", "engineer-v2"}
+            and task.state in {"SUCCEEDED", "ABSTAINED"}
+        ):
+            if task.result is None:
+                raise AgentValidationError("casefile_unavailable", "Accepted task has no result.")
+            snapshot = store.get_window(task.snapshot_id)
+            gateway = ToolGateway(store, task, snapshot, telemetry)
+            dependencies = gateway.dependencies()
+            for dependency in dependencies:
+                if dependency.result is None:
+                    raise AgentValidationError("casefile_sources", "Specialist has no result.")
+                validate_result(
+                    dependency.result,
+                    dependency,
+                    snapshot,
+                    store.tool_receipts(dependency.id),
+                    ToolGateway(store, dependency, snapshot, telemetry).dependencies(),
+                )
+            validate_result(
+                task.result,
+                task,
+                snapshot,
+                store.tool_receipts(task.id),
+                dependencies,
+            )
+            casefile = build_casefile(task, snapshot, dependencies, history_receipts)
+        return {
+            "task": task,
+            "children": children,
+            "receipts": store.tool_receipts(task_id),
+            "investigation_receipts": history_receipts,
+            "casefile": casefile,
+        }
+
     @app.get("/api/tasks/{task_id}")
     def task_view(task_id: str, request: Request) -> dict[str, object]:
         principal(request)
-        task = store.get_task(task_id)
-        children = [row for row in store.list_tasks(task.generation_id) if row.parent_id == task.id]
-        return {"task": task, "children": children, "receipts": store.tool_receipts(task_id)}
+        return task_detail(task_id)
+
+    @app.get("/api/tasks/{task_id}/casefile")
+    def casefile_download(task_id: str, request: Request, response: Response) -> InvestigationCase:
+        principal(request)
+        casefile = task_detail(task_id)["casefile"]
+        if not isinstance(casefile, InvestigationCase):
+            raise HTTPException(
+                status_code=409, detail="No completed operator handoff for this task"
+            )
+        response.headers["Content-Disposition"] = (
+            f'attachment; filename="investigation-{casefile.task_id}.json"'
+        )
+        return casefile
 
     @app.get("/api/tasks/{task_id}/trace")
     def trace_view(task_id: str, request: Request) -> dict[str, object]:

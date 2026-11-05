@@ -9,9 +9,9 @@ test("actual projection counters and every pipeline chip are explicit", async ({
   expect(login.status()).toBe(200);
   const response = await page.context().request.get("/api/replays");
   expect(response.status()).toBe(200);
-  const history: { replays: { id: string; latest_window_id: string | null; state: string }[] } = await response.json();
-  const replay = history.replays.find(item => item.latest_window_id && item.state === "PAUSED")
-    || history.replays.find(item => item.latest_window_id);
+  const history: { replays: { id: string; latest_window_id: string | null; state: string; source_version: string; scenario: string }[] } = await response.json();
+  const replay = history.replays.find(item => item.source_version === "pressure-v3" && item.scenario === "S1" && item.latest_window_id && item.state === "PAUSED")
+    || history.replays.find(item => item.source_version === "pressure-v3" && item.scenario === "S1" && item.latest_window_id);
   if (!replay) throw new Error("Counter regression needs an existing replay");
   await page.goto("/");
   await expect(page.locator("#create-replay")).toBeEnabled();
@@ -46,9 +46,9 @@ test("real sensor charts survive projection refreshes on a pinned window", async
   expect(login.status()).toBe(200);
   const history = await page.context().request.get("/api/replays");
   expect(history.status()).toBe(200);
-  const data: { replays: { id: string; latest_window_id: string | null; state: string }[] } = await history.json();
-  const replay = data.replays.find(item => item.latest_window_id && item.state === "PAUSED")
-    || data.replays.find(item => item.latest_window_id);
+  const data: { replays: { id: string; latest_window_id: string | null; state: string; source_version: string; scenario: string }[] } = await history.json();
+  const replay = data.replays.find(item => item.source_version === "pressure-v3" && item.scenario === "S1" && item.latest_window_id && item.state === "PAUSED")
+    || data.replays.find(item => item.source_version === "pressure-v3" && item.scenario === "S1" && item.latest_window_id);
   if (!replay) throw new Error("Sensor regression needs an existing real replay with a computed window");
   await page.goto("/");
   await expect(page.locator("#create-replay")).toBeEnabled();
@@ -60,11 +60,11 @@ test("real sensor charts survive projection refreshes on a pinned window", async
   await expect(page.locator("#selected-basis")).toContainText("PINNED");
   const basis = await page.locator("#selected-basis").textContent();
   for (let index = 0; index < 3; index++) await page.locator("#reconnect").click();
-  await expect(page.locator("#channel-charts svg")).toHaveCount(3, { timeout: 30_000 });
+  await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 30_000 });
   await expect(page.locator("#selected-basis")).toHaveText(basis || "");
   await page.locator("#reconnect").click();
   await expect(page.locator("#connection-state")).toContainText("Connected", { timeout: 30_000 });
-  await expect(page.locator("#channel-charts svg")).toHaveCount(3);
+  await expect(page.locator("#channel-charts svg")).toHaveCount(1);
   await page.locator("#inspect-raw").click();
   await expect(page.locator("#raw-table table")).toBeVisible();
   await expect(page.locator("#raw-table")).toContainText("Original value / unit");

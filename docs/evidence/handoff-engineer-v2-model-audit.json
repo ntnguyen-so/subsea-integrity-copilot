@@ -1,0 +1,342 @@
+{
+  "passed": true,
+  "mode": "live",
+  "actual_hosted_requests": 17,
+  "root_ids": [
+    "9de7f11e-72be-5d32-aa05-1861b6ab035d",
+    "9ed96362-614c-5d3c-b5b5-e7bab12185df"
+  ],
+  "model_receipts": [
+    {
+      "mode": "live",
+      "phase": "plan",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 6657,
+        "output_tokens": 31,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 5362
+      },
+      "duration_ms": 11938.000000081956,
+      "error": null,
+      "request_id": "5bc923f9-6e05-4825-8f85-3f622f3165d1"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13325,
+        "output_tokens": 941,
+        "reasoning_tokens": 73,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12030
+      },
+      "duration_ms": 25358.999999938533,
+      "error": null,
+      "request_id": "6ba12fe9-c130-44e8-be78-220eeb25a1cf"
+    },
+    {
+      "mode": "live",
+      "phase": "critic-0",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10185,
+        "output_tokens": 1646,
+        "reasoning_tokens": 516,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 8890
+      },
+      "duration_ms": 40452.99999997951,
+      "error": null,
+      "request_id": "6346f48c-46c3-4d15-a454-da51affd4397"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11196,
+        "output_tokens": 238,
+        "reasoning_tokens": 43,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9901
+      },
+      "duration_ms": 14922.00000002049,
+      "error": null,
+      "request_id": "84abb5f8-042e-451c-9e73-78ba1e74d037"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10635,
+        "output_tokens": 148,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9340
+      },
+      "duration_ms": 13047.00000002049,
+      "error": null,
+      "request_id": "21cb9265-2425-4cb5-814a-f7f977100b09"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11996,
+        "output_tokens": 344,
+        "reasoning_tokens": 36,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10701
+      },
+      "duration_ms": 15890.999999945052,
+      "error": null,
+      "request_id": "3ac6c531-d0e4-44ad-8eb7-76f30f9d0c6f"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13851,
+        "output_tokens": 398,
+        "reasoning_tokens": 103,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12556
+      },
+      "duration_ms": 18657.00000000652,
+      "error": null,
+      "request_id": "5e0ff2f5-ab60-4e53-932d-fb526ff1af3e"
+    },
+    {
+      "mode": "live",
+      "phase": "critic-1",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 9908,
+        "output_tokens": 1379,
+        "reasoning_tokens": 310,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 8613
+      },
+      "duration_ms": 32625.0,
+      "error": null,
+      "request_id": "15d06248-17a5-4a46-a181-9f9ef03f45e2"
+    },
+    {
+      "mode": "live",
+      "phase": "plan",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 7246,
+        "output_tokens": 53,
+        "reasoning_tokens": 20,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 5951
+      },
+      "duration_ms": 11625.0,
+      "error": null,
+      "request_id": "cf9b7ca3-6458-4722-b92a-140ded9b5320"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13070,
+        "output_tokens": 1037,
+        "reasoning_tokens": 190,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 11775
+      },
+      "duration_ms": 30469.00000004098,
+      "error": null,
+      "request_id": "9c61e356-8184-4640-ae7b-ea620d5e8c4f"
+    },
+    {
+      "mode": "live",
+      "phase": "reflection",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 14540,
+        "output_tokens": 895,
+        "reasoning_tokens": 41,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 13245
+      },
+      "duration_ms": 19922.00000002049,
+      "error": null,
+      "request_id": "e5fbc414-a815-4e59-8d52-c3e6be45de1b"
+    },
+    {
+      "mode": "live",
+      "phase": "critic-0",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 9895,
+        "output_tokens": 1470,
+        "reasoning_tokens": 445,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 8600
+      },
+      "duration_ms": 36140.00000001397,
+      "error": null,
+      "request_id": "73f89416-0a28-4782-827b-63d640dbae9b"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11207,
+        "output_tokens": 249,
+        "reasoning_tokens": 54,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9912
+      },
+      "duration_ms": 14062.000000034459,
+      "error": null,
+      "request_id": "39e08580-45d7-42e5-9009-fba25e4b9bff"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 14325,
+        "output_tokens": 414,
+        "reasoning_tokens": 126,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 13030
+      },
+      "duration_ms": 17437.99999996554,
+      "error": null,
+      "request_id": "20bf72d1-224f-4a8d-b14f-212a4f88578e"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10636,
+        "output_tokens": 151,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9341
+      },
+      "duration_ms": 13140.999999945052,
+      "error": null,
+      "request_id": "93eb5d9f-dce6-4162-aac4-6128109a28b2"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13716,
+        "output_tokens": 224,
+        "reasoning_tokens": 53,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12421
+      },
+      "duration_ms": 17969.00000004098,
+      "error": null,
+      "request_id": "8402f2a5-ec73-4757-af48-05641f691367"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11973,
+        "output_tokens": 700,
+        "reasoning_tokens": 269,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10678
+      },
+      "duration_ms": 24265.999999945052,
+      "error": null,
+      "request_id": "1df0c078-8178-4241-81dd-3e8c35c39565"
+    }
+  ],
+  "handoff_elapsed_seconds": [
+    145.053742,
+    223.494398
+  ],
+  "limitations": [
+    "Backend task spans include queue; not physical onset-to-human latency.",
+    "Same-model critic is not proof of entailment; monetary cost unknown."
+  ]
+}

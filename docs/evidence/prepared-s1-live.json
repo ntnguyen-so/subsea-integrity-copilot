@@ -1,0 +1,2747 @@
+{
+  "passed": true,
+  "mode": "live",
+  "fixture": "Arrival-gated mature S1; prepared answers are recorded LIVE, not newly computed during the meeting.",
+  "replay_id": "handoff-ec30ca28eaa74cef9c69a2d4d671de42",
+  "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+  "handoffs": [
+    {
+      "schema_version": "investigation-v1",
+      "task_id": "c16c4a98-92b7-51c8-9d42-8d7bdd129941",
+      "generation_id": "handoff-ec30ca28eaa74cef9c69a2d4d671de42",
+      "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+      "question": "Leak or faulty sensors?",
+      "mode": "live",
+      "state": "SUCCEEDED",
+      "window_start": "2026-01-01T00:02:00+00:00",
+      "window_end": "2026-01-01T00:03:00+00:00",
+      "input_hash": "c8bf8ceceeb640e3155af8c7d44f1976a04af18f60bdf0763665e6c282341b4f",
+      "pack_version": "pressure-pack-v3",
+      "baseline_version": "pressure-median-mad-v2",
+      "parameter_version": "pressure-window-v2",
+      "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+      "disposition": "Review supported inspection interval",
+      "hypothesis": "suspected_leak",
+      "inspection": {
+        "segment_id": "P1",
+        "start_m": 200.0,
+        "end_m": 600.0
+      },
+      "next_action": "Ask the operator to verify operating records.",
+      "interpretation": {
+        "focus": "root_cause",
+        "answer": {
+          "text": "The accepted assessment is suspected leak, not a confirmed leak or established sensor fault. Persistent paired pressure anomalies and the reviewed comparison support a localized pressure change across distinct gateways. They do not establish its cause; incomplete operating records and possible shared failures leave the distinction unresolved. See the checked numerical section for magnitudes and coverage.",
+          "references": [
+            "claim-025",
+            "subsea_ec263026890e4d58b385bf977cdeec9d",
+            "PROC-INSPECT-001",
+            "LOG-COVERAGE-001"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "A leak remains possible: paired anomalies persist at the affected stations, and the historical comparison shows pressure decreases there without comparable decreases in the sampled branch sensors. That pattern supports suspicion, but pressure association is not a causal test and does not exclude operating changes or shared failures.",
+            "references": [
+              "claim-025",
+              "subsea_ec263026890e4d58b385bf977cdeec9d",
+              "claim-030"
+            ],
+            "cause": "leak",
+            "stance": "possible"
+          },
+          {
+            "text": "An operating change is not established, but remains an alternative. The reviewed log excerpt contains no contemporaneous entry explaining the localized drop; it explicitly warns that upstream activity, manual actions and delayed entries may be absent. More complete operating records would help distinguish this explanation; absence of an entry cannot rule it out.",
+            "references": [
+              "LOG-COVERAGE-001",
+              "claim-029"
+            ],
+            "cause": "operating_change",
+            "stance": "not_established"
+          },
+          {
+            "text": "Faulty instrumentation or telemetry is not established. Reviewed anomalous sensors have no flagged drift, spikes or peer disagreement, and the comparison spans distinct gateways. This weakens a single-gateway explanation, but paired taps sharing a gateway are not independent corroboration, and shared failures still require verification. The health review is partial.",
+            "references": [
+              "claim-002",
+              "claim-003",
+              "claim-004",
+              "claim-005",
+              "PROC-INSPECT-001",
+              "subsea_ec263026890e4d58b385bf977cdeec9d"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "Are more complete operating records available to check upstream activity, manual actions or delayed entries around the pressure change?",
+          "Is there independent sensor or gateway evidence that could distinguish a physical pressure change from a shared instrumentation or telemetry failure?"
+        ]
+      },
+      "checked_claims": [
+        {
+          "id": "claim-000",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 3.5309233784563077,
+            "sensor_id": "P1-ST1-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-001"
+          ]
+        },
+        {
+          "id": "claim-001",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 3.992552220287493,
+            "sensor_id": "P1-ST1-B",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-003"
+          ]
+        },
+        {
+          "id": "claim-002",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 59,
+            "channel": "pressure",
+            "missing": 1,
+            "expected": 60,
+            "received": 60,
+            "max_score": 30.135533429774746,
+            "sensor_id": "P1-ST2-A",
+            "spike_count": 0,
+            "anomaly_count": 59,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 59.0
+          },
+          "evidence_ids": [
+            "ev-005"
+          ]
+        },
+        {
+          "id": "claim-003",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 32.922368585664685,
+            "sensor_id": "P1-ST2-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-007"
+          ]
+        },
+        {
+          "id": "claim-004",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 21.555259938389522,
+            "sensor_id": "P1-ST3-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-009"
+          ]
+        },
+        {
+          "id": "claim-005",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 22.876982622152298,
+            "sensor_id": "P1-ST3-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-011"
+          ]
+        },
+        {
+          "id": "claim-006",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 2.676163121482844,
+            "sensor_id": "P1-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-013"
+          ]
+        },
+        {
+          "id": "claim-022",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 45,
+            "channel": "pressure",
+            "missing": 15,
+            "expected": 60,
+            "received": 60,
+            "max_score": 2.8988733949883994,
+            "sensor_id": "P3-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-045"
+          ]
+        },
+        {
+          "id": "claim-024",
+          "kind": "coverage",
+          "value": {
+            "unit": "fraction",
+            "coverage": 0.9868055555555556,
+            "usable_samples": 1421,
+            "expected_samples": 1440,
+            "received_samples": 1440,
+            "failure_domains_available": 6
+          },
+          "evidence_ids": [
+            "ev-049"
+          ]
+        },
+        {
+          "id": "claim-025",
+          "kind": "hypothesis",
+          "value": {
+            "criteria": "pressure-investigation-v2",
+            "detector": "pressure-median-mad-v2",
+            "hypothesis": "suspected_leak",
+            "station_count": 2,
+            "operating_context": "No valve/compressor records supplied; operator verification required",
+            "persistence_seconds": 59.0,
+            "failure_domain_count": 2,
+            "supporting_sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST2-B",
+              "P1-ST3-A",
+              "P1-ST3-B"
+            ]
+          },
+          "evidence_ids": [
+            "ev-050"
+          ]
+        },
+        {
+          "id": "claim-026",
+          "kind": "location",
+          "value": {
+            "best": {
+              "position": {
+                "x": 0.0,
+                "y": -400.0
+              },
+              "residual": null,
+              "strength": null,
+              "chainage_m": 400.0,
+              "segment_id": "P1"
+            },
+            "unit": "m",
+            "method": "pressure-alert-bracket-v2",
+            "status": "located",
+            "compatible": [
+              {
+                "position": {
+                  "x": 0.0,
+                  "y": -600.0
+                },
+                "residual": null,
+                "strength": null,
+                "chainage_m": 200.0,
+                "segment_id": "P1"
+              },
+              {
+                "position": {
+                  "x": 0.0,
+                  "y": -200.0
+                },
+                "residual": null,
+                "strength": null,
+                "chainage_m": 600.0,
+                "segment_id": "P1"
+              }
+            ],
+            "inspection_end_m": 600.0,
+            "station_bracket_m": [
+              100.0,
+              300.0,
+              500.0,
+              700.0
+            ],
+            "inspection_start_m": 200.0
+          },
+          "evidence_ids": [
+            "ev-051"
+          ]
+        },
+        {
+          "id": "claim-027",
+          "kind": "limitation",
+          "value": {
+            "code": "SYNTHETIC_UNCALIBRATED"
+          },
+          "evidence_ids": [
+            "ev-052"
+          ]
+        },
+        {
+          "id": "claim-028",
+          "kind": "limitation",
+          "value": {
+            "code": "PRESSURE_PATTERNS_NOT_PROOF"
+          },
+          "evidence_ids": [
+            "ev-053"
+          ]
+        },
+        {
+          "id": "claim-029",
+          "kind": "limitation",
+          "value": {
+            "code": "OPERATING_CONTEXT_REQUIRED"
+          },
+          "evidence_ids": [
+            "ev-054"
+          ]
+        },
+        {
+          "id": "claim-030",
+          "kind": "limitation",
+          "value": {
+            "code": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+          },
+          "evidence_ids": [
+            "ev-055"
+          ]
+        },
+        {
+          "id": "claim-031",
+          "kind": "limitation",
+          "value": {
+            "code": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+          },
+          "evidence_ids": [
+            "ev-056"
+          ]
+        },
+        {
+          "id": "claim-032",
+          "kind": "limitation",
+          "value": {
+            "code": "COMPATIBLE_NOT_CONFIDENCE"
+          },
+          "evidence_ids": [
+            "ev-057"
+          ]
+        }
+      ],
+      "limitations": [
+        "SYNTHETIC_UNCALIBRATED",
+        "PRESSURE_PATTERNS_NOT_PROOF",
+        "OPERATING_CONTEXT_REQUIRED",
+        "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES",
+        "INSPECTION_INTERVAL_NOT_LEAK_POINT",
+        "COMPATIBLE_NOT_CONFIDENCE",
+        "partial_health_review"
+      ],
+      "sources": [
+        {
+          "document": {
+            "id": "LOG-COVERAGE-001",
+            "body": "Fictional, nonconfidential source coverage statement. This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent. No contemporaneous operation entry in this excerpt explains a localized Trunk P1 pressure drop. Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak. Pressure histories, sensor-quality observations and independent gateway coverage remain necessary; unavailable logs remain an explicit uncertainty.",
+            "type": "procedure",
+            "title": "Operating-log coverage and missing source limitations",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-31T23:00:00Z",
+            "available_at": "2025-12-31T23:05:00Z",
+            "content_hash": "4bc94404ba78fd1ef0b81207a3fc6e26d6c81e08d60d848df54638c0495a0812",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:00:00Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "PROC-INSPECT-001",
+            "body": "Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure taps; ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration. A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded. Operating logs and maintenance history are context, not proof of an integrity condition. Incomplete log coverage cannot establish that no operation occurred. Physical intervention remains subject to operator authorization.",
+            "type": "procedure",
+            "title": "Pressure anomaly desk assessment and bounded inspection planning",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-20T09:00:00Z",
+            "available_at": "2025-12-20T10:00:00Z",
+            "content_hash": "b719ef9ae3af12d68f22a4c42aff12755ef7690bd383606b07562bec59508c12",
+            "effective_to": null,
+            "effective_from": "2025-12-21T00:00:00Z"
+          },
+          "use": "cited"
+        }
+      ],
+      "comparisons": [
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "seek_counterevidence",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST2-A",
+              "change_bar": -1.2354,
+              "segment_id": "P1",
+              "after_usable": 59,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 78.4568,
+              "invalid_received": 1,
+              "before_median_bar": 79.6922
+            },
+            {
+              "sensor_id": "P1-ST3-A",
+              "change_bar": -0.8419,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 78.6491,
+              "invalid_received": 0,
+              "before_median_bar": 79.491
+            },
+            {
+              "sensor_id": "P2-ST2-A",
+              "change_bar": 0.0194,
+              "segment_id": "P2",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P2-1",
+              "before_expected": 120,
+              "after_median_bar": 78.9175,
+              "invalid_received": 0,
+              "before_median_bar": 78.8981
+            },
+            {
+              "sensor_id": "P3-ST2-A",
+              "change_bar": -0.0011,
+              "segment_id": "P3",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P3-1",
+              "before_expected": 120,
+              "after_median_bar": 78.9029,
+              "invalid_received": 0,
+              "before_median_bar": 78.904
+            }
+          ],
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "end_seconds": 180,
+          "split_seconds": 120,
+          "start_seconds": 0,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 7,
+          "call_id": "subsea_ec263026890e4d58b385bf977cdeec9d"
+        }
+      ],
+      "steps": [
+        {
+          "task_id": "d157bd4d-5672-5bdc-8747-179e5f870bef",
+          "call_id": "subsea_ff4e3723ac034ac6a1b3e9494bff7ec2",
+          "tool": "history.search",
+          "intent": "test_operating_change",
+          "arguments": {
+            "query": "operations valve compressor maintenance calibration telemetry",
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "asset_ids": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 5
+        },
+        {
+          "task_id": "d157bd4d-5672-5bdc-8747-179e5f870bef",
+          "call_id": "subsea_ed5057d3ccab4bf5aba6f6b6e733fbd1",
+          "tool": "history.read",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "document_ids": [
+              "LOG-COVERAGE-001",
+              "PROC-INSPECT-001"
+            ],
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 6
+        },
+        {
+          "task_id": "d157bd4d-5672-5bdc-8747-179e5f870bef",
+          "call_id": "subsea_ec263026890e4d58b385bf977cdeec9d",
+          "tool": "history.compare",
+          "intent": "seek_counterevidence",
+          "arguments": {
+            "intent": "seek_counterevidence",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST3-A",
+              "P2-ST2-A",
+              "P3-ST2-A"
+            ],
+            "end_seconds": 180,
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 120,
+            "start_seconds": 0,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 7
+        }
+      ],
+      "reused_task_ids": [],
+      "fresh_model_calls": 7,
+      "fresh_tool_calls": 15,
+      "recorded_elapsed_seconds": 143.158456,
+      "report_target_seconds": 300,
+      "report_target_met": true,
+      "interpretation_review": {
+        "protocol": "grounding-v1",
+        "source_hash": "eff74b5251335487d57eb76c0d72435ed2f94a4621ecd522789c9130530565df",
+        "rounds": [
+          {
+            "candidate_hash": "ccd8de1a9ad6e0ac5521ec895cbb8e0ae147c68fe22bd6d7c7016d17953d8f33",
+            "assessment": {
+              "decision": "accept",
+              "checks": [
+                {
+                  "paragraph_id": "answer",
+                  "verdict": "supported",
+                  "reason": "Faithfully presents suspected leak as unresolved, with distinct-gateway pressure evidence and explicit operating-record and shared-failure limitations.",
+                  "support": [
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"hypothesis\": \"suspected_leak\""
+                    },
+                    {
+                      "reference": "subsea_ec263026890e4d58b385bf977cdeec9d",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:leak",
+                  "verdict": "supported",
+                  "reason": "Persistent paired anomalies and sampled historical changes support suspicion, not causation. The paragraph preserves operating-change and shared-failure alternatives.",
+                  "support": [
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"persistence_seconds\": 59.0, \"station_count\": 2, \"supporting_sensor_ids\": [\"P1-ST2-A\", \"P1-ST2-B\", \"P1-ST3-A\", \"P1-ST3-B\"]"
+                    },
+                    {
+                      "reference": "subsea_ec263026890e4d58b385bf977cdeec9d",
+                      "quote": "\"change_bar\": -1.2354, \"failure_domain\": \"gateway-P1-1\""
+                    },
+                    {
+                      "reference": "subsea_ec263026890e4d58b385bf977cdeec9d",
+                      "quote": "\"change_bar\": 0.0194, \"failure_domain\": \"gateway-P2-1\", \"invalid_received\": 0, \"segment_id\": \"P2\", \"sensor_id\": \"P2-ST2-A\"}, {\"after_expected\": 60, \"after_median_bar\": 78.9029, \"after_usable\": 60, \"before_expected\": 120, \"before_median_bar\": 78.904, \"before_usable\": 120, \"change_bar\": -0.0011"
+                    },
+                    {
+                      "reference": "subsea_ec263026890e4d58b385bf977cdeec9d",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:operating_change",
+                  "verdict": "supported",
+                  "reason": "Accurately distinguishes an unexplained log excerpt from evidence excluding operations and requests fuller context without inventing operational events.",
+                  "support": [
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "No contemporaneous operation entry in this excerpt explains a localized Trunk P1 pressure drop."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:instrumentation_or_telemetry",
+                  "verdict": "supported",
+                  "reason": "The reviewed health objects report no specified fault flags. Distinct gateways weaken only a single-gateway explanation; shared failures and partial review remain explicit.",
+                  "support": [
+                    {
+                      "reference": "claim-002",
+                      "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0, \"max_score\": 30.135533429774746, \"missing\": 1, \"peer_disagreement\": false, \"persistence_seconds\": 59.0, \"received\": 60, \"sensor_id\": \"P1-ST2-A\", \"spike_count\": 0"
+                    },
+                    {
+                      "reference": "claim-005",
+                      "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0, \"max_score\": 22.876982622152298, \"missing\": 0, \"peer_disagreement\": false, \"persistence_seconds\": 60.0, \"received\": 60, \"sensor_id\": \"P1-ST3-B\", \"spike_count\": 0"
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "subsea_ec263026890e4d58b385bf977cdeec9d",
+                      "quote": "\"change_bar\": -0.8419, \"failure_domain\": \"gateway-P1-0\""
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:0",
+                  "verdict": "supported",
+                  "reason": "Relevant read-only request addressing explicitly incomplete operating records, without assuming unavailable records exist.",
+                  "support": [
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:1",
+                  "verdict": "supported",
+                  "reason": "Relevant read-only request for independent corroboration; it neither assumes a sensor failure nor treats paired taps as independent witnesses.",
+                  "support": [
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "claim-030",
+                      "quote": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "provider_cost_usd": null,
+      "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+    },
+    {
+      "schema_version": "investigation-v1",
+      "task_id": "bcc8d90e-bff5-54f0-8920-8232222aa15a",
+      "generation_id": "handoff-ec30ca28eaa74cef9c69a2d4d671de42",
+      "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+      "question": "Where should we inspect, and why?",
+      "mode": "live",
+      "state": "SUCCEEDED",
+      "window_start": "2026-01-01T00:02:00+00:00",
+      "window_end": "2026-01-01T00:03:00+00:00",
+      "input_hash": "c8bf8ceceeb640e3155af8c7d44f1976a04af18f60bdf0763665e6c282341b4f",
+      "pack_version": "pressure-pack-v3",
+      "baseline_version": "pressure-median-mad-v2",
+      "parameter_version": "pressure-window-v2",
+      "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+      "disposition": "Review supported inspection interval",
+      "hypothesis": "suspected_leak",
+      "inspection": {
+        "segment_id": "P1",
+        "start_m": 200.0,
+        "end_m": 600.0
+      },
+      "next_action": "Review the supported inspection interval with the integrity engineer.",
+      "interpretation": {
+        "focus": "inspection_rationale",
+        "answer": {
+          "text": "The supported inspection candidate is Trunk P1's bounded interval in the checked location result, not a proven leak point. Persistent paired-tap anomalies at ST2 and ST3 span distinct gateways; the reviewed comparison shows smaller changes at the outer stations. This supports a bounded inspection rationale, not a confirmed cause. Historical review remains unresolved because operating-log coverage is incomplete; physical intervention requires operator authorization.",
+          "references": [
+            "claim-026",
+            "claim-025",
+            "subsea_4e48be293c154503b9e45f0c5481da4c",
+            "PROC-INSPECT-001",
+            "LOG-COVERAGE-001"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "A leak is possible because persistent anomalies at distinct stations and gateways support the accepted suspected-leak hypothesis. The localized before/after pattern supports investigating the interval, but pressure patterns and temporal association do not establish an integrity failure.",
+            "references": [
+              "claim-025",
+              "claim-028",
+              "subsea_4e48be293c154503b9e45f0c5481da4c"
+            ],
+            "cause": "leak",
+            "stance": "possible"
+          },
+          {
+            "text": "An operating change is not established, but remains possible. The reviewed log excerpt contains no contemporaneous entry explaining the localized drop; it explicitly may omit upstream activity, manual actions and delayed entries. The reviewed branch comparisons do not establish a common operating cause, and missing records cannot exclude one.",
+            "references": [
+              "LOG-COVERAGE-001",
+              "subsea_db5f8cfe05074a6080fcac8340a3ad96"
+            ],
+            "cause": "operating_change",
+            "stance": "not_established"
+          },
+          {
+            "text": "Instrumentation or telemetry remains a possible competing explanation. Reviewed affected taps show no flagged drift or peer disagreement, and the supporting stations span distinct gateways, weakening a single-gateway explanation. Paired taps on a shared gateway are not independent corroboration, and the health review is partial; shared failures still require verification.",
+            "references": [
+              "claim-002",
+              "claim-003",
+              "claim-004",
+              "claim-005",
+              "PROC-INSPECT-001",
+              "claim-030"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "possible"
+          }
+        ],
+        "follow_up_questions": [
+          "Can missing upstream, manual-action or delayed operating records explain the localized pressure change, given LOG-COVERAGE-001's coverage gaps?",
+          "Can independent instrumentation evidence distinguish a physical pressure change from shared telemetry failures, as required by PROC-INSPECT-001?"
+        ]
+      },
+      "checked_claims": [
+        {
+          "id": "claim-000",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 3.5309233784563077,
+            "sensor_id": "P1-ST1-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-001"
+          ]
+        },
+        {
+          "id": "claim-001",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 3.992552220287493,
+            "sensor_id": "P1-ST1-B",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-003"
+          ]
+        },
+        {
+          "id": "claim-002",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 59,
+            "channel": "pressure",
+            "missing": 1,
+            "expected": 60,
+            "received": 60,
+            "max_score": 30.135533429774746,
+            "sensor_id": "P1-ST2-A",
+            "spike_count": 0,
+            "anomaly_count": 59,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 59.0
+          },
+          "evidence_ids": [
+            "ev-005"
+          ]
+        },
+        {
+          "id": "claim-003",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 32.922368585664685,
+            "sensor_id": "P1-ST2-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-007"
+          ]
+        },
+        {
+          "id": "claim-004",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 21.555259938389522,
+            "sensor_id": "P1-ST3-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-009"
+          ]
+        },
+        {
+          "id": "claim-005",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 22.876982622152298,
+            "sensor_id": "P1-ST3-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-011"
+          ]
+        },
+        {
+          "id": "claim-006",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 2.676163121482844,
+            "sensor_id": "P1-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-013"
+          ]
+        },
+        {
+          "id": "claim-022",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 45,
+            "channel": "pressure",
+            "missing": 15,
+            "expected": 60,
+            "received": 60,
+            "max_score": 2.8988733949883994,
+            "sensor_id": "P3-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-045"
+          ]
+        },
+        {
+          "id": "claim-024",
+          "kind": "coverage",
+          "value": {
+            "unit": "fraction",
+            "coverage": 0.9868055555555556,
+            "usable_samples": 1421,
+            "expected_samples": 1440,
+            "received_samples": 1440,
+            "failure_domains_available": 6
+          },
+          "evidence_ids": [
+            "ev-049"
+          ]
+        },
+        {
+          "id": "claim-025",
+          "kind": "hypothesis",
+          "value": {
+            "criteria": "pressure-investigation-v2",
+            "detector": "pressure-median-mad-v2",
+            "hypothesis": "suspected_leak",
+            "station_count": 2,
+            "operating_context": "No valve/compressor records supplied; operator verification required",
+            "persistence_seconds": 59.0,
+            "failure_domain_count": 2,
+            "supporting_sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST2-B",
+              "P1-ST3-A",
+              "P1-ST3-B"
+            ]
+          },
+          "evidence_ids": [
+            "ev-050"
+          ]
+        },
+        {
+          "id": "claim-026",
+          "kind": "location",
+          "value": {
+            "best": {
+              "position": {
+                "x": 0.0,
+                "y": -400.0
+              },
+              "residual": null,
+              "strength": null,
+              "chainage_m": 400.0,
+              "segment_id": "P1"
+            },
+            "unit": "m",
+            "method": "pressure-alert-bracket-v2",
+            "status": "located",
+            "compatible": [
+              {
+                "position": {
+                  "x": 0.0,
+                  "y": -600.0
+                },
+                "residual": null,
+                "strength": null,
+                "chainage_m": 200.0,
+                "segment_id": "P1"
+              },
+              {
+                "position": {
+                  "x": 0.0,
+                  "y": -200.0
+                },
+                "residual": null,
+                "strength": null,
+                "chainage_m": 600.0,
+                "segment_id": "P1"
+              }
+            ],
+            "inspection_end_m": 600.0,
+            "station_bracket_m": [
+              100.0,
+              300.0,
+              500.0,
+              700.0
+            ],
+            "inspection_start_m": 200.0
+          },
+          "evidence_ids": [
+            "ev-051"
+          ]
+        },
+        {
+          "id": "claim-027",
+          "kind": "limitation",
+          "value": {
+            "code": "SYNTHETIC_UNCALIBRATED"
+          },
+          "evidence_ids": [
+            "ev-052"
+          ]
+        },
+        {
+          "id": "claim-028",
+          "kind": "limitation",
+          "value": {
+            "code": "PRESSURE_PATTERNS_NOT_PROOF"
+          },
+          "evidence_ids": [
+            "ev-053"
+          ]
+        },
+        {
+          "id": "claim-029",
+          "kind": "limitation",
+          "value": {
+            "code": "OPERATING_CONTEXT_REQUIRED"
+          },
+          "evidence_ids": [
+            "ev-054"
+          ]
+        },
+        {
+          "id": "claim-030",
+          "kind": "limitation",
+          "value": {
+            "code": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+          },
+          "evidence_ids": [
+            "ev-055"
+          ]
+        },
+        {
+          "id": "claim-031",
+          "kind": "limitation",
+          "value": {
+            "code": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+          },
+          "evidence_ids": [
+            "ev-056"
+          ]
+        },
+        {
+          "id": "claim-032",
+          "kind": "limitation",
+          "value": {
+            "code": "COMPATIBLE_NOT_CONFIDENCE"
+          },
+          "evidence_ids": [
+            "ev-057"
+          ]
+        }
+      ],
+      "limitations": [
+        "SYNTHETIC_UNCALIBRATED",
+        "PRESSURE_PATTERNS_NOT_PROOF",
+        "OPERATING_CONTEXT_REQUIRED",
+        "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES",
+        "INSPECTION_INTERVAL_NOT_LEAK_POINT",
+        "COMPATIBLE_NOT_CONFIDENCE",
+        "partial_health_review"
+      ],
+      "sources": [
+        {
+          "document": {
+            "id": "LOG-COVERAGE-001",
+            "body": "Fictional, nonconfidential source coverage statement. This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent. No contemporaneous operation entry in this excerpt explains a localized Trunk P1 pressure drop. Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak. Pressure histories, sensor-quality observations and independent gateway coverage remain necessary; unavailable logs remain an explicit uncertainty.",
+            "type": "procedure",
+            "title": "Operating-log coverage and missing source limitations",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-31T23:00:00Z",
+            "available_at": "2025-12-31T23:05:00Z",
+            "content_hash": "4bc94404ba78fd1ef0b81207a3fc6e26d6c81e08d60d848df54638c0495a0812",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:00:00Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "PROC-INSPECT-001",
+            "body": "Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure taps; ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration. A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded. Operating logs and maintenance history are context, not proof of an integrity condition. Incomplete log coverage cannot establish that no operation occurred. Physical intervention remains subject to operator authorization.",
+            "type": "procedure",
+            "title": "Pressure anomaly desk assessment and bounded inspection planning",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-20T09:00:00Z",
+            "available_at": "2025-12-20T10:00:00Z",
+            "content_hash": "b719ef9ae3af12d68f22a4c42aff12755ef7690bd383606b07562bec59508c12",
+            "effective_to": null,
+            "effective_from": "2025-12-21T00:00:00Z"
+          },
+          "use": "cited"
+        }
+      ],
+      "comparisons": [
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "seek_counterevidence",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "change_bar": -0.065,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 79.8222,
+              "invalid_received": 0,
+              "before_median_bar": 79.8871
+            },
+            {
+              "sensor_id": "P1-ST2-B",
+              "change_bar": -1.2353,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 119,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 78.4543,
+              "invalid_received": 1,
+              "before_median_bar": 79.6896
+            },
+            {
+              "sensor_id": "P1-ST3-B",
+              "change_bar": -0.8256,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 78.6563,
+              "invalid_received": 0,
+              "before_median_bar": 79.482
+            },
+            {
+              "sensor_id": "P1-ST4-A",
+              "change_bar": -0.0176,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 79.2834,
+              "invalid_received": 0,
+              "before_median_bar": 79.301
+            }
+          ],
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "end_seconds": 180,
+          "split_seconds": 120,
+          "start_seconds": 0,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 8,
+          "call_id": "subsea_4e48be293c154503b9e45f0c5481da4c"
+        },
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "test_operating_change",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST2-A",
+              "change_bar": -1.2354,
+              "segment_id": "P1",
+              "after_usable": 59,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 78.4568,
+              "invalid_received": 1,
+              "before_median_bar": 79.6922
+            },
+            {
+              "sensor_id": "P1-ST3-A",
+              "change_bar": -0.8419,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 78.6491,
+              "invalid_received": 0,
+              "before_median_bar": 79.491
+            },
+            {
+              "sensor_id": "P2-ST2-A",
+              "change_bar": 0.0194,
+              "segment_id": "P2",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P2-1",
+              "before_expected": 120,
+              "after_median_bar": 78.9175,
+              "invalid_received": 0,
+              "before_median_bar": 78.8981
+            },
+            {
+              "sensor_id": "P3-ST2-A",
+              "change_bar": -0.0011,
+              "segment_id": "P3",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P3-1",
+              "before_expected": 120,
+              "after_median_bar": 78.9029,
+              "invalid_received": 0,
+              "before_median_bar": 78.904
+            }
+          ],
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "end_seconds": 180,
+          "split_seconds": 120,
+          "start_seconds": 0,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 7,
+          "call_id": "subsea_db5f8cfe05074a6080fcac8340a3ad96"
+        }
+      ],
+      "steps": [
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_a75c01790e1546678b9f793b58611735",
+          "tool": "history.search",
+          "intent": "test_operating_change",
+          "arguments": {
+            "query": "pressure valve compressor operations maintenance",
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "asset_ids": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 5
+        },
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_1747ef3a61934843b25038b0ffa28f07",
+          "tool": "history.read",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "document_ids": [
+              "LOG-COVERAGE-001",
+              "PROC-INSPECT-001"
+            ],
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 6
+        },
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_db5f8cfe05074a6080fcac8340a3ad96",
+          "tool": "history.compare",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST3-A",
+              "P2-ST2-A",
+              "P3-ST2-A"
+            ],
+            "end_seconds": 180,
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 120,
+            "start_seconds": 0,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 7
+        },
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_4e48be293c154503b9e45f0c5481da4c",
+          "tool": "history.compare",
+          "intent": "seek_counterevidence",
+          "arguments": {
+            "intent": "seek_counterevidence",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST2-B",
+              "P1-ST3-B",
+              "P1-ST4-A"
+            ],
+            "end_seconds": 180,
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 120,
+            "start_seconds": 0,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 8
+        }
+      ],
+      "reused_task_ids": [],
+      "fresh_model_calls": 7,
+      "fresh_tool_calls": 16,
+      "recorded_elapsed_seconds": 142.548701,
+      "report_target_seconds": 300,
+      "report_target_met": true,
+      "interpretation_review": {
+        "protocol": "grounding-v1",
+        "source_hash": "2a9db6c7c4a27194c911fb6b7f749622ed2eff924051b83adec16fe381d07dc2",
+        "rounds": [
+          {
+            "candidate_hash": "91ff3704ef186c320aea5346b693f58b37c4f2b2791680c772a4648b204d8771",
+            "assessment": {
+              "decision": "accept",
+              "checks": [
+                {
+                  "paragraph_id": "answer",
+                  "verdict": "supported",
+                  "reason": "The location is a bounded inspection candidate, not a proven leak. Station, gateway and comparison evidence support that scope; incomplete logs and authorization requirements are preserved.",
+                  "support": [
+                    {
+                      "reference": "claim-026",
+                      "quote": "\"inspection_end_m\": 600.0, \"inspection_start_m\": 200.0"
+                    },
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"failure_domain_count\": 2, \"hypothesis\": \"suspected_leak\""
+                    },
+                    {
+                      "reference": "subsea_4e48be293c154503b9e45f0c5481da4c",
+                      "quote": "\"change_bar\": -0.0176, \"failure_domain\": \"gateway-P1-1\", \"invalid_received\": 0, \"segment_id\": \"P1\", \"sensor_id\": \"P1-ST4-A\""
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Incomplete log coverage cannot establish that no operation occurred. Physical intervention remains subject to operator authorization."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:leak",
+                  "verdict": "supported",
+                  "reason": "The suspected-leak hypothesis and localized changes justify investigation only. The paragraph correctly avoids treating pressure patterns or temporal association as proof of failure.",
+                  "support": [
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"failure_domain_count\": 2, \"hypothesis\": \"suspected_leak\""
+                    },
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"persistence_seconds\": 59.0, \"station_count\": 2"
+                    },
+                    {
+                      "reference": "claim-028",
+                      "quote": "PRESSURE_PATTERNS_NOT_PROOF"
+                    },
+                    {
+                      "reference": "subsea_4e48be293c154503b9e45f0c5481da4c",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:operating_change",
+                  "verdict": "supported",
+                  "reason": "The excerpt explicitly leaves operating activity unresolved. Branch comparisons do not establish a common cause, and the paragraph does not use missing records to exclude one.",
+                  "support": [
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "No contemporaneous operation entry in this excerpt explains a localized Trunk P1 pressure drop."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak."
+                    },
+                    {
+                      "reference": "subsea_db5f8cfe05074a6080fcac8340a3ad96",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:instrumentation_or_telemetry",
+                  "verdict": "supported",
+                  "reason": "Reviewed health flags support the bounded statement, not instrument clearance. Gateway topology weakens a single-gateway explanation while shared failures and partial review remain explicit.",
+                  "support": [
+                    {
+                      "reference": "claim-002",
+                      "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0, \"max_score\": 30.135533429774746, \"missing\": 1, \"peer_disagreement\": false"
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "claim-030",
+                      "quote": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:0",
+                  "verdict": "supported",
+                  "reason": "This is a relevant read-only request to investigate explicitly documented coverage gaps, without assuming that an operating change occurred.",
+                  "support": [
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:1",
+                  "verdict": "supported",
+                  "reason": "This requests independent verification of a documented telemetry ambiguity without asserting that such evidence has already been obtained.",
+                  "support": [
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "provider_cost_usd": null,
+      "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+    },
+    {
+      "schema_version": "investigation-v1",
+      "task_id": "cfcbb8e6-7702-53c1-a553-e0f968076fd2",
+      "generation_id": "handoff-ec30ca28eaa74cef9c69a2d4d671de42",
+      "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+      "question": "What evidence supports this, and what remains unknown?",
+      "mode": "live",
+      "state": "SUCCEEDED",
+      "window_start": "2026-01-01T00:02:00+00:00",
+      "window_end": "2026-01-01T00:03:00+00:00",
+      "input_hash": "c8bf8ceceeb640e3155af8c7d44f1976a04af18f60bdf0763665e6c282341b4f",
+      "pack_version": "pressure-pack-v3",
+      "baseline_version": "pressure-median-mad-v2",
+      "parameter_version": "pressure-window-v2",
+      "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+      "disposition": "Review supported inspection interval",
+      "hypothesis": "suspected_leak",
+      "inspection": {
+        "segment_id": "P1",
+        "start_m": 200.0,
+        "end_m": 600.0
+      },
+      "next_action": "Review the supported inspection interval with the integrity engineer.",
+      "interpretation": {
+        "focus": "evidence_gaps",
+        "answer": {
+          "text": "Persistent paired pressure anomalies across distinct stations and gateways support the suspected-leak assessment, not confirmation. Reviewed comparisons show a localized contrast with other observed taps. The accepted bracket scopes an interval, not a leak point or confidence estimate; see the checked numerical section. Cause remains unresolved: logs are incomplete, the data are synthetic and uncalibrated, and sensor-health review is partial.",
+          "references": [
+            "claim-025",
+            "claim-026",
+            "claim-027",
+            "PROC-INSPECT-001",
+            "LOG-COVERAGE-001",
+            "subsea_4e48be293c154503b9e45f0c5481da4c"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "A leak is possible because persistent paired anomalies and the reviewed pressure contrasts support the accepted hypothesis. Pressure patterns and the bounded interval do not establish an integrity failure or exact leak point; the historical comparisons are associations, not causal tests.",
+            "references": [
+              "claim-025",
+              "claim-028",
+              "claim-031",
+              "subsea_db5f8cfe05074a6080fcac8340a3ad96"
+            ],
+            "cause": "leak",
+            "stance": "possible"
+          },
+          {
+            "text": "An operating change is not established, but remains an alternative. The reviewed log excerpt contains no contemporaneous entry explaining the localized drop; it explicitly may omit upstream activity, manual actions and delayed entries. Missing entries cannot exclude an operation, and the pressure comparisons do not identify a causal operating event.",
+            "references": [
+              "LOG-COVERAGE-001",
+              "subsea_db5f8cfe05074a6080fcac8340a3ad96"
+            ],
+            "cause": "operating_change",
+            "stance": "not_established"
+          },
+          {
+            "text": "Instrumentation or telemetry remains possible. Reviewed anomalous taps show no flagged drift or peer disagreement, and the pattern spans distinct gateways, which weighs against an explanation confined to a shared gateway. However, paired taps within a gateway are not independent telemetry corroboration; missing observations, uncalibrated synthetic data and partial health review leave shared failures unexcluded.",
+            "references": [
+              "claim-002",
+              "claim-003",
+              "claim-004",
+              "claim-005",
+              "claim-027",
+              "PROC-INSPECT-001"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "possible"
+          }
+        ],
+        "follow_up_questions": [
+          "Can fuller operating records verify whether upstream activity, manual actions or delayed entries explain the drop, given LOG-COVERAGE-001?",
+          "Can independent gateway evidence verify whether a shared failure explains the paired anomalies, as cautioned in PROC-INSPECT-001?",
+          "What independent evidence can distinguish a leak from other causes within the accepted interval, given claim-028 and claim-031?"
+        ]
+      },
+      "checked_claims": [
+        {
+          "id": "claim-000",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 3.5309233784563077,
+            "sensor_id": "P1-ST1-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-001"
+          ]
+        },
+        {
+          "id": "claim-001",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 3.992552220287493,
+            "sensor_id": "P1-ST1-B",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-003"
+          ]
+        },
+        {
+          "id": "claim-002",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 59,
+            "channel": "pressure",
+            "missing": 1,
+            "expected": 60,
+            "received": 60,
+            "max_score": 30.135533429774746,
+            "sensor_id": "P1-ST2-A",
+            "spike_count": 0,
+            "anomaly_count": 59,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 59.0
+          },
+          "evidence_ids": [
+            "ev-005"
+          ]
+        },
+        {
+          "id": "claim-003",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 32.922368585664685,
+            "sensor_id": "P1-ST2-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-007"
+          ]
+        },
+        {
+          "id": "claim-004",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 21.555259938389522,
+            "sensor_id": "P1-ST3-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-009"
+          ]
+        },
+        {
+          "id": "claim-005",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 22.876982622152298,
+            "sensor_id": "P1-ST3-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60.0
+          },
+          "evidence_ids": [
+            "ev-011"
+          ]
+        },
+        {
+          "id": "claim-006",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 2.676163121482844,
+            "sensor_id": "P1-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-013"
+          ]
+        },
+        {
+          "id": "claim-022",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 45,
+            "channel": "pressure",
+            "missing": 15,
+            "expected": 60,
+            "received": 60,
+            "max_score": 2.8988733949883994,
+            "sensor_id": "P3-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 0,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 0.0
+          },
+          "evidence_ids": [
+            "ev-045"
+          ]
+        },
+        {
+          "id": "claim-024",
+          "kind": "coverage",
+          "value": {
+            "unit": "fraction",
+            "coverage": 0.9868055555555556,
+            "usable_samples": 1421,
+            "expected_samples": 1440,
+            "received_samples": 1440,
+            "failure_domains_available": 6
+          },
+          "evidence_ids": [
+            "ev-049"
+          ]
+        },
+        {
+          "id": "claim-025",
+          "kind": "hypothesis",
+          "value": {
+            "criteria": "pressure-investigation-v2",
+            "detector": "pressure-median-mad-v2",
+            "hypothesis": "suspected_leak",
+            "station_count": 2,
+            "operating_context": "No valve/compressor records supplied; operator verification required",
+            "persistence_seconds": 59.0,
+            "failure_domain_count": 2,
+            "supporting_sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST2-B",
+              "P1-ST3-A",
+              "P1-ST3-B"
+            ]
+          },
+          "evidence_ids": [
+            "ev-050"
+          ]
+        },
+        {
+          "id": "claim-026",
+          "kind": "location",
+          "value": {
+            "best": {
+              "position": {
+                "x": 0.0,
+                "y": -400.0
+              },
+              "residual": null,
+              "strength": null,
+              "chainage_m": 400.0,
+              "segment_id": "P1"
+            },
+            "unit": "m",
+            "method": "pressure-alert-bracket-v2",
+            "status": "located",
+            "compatible": [
+              {
+                "position": {
+                  "x": 0.0,
+                  "y": -600.0
+                },
+                "residual": null,
+                "strength": null,
+                "chainage_m": 200.0,
+                "segment_id": "P1"
+              },
+              {
+                "position": {
+                  "x": 0.0,
+                  "y": -200.0
+                },
+                "residual": null,
+                "strength": null,
+                "chainage_m": 600.0,
+                "segment_id": "P1"
+              }
+            ],
+            "inspection_end_m": 600.0,
+            "station_bracket_m": [
+              100.0,
+              300.0,
+              500.0,
+              700.0
+            ],
+            "inspection_start_m": 200.0
+          },
+          "evidence_ids": [
+            "ev-051"
+          ]
+        },
+        {
+          "id": "claim-027",
+          "kind": "limitation",
+          "value": {
+            "code": "SYNTHETIC_UNCALIBRATED"
+          },
+          "evidence_ids": [
+            "ev-052"
+          ]
+        },
+        {
+          "id": "claim-028",
+          "kind": "limitation",
+          "value": {
+            "code": "PRESSURE_PATTERNS_NOT_PROOF"
+          },
+          "evidence_ids": [
+            "ev-053"
+          ]
+        },
+        {
+          "id": "claim-029",
+          "kind": "limitation",
+          "value": {
+            "code": "OPERATING_CONTEXT_REQUIRED"
+          },
+          "evidence_ids": [
+            "ev-054"
+          ]
+        },
+        {
+          "id": "claim-030",
+          "kind": "limitation",
+          "value": {
+            "code": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+          },
+          "evidence_ids": [
+            "ev-055"
+          ]
+        },
+        {
+          "id": "claim-031",
+          "kind": "limitation",
+          "value": {
+            "code": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+          },
+          "evidence_ids": [
+            "ev-056"
+          ]
+        },
+        {
+          "id": "claim-032",
+          "kind": "limitation",
+          "value": {
+            "code": "COMPATIBLE_NOT_CONFIDENCE"
+          },
+          "evidence_ids": [
+            "ev-057"
+          ]
+        }
+      ],
+      "limitations": [
+        "SYNTHETIC_UNCALIBRATED",
+        "PRESSURE_PATTERNS_NOT_PROOF",
+        "OPERATING_CONTEXT_REQUIRED",
+        "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES",
+        "INSPECTION_INTERVAL_NOT_LEAK_POINT",
+        "COMPATIBLE_NOT_CONFIDENCE",
+        "partial_health_review"
+      ],
+      "sources": [
+        {
+          "document": {
+            "id": "LOG-COVERAGE-001",
+            "body": "Fictional, nonconfidential source coverage statement. This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent. No contemporaneous operation entry in this excerpt explains a localized Trunk P1 pressure drop. Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak. Pressure histories, sensor-quality observations and independent gateway coverage remain necessary; unavailable logs remain an explicit uncertainty.",
+            "type": "procedure",
+            "title": "Operating-log coverage and missing source limitations",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-31T23:00:00Z",
+            "available_at": "2025-12-31T23:05:00Z",
+            "content_hash": "4bc94404ba78fd1ef0b81207a3fc6e26d6c81e08d60d848df54638c0495a0812",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:00:00Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "PROC-INSPECT-001",
+            "body": "Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure taps; ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration. A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded. Operating logs and maintenance history are context, not proof of an integrity condition. Incomplete log coverage cannot establish that no operation occurred. Physical intervention remains subject to operator authorization.",
+            "type": "procedure",
+            "title": "Pressure anomaly desk assessment and bounded inspection planning",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-20T09:00:00Z",
+            "available_at": "2025-12-20T10:00:00Z",
+            "content_hash": "b719ef9ae3af12d68f22a4c42aff12755ef7690bd383606b07562bec59508c12",
+            "effective_to": null,
+            "effective_from": "2025-12-21T00:00:00Z"
+          },
+          "use": "cited"
+        }
+      ],
+      "comparisons": [
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "seek_counterevidence",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "change_bar": -0.065,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 79.8222,
+              "invalid_received": 0,
+              "before_median_bar": 79.8871
+            },
+            {
+              "sensor_id": "P1-ST2-B",
+              "change_bar": -1.2353,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 119,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 78.4543,
+              "invalid_received": 1,
+              "before_median_bar": 79.6896
+            },
+            {
+              "sensor_id": "P1-ST3-B",
+              "change_bar": -0.8256,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 78.6563,
+              "invalid_received": 0,
+              "before_median_bar": 79.482
+            },
+            {
+              "sensor_id": "P1-ST4-A",
+              "change_bar": -0.0176,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 79.2834,
+              "invalid_received": 0,
+              "before_median_bar": 79.301
+            }
+          ],
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "end_seconds": 180,
+          "split_seconds": 120,
+          "start_seconds": 0,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 8,
+          "call_id": "subsea_4e48be293c154503b9e45f0c5481da4c"
+        },
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "test_operating_change",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST2-A",
+              "change_bar": -1.2354,
+              "segment_id": "P1",
+              "after_usable": 59,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 120,
+              "after_median_bar": 78.4568,
+              "invalid_received": 1,
+              "before_median_bar": 79.6922
+            },
+            {
+              "sensor_id": "P1-ST3-A",
+              "change_bar": -0.8419,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 120,
+              "after_median_bar": 78.6491,
+              "invalid_received": 0,
+              "before_median_bar": 79.491
+            },
+            {
+              "sensor_id": "P2-ST2-A",
+              "change_bar": 0.0194,
+              "segment_id": "P2",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P2-1",
+              "before_expected": 120,
+              "after_median_bar": 78.9175,
+              "invalid_received": 0,
+              "before_median_bar": 78.8981
+            },
+            {
+              "sensor_id": "P3-ST2-A",
+              "change_bar": -0.0011,
+              "segment_id": "P3",
+              "after_usable": 60,
+              "before_usable": 120,
+              "after_expected": 60,
+              "failure_domain": "gateway-P3-1",
+              "before_expected": 120,
+              "after_median_bar": 78.9029,
+              "invalid_received": 0,
+              "before_median_bar": 78.904
+            }
+          ],
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "end_seconds": 180,
+          "split_seconds": 120,
+          "start_seconds": 0,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 7,
+          "call_id": "subsea_db5f8cfe05074a6080fcac8340a3ad96"
+        }
+      ],
+      "steps": [
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_a75c01790e1546678b9f793b58611735",
+          "tool": "history.search",
+          "intent": "test_operating_change",
+          "arguments": {
+            "query": "pressure valve compressor operations maintenance",
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "asset_ids": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 5
+        },
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_1747ef3a61934843b25038b0ffa28f07",
+          "tool": "history.read",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "document_ids": [
+              "LOG-COVERAGE-001",
+              "PROC-INSPECT-001"
+            ],
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 6
+        },
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_db5f8cfe05074a6080fcac8340a3ad96",
+          "tool": "history.compare",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST3-A",
+              "P2-ST2-A",
+              "P3-ST2-A"
+            ],
+            "end_seconds": 180,
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 120,
+            "start_seconds": 0,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 7
+        },
+        {
+          "task_id": "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4",
+          "call_id": "subsea_4e48be293c154503b9e45f0c5481da4c",
+          "tool": "history.compare",
+          "intent": "seek_counterevidence",
+          "arguments": {
+            "intent": "seek_counterevidence",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST2-B",
+              "P1-ST3-B",
+              "P1-ST4-A"
+            ],
+            "end_seconds": 180,
+            "snapshot_id": "window-8a3c218c5c280b1dcbfca97ded9ce33413b1446fb1510c7fe564acb97d891ee8",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 120,
+            "start_seconds": 0,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 8
+        }
+      ],
+      "reused_task_ids": [
+        "d11f51d4-1be6-5357-987f-1b8a65cf0f43",
+        "d39894f4-2ae0-5448-931c-e1d1ebf8d7e4"
+      ],
+      "fresh_model_calls": 3,
+      "fresh_tool_calls": 4,
+      "recorded_elapsed_seconds": 88.239426,
+      "report_target_seconds": 300,
+      "report_target_met": true,
+      "interpretation_review": {
+        "protocol": "grounding-v1",
+        "source_hash": "2a9db6c7c4a27194c911fb6b7f749622ed2eff924051b83adec16fe381d07dc2",
+        "rounds": [
+          {
+            "candidate_hash": "82dfa58eae7f2bad7418583449d34d327107bcead44431fe34d36a49d7dae495",
+            "assessment": {
+              "decision": "accept",
+              "checks": [
+                {
+                  "paragraph_id": "answer",
+                  "verdict": "supported",
+                  "reason": "The hypothesis, computed contrasts and bounded location support a qualified suspicion only. Incomplete log coverage, synthetic data and partial health review preserve the stated uncertainty.",
+                  "support": [
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"hypothesis\": \"suspected_leak\""
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    },
+                    {
+                      "reference": "claim-027",
+                      "quote": "SYNTHETIC_UNCALIBRATED"
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:leak",
+                  "verdict": "supported",
+                  "reason": "The recorded hypothesis and pressure comparisons justify possibility, not integrity confirmation or precise localization; the causal qualification matches the comparison caveat.",
+                  "support": [
+                    {
+                      "reference": "claim-025",
+                      "quote": "\"hypothesis\": \"suspected_leak\""
+                    },
+                    {
+                      "reference": "claim-028",
+                      "quote": "PRESSURE_PATTERNS_NOT_PROOF"
+                    },
+                    {
+                      "reference": "claim-031",
+                      "quote": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+                    },
+                    {
+                      "reference": "subsea_db5f8cfe05074a6080fcac8340a3ad96",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:operating_change",
+                  "verdict": "supported",
+                  "reason": "The source explicitly limits the absence of an explanatory entry to this excerpt. Neither incomplete logs nor before/after comparisons establish or exclude an operating cause.",
+                  "support": [
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "No contemporaneous operation entry in this excerpt explains a localized Trunk P1 pressure drop."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    },
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "Absence of such an entry is not evidence that no operation occurred, nor confirmation of a leak."
+                    },
+                    {
+                      "reference": "subsea_db5f8cfe05074a6080fcac8340a3ad96",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:instrumentation_or_telemetry",
+                  "verdict": "supported",
+                  "reason": "All four cited health records lack drift and peer-disagreement flags; one has missing data. Distinct station gateways weaken only a single-gateway explanation, while shared failures remain unexcluded.",
+                  "support": [
+                    {
+                      "reference": "claim-002",
+                      "quote": "\"missing\": 1, \"peer_disagreement\": false, \"persistence_seconds\": 59.0"
+                    },
+                    {
+                      "reference": "claim-005",
+                      "quote": "\"drift_suspected\": false"
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "claim-027",
+                      "quote": "SYNTHETIC_UNCALIBRATED"
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:0",
+                  "verdict": "supported",
+                  "reason": "A relevant read-only request addressing the explicit gaps in operating-log coverage without presuming an operating event occurred.",
+                  "support": [
+                    {
+                      "reference": "LOG-COVERAGE-001",
+                      "quote": "third-party upstream activity, manual field actions and delayed shift entries may be absent."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:1",
+                  "verdict": "supported",
+                  "reason": "A relevant verification request for independent evidence, not an assertion that shared failure occurred or that paired taps independently corroborate telemetry.",
+                  "support": [
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:2",
+                  "verdict": "supported",
+                  "reason": "The question appropriately seeks discriminating evidence while retaining the distinction between an inspection interval and a proven leak location.",
+                  "support": [
+                    {
+                      "reference": "claim-028",
+                      "quote": "PRESSURE_PATTERNS_NOT_PROOF"
+                    },
+                    {
+                      "reference": "claim-031",
+                      "quote": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "provider_cost_usd": null,
+      "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+    }
+  ],
+  "limitations": [
+    "Synthetic and uncalibrated; not field detection performance.",
+    "Prepared reports must be presented as recorded LIVE results with their exact basis.",
+    "Same-model critic cannot guarantee entailment; human review required."
+  ],
+  "model_receipts": [
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13334,
+        "output_tokens": 952,
+        "reasoning_tokens": 100,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12039
+      },
+      "duration_ms": 24484.99999998603,
+      "error": null,
+      "request_id": "6883daa0-e780-4e03-a296-0db81b651aff"
+    },
+    {
+      "mode": "live",
+      "phase": "plan",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 6626,
+        "output_tokens": 31,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 5331
+      },
+      "duration_ms": 11782.00000000652,
+      "error": null,
+      "request_id": "d50cffb4-243c-4493-b8e6-b88709603575"
+    },
+    {
+      "mode": "live",
+      "phase": "critic-0",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10398,
+        "output_tokens": 1736,
+        "reasoning_tokens": 457,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9103
+      },
+      "duration_ms": 39187.00000003446,
+      "error": null,
+      "request_id": "3c433136-8118-4f61-b7b4-3cad12a81c35"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11364,
+        "output_tokens": 296,
+        "reasoning_tokens": 64,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10069
+      },
+      "duration_ms": 16172.00000002049,
+      "error": null,
+      "request_id": "de192436-5c79-47a5-bb02-e6640de71e44"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13247,
+        "output_tokens": 398,
+        "reasoning_tokens": 75,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 11952
+      },
+      "duration_ms": 15344.000000040978,
+      "error": null,
+      "request_id": "fe801bfa-a0cf-4721-b881-d8ddebb35b5f"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10892,
+        "output_tokens": 188,
+        "reasoning_tokens": 36,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9597
+      },
+      "duration_ms": 14109.99999998603,
+      "error": null,
+      "request_id": "b051f74d-28cf-4b9f-895b-ace785867029"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11730,
+        "output_tokens": 377,
+        "reasoning_tokens": 77,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10435
+      },
+      "duration_ms": 18187.00000003446,
+      "error": null,
+      "request_id": "230061c5-ef9e-49c6-a230-d3ab74ee2d16"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13911,
+        "output_tokens": 1022,
+        "reasoning_tokens": 121,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12616
+      },
+      "duration_ms": 25250.0,
+      "error": null,
+      "request_id": "528a3b28-d674-4ddb-8d00-a426f52633e6"
+    },
+    {
+      "mode": "live",
+      "phase": "plan",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 7218,
+        "output_tokens": 77,
+        "reasoning_tokens": 44,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 5923
+      },
+      "duration_ms": 15420.999999972992,
+      "error": null,
+      "request_id": "88c57e93-c4dd-4632-b982-a79f9bb76ed7"
+    },
+    {
+      "mode": "live",
+      "phase": "critic-0",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11204,
+        "output_tokens": 1277,
+        "reasoning_tokens": 247,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9909
+      },
+      "duration_ms": 30781.000000075437,
+      "error": null,
+      "request_id": "2944fc08-05e9-40ab-aa0b-ebb733a5decc"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11390,
+        "output_tokens": 280,
+        "reasoning_tokens": 48,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10095
+      },
+      "duration_ms": 14170.999999972992,
+      "error": null,
+      "request_id": "07a12ae4-73a5-4a47-ae77-0d05df792114"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13943,
+        "output_tokens": 398,
+        "reasoning_tokens": 50,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12648
+      },
+      "duration_ms": 17234.99999998603,
+      "error": null,
+      "request_id": "e7143729-947e-4076-a3bf-55256cc47f52"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11745,
+        "output_tokens": 557,
+        "reasoning_tokens": 106,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10450
+      },
+      "duration_ms": 18937.99999996554,
+      "error": null,
+      "request_id": "281e86cd-8d6b-4364-9159-e22bf1bc7c47"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10914,
+        "output_tokens": 189,
+        "reasoning_tokens": 39,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9619
+      },
+      "duration_ms": 15562.999999965541,
+      "error": null,
+      "request_id": "ea069316-1b03-42f5-aa5b-732409018cc7"
+    },
+    {
+      "mode": "live",
+      "phase": "answer",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13907,
+        "output_tokens": 1055,
+        "reasoning_tokens": 111,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12612
+      },
+      "duration_ms": 38108.99999993853,
+      "error": null,
+      "request_id": "d5c2469e-e4cf-4cd4-8da5-96aef27c5234"
+    },
+    {
+      "mode": "live",
+      "phase": "plan",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 7320,
+        "output_tokens": 112,
+        "reasoning_tokens": 26,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 6025
+      },
+      "duration_ms": 11343.999999924563,
+      "error": null,
+      "request_id": "788f0f0a-1b99-4798-a53e-30f1583a307b"
+    },
+    {
+      "mode": "live",
+      "phase": "critic-0",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11255,
+        "output_tokens": 1434,
+        "reasoning_tokens": 491,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9960
+      },
+      "duration_ms": 37187.99999996554,
+      "error": null,
+      "request_id": "7e3515db-3433-4db2-ba84-82542dc688e3"
+    }
+  ]
+}

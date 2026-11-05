@@ -1,0 +1,3071 @@
+{
+  "created_at": "2026-11-05T12:18:01.614710+00:00",
+  "suite": "agents",
+  "mode": "scripted",
+  "agents": {
+    "passed": true,
+    "mode": "scripted",
+    "source_version": "pressure-v3",
+    "live_model_evidence": false,
+    "requested_model": null,
+    "observed_models": [],
+    "observed_cli_versions": [],
+    "qualification_tenant_id": "qualification-f1e3304152a1",
+    "population": "three questions x 3 repetitions x 4 pinned snapshots",
+    "questions": [
+      "Leak or faulty sensors?",
+      "Where should we inspect, and why?",
+      "What evidence supports this, and what remains unknown?"
+    ],
+    "investigation_protocol": "bounded-history-v1",
+    "generation_model_call_ceiling": 100,
+    "cohort_maximum_model_calls": 400,
+    "answer_count": 36,
+    "provider_blocked": null,
+    "results": [
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "c0eadb0b-b666-51a3-8ec3-8781947db43e",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 5.391,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 7,
+        "tool_calls": 15,
+        "specialist_model_calls": 5,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 47.0000000204891,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "72e1eac3-e8df-5470-8042-4aafd1e8fcc1",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.391,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "f69e4fa1-3abd-5b98-b5d3-05e7904eaaf8",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.218,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "6e9cfd41-ea99-5258-8fc6-1a5f1c5ee731",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.125,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "b16737ab-4a80-56b8-96f9-7e89fe0b20f8",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.329,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "cbc4fde9-539c-532e-85f8-fa7b7c3f4640",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.218,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "9743f6e2-9d0e-5515-9c1e-8691db626edb",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.203,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "3d6220bb-0f36-590f-bb06-1617f76c1038",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.125,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "4fb29e9f-b178-57ff-836b-25a8829e96e8",
+        "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.157,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029",
+          "claim-030",
+          "claim-031",
+          "claim-032"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "e6a35c91e6e1470180db10754572e1ec"
+          ],
+          "next_action": "inspect_supported_interval"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "fe41458b-4504-54df-bb2c-a04c195d718b",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 4.156,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 7,
+        "tool_calls": 14,
+        "specialist_model_calls": 5,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "1fcf6310-117b-5580-930f-174ffee7a7c4",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.359,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "0ff3854e-1d8c-576a-bc5c-ead741497fe2",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.11,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "4330d5cf-5f89-5ca7-9b14-1b8222a9260d",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.172,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "2b87c232-18dc-537a-8d20-506f252f581c",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.218,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "e9faed5c-f7c8-5463-a41d-753d53bee271",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.282,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "29da08ab-11d1-57eb-bee9-29066d174401",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.171,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "206cdc7f-4814-5d03-a580-27540070f30a",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.391,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "8bf1362c-1801-5c68-9c93-ab48555927fa",
+        "snapshot_id": "window-a59d230a84dbeb33cf6723e732b381fe9c5ae599b3282343fc60d2eafd5513a8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.531,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "instrumentation_context",
+          "document_ids": [
+            "MAINT-LINK-P3-001",
+            "MAINT-CAL-P1-002"
+          ],
+          "rejected_document_ids": [
+            "MAINT-CAL-P1-DRAFT"
+          ],
+          "comparison_call_ids": [
+            "3c1de09af6c947aebda12749a15e2500"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "8c306cc7-5299-5433-95a0-4810e8fd5f97",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 3.813,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 7,
+        "tool_calls": 14,
+        "specialist_model_calls": 5,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "a201fca1-bded-57a8-822c-74dc4068975b",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.125,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "428af7a0-98cd-5303-a0c1-7fb5b3f9841b",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.328,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "8bf320be-9f8d-522e-b3ec-c7126c9ba880",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.297,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "b7575697-5e4b-5404-ace2-90b3f52035b4",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.219,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "3a8b5f4e-fae6-5786-b90f-ad4881bc6ca5",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.203,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "18b1b498-6592-5510-8fe6-d2176b986f4d",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.109,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "0da7b462-b3db-53fe-9170-5180032f88fe",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.219,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "0fc27d72-98e4-5ea1-bbf7-50217985df7f",
+        "snapshot_id": "window-f02ba678e72984d459d70420fde94fbddcd5fe678ca8a136629c17c14d563112",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.141,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "operating_change_plausible",
+          "document_ids": [
+            "OP-VALVE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [
+            "INC-TRANSIENT-001"
+          ],
+          "comparison_call_ids": [
+            "9fbd12855f5745d1bc2aa3e49685b732"
+          ],
+          "next_action": "check_operating_records"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "0c55ec8e-9f3c-5a1a-9cd7-0491c8d701b4",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 3.312,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 7,
+        "tool_calls": 14,
+        "specialist_model_calls": 5,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "c621e27c-706e-5803-9e23-b4526ea425c4",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.032,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "3dcd55fd-d860-5b81-9712-63cc994db257",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.218,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 140.99999994505197,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "530739fd-bb4c-53df-b6c3-59d7018e1968",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.079,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "b70157b5-ba13-5799-86e6-d429829c37e5",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.093,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "a771d51b-594e-5831-95eb-ffa5f5a81d66",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.11,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "5cfcff8e-e703-5c30-8e57-3eba92a96f2e",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.093,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "c7b40cc7-d03e-50d2-b4a6-0a341bcb1510",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.157,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "17f3abae-59d0-5d05-a2a6-19f8c76bcdad",
+        "snapshot_id": "window-f9e321c728eed30c7aab92b4cc6fe36e4003db5fddb6f534a7c9f2fe650b0c7a",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.218,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-008",
+          "claim-009",
+          "claim-024",
+          "claim-026",
+          "claim-027",
+          "claim-028",
+          "claim-029"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "WO-TELEMETRY-001",
+            "LOG-COVERAGE-001",
+            "PROC-INSPECT-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "05d537e49d4f470f855d91a4b75e7cfa"
+          ],
+          "next_action": "restore_telemetry"
+        },
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": "scripted",
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ]
+      }
+    ],
+    "observability": {
+      "status": "ok",
+      "destinations": {
+        "langfuse": {
+          "status": "accepted",
+          "endpoint": "http://127.0.0.1:3001/api/public/otel/v1/traces",
+          "processor": "batch",
+          "queue_capacity": 256,
+          "batch_capacity": 64,
+          "accepted_batches": 57,
+          "failed_batches": 0,
+          "exporter_accepted": true,
+          "enqueued_spans": 380,
+          "completed_spans": 380,
+          "pending_spans": 0
+        },
+        "jaeger": {
+          "status": "accepted",
+          "endpoint": "http://127.0.0.1:4319/v1/traces",
+          "processor": "batch",
+          "queue_capacity": 256,
+          "batch_capacity": 64,
+          "accepted_batches": 56,
+          "failed_batches": 0,
+          "exporter_accepted": true,
+          "enqueued_spans": 380,
+          "completed_spans": 380,
+          "pending_spans": 0
+        }
+      },
+      "content_capture": false,
+      "synchronous_export": false,
+      "local_audit": "available",
+      "stored_trace_visibility": "verified",
+      "storage_verification_api": "langfuse_observations_v2",
+      "verified_trace_count": 1,
+      "verified_observation_tree_count": 1,
+      "closed": false,
+      "flush_failed": false,
+      "flush_diagnostic": {
+        "status": "completed",
+        "error_type": null
+      }
+    },
+    "single_agent_comparison": {
+      "task_id": "baseline-90626a74356f47979de1336108f5a6d9",
+      "snapshot_id": "window-d7bd254470c062ddb9bf1304dde240630d321187f8648dda50dad8d7c9bb63c2",
+      "mode": "scripted",
+      "population": "single model task with governed numerical tools",
+      "state": "SUCCEEDED",
+      "check_accepted": true,
+      "model_calls": 1,
+      "tool_calls": 4,
+      "child_count": 0,
+      "elapsed_seconds": 0.5469999999040738,
+      "hypothesis": "suspected_leak",
+      "claim_refs": [
+        "claim-025",
+        "claim-027",
+        "claim-028",
+        "claim-029",
+        "claim-030",
+        "claim-031",
+        "claim-032",
+        "claim-026",
+        "claim-024",
+        "claim-000",
+        "claim-001",
+        "claim-002",
+        "claim-003",
+        "claim-004",
+        "claim-005",
+        "claim-006",
+        "claim-022"
+      ],
+      "outcome": "supported",
+      "error_code": null,
+      "live_model_evidence": false
+    },
+    "stored_trace_tree_verified": true,
+    "verified_trace_ids": [
+      "2547e5daac9f7ef2d5e59925051ba15d"
+    ],
+    "monetary_inference_cost": null,
+    "limitation": "Synthetic-only cohort; scripted runs are not live-model evidence. Single-agent comparison is the numerical-only legacy policy, not same-history evidence."
+  },
+  "passed": true
+}

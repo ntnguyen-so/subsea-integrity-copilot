@@ -1,0 +1,110 @@
+{
+  "created_at": "2026-11-05T08:55:52.205388+00:00",
+  "suite": "diagnostics",
+  "mode": "scripted",
+  "diagnostics": {
+    "source_version": "pressure-v2",
+    "method": "Frozen lightweight median/MAD; one mature [120,180) window per run",
+    "seeds": [
+      91000,
+      91001,
+      91002,
+      91003,
+      91004,
+      91005,
+      91006,
+      91007,
+      91008,
+      91009,
+      91010,
+      91011,
+      91012,
+      91013,
+      91014,
+      91015,
+      91016,
+      91017,
+      91018,
+      91019
+    ],
+    "runs_per_scenario": 20,
+    "confusion_by_scenario": {
+      "S1": {
+        "suspected_leak": 20
+      },
+      "S2": {
+        "sensor_or_telemetry_issue": 20
+      },
+      "S3": {
+        "insufficient_evidence": 20
+      },
+      "S4": {
+        "insufficient_evidence": 20
+      },
+      "S5": {
+        "insufficient_evidence": 20
+      },
+      "S6": {
+        "no_event": 20
+      }
+    },
+    "per_sensor_alert_baseline": {
+      "S1": {
+        "anomaly_alert": 20
+      },
+      "S2": {
+        "anomaly_alert": 20
+      },
+      "S3": {
+        "no_alert": 20
+      },
+      "S4": {
+        "anomaly_alert": 20
+      },
+      "S5": {
+        "anomaly_alert": 20
+      },
+      "S6": {
+        "no_alert": 20
+      }
+    },
+    "leak_precision": 1.0,
+    "detectable_leak_recall": 1.0,
+    "inspection_intervals": {
+      "located": 20,
+      "denominator": 20,
+      "truth_contained": 20,
+      "median_width_m": 400.0,
+      "abstentions": 0,
+      "meaning": "Recommended search areas, not predicted exact source points"
+    },
+    "fault_attribution": {
+      "true_positive": 160,
+      "false_positive": 3,
+      "false_negative": 0,
+      "precision": 0.9815950920245399,
+      "recall": 1.0
+    },
+    "timing": {
+      "window_compute_p95_seconds": 0.16365969997132196,
+      "total_seconds": 51.22393709991593
+    },
+    "limitations": [
+      "Synthetic pressure footprints, not a validated gas transient model",
+      "No live valve/compressor or customer detector connector",
+      "Interval containment is not calibrated confidence or field localization accuracy",
+      "Recall excludes S5's deliberately unobservable leak; its abstentions are reported",
+      "Mature-window compute time is not onset-to-operator latency"
+    ],
+    "gates": {
+      "all_scenarios_match_expected_investigation": true,
+      "no_non_leak_false_leak_conclusions": true,
+      "detectable_leak_recall_at_least_90_percent": true,
+      "inspection_interval_contains_true_section_at_least_90_percent": true,
+      "operating_change_not_called_localized_leak": true,
+      "poor_coverage_abstains": true
+    },
+    "passed": true
+  },
+  "passed": true
+}

@@ -1,0 +1,1065 @@
+{
+  "passed": true,
+  "mode": "live",
+  "replay_id": "handoff-10389874cddb4dcd9edf1630b99eed06",
+  "fixture": "Mature synthetic S4 seeded to isolate question/follow-up costs; no automatic roots.",
+  "limitations": [
+    "Source membership and UI behavior checked; prose entailment still needs engineer review."
+  ],
+  "handoffs": [
+    {
+      "schema_version": "investigation-v1",
+      "task_id": "8cfcd675-ff5d-5bb1-a6db-79e594756bb8",
+      "generation_id": "handoff-10389874cddb4dcd9edf1630b99eed06",
+      "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+      "question": "Could a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?",
+      "mode": "live",
+      "state": "ABSTAINED",
+      "window_start": "2026-01-01T00:02:00+00:00",
+      "window_end": "2026-01-01T00:03:00+00:00",
+      "input_hash": "4826228727e5047e97b330ee414f5f153ccd0cf21c661bdf7d1697df92ce8e76",
+      "pack_version": "pressure-pack-v3",
+      "baseline_version": "pressure-median-mad-v2",
+      "parameter_version": "pressure-window-v2",
+      "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+      "disposition": "Resolve evidence gaps; location withheld",
+      "hypothesis": null,
+      "inspection": null,
+      "next_action": "Ask the operator to verify operating records.",
+      "interpretation": {
+        "focus": "root_cause",
+        "answer": {
+          "text": "Yes, a valve change is plausible, but not established as the root cause. The reviewed log records an acknowledged upstream setpoint reduction affecting P1, P2 and P3; the comparison shows pressure decreases across distinct gateways. Before accepting causation, verify actual valve response, pressure-onset timing and hydraulic scope, and check for localized residual behavior or telemetry effects. The log records a command, not measured tap response, and the comparison establishes association only. See the checked numerical section.",
+          "references": [
+            "OP-VALVE-001",
+            "subsea_65399a66ba6a415f8e8c9f9b8c14a9a0",
+            "PROC-INSPECT-001"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "The logged setpoint reduction and broad before/after pressure decreases support an operating-change explanation. Acceptance still requires verification that the valve actually responded and that measured timing and spatial behavior match the operation; acknowledgement and association do not establish causation or exclude another condition.",
+            "references": [
+              "OP-VALVE-001",
+              "subsea_65399a66ba6a415f8e8c9f9b8c14a9a0"
+            ],
+            "cause": "operating_change",
+            "stance": "possible"
+          },
+          {
+            "text": "A leak is not established by the pressure pattern. The operating log explicitly leaves coincident localized behavior unresolved. Verification should distinguish a broad operating response from persistent localized departures supported by distinct stations and gateways; the accepted diagnosis withheld a location.",
+            "references": [
+              "OP-VALVE-001",
+              "PROC-INSPECT-001",
+              "claim-027"
+            ],
+            "cause": "leak",
+            "stance": "not_established"
+          },
+          {
+            "text": "The reviewed health claims show no flagged drift or peer disagreement, and the historical comparison spans distinct gateways, which weighs against a single-gateway artifact. However, health review was partial and missing observations remain unknown. Shared-gateway agreement alone cannot exclude instrumentation or telemetry effects.",
+            "references": [
+              "claim-000",
+              "claim-002",
+              "subsea_65399a66ba6a415f8e8c9f9b8c14a9a0",
+              "PROC-INSPECT-001"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "What evidence verifies actual valve response beyond the logged command and acknowledgement?",
+          "Do measured pressure-onset timing and affected segments match the logged change across distinct gateways?",
+          "After accounting for the operating change, do localized pressure departures persist, and are missing observations or telemetry effects unresolved?"
+        ]
+      },
+      "checked_claims": [
+        {
+          "id": "claim-000",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.018743548583373,
+            "sensor_id": "P1-ST1-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-001"
+          ]
+        },
+        {
+          "id": "claim-001",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.48037239041456,
+            "sensor_id": "P1-ST1-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-003"
+          ]
+        },
+        {
+          "id": "claim-002",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 59,
+            "channel": "pressure",
+            "missing": 1,
+            "expected": 60,
+            "received": 60,
+            "max_score": 18.52849009207491,
+            "sensor_id": "P1-ST2-A",
+            "spike_count": 0,
+            "anomaly_count": 59,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 59
+          },
+          "evidence_ids": [
+            "ev-005"
+          ]
+        },
+        {
+          "id": "claim-003",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.279451102032198,
+            "sensor_id": "P1-ST2-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-007"
+          ]
+        },
+        {
+          "id": "claim-004",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 18.985041491110483,
+            "sensor_id": "P1-ST3-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-009"
+          ]
+        },
+        {
+          "id": "claim-005",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.067153529470616,
+            "sensor_id": "P1-ST3-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-011"
+          ]
+        },
+        {
+          "id": "claim-006",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.693392529237542,
+            "sensor_id": "P1-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-013"
+          ]
+        },
+        {
+          "id": "claim-007",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.248204767700173,
+            "sensor_id": "P1-ST4-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-015"
+          ]
+        },
+        {
+          "id": "claim-024",
+          "kind": "coverage",
+          "value": {
+            "unit": "fraction",
+            "coverage": 0.9972222222222222,
+            "usable_samples": 1436,
+            "expected_samples": 1440,
+            "received_samples": 1440,
+            "failure_domains_available": 6
+          },
+          "evidence_ids": [
+            "ev-049"
+          ]
+        },
+        {
+          "id": "claim-026",
+          "kind": "limitation",
+          "value": {
+            "code": "SYNTHETIC_UNCALIBRATED"
+          },
+          "evidence_ids": [
+            "ev-051"
+          ]
+        },
+        {
+          "id": "claim-027",
+          "kind": "limitation",
+          "value": {
+            "code": "PRESSURE_PATTERNS_NOT_PROOF"
+          },
+          "evidence_ids": [
+            "ev-052"
+          ]
+        },
+        {
+          "id": "claim-028",
+          "kind": "limitation",
+          "value": {
+            "code": "OPERATING_CONTEXT_REQUIRED"
+          },
+          "evidence_ids": [
+            "ev-053"
+          ]
+        },
+        {
+          "id": "claim-029",
+          "kind": "limitation",
+          "value": {
+            "code": "COMMON_MODE_PRESSURE_CHANGE"
+          },
+          "evidence_ids": [
+            "ev-054"
+          ]
+        }
+      ],
+      "limitations": [
+        "SYNTHETIC_UNCALIBRATED",
+        "PRESSURE_PATTERNS_NOT_PROOF",
+        "OPERATING_CONTEXT_REQUIRED",
+        "COMMON_MODE_PRESSURE_CHANGE",
+        "partial_health_review",
+        "child_abstained",
+        "location_withheld"
+      ],
+      "sources": [
+        {
+          "document": {
+            "id": "PROC-OPS-001",
+            "body": "Fictional, nonconfidential desk-review index. Explicit operation-history reference: OP-VALVE-001, upstream valve pressure-setpoint change at synthetic second 90. The event entry contains execution timing and affected segments. The associated historical comparison is INC-TRANSIENT-001. A logged operation can motivate comparison of actual pressure histories on P1, P2 and P3 across gateway-P1-0/1, gateway-P2-0/1 and gateway-P3-0/1; this index contains no measured current response and cannot settle whether another condition coexists.",
+            "type": "procedure",
+            "title": "Pressure-setpoint change review index",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2026-01-01T00:02:00Z",
+            "available_at": "2026-01-01T00:02:10Z",
+            "content_hash": "e32ba48e4add1d36e402895198e729f5e5b9ec03b0c43dce0a41d24247776706",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:02:00Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "OP-VALVE-001",
+            "body": "Fictional, nonconfidential executed operating log. At 2026-01-01T00:01:30Z (synthetic second 90), the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar. Execution was acknowledged at second 100 and the log became available at second 110. Hydraulic scope is Trunk P1 and downstream Branch A P2 and Branch B P3, all four stations on each segment. This entry records a commanded change, not measured pressure at the taps. Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded.",
+            "type": "operation",
+            "title": "Executed upstream valve pressure-setpoint change at second 90",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2026-01-01T00:01:40Z",
+            "available_at": "2026-01-01T00:01:50Z",
+            "content_hash": "e7354ee885649f39c1876c925b9c75dbef234e9a92fe15fed7e367da20308e46",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:01:30Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "PROC-INSPECT-001",
+            "body": "Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure taps; ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration. A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded. Operating logs and maintenance history are context, not proof of an integrity condition. Incomplete log coverage cannot establish that no operation occurred. Physical intervention remains subject to operator authorization.",
+            "type": "procedure",
+            "title": "Pressure anomaly desk assessment and bounded inspection planning",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-20T09:00:00Z",
+            "available_at": "2025-12-20T10:00:00Z",
+            "content_hash": "b719ef9ae3af12d68f22a4c42aff12755ef7690bd383606b07562bec59508c12",
+            "effective_to": null,
+            "effective_from": "2025-12-21T00:00:00Z"
+          },
+          "use": "cited"
+        }
+      ],
+      "comparisons": [
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "test_operating_change",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "change_bar": -0.7365,
+              "segment_id": "P1",
+              "after_usable": 90,
+              "before_usable": 60,
+              "after_expected": 90,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 60,
+              "after_median_bar": 79.1585,
+              "invalid_received": 0,
+              "before_median_bar": 79.8949
+            },
+            {
+              "sensor_id": "P1-ST2-A",
+              "change_bar": -0.7374,
+              "segment_id": "P1",
+              "after_usable": 89,
+              "before_usable": 60,
+              "after_expected": 90,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 60,
+              "after_median_bar": 78.9575,
+              "invalid_received": 1,
+              "before_median_bar": 79.6948
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "change_bar": -0.7376,
+              "segment_id": "P2",
+              "after_usable": 90,
+              "before_usable": 59,
+              "after_expected": 90,
+              "failure_domain": "gateway-P2-0",
+              "before_expected": 60,
+              "after_median_bar": 78.3667,
+              "invalid_received": 1,
+              "before_median_bar": 79.1042
+            },
+            {
+              "sensor_id": "P3-ST2-A",
+              "change_bar": -0.7481,
+              "segment_id": "P3",
+              "after_usable": 90,
+              "before_usable": 60,
+              "after_expected": 90,
+              "failure_domain": "gateway-P3-1",
+              "before_expected": 60,
+              "after_median_bar": 78.152,
+              "invalid_received": 0,
+              "before_median_bar": 78.9001
+            }
+          ],
+          "input_hash": "c405ac44fde9a44a7aa3ffec4b3fc1ae670e47b531b5117ab150cb89b55496ab",
+          "end_seconds": 180,
+          "split_seconds": 90,
+          "start_seconds": 30,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 6,
+          "call_id": "subsea_65399a66ba6a415f8e8c9f9b8c14a9a0"
+        }
+      ],
+      "steps": [
+        {
+          "task_id": "d2eb8d1e-d81a-539d-a8be-ea411ecf268a",
+          "call_id": "subsea_e0121fa28c7e4e0ab861df8e35dc054b",
+          "tool": "history.search",
+          "intent": "test_operating_change",
+          "arguments": {
+            "query": "valve compressor operating change pressure",
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "asset_ids": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 4
+        },
+        {
+          "task_id": "d2eb8d1e-d81a-539d-a8be-ea411ecf268a",
+          "call_id": "subsea_b98f9209530b42fd8d8374dc92891e3f",
+          "tool": "history.read",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+            "document_ids": [
+              "OP-VALVE-001",
+              "PROC-OPS-001",
+              "PROC-INSPECT-001"
+            ],
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 5
+        },
+        {
+          "task_id": "d2eb8d1e-d81a-539d-a8be-ea411ecf268a",
+          "call_id": "subsea_65399a66ba6a415f8e8c9f9b8c14a9a0",
+          "tool": "history.compare",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST2-A",
+              "P2-ST1-A",
+              "P3-ST2-A"
+            ],
+            "end_seconds": 180,
+            "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 90,
+            "start_seconds": 30,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 6
+        }
+      ],
+      "reused_task_ids": [],
+      "fresh_model_calls": 6,
+      "fresh_tool_calls": 14,
+      "recorded_elapsed_seconds": 112.700758,
+      "provider_cost_usd": null,
+      "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+    },
+    {
+      "schema_version": "investigation-v1",
+      "task_id": "13246d8d-5ae7-5f09-bb65-4c0bfa47a873",
+      "generation_id": "handoff-10389874cddb4dcd9edf1630b99eed06",
+      "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+      "question": "What evidence verifies actual valve response beyond the logged command and acknowledgement?",
+      "mode": "live",
+      "state": "ABSTAINED",
+      "window_start": "2026-01-01T00:02:00+00:00",
+      "window_end": "2026-01-01T00:03:00+00:00",
+      "input_hash": "4826228727e5047e97b330ee414f5f153ccd0cf21c661bdf7d1697df92ce8e76",
+      "pack_version": "pressure-pack-v3",
+      "baseline_version": "pressure-median-mad-v2",
+      "parameter_version": "pressure-window-v2",
+      "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+      "disposition": "Resolve evidence gaps; location withheld",
+      "hypothesis": null,
+      "inspection": null,
+      "next_action": "Ask the operator to verify operating records.",
+      "interpretation": {
+        "focus": "evidence_gaps",
+        "answer": {
+          "text": "Beyond the command and acknowledgement, the reviewed comparison shows similar pressure decreases across P1, P2 and P3 on distinct gateways. This supports a hydraulic response consistent with the commanded change, but does not verify actual valve travel or establish causation. No valve-position feedback or actuator-response record was reviewed. The operating log explicitly records a command, not measured tap pressure; the comparison is associative, not a causal test.",
+          "references": [
+            "OP-VALVE-001",
+            "subsea_84c85b1ea5ce40029703417944d03602"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "An operating change is plausible because the broad measured pressure decrease is consistent with the logged setpoint reduction. Actual valve-position feedback and time-aligned actuator records would help distinguish physical valve response from command acknowledgement alone; neither is present in the reviewed material.",
+            "references": [
+              "OP-VALVE-001",
+              "subsea_84c85b1ea5ce40029703417944d03602"
+            ],
+            "cause": "operating_change",
+            "stance": "possible"
+          },
+          {
+            "text": "Instrumentation or telemetry is not established as the explanation. Similar changes across distinct gateways provide stronger corroboration than agreement within a shared gateway, but the health review is partial and the evidence is synthetic and uncalibrated. Independent valve feedback would provide a different measurement of response.",
+            "references": [
+              "subsea_84c85b1ea5ce40029703417944d03602",
+              "PROC-INSPECT-001",
+              "claim-026"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "not_established"
+          },
+          {
+            "text": "A leak is not established by these pressure changes. The operating log explicitly leaves coincident localized behavior unresolved, and the before/after comparison cannot exclude a coexisting condition. Distinct-station and gateway evidence would be needed to assess localized behavior separately from the broad response.",
+            "references": [
+              "OP-VALVE-001",
+              "PROC-INSPECT-001",
+              "subsea_84c85b1ea5ce40029703417944d03602"
+            ],
+            "cause": "leak",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "Is time-aligned measured valve-position feedback available to distinguish actual travel from command acknowledgement?",
+          "Do actuator-response records independently corroborate physical movement during the logged change?",
+          "Do distinct-station and gateway pressure histories show any localized behavior beyond the broad decrease?"
+        ]
+      },
+      "checked_claims": [
+        {
+          "id": "claim-000",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.018743548583373,
+            "sensor_id": "P1-ST1-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-001"
+          ]
+        },
+        {
+          "id": "claim-001",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.48037239041456,
+            "sensor_id": "P1-ST1-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-003"
+          ]
+        },
+        {
+          "id": "claim-002",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 59,
+            "channel": "pressure",
+            "missing": 1,
+            "expected": 60,
+            "received": 60,
+            "max_score": 18.52849009207491,
+            "sensor_id": "P1-ST2-A",
+            "spike_count": 0,
+            "anomaly_count": 59,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 59
+          },
+          "evidence_ids": [
+            "ev-005"
+          ]
+        },
+        {
+          "id": "claim-003",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.279451102032198,
+            "sensor_id": "P1-ST2-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-007"
+          ]
+        },
+        {
+          "id": "claim-004",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 18.985041491110483,
+            "sensor_id": "P1-ST3-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-009"
+          ]
+        },
+        {
+          "id": "claim-005",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.067153529470616,
+            "sensor_id": "P1-ST3-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-011"
+          ]
+        },
+        {
+          "id": "claim-006",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.693392529237542,
+            "sensor_id": "P1-ST4-A",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-013"
+          ]
+        },
+        {
+          "id": "claim-007",
+          "kind": "sensor_health",
+          "value": {
+            "usable": 60,
+            "channel": "pressure",
+            "missing": 0,
+            "expected": 60,
+            "received": 60,
+            "max_score": 20.248204767700173,
+            "sensor_id": "P1-ST4-B",
+            "spike_count": 0,
+            "anomaly_count": 60,
+            "hard_excluded": 0,
+            "drift_suspected": false,
+            "peer_disagreement": false,
+            "persistence_seconds": 60
+          },
+          "evidence_ids": [
+            "ev-015"
+          ]
+        },
+        {
+          "id": "claim-024",
+          "kind": "coverage",
+          "value": {
+            "unit": "fraction",
+            "coverage": 0.9972222222222222,
+            "usable_samples": 1436,
+            "expected_samples": 1440,
+            "received_samples": 1440,
+            "failure_domains_available": 6
+          },
+          "evidence_ids": [
+            "ev-049"
+          ]
+        },
+        {
+          "id": "claim-026",
+          "kind": "limitation",
+          "value": {
+            "code": "SYNTHETIC_UNCALIBRATED"
+          },
+          "evidence_ids": [
+            "ev-051"
+          ]
+        },
+        {
+          "id": "claim-027",
+          "kind": "limitation",
+          "value": {
+            "code": "PRESSURE_PATTERNS_NOT_PROOF"
+          },
+          "evidence_ids": [
+            "ev-052"
+          ]
+        },
+        {
+          "id": "claim-028",
+          "kind": "limitation",
+          "value": {
+            "code": "OPERATING_CONTEXT_REQUIRED"
+          },
+          "evidence_ids": [
+            "ev-053"
+          ]
+        },
+        {
+          "id": "claim-029",
+          "kind": "limitation",
+          "value": {
+            "code": "COMMON_MODE_PRESSURE_CHANGE"
+          },
+          "evidence_ids": [
+            "ev-054"
+          ]
+        }
+      ],
+      "limitations": [
+        "SYNTHETIC_UNCALIBRATED",
+        "PRESSURE_PATTERNS_NOT_PROOF",
+        "OPERATING_CONTEXT_REQUIRED",
+        "COMMON_MODE_PRESSURE_CHANGE",
+        "partial_health_review",
+        "child_abstained",
+        "location_withheld"
+      ],
+      "sources": [
+        {
+          "document": {
+            "id": "PROC-OPS-001",
+            "body": "Fictional, nonconfidential desk-review index. Explicit operation-history reference: OP-VALVE-001, upstream valve pressure-setpoint change at synthetic second 90. The event entry contains execution timing and affected segments. The associated historical comparison is INC-TRANSIENT-001. A logged operation can motivate comparison of actual pressure histories on P1, P2 and P3 across gateway-P1-0/1, gateway-P2-0/1 and gateway-P3-0/1; this index contains no measured current response and cannot settle whether another condition coexists.",
+            "type": "procedure",
+            "title": "Pressure-setpoint change review index",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2026-01-01T00:02:00Z",
+            "available_at": "2026-01-01T00:02:10Z",
+            "content_hash": "e32ba48e4add1d36e402895198e729f5e5b9ec03b0c43dce0a41d24247776706",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:02:00Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "OP-VALVE-001",
+            "body": "Fictional, nonconfidential executed operating log. At 2026-01-01T00:01:30Z (synthetic second 90), the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar. Execution was acknowledged at second 100 and the log became available at second 110. Hydraulic scope is Trunk P1 and downstream Branch A P2 and Branch B P3, all four stations on each segment. This entry records a commanded change, not measured pressure at the taps. Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded.",
+            "type": "operation",
+            "title": "Executed upstream valve pressure-setpoint change at second 90",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2026-01-01T00:01:40Z",
+            "available_at": "2026-01-01T00:01:50Z",
+            "content_hash": "e7354ee885649f39c1876c925b9c75dbef234e9a92fe15fed7e367da20308e46",
+            "effective_to": null,
+            "effective_from": "2026-01-01T00:01:30Z"
+          },
+          "use": "cited"
+        },
+        {
+          "document": {
+            "id": "PROC-INSPECT-001",
+            "body": "Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure taps; ST1/ST3 share gateway-<segment>-0 and ST2/ST4 share gateway-<segment>-1. Agreement within a shared gateway is not independent telemetry corroboration. A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded. Operating logs and maintenance history are context, not proof of an integrity condition. Incomplete log coverage cannot establish that no operation occurred. Physical intervention remains subject to operator authorization.",
+            "type": "procedure",
+            "title": "Pressure anomaly desk assessment and bounded inspection planning",
+            "status": "approved",
+            "revision": 1,
+            "asset_ids": [
+              "northsea",
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "admissible": true,
+            "supersedes": null,
+            "authored_at": "2025-12-20T09:00:00Z",
+            "available_at": "2025-12-20T10:00:00Z",
+            "content_hash": "b719ef9ae3af12d68f22a4c42aff12755ef7690bd383606b07562bec59508c12",
+            "effective_to": null,
+            "effective_from": "2025-12-21T00:00:00Z"
+          },
+          "use": "cited"
+        }
+      ],
+      "comparisons": [
+        {
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+          "intent": "test_operating_change",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "change_bar": -0.7338,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 60,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-0",
+              "before_expected": 60,
+              "after_median_bar": 79.1612,
+              "invalid_received": 0,
+              "before_median_bar": 79.8949
+            },
+            {
+              "sensor_id": "P1-ST2-A",
+              "change_bar": -0.7366,
+              "segment_id": "P1",
+              "after_usable": 60,
+              "before_usable": 60,
+              "after_expected": 60,
+              "failure_domain": "gateway-P1-1",
+              "before_expected": 60,
+              "after_median_bar": 78.9583,
+              "invalid_received": 0,
+              "before_median_bar": 79.6948
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "change_bar": -0.7393,
+              "segment_id": "P2",
+              "after_usable": 60,
+              "before_usable": 59,
+              "after_expected": 60,
+              "failure_domain": "gateway-P2-0",
+              "before_expected": 60,
+              "after_median_bar": 78.3649,
+              "invalid_received": 1,
+              "before_median_bar": 79.1042
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "change_bar": -0.7405,
+              "segment_id": "P3",
+              "after_usable": 59,
+              "before_usable": 60,
+              "after_expected": 60,
+              "failure_domain": "gateway-P3-0",
+              "before_expected": 60,
+              "after_median_bar": 78.362,
+              "invalid_received": 1,
+              "before_median_bar": 79.1026
+            }
+          ],
+          "input_hash": "1a6234b7f8365616d430965e4057eb24e0070ad789bbd79442bce0498190d2ad",
+          "end_seconds": 150,
+          "split_seconds": 90,
+          "start_seconds": 30,
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "investigation_step": 6,
+          "call_id": "subsea_84c85b1ea5ce40029703417944d03602"
+        }
+      ],
+      "steps": [
+        {
+          "task_id": "0871dd69-00b2-56ee-a763-72e493df0d5c",
+          "call_id": "subsea_21f928ad00bf43b49638281683b45a00",
+          "tool": "history.search",
+          "intent": "test_operating_change",
+          "arguments": {
+            "query": "valve position feedback stroke response operating log",
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "asset_ids": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 4
+        },
+        {
+          "task_id": "0871dd69-00b2-56ee-a763-72e493df0d5c",
+          "call_id": "subsea_aaf93fcf498e4ef499b9bee782535310",
+          "tool": "history.read",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+            "document_ids": [
+              "OP-VALVE-001",
+              "PROC-OPS-001",
+              "PROC-INSPECT-001"
+            ],
+            "pack_version": "pressure-pack-v3",
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 5
+        },
+        {
+          "task_id": "0871dd69-00b2-56ee-a763-72e493df0d5c",
+          "call_id": "subsea_84c85b1ea5ce40029703417944d03602",
+          "tool": "history.compare",
+          "intent": "test_operating_change",
+          "arguments": {
+            "intent": "test_operating_change",
+            "site_id": "northsea",
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST2-A",
+              "P2-ST1-A",
+              "P3-ST1-A"
+            ],
+            "end_seconds": 150,
+            "snapshot_id": "window-b4ad0091c4cdb5be6b935549f975272ea9c740a57b7fae0110b6682268044037",
+            "pack_version": "pressure-pack-v3",
+            "split_seconds": 90,
+            "start_seconds": 30,
+            "baseline_version": "pressure-median-mad-v2",
+            "parameter_version": "pressure-window-v2"
+          },
+          "error": null,
+          "sequence": 6
+        }
+      ],
+      "reused_task_ids": [],
+      "fresh_model_calls": 7,
+      "fresh_tool_calls": 14,
+      "recorded_elapsed_seconds": 129.779118,
+      "provider_cost_usd": null,
+      "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+    }
+  ]
+}

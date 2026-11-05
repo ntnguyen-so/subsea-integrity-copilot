@@ -1,0 +1,171 @@
+{
+  "mode": "live",
+  "response_protocol": "engineer-v1",
+  "passed": false,
+  "results": [
+    {
+      "scenario": "S4",
+      "question": "Could a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?",
+      "root_id": "9420a6e2-4d10-5dd8-8cd4-f6f22ba5fff8",
+      "snapshot_id": "window-44f5b902c3d4917a56f3146e3ca6d45cdda05e88135b3c1d6941e5db45228d8b",
+      "state": "FAILED",
+      "error_code": "interpretation_questions",
+      "accepted": false,
+      "interpretation": null,
+      "answer": null,
+      "elapsed_seconds": 161.03099999995902,
+      "model_receipts": [
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 13114,
+            "output_tokens": 955,
+            "reasoning_tokens": 89,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 11819
+          },
+          "duration_ms": 26530.99999995902,
+          "error": null,
+          "request_id": "b9a5112d-79ed-4494-b97a-91914e221e29"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 6533,
+            "output_tokens": 49,
+            "reasoning_tokens": 16,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 5238
+          },
+          "duration_ms": 11937.000000034459,
+          "error": null,
+          "request_id": "34ba6189-9bfd-4d97-b5c5-2a7ea80e8c08"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 15166,
+            "output_tokens": 973,
+            "reasoning_tokens": 65,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 13871
+          },
+          "duration_ms": 25655.99999995902,
+          "error": null,
+          "request_id": "a3eeec84-7f3f-46f7-94bc-53f6e1535736"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 11159,
+            "output_tokens": 231,
+            "reasoning_tokens": 36,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 9864
+          },
+          "duration_ms": 15782.00000000652,
+          "error": null,
+          "request_id": "a5b67dfa-ae2f-4331-a62f-6798380734cc"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 10548,
+            "output_tokens": 172,
+            "reasoning_tokens": 17,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 9253
+          },
+          "duration_ms": 13437.999999965541,
+          "error": null,
+          "request_id": "281875b6-b2fd-4fbc-a666-9c0335a985c9"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 15232,
+            "output_tokens": 512,
+            "reasoning_tokens": 221,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 13937
+          },
+          "duration_ms": 20844.00000004098,
+          "error": null,
+          "request_id": "6242819d-6f90-4a75-86d7-eea9d43ffd2d"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 13747,
+            "output_tokens": 435,
+            "reasoning_tokens": 135,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 12452
+          },
+          "duration_ms": 20734.000000054948,
+          "error": null,
+          "request_id": "f16e66ad-346e-4123-8506-76981df7bf21"
+        },
+        {
+          "mode": "live",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 11903,
+            "output_tokens": 408,
+            "reasoning_tokens": 86,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 10608
+          },
+          "duration_ms": 21375.0,
+          "error": null,
+          "request_id": "70090370-c87c-4d66-9ff8-9bb7d89d82e6"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "SCRIPTED is an offline contract example, not genuine interpretation.",
+    "Citation membership is checked, not semantic entailment.",
+    "Model-written RCA context requires engineer review and is not a confirmed cause.",
+    "These questions demonstrate functionality, not effort savings or superiority."
+  ]
+}

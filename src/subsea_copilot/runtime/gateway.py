@@ -89,6 +89,10 @@ class ToolGateway:
 
     def _read(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         snapshot = self.snapshot
+        if name.startswith("history."):
+            from subsea_copilot.history import read_history
+
+            return read_history(self.store, self.task, snapshot, name, arguments)
         ledger = {
             k: c.model_dump(mode="json")
             for k, c in snapshot.claims.items()
@@ -125,7 +129,13 @@ class ToolGateway:
             findings = sorted(
                 snapshot.quality.findings,
                 key=lambda f: (
-                    not bool(f.hard_excluded or f.spike_count or f.drift_suspected),
+                    not bool(
+                        f.hard_excluded
+                        or f.spike_count
+                        or f.drift_suspected
+                        or f.peer_disagreement
+                        or f.missing > f.expected * 0.1
+                    ),
                     f.sensor_id,
                     f.channel,
                 ),
@@ -226,11 +236,31 @@ class ToolGateway:
                 self.store.tool_receipts(child.id),
                 gateway.dependencies(),
             )
+            reviewed_context = None
+            review = child.result.investigation
+            if self.task.response_protocol in {"engineer-v1", "engineer-v2"} and review is not None:
+                reads = self.store.tool_receipts(child.id)
+                reviewed_context = {
+                    "documents": [
+                        document
+                        for receipt in reads
+                        if receipt["name"] == "history.read" and not receipt.get("error")
+                        for document in (receipt.get("result") or {}).get("documents", [])
+                        if document["id"] in review.document_ids
+                    ],
+                    "comparisons": [
+                        {"call_id": receipt["call_id"], **receipt["result"]}
+                        for receipt in reads
+                        if receipt["call_id"] in review.comparison_call_ids
+                        and not receipt.get("error")
+                    ],
+                }
             return {
                 "task_id": child.id,
                 "role": child.role,
                 "state": child.state,
                 "result": child.result.model_dump(mode="json"),
+                "reviewed_context": reviewed_context,
             }
         raise ValidationError("tool_authority", "Unknown read.")
 
@@ -257,6 +287,9 @@ class ToolGateway:
         ):
             try:
                 result = self._read(name, arguments)
+                if name.startswith("history."):
+                    result["investigation_step"] = self.task.tool_calls
+                    result["intent"] = arguments["intent"]
                 if len(json.dumps(result, allow_nan=False).encode()) > 12 * 1024:
                     raise ValidationError("payload_too_large", "Required evidence exceeds 12 KiB.")
             except ValidationError as exc:

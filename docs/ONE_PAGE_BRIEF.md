@@ -1,66 +1,124 @@
-# Subsea Integrity Copilot - Customer Brief
+# Subsea Integrity Copilot - Review Brief
 
-**Customer, problem and users.** NorthSea Integrity Operations is a fictional
-offshore oil-and-gas operator; this demo focuses on its gas pipelines.
-Monitoring, integrity and instrumentation engineers must distinguish a possible
-leak from sensor faults or shared telemetry outages, then choose what to inspect.
-The agent is a read-only evidence layer over existing monitoring workflows,
-not a replacement dashboard or safety system.
+**Customer and problem.** NorthSea Integrity Operations is a fictional offshore
+gas operator that needs to monitor a long subsea pipeline network. A leak could
+release gas into the environment and interrupt operations, so warning signs must
+be investigated promptly. To support this, many sensors distributed along the
+pipelines continuously stream pressure readings, and existing ML algorithms flag
+unusual changes.
 
-![Synthetic Y-shaped pipeline network: three 800m segments, four sensor pairs per segment, 24 nodes.](assets/pipeline-topology.svg)
+The difficulty is that the monitoring equipment can also malfunction. A faulty
+sensor may produce sudden spikes, stop reporting measurements or gradually drift
+away from its expected readings even when the pipeline is healthy. Engineers
+therefore need to assess the quality of the measurements while investigating a
+possible leak. Rather than judging each alert in isolation, they must compare
+the timing and location of anomalies across several sensors and relate those
+patterns to the pipeline layout.
 
-**Why I chose this problem.** It builds on my PhD research in marine sensor
-data quality and anomaly detection. The practical question is whether unusual
-readings point to a real pipeline problem or faulty sensors. This is a useful
-FDE case because engineers need evidence they can check before deciding what to
-inspect, not just another alarm or chatbot answer. Leak localization is a
-simplified demo extension, not a capability validated by my thesis.
+The diagram illustrates this reasoning. On the left, several nearby sensors show
+related pressure drops within the same monitoring window. This spatial and
+temporal agreement supports a possible leak investigation and helps narrow the
+section that may need inspection. By contrast, the scattered spikes, missing
+readings and drift on the right suggest individual sensor faults rather than one
+localized pipeline event. Neither pattern is conclusive: operating changes can
+affect several sensors, and shared communication or equipment failures can also
+produce related anomalies.
 
-**Why the prospect has not signed.** Their existing dashboard is cheaper, and
-errors have two costly sides. False alarms can trigger unnecessary offshore
-personnel, vessel or ROV mobilization and operational disruption. Missed releases
-risk environmental harm; oil-line spills also bring cleanup and liability.
-Serious regulatory violations can put licences at risk, including potential
-revocation under applicable law. They need evidence that AI reduces investigation
-effort without increasing missed-event risk, integration burden or data exposure.
+Today, this investigation depends on a few experienced engineers who combine
+sensor histories, pipeline layout and operational knowledge. Their expertise is
+difficult to obtain, translate into software and pass to newcomers. At scale,
+manual analysis takes time and important warnings may be overlooked among
+sensor-related alerts. The proposed solution makes documented expert knowledge
+reusable in agent-assisted investigation: distinguish sensor faults from possible
+leaks, narrow down where to inspect and explain the evidence to less-experienced
+engineers. Initial numerical warnings do not wait for an AI report. It builds on
+existing detectors; humans retain safety authority.
 
-**Business stakeholder: Head of Subsea Operations, budget owner.** Cares about
-inspection cost, delivery time, adoption, environmental exposure and accountability.
-Main objections: "Will fewer alarms conceal real leaks?", "What value can four
-weeks demonstrate?" and "Who owns a wrong recommendation?" The ask is a bounded
-shadow pilot alongside existing safety procedures, not autonomous intervention.
+![Pressure-monitoring illustration generated from the demo's topology and observations: nearby related anomalies support a leak investigation, while scattered spikes, gaps or drift suggest sensor faults; existing detectors feed agent-assisted investigation and human review.](assets/pressure-leak-vs-sensor-faults.svg)
 
-**Technical stakeholder: Lead Subsea Integrity & Instrumentation Engineer.**
-Cares about calibration, provenance, stale/incomplete/inconsistent data,
-environmental confounders and reproducible physical assumptions. Main objections:
-"Could these sensors share a failed gateway?", "Could currents or acoustic noise
-explain this?" and "Can I reproduce the location from raw evidence?"
+**Why I chose this problem.** The operator faces two costly mistakes. A missed
+leak can cause environmental harm and regulatory breaches that threaten its
+licence to operate, including possible revocation for serious or repeated
+violations. Conversely, mistaking a sensor fault for a leak can trigger an
+unnecessary offshore inspection involving personnel, vessels or an ROV. My PhD
+studied marine data quality, anomaly detection and the difficulty of translating
+expert knowledge into smart systems. I now want to apply that research in
+practice: make expert investigation knowledge reusable while delivering timely,
+evidence-backed warnings and inspection guidance.
 
-**What the demo demonstrates.** Acoustic, methane and temperature data move through
-60-second windows every five simulated seconds. Inputs include gaps, spikes, mixed
-formats and conflicting duplicates. Three agents answer: possible leak or sensor
-issue? Where should we inspect? What evidence is missing? **Leak example:** the
-recorded S1 window suggests P1 near 375m, between the 300m and 500m stations.
-**Sensor-fault example:** S2 has scattered spikes at P1-ST1-A, P2-ST2-A and
-P3-ST4-A. Numerical tools calculate; agents interpret checked evidence. Raw records,
-pinned answers and execution receipts remain inspectable; insufficient coverage
-means abstention, not an all-clear.
+---
 
-**Assumptions and limitations.** The customer, network and telemetry are synthetic;
-no confidential employer data is used. Methane/acoustic signatures model gas,
-not validated oil-spill detection. Geometry, baselines and failure domains are
-assumed. Acoustic distance-decay fitting provides a
-compatible inspection candidate, not an exact leak position or calibrated confidence
-interval. Synthetic qualification is not field reliability. Missingness does not
-prove a leak or a particular hardware failure. Copilot inference is hosted, not
-local-only; only synthetic evidence is sent. No live historian/platform connector,
-certified detection, shutdown/control or production security certification is
-claimed. Human engineers retain inspection and safety authority.
+**Proposed workflow.** Keep existing detectors. Agents observe the numerical
+evidence, choose read-only searches of incident and maintenance records, and
+select pressure-history comparisons to test competing explanations. They check
+document status and availability at the incident time, then present cited
+evidence, supported inspection areas, contradictions and uncertainty for human
+review. The LLM interprets the engineer's question and explains competing
+root-cause hypotheses in context: what supports them, what conflicts with them,
+and what the engineer should verify next. The review handoff combines this
+explanation with the checked inspection interval or explicit withholding,
+readable sources, measured comparisons and unresolved questions. Engineers can
+draft a follow-up against the same monitoring window and download a versioned
+evidence packet. Its citation-linked explanation is separate from checked
+measurements; the packet is not a confirmed RCA or engineer approval.
+A separate same-model critic reviews every explanation and verification question
+against original sources. One revision is allowed; rejected reports are withheld.
+Exact quotes and review coverage are code-checked, not a guarantee of correctness.
+A logged valve change may make an operating explanation plausible;
+it does not rule out a concurrent leak.
 
-**Proposed next step.** A conditional four-week shadow pilot on one network after
-data/security approval. Compare triage effort and reviewed false alarms against
-existing workflows; separately assess missed-event sensitivity with labeled events
-or validated tests. Track coverage and latency; poor coverage is not a healthy
-pipeline. Agree pricing, savings assumptions and safety/acceptance gates before work.
+**Why agents, not only ML?** Numerical or graph-based methods can correlate
+measurements. The agent's additional role is interpreting engineer questions, deciding which
+historical evidence to investigate and explaining what it changes. A well-designed fixed workflow
+can also solve these small cases; additional model calls must earn their place
+against that cheaper baseline.
+A separate authored 16-case inspection-priority evaluation matched 15/16
+priority sets with hosted interpretation versus 12/16 with context-aware rules.
+This tests interpreting operating records to prioritize numerically bracketed
+areas, not better leak coordinates or field accuracy. Deprioritized areas are
+not cleared of leaks.
+
+**Knowledge transfer.** The demo uses versioned fictional procedures and incident
+records, not automatically acquired tacit expertise. In a customer pilot, experts
+must elicit, review and approve procedures and examples before reuse. Compare
+newcomer and experienced-engineer decisions; onboarding benefit is a hypothesis,
+not a measured result.
+
+**Customer questions.** "Leak or faulty sensors?" "Where should we inspect, and
+why?" "What evidence supports this, and what remains unknown?"
+
+**Why unsigned.** They doubt AI will reduce investigation effort. False alarms
+mean costly offshore inspections; missed leaks risk damage, disruption and regulatory
+action, including possible licence revocation for serious violations. Privacy,
+integration cost and accountability remain concerns.
+
+**Budget owner: Head of Subsea Operations.** Cares about workload, inspection cost
+and safety. "What will this save, cost and take to deploy?"
+
+**Technical expert: Lead Subsea Integrity & Instrumentation Engineer.** Cares
+about calibration, missing data and physical assumptions. "Can you distinguish
+pressure transients, shared failures and leaks, and reproduce the conclusion?"
+
+**Current implementation and limits.** The prototype streams synthetic pressure
+readings through lightweight anomaly detectors and agent-assisted investigation,
+including gaps, spikes and drift. It recommends a station-supported inspection
+interval, not an exact leak position. A PostgreSQL full-text retrieval corpus
+contains fictional operating logs, maintenance reports and procedures, including
+superseded, expired and future-dated records. Searches and comparisons are scoped
+to the incident and retain executed tool receipts. The pressure profile is
+illustrative, not a validated hydraulic model. Customer detector, historian and
+maintenance-system integrations remain unimplemented; operating context and
+causation require human verification.
+No confidential data. Inference is hosted, not local-only. Read-only decision
+support, not certified protection or plant control; humans retain safety authority.
+
+**Pilot.** Treat ten minutes per manual investigation as an assumption to validate.
+Aim for a usable AI report within five minutes; immediate numerical warnings are
+measured separately and never gated by inference. Compare accuracy, false/missed
+warnings, interval containment, unsupported claims, abstention and reliability
+under outages against manual/fixed baselines. Include failed and late attempts,
+not only successful answers. Zero observed unsupported claims is an acceptance
+goal, not a guarantee of hallucination-free language. Adopt only if evidence
+quality, knowledge transfer and total cost justify deployment.
 
 **Private demo repository:** https://github.com/ntnguyen-so/subsea-integrity-copilot

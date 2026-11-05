@@ -61,6 +61,7 @@ def compatible(task: AgentTask, other: AgentTask, snapshot: WindowSnapshot) -> b
         and other.generation_id == task.generation_id
         and other.snapshot_id == snapshot.id
         and other.mode == task.mode
+        and other.history_version == task.history_version
         and other.purpose == REGISTRY[other.role].purpose
         and other.state in {"SUCCEEDED", "ABSTAINED"}
         and other.result is not None
@@ -339,6 +340,25 @@ def _validate_with_policy(
                 d.result is not None and d.result.hypothesis == result.hypothesis for d in diagnoses
             ):
                 reject("diagnosis_consistency", "Response must retain the accepted diagnosis.")
+        if diagnoses:
+            assert diagnoses[0].result is not None
+            if result.investigation != diagnoses[0].result.investigation:
+                reject("history_inheritance", "Response must retain the checked investigation.")
+        elif result.investigation is not None:
+            reject("history_inheritance", "A response cannot introduce unreviewed history.")
+    if task.role == "event_diagnosis" and task.history_version:
+        from subsea_copilot.investigation import validate_investigation
+
+        validate_investigation(result, task, snapshot, receipts)
+    elif result.investigation is not None and task.role != "operator_response":
+        reject("history_authority", "Only a history-enabled diagnosis can introduce context.")
+    from subsea_copilot.interpretation import validate_interpretation
+
+    validate_interpretation(result, task)
+    if task.response_protocol == "engineer-v2" and task.state in {"SUCCEEDED", "ABSTAINED"}:
+        from subsea_copilot.grounding import validate_review
+
+        validate_review(result, task, snapshot, receipts)
     return result
 
 
@@ -369,12 +389,15 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                         f"{finding.usable}/{finding.expected} usable; {finding.missing} missing; "
                         f"{finding.hard_excluded} code-excluded observations; "
                         f"{finding.spike_count} usable spikes; "
-                        f"drift suspicion: {finding.drift_suspected}."
+                        f"drift suspicion: {finding.drift_suspected}; "
+                        f"paired-instrument disagreement: {finding.peer_disagreement}."
                     )
         elif claim.kind == "hypothesis":
             labels = {
                 "suspected_leak": "Suspected leak; not a confirmed diagnosis.",
-                "sensor_or_telemetry_issue": "Sensor or telemetry issue is supported.",
+                "sensor_or_telemetry_issue": (
+                    "Sensor or telemetry issues warrant review; not a proven hardware diagnosis."
+                ),
                 "environmental_disturbance": "Environmental disturbance is supported.",
                 "no_event": "No event supported in this window; not a safety conclusion.",
                 "insufficient_evidence": "Insufficient evidence for an event conclusion.",
@@ -384,13 +407,31 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
             )
             if hypothesis in labels:
                 lines.append(labels[hypothesis])
+                if hypothesis == "suspected_leak":
+                    event = snapshot.event
+                    lines.append(
+                        f"Why: {len(event.supporting_sensor_ids)} pressure instruments across "
+                        f"{event.failure_domain_count} failure domains show overlapping drops "
+                        f"for {event.persistence_seconds:g}s. Review the cited sensor histories."
+                    )
         elif claim.kind == "location" and snapshot.location:
-            lines.append(f"Numerical fit: {snapshot.location.status}. Compatible candidates:")
-            for candidate in snapshot.location.compatible:
+            location = snapshot.location
+            if location.inspection_start_m is not None and location.inspection_end_m is not None:
+                segment = location.best.segment_id if location.best else "unresolved segment"
                 lines.append(
-                    f"{candidate.segment_id}: {candidate.chainage_m:.1f} m; "
-                    f"residual {candidate.residual:.3f}."
+                    f"Priority inspection interval: {segment} "
+                    f"{location.inspection_start_m:.0f}-{location.inspection_end_m:.0f} m. "
+                    "This is an inspection bracket, not an exact leak position."
                 )
+                if len(location.station_bracket_m) == 4:
+                    before, first, last, after = location.station_bracket_m
+                    lines.append(
+                        f"Why: affected stations at {first:g}/{last:g} m are bracketed by "
+                        f"unaffected stations at {before:g}/{after:g} m. "
+                        "Inspection boundaries are the intervening station midpoints."
+                    )
+            else:
+                lines.append(f"Location: {location.status}. {location.reason}")
     if result.limitations:
         lines.append("Limitations: " + ", ".join(sorted(result.limitations)) + ".")
         explanations = {
@@ -398,6 +439,25 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
             "GRID_NOT_ACCURACY": "The numerical grid spacing is not localization accuracy.",
             "COMPATIBLE_NOT_CONFIDENCE": "Compatible candidates are not a confidence interval.",
             "LOCATION_MODEL_SIMPLIFIED": "Location uses a simplified numerical propagation model.",
+            "INSPECTION_INTERVAL_NOT_LEAK_POINT": (
+                "Station spacing bounds an inspection priority, not the physical leak coordinate."
+            ),
+            "PRESSURE_PATTERNS_NOT_PROOF": (
+                "Correlated pressure anomalies support investigation, not a confirmed leak."
+            ),
+            "OPERATING_CONTEXT_REQUIRED": (
+                "Verify valve/compressor changes and shared failures with the operator. "
+                "Synthetic operational history can support investigation; "
+                "customer operating records remain unconnected."
+            ),
+            "COMMON_MODE_PRESSURE_CHANGE": (
+                "A broad pressure change can reflect operating changes or a shared failure; "
+                "no localized leak is asserted."
+            ),
+            "CORRELATED_PRESSURE_TRANSIENT": (
+                "Several instruments changed together, but the pressure pattern was too brief "
+                "for leak criteria; check operating changes before attributing sensor faults."
+            ),
             "NO_EVENT_NOT_SAFETY": "No-event evidence is not an operational safety determination.",
             "partial_health_review": (
                 "Health claim review is bounded, not exhaustive; "

@@ -15,6 +15,7 @@ from pydantic import JsonValue, TypeAdapter
 from .config import Settings
 from .contracts import AgentRole, Mode, ReplaySession, utc_now
 from .diagnostics import analyze_window
+from .history_evaluation import history_answer_supported
 from .ingest import normalize_records
 from .llm.copilot_cli import CopilotCLIChatModel
 from .runtime.baseline import run_single_agent_baseline
@@ -22,19 +23,24 @@ from .runtime.checkpointer import postgres_checkpointer
 from .runtime.scripted import ScriptedChatModel
 from .runtime.workflow import AgentService
 from .store import Store
-from .synthetic import generate_scenario
+from .synthetic import CUSTOMER_QUESTIONS, SOURCE_VERSION, generate_scenario
 from .telemetry import Telemetry
 
-PRIMARY_QUESTIONS = [
-    "The alarms started together. Is this a possible leak or an instrumentation issue?",
-    "Which pipeline section should our integrity engineer inspect first, and why?",
-    "Which sensors are unreliable, what evidence is missing, and what should we do next?",
-]
+PRIMARY_QUESTIONS = CUSTOMER_QUESTIONS
 TERMINALS = {"SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED"}
 JSON_ADAPTER = TypeAdapter[JsonValue](JsonValue)
 MODEL_METADATA_KEYS = (
-    "mode", "requested_model", "observed_model", "model_identity_source", "cli_version",
-    "cli_version_source", "usage", "duration_ms", "error", "request_id",
+    "mode",
+    "phase",
+    "requested_model",
+    "observed_model",
+    "model_identity_source",
+    "cli_version",
+    "cli_version_source",
+    "usage",
+    "duration_ms",
+    "error",
+    "request_id",
 )
 
 
@@ -46,7 +52,9 @@ def model_receipts(store: Store, task_ids: list[str]) -> list[JsonValue]:
     ]
 
 
-def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
+def qualify_agents(mode: Mode, repetitions: int = 3) -> dict[str, JsonValue]:
+    if not 1 <= repetitions <= 3:
+        raise ValueError("Agent qualification requires one to three repetitions")
     settings = Settings.from_env()
     tenant = "qualification-" + uuid.uuid4().hex[:12]
     store = Store(
@@ -61,6 +69,7 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
     expected = {
         "S1": "suspected_leak",
         "S2": "sensor_or_telemetry_issue",
+        "S4": "insufficient_evidence",
         "S5": "insufficient_evidence",
     }
     provider_blocked: str | None = None
@@ -85,6 +94,7 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                         tenant_id=tenant,
                         site_id=settings.site_id,
                         scenario=scenario,
+                        source_version=SOURCE_VERSION,
                         mode=mode,
                         clock_seconds=185,
                         epoch=source.epoch,
@@ -115,7 +125,7 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                         tenant_id=tenant,
                     )
                 )
-                for repetition in range(3):
+                for repetition in range(repetitions):
                     for index, question in enumerate(PRIMARY_QUESTIONS):
                         started = time.monotonic()
                         root = service.submit_question(
@@ -146,6 +156,9 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                         selected_kinds = {claim.kind for claim in claims}
                         accepted = root.state in ("SUCCEEDED", "ABSTAINED")
                         supported = snapshot.event.hypothesis == expected[scenario]
+                        supported = supported and history_answer_supported(
+                            scenario, root.result, root.state
+                        )
                         if index == 0:
                             supported = supported and (
                                 "hypothesis" in selected_kinds or root.state == "ABSTAINED"
@@ -197,6 +210,10 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                                     task.model_calls for task in tasks if task.parent_id
                                 ),
                                 "claim_refs": selected_refs,
+                                "history_version": root.history_version,
+                                "investigation": root.result.investigation.model_dump(mode="json")
+                                if root.result and root.result.investigation
+                                else None,
                                 "model_receipts": receipts,
                             }
                         )
@@ -209,8 +226,13 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                     break
                 if scenario == "S1":
                     comparison = run_single_agent_baseline(
-                        store, snapshot, mode, factory, telemetry,
-                        question=PRIMARY_QUESTIONS[0], checkpointer=checkpointer,
+                        store,
+                        snapshot,
+                        mode,
+                        factory,
+                        telemetry,
+                        question=PRIMARY_QUESTIONS[0],
+                        checkpointer=checkpointer,
                     )
                     if comparison.get("error_code") in ("proxy_auth", "proxy_quota"):
                         provider_blocked = str(comparison["error_code"])
@@ -228,19 +250,26 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                     break
                 time.sleep(2)
             return {
-                "passed": len(results) == 27
+                "passed": len(results) == len(expected) * len(PRIMARY_QUESTIONS) * repetitions
                 and all(isinstance(row, dict) and row["accepted_correct"] for row in results)
-                and comparison is not None and comparison.get("check_accepted") is True
+                and comparison is not None
+                and comparison.get("check_accepted") is True
                 and trace_visible,
                 "mode": mode,
+                "source_version": SOURCE_VERSION,
                 "live_model_evidence": mode == "live" and bool(measured_models),
                 "requested_model": "gpt-6.1-sol" if mode == "live" else None,
                 "observed_models": list(sorted(measured_models)),
                 "observed_cli_versions": list(sorted(measured_versions)),
                 "qualification_tenant_id": tenant,
-                "population": "three questions x three repetitions x three pinned snapshots",
+                "population": (
+                    f"three questions x {repetitions} repetitions "
+                    f"x {len(expected)} pinned snapshots"
+                ),
+                "questions": list(PRIMARY_QUESTIONS),
+                "investigation_protocol": "bounded-history-v1",
                 "generation_model_call_ceiling": 100,
-                "cohort_maximum_model_calls": 300,
+                "cohort_maximum_model_calls": len(expected) * 100,
                 "answer_count": len(results),
                 "provider_blocked": provider_blocked,
                 "results": results,
@@ -249,7 +278,11 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
                 "stored_trace_tree_verified": trace_visible,
                 "verified_trace_ids": list(trace_ids),
                 "monetary_inference_cost": None,
-                "limitation": "Synthetic-only cohort; scripted runs are not live-model evidence.",
+                "limitation": (
+                    "Synthetic-only cohort; scripted runs are not live-model evidence. "
+                    "Single-agent comparison is the numerical-only legacy policy, "
+                    "not same-history evidence."
+                ),
             }
     finally:
         telemetry.close()
@@ -257,7 +290,10 @@ def qualify_agents(mode: Mode) -> dict[str, JsonValue]:
 
 
 def run_qualification(
-    suite: Literal["diagnostics", "agents", "qualification"], mode: Mode, output: Path
+    suite: Literal["diagnostics", "agents", "qualification"],
+    mode: Mode,
+    output: Path,
+    repetitions: int = 3,
 ) -> dict[str, JsonValue]:
     report: dict[str, JsonValue] = {
         "created_at": utc_now().isoformat(),
@@ -269,7 +305,7 @@ def run_qualification(
 
         report["diagnostics"] = evaluate_diagnostics(seed_count=20)
     if suite in ("agents", "qualification"):
-        report["agents"] = qualify_agents(mode)
+        report["agents"] = qualify_agents(mode, repetitions)
     sections = [report[key] for key in ("diagnostics", "agents") if key in report]
     report["passed"] = all(
         isinstance(section, dict) and section.get("passed") is True for section in sections

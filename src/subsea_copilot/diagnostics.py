@@ -1,4 +1,4 @@
-"""Label-free, event-time numerical summaries and bounded claim ledger."""
+"""Pressure alerts and cross-sensor investigation; no scenario labels or LLM arithmetic."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 
+from .anomaly import MedianMADDetector
 from .contracts import (
     CanonicalObservation,
     Claim,
@@ -17,23 +18,21 @@ from .contracts import (
     EvidenceItem,
     QualityFinding,
     QualityReport,
-    Sensor,
     SitePack,
     WindowSnapshot,
     content_hash,
 )
-from .localization import locate, point_at_chainage
+from .localization import locate, pipeline_distances
 
 
 def _duration(times: Sequence[float], sample_seconds: int) -> float:
-    longest = run = 0.0
+    longest = 0.0
     previous = -math.inf
     run_start = 0.0
     for second in sorted(set(times)):
         if second - previous > sample_seconds * 1.01:
             run_start = second
-        run = second - run_start + sample_seconds
-        longest = max(longest, run)
+        longest = max(longest, second - run_start + sample_seconds)
         previous = second
     return longest
 
@@ -54,39 +53,43 @@ def analyze_window(
         raise ValueError("epoch must be timezone aware")
     if not math.isfinite(clock_seconds) or end_seconds <= 0 or revision < 1:
         raise ValueError("Invalid window clock, endpoint or revision")
+    if any(sensor.channels != ["pressure"] for sensor in pack.sensors):
+        raise ValueError(
+            "Pressure investigation requires pressure instruments; create a new replay"
+        )
     start = epoch + timedelta(seconds=end_seconds - pack.window_seconds)
     end = epoch + timedelta(seconds=end_seconds)
     clock = epoch + timedelta(seconds=clock_seconds)
     selected = sorted(
         {
-            observation.id: observation
-            for observation in observations
-            if start <= observation.observed_at < end
-            and observation.received_at <= clock
-            and observation.observed_at <= clock
+            row.id: row
+            for row in observations
+            if start <= row.observed_at < end
+            and row.received_at <= clock
+            and row.observed_at <= clock
         }.values(),
-        key=lambda observation: observation.id,
+        key=lambda row: row.id,
     )
-    # Pre-roll is explicit and verified externally; no unreleased/future normal sample
-    # is accepted as a baseline simply because a caller supplied it.
     normal = [
-        observation
-        for observation in baseline
-        if observation.observed_at < epoch
-        and observation.received_at <= epoch
-        and observation.validity == "usable"
-        and observation.value is not None
+        row
+        for row in baseline
+        if row.observed_at < epoch
+        and row.received_at <= epoch
+        and row.validity == "usable"
+        and row.value is not None
+        and row.channel == "pressure"
     ]
-    groups: dict[tuple[str, str], list[CanonicalObservation]] = defaultdict(list)
-    baselines: dict[tuple[str, str], list[float]] = defaultdict(list)
-    for observation in selected:
-        groups[(observation.sensor_id, observation.channel)].append(observation)
-    for observation in normal:
-        if observation.value is not None:
-            baselines[(observation.sensor_id, observation.channel)].append(observation.value)
+    groups: dict[str, list[CanonicalObservation]] = defaultdict(list)
+    baselines: dict[str, list[float]] = defaultdict(list)
+    for row in selected:
+        if row.channel == "pressure":
+            groups[row.sensor_id].append(row)
+    for row in normal:
+        if row.value is not None:
+            baselines[row.sensor_id].append(row.value)
     expected_each = math.ceil(pack.window_seconds / pack.sample_seconds)
-    findings = []
-    stats: dict[tuple[str, str], dict[str, Any]] = {}
+    findings: list[QualityFinding] = []
+    stats: dict[str, dict[str, Any]] = {}
     evidence: dict[str, EvidenceItem] = {}
     claims: dict[str, Claim] = {}
 
@@ -95,24 +98,25 @@ def analyze_window(
         value: dict[str, Any],
         claim_kind: str | None = None,
         sensor_id: str | None = None,
-        channel: str | None = None,
     ) -> str:
-        evidence_id = f"ev-{len(evidence):03d}"
-        evidence[evidence_id] = EvidenceItem(
-            id=evidence_id,
+        identifier = f"ev-{len(evidence):03d}"
+        evidence[identifier] = EvidenceItem(
+            id=identifier,
             kind=kind,
             value=value,
             sensor_id=sensor_id,
-            channel=channel,
+            channel="pressure" if sensor_id else None,
         )
         if claim_kind:
             claim_id = f"claim-{len(claims):03d}"
             claims[claim_id] = Claim(
-                id=claim_id, kind=claim_kind, value=value, evidence_ids=[evidence_id]
+                id=claim_id,
+                kind=claim_kind,
+                value=value,
+                evidence_ids=[identifier],
             )
-        return evidence_id
+        return identifier
 
-    missing_baseline = False
     ledger(
         "sensor_metadata",
         {
@@ -121,237 +125,254 @@ def analyze_window(
             "sensors": [sensor.model_dump(mode="json") for sensor in pack.sensors],
         },
     )
+    missing_baseline = False
     for sensor in pack.sensors:
-        for channel in sensor.channels:
-            key = (sensor.id, channel)
-            channel_rows = groups[key]
-            usable = [
-                row for row in channel_rows if row.validity == "usable" and row.value is not None
-            ]
-            values = baselines[key]
-            if len(values) >= pack.persistence_seconds:
-                median = float(np.median(values))
-                scale = max(
-                    float(np.median(np.abs(np.asarray(values) - median))) * 1.4826,
-                    pack.minimum_scales[channel],
-                )
-            else:
-                median, scale = 0.0, pack.minimum_scales[channel]
-                missing_baseline = True
-            scores = (
-                [(row, (row.value - median) / scale) for row in usable if row.value is not None]
-                if values
-                else []
+        rows = groups[sensor.id]
+        usable = [row for row in rows if row.validity == "usable" and row.value is not None]
+        values = baselines[sensor.id]
+        model = None
+        if len(values) >= pack.persistence_seconds:
+            model = MedianMADDetector.fit(
+                values,
+                pack.minimum_scales["pressure"],
+                pack.anomaly_threshold,
             )
-            positive = [
+        else:
+            missing_baseline = True
+        scores = [
+            (row, model.score(row.value))
+            for row in usable
+            if row.value is not None and model is not None
+        ]
+        drops = [
+            (row.observed_at - epoch).total_seconds()
+            for row, score in scores
+            if score <= -pack.anomaly_threshold
+        ]
+        excursions = {
+            (row.observed_at - epoch).total_seconds()
+            for row, score in scores
+            if abs(score) >= pack.anomaly_threshold
+        }
+        times = [(row.observed_at - epoch).total_seconds() for row, _ in scores]
+        readings = [row.value for row, _ in scores if row.value is not None]
+        trend = False
+        if model and len(times) >= pack.persistence_seconds and len(set(times)) > 1:
+            ordered = sorted(zip(times, readings, strict=True))
+            first = [value for _, value in ordered[: len(ordered) // 3]]
+            last = [value for _, value in ordered[-len(ordered) // 3 :]]
+            span = float(np.median(np.asarray(last))) - float(np.median(np.asarray(first)))
+            if abs(span) >= pack.anomaly_threshold * model.scale:
+                correlation = float(np.corrcoef(np.asarray(times), np.asarray(readings))[0, 1])
+                trend = abs(correlation) >= 0.85
+        finding = QualityFinding(
+            sensor_id=sensor.id,
+            channel="pressure",
+            expected=expected_each,
+            received=len({row.observed_at for row in rows}),
+            usable=len({row.observed_at for row in usable}),
+            missing=max(0, expected_each - len({row.observed_at for row in usable})),
+            hard_excluded=sum(row.validity not in {"usable", "missing"} for row in rows),
+            spike_count=sum(
+                second - pack.sample_seconds not in excursions
+                and second + pack.sample_seconds not in excursions
+                for second in excursions
+            ),
+            anomaly_count=len(excursions),
+            max_score=max((abs(score) for _, score in scores), default=0),
+            persistence_seconds=_duration(sorted(excursions), pack.sample_seconds),
+        )
+        findings.append(finding)
+        stats[sensor.id] = {
+            "median": model.center if model else None,
+            "scale": model.scale if model else pack.minimum_scales["pressure"],
+            "drops": set(drops),
+            "excursions": excursions,
+            "rises": {
                 (row.observed_at - epoch).total_seconds()
                 for row, score in scores
                 if score >= pack.anomaly_threshold
-            ]
-            excursions = [
-                (row.observed_at - epoch).total_seconds()
-                for row, score in scores
-                if abs(score) >= pack.anomaly_threshold
-            ]
-            persistence = _duration(positive, pack.sample_seconds)
-            positive_set = set(excursions)
-            spikes = sum(
-                second - pack.sample_seconds not in positive_set
-                and second + pack.sample_seconds not in positive_set
-                for second in positive_set
+            },
+            "duration": _duration(drops, pack.sample_seconds),
+            "usable": finding.usable,
+            "trend": trend,
+            "deficit": model.center
+            - float(
+                np.median(
+                    [row.value for row, score in scores if score <= -pack.anomaly_threshold]
+                    if _duration(drops, pack.sample_seconds) >= pack.persistence_seconds
+                    else [row.value for row in usable]
+                )
             )
-            received_times = {row.observed_at for row in channel_rows}
-            usable_times = {row.observed_at for row in usable}
-            finding = QualityFinding(
-                sensor_id=sensor.id,
-                channel=channel,
-                expected=expected_each,
-                received=len(received_times),
-                usable=len(usable_times),
-                missing=max(0, expected_each - len(usable_times)),
-                hard_excluded=sum(
-                    row.validity not in {"usable", "missing"} for row in channel_rows
+            if model and usable
+            else None,
+        }
+    distances = pipeline_distances(pack)
+    for sensor, finding in zip(pack.sensors, findings, strict=True):
+        peer = [
+            other
+            for other in pack.sensors
+            if other.station_id == sensor.station_id and other.id != sensor.id
+        ]
+        finding.peer_disagreement = finding.persistence_seconds >= pack.persistence_seconds and any(
+            stats[other.id]["usable"] >= expected_each * pack.min_coverage
+            and _duration(
+                sorted(
+                    (stats[sensor.id]["drops"] & stats[other.id]["drops"])
+                    | (stats[sensor.id]["rises"] & stats[other.id]["rises"])
                 ),
-                spike_count=spikes,
-                max_score=max((abs(score) for _, score in scores), default=0),
-                persistence_seconds=_duration(excursions, pack.sample_seconds),
+                pack.sample_seconds,
             )
-            stats[key] = {
-                "median": median,
-                "scale": scale,
-                "positive": positive,
-                "duration": persistence,
-                "health_duration": _duration(excursions, pack.sample_seconds),
-                "usable": len(usable_times),
-                "excess": float(np.median([row.value for row in usable])) - median
-                if usable
-                else None,
-            }
-            findings.append(finding)
-    expected = expected_each * sum(len(sensor.channels) for sensor in pack.sensors)
+            < pack.persistence_seconds
+            for other in peer
+        )
+        finding.drift_suspected = finding.peer_disagreement and stats[sensor.id]["trend"]
+    expected = expected_each * len(pack.sensors)
     usable_count = sum(finding.usable for finding in findings)
     coverage = min(1.0, usable_count / expected) if expected else 0
     domains = {
         sensor.failure_domain_id
         for sensor in pack.sensors
-        if any(
-            stats[(sensor.id, channel)]["usable"] >= expected_each * pack.min_coverage
-            for channel in sensor.channels
-        )
+        if stats[sensor.id]["usable"] >= expected_each * pack.min_coverage
     }
     warmup = (
         end_seconds < pack.window_seconds
-        or clock_seconds < (end_seconds + pack.lateness_seconds)
+        or clock_seconds < end_seconds + pack.lateness_seconds
         or missing_baseline
     )
-    acoustic = [
+    pressure = [
         sensor
-        for sensor in pack.sensors
-        if stats[(sensor.id, "acoustic")]["duration"] >= pack.persistence_seconds
-        and stats[(sensor.id, "acoustic")]["usable"] >= expected_each * pack.min_coverage
+        for sensor, finding in zip(pack.sensors, findings, strict=True)
+        if stats[sensor.id]["duration"] >= pack.persistence_seconds
+        and stats[sensor.id]["usable"] >= expected_each * pack.min_coverage
+        and not finding.peer_disagreement
     ]
-    methane = [
-        sensor
-        for sensor in pack.sensors
-        if stats[(sensor.id, "methane")]["duration"] >= pack.persistence_seconds
-        and stats[(sensor.id, "methane")]["usable"] >= expected_each * pack.min_coverage
-    ]
-
-    def distance(a: Sensor, b: Sensor) -> float:
-        return math.hypot(a.position.x - b.position.x, a.position.y - b.position.y)
-
-    # Require overlapping raw-time excursions across independent nearby observers.
     clusters = []
-    for anchor in acoustic:
-        neighborhood = [
-            sensor for sensor in acoustic if distance(sensor, anchor) <= pack.neighborhood_m
-        ]
-        joint_times = set(stats[(anchor.id, "acoustic")]["positive"])
-        qualified = []
-        for sensor in neighborhood:
-            overlap = joint_times.intersection(stats[(sensor.id, "acoustic")]["positive"])
-            if _duration(sorted(overlap), pack.sample_seconds) >= pack.persistence_seconds:
-                qualified.append(sensor)
-        corroborators = []
-        for sensor in methane:
-            nearby = [
-                other for other in qualified if distance(sensor, other) <= pack.neighborhood_m
-            ]
-            if not nearby:
+    for anchor in pressure:
+        group = [anchor]
+        joint = stats[anchor.id]["drops"].copy()
+        for sensor in pressure:
+            if sensor.id == anchor.id or distances[anchor.id, sensor.id] > pack.neighborhood_m:
                 continue
-            methane_times = stats[(sensor.id, "methane")]["positive"]
-            matches = [
-                second
-                for second in methane_times
-                if any(
-                    0 <= second - acoustic_time <= pack.methane_lag_seconds
-                    for acoustic_time in joint_times
-                )
+            overlap = joint & stats[sensor.id]["drops"]
+            if _duration(sorted(overlap), pack.sample_seconds) >= pack.persistence_seconds:
+                group.append(sensor)
+                joint = overlap
+        if (
+            len(group) >= pack.min_observers
+            and len({sensor.station_id for sensor in group}) >= pack.min_stations
+            and len({sensor.failure_domain_id for sensor in group}) >= pack.min_failure_domains
+        ):
+            clusters.append(group)
+    support = max(clusters, key=len, default=[])
+    limitations = [
+        "SYNTHETIC_UNCALIBRATED",
+        "PRESSURE_PATTERNS_NOT_PROOF",
+        "OPERATING_CONTEXT_REQUIRED",
+    ]
+    sustained_changes = [
+        finding
+        for finding in findings
+        if finding.persistence_seconds >= pack.persistence_seconds
+        and finding.usable >= expected_each * pack.min_coverage
+        and not finding.peer_disagreement
+    ]
+    broad = len(sustained_changes) >= max(pack.min_observers, len(pack.sensors) // 2)
+    multiple_regions = support and any(
+        not {sensor.id for sensor in group} & {sensor.id for sensor in support}
+        for group in clusters
+    )
+    transient = False
+    for anchor in pack.sensors:
+        for timestamp in stats[anchor.id]["excursions"]:
+            group = [
+                sensor
+                for sensor in pack.sensors
+                if distances[anchor.id, sensor.id] <= pack.neighborhood_m
+                and timestamp in stats[sensor.id]["excursions"]
             ]
-            if _duration(matches, pack.sample_seconds) >= pack.persistence_seconds:
-                corroborators.append(sensor)
-        independent = {sensor.failure_domain_id for sensor in qualified}
-        if len(qualified) >= pack.min_observers and len(independent) >= pack.min_failure_domains:
-            clusters.append((qualified, corroborators))
-    supported = [(group, corroborators) for group, corroborators in clusters if corroborators]
-    support = max(supported, key=lambda item: len(item[0]), default=([], []))[0]
-    for finding in findings:
-        if finding.persistence_seconds < pack.persistence_seconds:
-            continue
-        sensor = next(sensor for sensor in pack.sensors if sensor.id == finding.sensor_id)
-        neighboring_excursions = [
-            other
-            for other in pack.sensors
-            if other.id != sensor.id
-            and distance(sensor, other) <= pack.neighborhood_m
-            and stats[(other.id, finding.channel)]["health_duration"] >= pack.persistence_seconds
-        ]
-        finding.drift_suspected = not neighboring_excursions
-    limitations = ["SYNTHETIC_UNCALIBRATED"]
+            if (
+                len(group) >= pack.min_observers
+                and len({sensor.station_id for sensor in group}) >= pack.min_stations
+                and len({sensor.failure_domain_id for sensor in group}) >= pack.min_failure_domains
+            ):
+                transient = True
+                break
+        if transient:
+            break
     if warmup:
         hypothesis = "insufficient_evidence"
         limitations.append("WARMING_UP")
     elif coverage < pack.min_coverage or len(domains) < pack.min_failure_domains:
         hypothesis = "insufficient_evidence"
         limitations.append("COVERAGE_LOST")
+    elif broad:
+        hypothesis = "insufficient_evidence"
+        limitations.append("COMMON_MODE_PRESSURE_CHANGE")
+    elif multiple_regions:
+        hypothesis = "insufficient_evidence"
+        limitations.append("MULTIPLE_PRESSURE_REGIONS")
     elif support:
         hypothesis = "suspected_leak"
-    elif len(acoustic) >= max(pack.min_observers, len(pack.sensors) // 2) and not methane:
-        hypothesis = "environmental_disturbance"
-        limitations.append("NO_METHANE_CORROBORATION")
-    elif acoustic and methane:
+        limitations.append("VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES")
+    elif pressure:
         hypothesis = "insufficient_evidence"
         limitations.append("INSUFFICIENT_INDEPENDENT_OBSERVERS")
-    elif methane:
+    elif sustained_changes:
         hypothesis = "insufficient_evidence"
-        limitations.append("NO_ACOUSTIC_CORROBORATION")
-    elif acoustic or any(
-        (finding.spike_count >= 2 or (finding.spike_count and finding.max_score >= 10))
+        limitations.append("UNEXPLAINED_PRESSURE_CHANGE")
+    elif transient:
+        hypothesis = "insufficient_evidence"
+        limitations.append("CORRELATED_PRESSURE_TRANSIENT")
+    elif any(
+        finding.spike_count
         or finding.hard_excluded
-        or finding.drift_suspected
+        or finding.peer_disagreement
         or finding.missing > expected_each * 0.1
         for finding in findings
     ):
         hypothesis = "sensor_or_telemetry_issue"
-        if acoustic:
-            limitations.append("NO_METHANE_CORROBORATION")
     else:
         hypothesis = "no_event"
         limitations.append("NO_EVENT_NOT_SAFETY")
-    # Drift is a soft, isolated-channel pattern; high corroborated leak readings
-    # remain usable and are not labeled faulty merely because they are high.
+
     for finding in findings:
-        value = {
-            "sensor_id": finding.sensor_id,
-            "channel": finding.channel,
-            "expected": finding.expected,
-            "received": finding.received,
-            "usable": finding.usable,
-            "missing": finding.missing,
-            "hard_excluded": finding.hard_excluded,
-            "spike_count": finding.spike_count,
-            "drift_suspected": finding.drift_suspected,
-        }
+        value = finding.model_dump(mode="json", exclude={"evidence_ids"})
         finding.evidence_ids = [
-            ledger("sensor_health", value, "sensor_health", finding.sensor_id, finding.channel)
+            ledger("sensor_health", value, "sensor_health", finding.sensor_id),
         ]
-        # Baseline/noise and raw magnitude are summary evidence, not probabilities.
         ledger(
             "channel_summary",
             {
-                "expected": finding.expected,
-                "received": finding.received,
-                "usable": finding.usable,
-                "missing": finding.missing,
-                "baseline_median": stats[(finding.sensor_id, finding.channel)]["median"],
-                "baseline_scale": stats[(finding.sensor_id, finding.channel)]["scale"],
-                "median_excess": stats[(finding.sensor_id, finding.channel)]["excess"],
+                "detector": "pressure-median-mad-v2",
+                "unit": "bar",
+                "baseline_median": stats[finding.sensor_id]["median"],
+                "baseline_scale": stats[finding.sensor_id]["scale"],
+                "anomaly_threshold": pack.anomaly_threshold,
+                "median_pressure_drop_bar": stats[finding.sensor_id]["deficit"],
+                "anomaly_count": finding.anomaly_count,
                 "max_score": finding.max_score,
-                "persistence_seconds": finding.persistence_seconds,
+                "pressure_drop_persistence_seconds": stats[finding.sensor_id]["duration"],
             },
             sensor_id=finding.sensor_id,
-            channel=finding.channel,
         )
     degraded = any(
         finding.hard_excluded
         or finding.spike_count
-        or finding.drift_suspected
+        or finding.peer_disagreement
         or finding.missing > expected_each * 0.1
         for finding in findings
     )
-    status = (
-        "WARMING_UP"
+    quality = QualityReport(
+        status="WARMING_UP"
         if warmup
         else (
             "COVERAGE_LOST"
-            if coverage < pack.min_coverage
+            if coverage < pack.min_coverage or len(domains) < pack.min_failure_domains
             else ("DEGRADED" if degraded else "NORMAL")
-        )
-    )
-    quality = QualityReport(
-        status=status,
+        ),
         expected_samples=expected,
-        received_samples=sum(finding.received for finding in findings),
+        received_samples=sum(f.received for f in findings),
         usable_samples=usable_count,
         coverage=coverage,
         failure_domains_available=len(domains),
@@ -372,18 +393,27 @@ def analyze_window(
         "coverage",
     )
     if hypothesis != "suspected_leak":
-        support = acoustic
+        support = pressure
     support_ids = sorted(sensor.id for sensor in support)
     segment_ids = sorted({sensor.segment_id for sensor in support})
     failure_domain_count = len({sensor.failure_domain_id for sensor in support})
-    persistence = min((stats[(sensor.id, "acoustic")]["duration"] for sensor in support), default=0)
+    joint = (
+        set.intersection(*(stats[sensor.id]["drops"] for sensor in support)) if support else set()
+    )
+    persistence = _duration(sorted(joint), pack.sample_seconds)
     event_id = ledger(
         "event_criteria",
         {
             "hypothesis": hypothesis,
             "supporting_sensor_ids": support_ids,
             "failure_domain_count": failure_domain_count,
+            "station_count": len({sensor.station_id for sensor in support}),
             "persistence_seconds": persistence,
+            "detector": "pressure-median-mad-v2",
+            "criteria": "pressure-investigation-v2",
+            "operating_context": (
+                "No valve/compressor records supplied; operator verification required"
+            ),
         },
         "hypothesis",
     )
@@ -402,37 +432,23 @@ def analyze_window(
     )
     location = None
     if event.eligible_location:
-        limitations.extend(
-            [
-                "LOCATION_MODEL_SIMPLIFIED",
-                "GRID_NOT_ACCURACY",
-                "COMPATIBLE_NOT_CONFIDENCE",
-            ]
-        )
-        acoustic_stats = {
-            sensor.id: stats[(sensor.id, "acoustic")]
-            for sensor in pack.sensors
-            if stats[(sensor.id, "acoustic")]["usable"] >= expected_each * pack.min_coverage
+        healthy = {
+            sensor.id: stats[sensor.id]
+            for sensor, finding in zip(pack.sensors, findings, strict=True)
+            if stats[sensor.id]["usable"] >= expected_each * pack.min_coverage
+            and not finding.peer_disagreement
+            and stats[sensor.id]["deficit"] is not None
+            and (
+                stats[sensor.id]["duration"] >= pack.persistence_seconds
+                or finding.persistence_seconds < pack.persistence_seconds
+            )
         }
-        # A nearby crossing pipe remains a candidate even if the observing nodes
-        # are administratively associated with only one of its two branches.
-        relevant_segments = set(segment_ids)
-        for segment in pack.segments:
-            for index in range(int(segment.length_m // pack.location_grid_m) + 1):
-                candidate = point_at_chainage(segment, index * pack.location_grid_m)
-                if any(
-                    math.hypot(sensor.position.x - candidate.x, sensor.position.y - candidate.y)
-                    <= pack.neighborhood_m
-                    for sensor in support
-                ):
-                    relevant_segments.add(segment.id)
-                    break
         location = locate(
             pack,
-            {key: value["excess"] for key, value in acoustic_stats.items()},
-            {key: value["scale"] for key, value in acoustic_stats.items()},
-            sorted(relevant_segments),
-            {key: value["usable"] / expected_each for key, value in acoustic_stats.items()},
+            {key: value["deficit"] for key, value in healthy.items()},
+            {key: value["scale"] for key, value in healthy.items()},
+            segment_ids,
+            {key: value["usable"] / expected_each for key, value in healthy.items()},
         )
         ledger(
             "location_fit",
@@ -440,11 +456,15 @@ def analyze_window(
                 "status": location.status,
                 "best": location.best.model_dump(mode="json") if location.best else None,
                 "compatible": [item.model_dump(mode="json") for item in location.compatible],
+                "inspection_start_m": location.inspection_start_m,
+                "inspection_end_m": location.inspection_end_m,
+                "station_bracket_m": location.station_bracket_m,
                 "unit": "m",
                 "method": location.method,
             },
             "location",
         )
+        limitations.extend(["INSPECTION_INTERVAL_NOT_LEAK_POINT", "COMPATIBLE_NOT_CONFIDENCE"])
         if location.status != "located":
             limitations.append(
                 "LOCATION_AMBIGUOUS" if location.status == "ambiguous" else "LOCATION_WITHHELD"
@@ -472,8 +492,8 @@ def analyze_window(
             "input": input_hash,
             "revision": revision,
             "predecessor": predecessor_id,
-            "parameters": "window-v1",
-            "baseline": "baseline-v1",
+            "parameters": "pressure-window-v2",
+            "baseline": "pressure-median-mad-v2",
         }
     )
     return WindowSnapshot(

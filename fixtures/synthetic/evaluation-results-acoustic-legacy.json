@@ -1,0 +1,121 @@
+{
+  "method": "Frozen parameters; independent runs; one mature [120,180) window per run",
+  "seeds": [
+    91000,
+    91001,
+    91002,
+    91003,
+    91004,
+    91005,
+    91006,
+    91007,
+    91008,
+    91009,
+    91010,
+    91011,
+    91012,
+    91013,
+    91014,
+    91015,
+    91016,
+    91017,
+    91018,
+    91019
+  ],
+  "runs_per_scenario": 20,
+  "confusion_by_scenario": {
+    "S1": {
+      "suspected_leak": 20
+    },
+    "S2": {
+      "sensor_or_telemetry_issue": 20
+    },
+    "S3": {
+      "insufficient_evidence": 20
+    },
+    "S4": {
+      "environmental_disturbance": 20
+    },
+    "S5": {
+      "insufficient_evidence": 20
+    },
+    "S6": {
+      "no_event": 20
+    }
+  },
+  "acoustic_only_baseline": {
+    "S1": {
+      "suspected_leak": 20
+    },
+    "S2": {
+      "suspected_leak": 20
+    },
+    "S3": {
+      "no_event": 20
+    },
+    "S4": {
+      "suspected_leak": 20
+    },
+    "S5": {
+      "suspected_leak": 20
+    },
+    "S6": {
+      "no_event": 20
+    }
+  },
+  "leak_precision": 1.0,
+  "leak_recall": 1.0,
+  "localization": {
+    "within_200m_correct_segment_including_abstentions": 20,
+    "denominator": 20,
+    "localized": 20,
+    "median_error_m": 0.0,
+    "p95_error_m": 0.0,
+    "true_location_in_compatible_set": 20,
+    "median_candidate_width_m": 0.0,
+    "abstentions": 0
+  },
+  "fault_attribution": {
+    "true_positive": 400,
+    "false_positive": 100,
+    "false_negative": 0,
+    "precision": 0.8,
+    "recall": 1.0
+  },
+  "crossing_parallel_statuses": {
+    "ambiguous": 20
+  },
+  "model_mismatch_statuses": {
+    "suspected_leak/located": 18,
+    "insufficient_evidence/none": 2
+  },
+  "mandatory_poor_fit_withheld": 20,
+  "model_mismatch_location": {
+    "localized": 18,
+    "denominator": 20,
+    "median_error_m": 0.0,
+    "p95_error_m": 25.0,
+    "true_location_in_compatible_set": 18
+  },
+  "timing": {
+    "window_compute_p95_seconds": 0.47640894999494776,
+    "total_seconds": 173.26715749991126
+  },
+  "limitations": [
+    "Synthetic data; no calibrated confidence or production propagation guarantee",
+    "Mature-window evaluation does not measure onset-to-operator latency",
+    "Perpendicular crossing shares an exact source position to test identifiability",
+    "Mismatch stress is reported, not used to retune frozen parameters"
+  ],
+  "passed_demo_gates": true,
+  "gates": {
+    "leak_recall_at_least_90_percent": true,
+    "no_non_leak_false_confirmations": true,
+    "localized_correct_segment_within_200m_at_least_90_percent": true,
+    "poor_coverage_abstains": true,
+    "shared_failure_not_safety": true,
+    "crossing_precision_withheld": true,
+    "poor_model_fit_abstains": true
+  },
+  "passed": true
+}

@@ -29,6 +29,29 @@ class FakeSpan:
         pass
 
 
+@pytest.mark.parametrize("detail", ["Use only fully reviewed current sources.", "x" * 1500])
+def test_reflection_receives_bounded_specific_criticism_and_cannot_retry_forever(detail):
+    import json
+
+    from langgraph.types import Command
+
+    from subsea_copilot.runtime.agent import build_graph
+
+    def reject(_value):
+        raise ValidationError("interpretation_citations", detail)
+
+    graph = build_graph(validator=reject)
+    config = {"configurable": {"thread_id": uuid4().hex}}
+    graph.invoke({"messages": [], "phase": "answer", "repairs": 0}, config)
+    revised = graph.invoke(Command(resume=AIMessage(content="{}")), config)
+    feedback = json.loads(revised["__interrupt__"][0].value["messages"][-1].content)
+    assert feedback["repair"] == "interpretation_citations"
+    assert feedback["validator_feedback"] == detail[:1000]
+    rejected = graph.invoke(Command(resume=AIMessage(content="{}")), config)
+    assert rejected["failure"] == "interpretation_citations"
+    assert not rejected.get("parsed")
+
+
 class FakeTelemetry:
     @contextmanager
     def span(self, *args, **kwargs):

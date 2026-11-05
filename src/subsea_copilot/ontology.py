@@ -9,23 +9,28 @@ from .contracts import SitePack
 from .synthetic import generate_pack
 
 METHODS = {
-    "baseline-v1": {
+    "pressure-median-mad-v2": {
         "kind": "method",
-        "description": "Verified-normal median/MAD with channel-specific minimum noise scale",
+        "description": "Per-instrument median/MAD model fitted on verified-normal pressure. "
+        "Two-sided alerts at five robust scales; no live retraining on suspected events.",
         "limitations": ["Anomaly residuals are not event probabilities"],
     },
-    "event-rules-v1": {
+    "pressure-investigation-v2": {
         "kind": "rule",
-        "description": "Persistent local acoustic observers in independent failure domains "
-        "with overlapping or delayed methane corroboration",
-        "limitations": ["Independence and propagation are synthetic fixture assumptions"],
-    },
-    "acoustic-excess-distance-decay-v1": {
-        "kind": "method",
-        "description": "Nonnegative strength fit to A/(distance squared + r0 squared)",
+        "description": "Persistent overlapping pressure drops at nearby connected-pipe stations "
+        "in independent failure domains; assess sensor faults and broad operating changes.",
         "limitations": [
-            "Compatible grid candidates are not confidence intervals",
-            "Grid spacing is not localization accuracy",
+            "Patterns support suspicion, not proof",
+            "Valve/compressor context is not connected; operator verification required",
+        ],
+    },
+    "pressure-alert-bracket-v2": {
+        "kind": "method",
+        "description": "Bracket affected stations using midpoints to unaffected stations "
+        "on either side; recommend an inspection interval, not a hydraulic source coordinate",
+        "limitations": [
+            "Inspection intervals are not confidence intervals",
+            "Station spacing limits the recommended inspection interval",
         ],
     },
     "read-only-v1": {

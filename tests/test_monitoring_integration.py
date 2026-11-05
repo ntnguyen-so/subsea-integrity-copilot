@@ -16,9 +16,10 @@ from subsea_copilot.contracts import AgentRole, Mode
 from subsea_copilot.monitoring import Monitor
 from subsea_copilot.runtime.scripted import ScriptedChatModel
 from subsea_copilot.runtime.workflow import AgentService
-from subsea_copilot.store import Store
+from subsea_copilot.store import Conflict, Store
 from subsea_copilot.telemetry import Telemetry
 from subsea_copilot.validation import ValidationError
+from subsea_copilot.warning import monitoring_warning
 
 pytestmark = pytest.mark.integration
 
@@ -29,7 +30,8 @@ def settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Settings:
         pytest.skip("Load the independently bootstrapped PostgreSQL environment")
     monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
     return replace(
-        Settings.from_env(), tenant_id="monitor-test-" + uuid.uuid4().hex,
+        Settings.from_env(),
+        tenant_id="monitor-test-" + uuid.uuid4().hex,
         runtime_dir=tmp_path,
     )
 
@@ -40,8 +42,10 @@ def monitor(settings: Settings) -> Iterator[Monitor]:
         return ScriptedChatModel(role=role)
 
     with Store(
-        settings.database_dsn, tenant_id=settings.tenant_id,
-        site_id=settings.site_id, tools_dsn=settings.tools_dsn,
+        settings.database_dsn,
+        tenant_id=settings.tenant_id,
+        site_id=settings.site_id,
+        tools_dsn=settings.tools_dsn,
     ) as store:
         telemetry = Telemetry(settings.runtime_dir)
         try:
@@ -53,7 +57,9 @@ def monitor(settings: Settings) -> Iterator[Monitor]:
 
 @pytest.mark.parametrize("failure", ["proxy_auth", "proxy_quota"])
 def test_outage_windows_progress_when_provider_is_unavailable(
-    monitor: Monitor, monkeypatch: pytest.MonkeyPatch, failure: str,
+    monitor: Monitor,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
 ) -> None:
     replay = monitor.create("S6", 2026, "live", "outage")
     source = monitor._source(replay)
@@ -94,8 +100,40 @@ def test_repeated_control_does_not_advance_clock_twice(monitor: Monitor) -> None
     assert monitor.store.get_window(second.latest_window_id).quality.status == "WARMING_UP"
 
 
+def test_possible_leak_warning_does_not_wait_for_a_working_llm(monitor: Monitor, monkeypatch):
+    replay = monitor.create("S1", 2026, "live", "leak-without-provider")
+    monkeypatch.setattr(monitor.agents, "health", lambda: {"available": False})
+    for index in range(24):
+        monitor.control(replay.id, "step", None, f"warning-step-{index}")
+    current = monitor.store.get_replay(replay.id)
+    snapshot = monitor.store.get_window(current.latest_window_id)
+    assert monitoring_warning(snapshot).kind == "possible_leak"
+    assert not monitor.store.list_tasks(replay.id)
+    assert monitor.store.list_episodes(replay.id)[0].dispatch_status == "agent_unavailable"
+
+
+@pytest.mark.parametrize("old_version", ["legacy-v1", "pressure-v2"])
+def test_archived_replay_is_never_reinterpreted_as_pressure(monitor: Monitor, old_version) -> None:
+    replay = monitor.create("S1", 2026, "scripted", "archived")
+    monitor.control(replay.id, "step", None, "one-step")
+    current = monitor.control(replay.id, "step", None, "two-steps")
+    assert current.source_version == "pressure-v3"
+    assert current.latest_window_id
+    snapshot = monitor.store.get_window(current.latest_window_id)
+    archived = monitor.store.save_replay(
+        current.model_copy(update={"source_version": old_version, "state": "PLAYING"}),
+        expected_version=current.version,
+    )
+    with pytest.raises(Conflict, match="Archived replay"):
+        monitor.control(archived.id, "step", None, "forbidden-step")
+    monitor.tick()
+    assert monitor.store.get_replay(archived.id).clock_seconds == archived.clock_seconds
+    assert monitor.store.get_window(snapshot.id) == snapshot
+
+
 def test_idle_history_does_not_rehydrate_all_sensor_streams(
-    monitor: Monitor, monkeypatch: pytest.MonkeyPatch,
+    monitor: Monitor,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     replay = monitor.create("S1", 2026, "scripted", "idle-history")
     monitor.control(replay.id, "step", None, "one")
@@ -129,7 +167,8 @@ def test_completed_source_drains_bounded_window_backlog(monitor: Monitor) -> Non
 
 
 def test_explicit_scripted_mode_is_not_disabled_by_live_provider_failure(
-    monitor: Monitor, monkeypatch: pytest.MonkeyPatch,
+    monitor: Monitor,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     replay = monitor.create("S6", 2026, "scripted", "explicit-scripted")
     monitor._source(replay).received_seconds = []
@@ -143,41 +182,72 @@ def test_explicit_scripted_mode_is_not_disabled_by_live_provider_failure(
 
 
 def test_api_provider_error_is_explicit_and_controls_remain_available(
-    settings: Settings, monkeypatch: pytest.MonkeyPatch,
+    settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     app = create_app(settings, start_workers=False)
     with TestClient(app) as client:
-        login = client.post("/api/login", json={
-            "username": "operator", "password": settings.operator_password,
-        })
+        login = client.post(
+            "/api/login",
+            json={
+                "username": "operator",
+                "password": settings.operator_password,
+            },
+        )
         assert login.status_code == 200
         csrf = login.json()["csrf_token"]
         headers = {"X-CSRF-Token": csrf}
         service = app.state.resources["service"]
-        monkeypatch.setattr(service, "health", lambda: {
-            "available": False, "error_code": "proxy_quota",
-        })
+        monkeypatch.setattr(
+            service,
+            "health",
+            lambda: {
+                "available": False,
+                "error_code": "proxy_quota",
+            },
+        )
         assert client.get("/api/health").json()["agent"] == "proxy_quota"
-        response = client.post("/api/replays", headers=headers, json={
-            "scenario": "S1", "mode": "scripted", "idempotency_key": "api",
-        })
+        response = client.post(
+            "/api/replays",
+            headers=headers,
+            json={
+                "scenario": "S1",
+                "mode": "scripted",
+                "idempotency_key": "api",
+            },
+        )
         assert response.status_code == 200
         replay_id = response.json()["id"]
-        forged = client.post(f"/api/replays/{replay_id}/control", json={
-            "action": "step", "idempotency_key": "forged",
-        })
+        forged = client.post(
+            f"/api/replays/{replay_id}/control",
+            json={
+                "action": "step",
+                "idempotency_key": "forged",
+            },
+        )
         assert forged.status_code == 403
-        stepped = client.post(f"/api/replays/{replay_id}/control", headers=headers, json={
-            "action": "step", "idempotency_key": "valid",
-        })
+        stepped = client.post(
+            f"/api/replays/{replay_id}/control",
+            headers=headers,
+            json={
+                "action": "step",
+                "idempotency_key": "valid",
+            },
+        )
         assert stepped.status_code == 200
         assert stepped.json()["clock_seconds"] == 5
-        second = client.post(f"/api/replays/{replay_id}/control", headers=headers, json={
-            "action": "step", "idempotency_key": "second",
-        }).json()
+        second = client.post(
+            f"/api/replays/{replay_id}/control",
+            headers=headers,
+            json={
+                "action": "step",
+                "idempotency_key": "second",
+            },
+        ).json()
         question = {
             "question": "Is this a possible leak or an instrumentation issue?",
-            "snapshot_id": second["latest_window_id"], "mode": "scripted",
+            "snapshot_id": second["latest_window_id"],
+            "mode": "scripted",
             "idempotency_key": "question",
         }
         original_submit = service.submit_question
@@ -187,16 +257,21 @@ def test_api_provider_error_is_explicit_and_controls_remain_available(
 
         monkeypatch.setattr(service, "submit_question", unavailable)
         rejected = client.post(
-            f"/api/replays/{replay_id}/questions", headers=headers, json=question,
+            f"/api/replays/{replay_id}/questions",
+            headers=headers,
+            json=question,
         )
         assert rejected.status_code == 503
         assert rejected.json()["code"] == "proxy_quota"
         monkeypatch.setattr(service, "submit_question", original_submit)
         submitted = client.post(
-            f"/api/replays/{replay_id}/questions", headers=headers, json=question,
+            f"/api/replays/{replay_id}/questions",
+            headers=headers,
+            json=question,
         )
         assert submitted.status_code == 200
         task_id = submitted.json()["id"]
+        assert client.get(f"/api/tasks/{task_id}/casefile").status_code == 409
         for _ in range(10):
             service.run_once()
             task = app.state.store.get_task(task_id)
@@ -206,7 +281,9 @@ def test_api_provider_error_is_explicit_and_controls_remain_available(
         checked: list[str] = []
 
         def verify(
-            _self: Telemetry, trace_id: str, required_types: list[str] | None = None,
+            _self: Telemetry,
+            trace_id: str,
+            required_types: list[str] | None = None,
         ) -> bool:
             assert required_types == ["agent", "generation", "tool", "guardrail"]
             checked.append(trace_id)
@@ -216,3 +293,16 @@ def test_api_provider_error_is_explicit_and_controls_remain_available(
         trace = client.get(f"/api/tasks/{task_id}/trace").json()
         assert trace["stored_trace_visible"] is True
         assert checked == [trace["trace_id"]]
+        handoff = client.get(f"/api/tasks/{task_id}/casefile")
+        assert handoff.status_code == 200
+        assert "attachment" in handoff.headers["content-disposition"]
+        assert handoff.json()["snapshot_id"] == question["snapshot_id"]
+        assert handoff.json()["inspection"] is None
+        assert handoff.json()["provider_cost_usd"] is None
+        assert client.get(f"/api/tasks/{task_id}").json()["casefile"] == handoff.json()
+        specialist = next(
+            child for child in app.state.store.list_tasks(replay_id) if child.parent_id == task_id
+        )
+        assert client.get(f"/api/tasks/{specialist.id}/casefile").status_code == 409
+        client.cookies.clear()
+        assert client.get(f"/api/tasks/{task_id}/casefile").status_code == 401

@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .contracts import CanonicalObservation, RawRecord, Sensor, SitePack, content_hash
 
-UNITS = {"acoustic": "a.u.", "methane": "umol/L", "temperature": "degC"}
+UNITS = {"pressure": "bar", "acoustic": "a.u.", "methane": "umol/L", "temperature": "degC"}
 SENTINELS = {"", "null", "none", "na", "n/a", "-9999"}
 
 
@@ -94,7 +94,12 @@ def _normalize_record(
             validity = "malformed"
             transformations.append("malformed/nonfinite numeric payload")
     canonical_unit = UNITS[record.channel]
-    if record.channel == "methane" and record.unit == "nmol/L":
+    if record.channel == "pressure" and record.unit in {"kPa", "MPa", "Pa"}:
+        factor = {"kPa": 0.01, "MPa": 10.0, "Pa": 0.00001}[record.unit]
+        if value is not None:
+            value *= factor
+        transformations.append(f"{record.unit} multiplied by {factor:g} to bar")
+    elif record.channel == "methane" and record.unit == "nmol/L":
         if value is not None:
             value /= 1000
         transformations.append("nmol/L divided by 1000 to umol/L")
@@ -107,6 +112,7 @@ def _normalize_record(
         transformations.append("unknown sensor/channel capability")
     if value is not None and (
         (record.channel in {"acoustic", "methane"} and value < 0)
+        or (record.channel == "pressure" and not 0 <= value <= 250)
         or (record.channel == "temperature" and not -5 <= value <= 60)
     ):
         validity = "impossible"

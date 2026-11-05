@@ -48,7 +48,7 @@ class GraphState(TypedDict, total=False):
     failure: str
 
 
-def build_graph(checkpointer: Any = None, validator: Any = None) -> Any:
+def build_graph(checkpointer: Any = None, validator: Any = None, result_schema: Any = None) -> Any:
     """The service fulfils model/tool requests outside graph nodes and checkpoints them."""
 
     def model(state: GraphState) -> dict[str, Any]:
@@ -82,11 +82,12 @@ def build_graph(checkpointer: Any = None, validator: Any = None) -> Any:
                         content=json.dumps(
                             {
                                 "repair": getattr(exc, "code", "structure"),
+                                "validator_feedback": str(exc)[:1000],
                                 "instruction": "Correct the structured result; no prose.",
                                 "expected_schema": (
                                     WorkPlan.model_json_schema()
                                     if state["phase"] == "plan"
-                                    else AgentResult.model_json_schema()
+                                    else result_schema or AgentResult.model_json_schema()
                                 ),
                             }
                         )
@@ -118,6 +119,9 @@ def tool_messages(
     results: list[dict[str, Any]],
 ) -> list[ToolMessage]:
     return [
-        ToolMessage(content=json.dumps(result, allow_nan=False), tool_call_id=call["id"])
+        ToolMessage(
+            content=json.dumps(result, allow_nan=False, separators=(",", ":")),
+            tool_call_id=call["id"],
+        )
         for call, result in zip(calls, results, strict=True)
     ]

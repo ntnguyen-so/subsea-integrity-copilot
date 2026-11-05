@@ -1,0 +1,6411 @@
+{
+  "source_version": "pressure-v3",
+  "pack_version": "pressure-pack-v3",
+  "seed": 2026,
+  "examples": {
+    "S1": {
+      "snapshot": {
+        "id": "window-d0521bc5974e0e5373e944e6b8900f835e5087e8c8f6c5334c96e9bd3ccd08c5",
+        "tenant_id": "demo",
+        "site_id": "northsea",
+        "generation_id": "brief-S1",
+        "window_start": "2026-01-01T00:01:20Z",
+        "window_end": "2026-01-01T00:02:20Z",
+        "end_seconds": 140,
+        "revision": 1,
+        "predecessor_id": null,
+        "input_hash": "0c9de24aa55c4dd1bfd2f71b0a71b526ec4f36ced9acc21d31a8023e30962602",
+        "pack_version": "pressure-pack-v3",
+        "baseline_version": "pressure-median-mad-v2",
+        "parameter_version": "pressure-window-v2",
+        "clock_seconds": 145.0,
+        "watermark_seconds": 140.0,
+        "created_at": "2026-11-05T17:45:57.517239Z",
+        "canonical_count": 1440,
+        "quality": {
+          "status": "DEGRADED",
+          "expected_samples": 1440,
+          "received_samples": 1440,
+          "usable_samples": 1421,
+          "coverage": 0.9868055555555556,
+          "failure_domains_available": 6,
+          "findings": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.8192789873257027,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-001"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.992552220287493,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-003"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 49,
+              "max_score": 30.401696929096687,
+              "persistence_seconds": 49.0,
+              "evidence_ids": [
+                "ev-005"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 32.922368585664685,
+              "persistence_seconds": 48.0,
+              "evidence_ids": [
+                "ev-007"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 21.451523852124403,
+              "persistence_seconds": 48.0,
+              "evidence_ids": [
+                "ev-009"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 22.975390514240246,
+              "persistence_seconds": 48.0,
+              "evidence_ids": [
+                "ev-011"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.4627656401964515,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-013"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.9794453526399423,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-015"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.5574706380382306,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-017"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.328905006368487,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-019"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9757054353501502,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-021"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1322427647220366,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-023"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.142196188182922,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-025"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.6076555850726777,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-027"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.567269233555436,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-029"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 58,
+              "missing": 2,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.624251774076569,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-031"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.395569639799433,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-033"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.00279984856202,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-035"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.7785371493470592,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-037"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.2799270557083418,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-039"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.474624934348114,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-041"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.317640061581372,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-043"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 47,
+              "missing": 13,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.4046439773755424,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-045"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.8947379670353361,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-047"
+              ]
+            }
+          ],
+          "conflicts": [],
+          "issues": [
+            "PRESSURE_PATTERNS_NOT_PROOF",
+            "OPERATING_CONTEXT_REQUIRED",
+            "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+          ]
+        },
+        "event": {
+          "hypothesis": "suspected_leak",
+          "eligible_hypotheses": [
+            "suspected_leak",
+            "insufficient_evidence"
+          ],
+          "supporting_sensor_ids": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ],
+          "failure_domain_count": 2,
+          "persistence_seconds": 48.0,
+          "segment_ids": [
+            "P1"
+          ],
+          "evidence_ids": [
+            "ev-050"
+          ],
+          "counterevidence": [
+            "PRESSURE_PATTERNS_NOT_PROOF",
+            "OPERATING_CONTEXT_REQUIRED",
+            "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+          ],
+          "eligible_location": true,
+          "criteria_id": "pressure-investigation-v2"
+        },
+        "location": {
+          "status": "located",
+          "best": {
+            "segment_id": "P1",
+            "chainage_m": 400.0,
+            "position": {
+              "x": 0.0,
+              "y": -400.0
+            },
+            "residual": null,
+            "strength": null
+          },
+          "compatible": [
+            {
+              "segment_id": "P1",
+              "chainage_m": 200.0,
+              "position": {
+                "x": 0.0,
+                "y": -600.0
+              },
+              "residual": null,
+              "strength": null
+            },
+            {
+              "segment_id": "P1",
+              "chainage_m": 600.0,
+              "position": {
+                "x": 0.0,
+                "y": -200.0
+              },
+              "residual": null,
+              "strength": null
+            }
+          ],
+          "reason": "Priority inspection interval between station midpoints; not an exact leak location or a confidence interval",
+          "method": "pressure-alert-bracket-v2",
+          "grid_m": 0.0,
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "station_bracket_m": [
+            100.0,
+            300.0,
+            500.0,
+            700.0
+          ]
+        },
+        "evidence": {
+          "ev-000": {
+            "id": "ev-000",
+            "kind": "sensor_metadata",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "pack_id": "northsea",
+              "pack_version": "pressure-pack-v3",
+              "sensors": [
+                {
+                  "id": "P1-ST1-A",
+                  "station_id": "P1-ST1",
+                  "segment_id": "P1",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -700.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST1-B",
+                  "station_id": "P1-ST1",
+                  "segment_id": "P1",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -700.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST2-A",
+                  "station_id": "P1-ST2",
+                  "segment_id": "P1",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -500.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST2-B",
+                  "station_id": "P1-ST2",
+                  "segment_id": "P1",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -500.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST3-A",
+                  "station_id": "P1-ST3",
+                  "segment_id": "P1",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -300.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST3-B",
+                  "station_id": "P1-ST3",
+                  "segment_id": "P1",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -300.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST4-A",
+                  "station_id": "P1-ST4",
+                  "segment_id": "P1",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -100.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST4-B",
+                  "station_id": "P1-ST4",
+                  "segment_id": "P1",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -100.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST1-A",
+                  "station_id": "P2-ST1",
+                  "segment_id": "P2",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": -79.82,
+                    "y": 60.24
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST1-B",
+                  "station_id": "P2-ST1",
+                  "segment_id": "P2",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": -80.18,
+                    "y": 59.76
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST2-A",
+                  "station_id": "P2-ST2",
+                  "segment_id": "P2",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": -239.82,
+                    "y": 180.24
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST2-B",
+                  "station_id": "P2-ST2",
+                  "segment_id": "P2",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": -240.18,
+                    "y": 179.76
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST3-A",
+                  "station_id": "P2-ST3",
+                  "segment_id": "P2",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": -399.82,
+                    "y": 300.24
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST3-B",
+                  "station_id": "P2-ST3",
+                  "segment_id": "P2",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": -400.18,
+                    "y": 299.76
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST4-A",
+                  "station_id": "P2-ST4",
+                  "segment_id": "P2",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": -559.82,
+                    "y": 420.24
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST4-B",
+                  "station_id": "P2-ST4",
+                  "segment_id": "P2",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": -560.18,
+                    "y": 419.76
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST1-A",
+                  "station_id": "P3-ST1",
+                  "segment_id": "P3",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": 80.18,
+                    "y": 59.76
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST1-B",
+                  "station_id": "P3-ST1",
+                  "segment_id": "P3",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": 79.82,
+                    "y": 60.24
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST2-A",
+                  "station_id": "P3-ST2",
+                  "segment_id": "P3",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": 240.18,
+                    "y": 179.76
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST2-B",
+                  "station_id": "P3-ST2",
+                  "segment_id": "P3",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": 239.82,
+                    "y": 180.24
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST3-A",
+                  "station_id": "P3-ST3",
+                  "segment_id": "P3",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": 400.18,
+                    "y": 299.76
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST3-B",
+                  "station_id": "P3-ST3",
+                  "segment_id": "P3",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": 399.82,
+                    "y": 300.24
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST4-A",
+                  "station_id": "P3-ST4",
+                  "segment_id": "P3",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": 560.18,
+                    "y": 419.76
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST4-B",
+                  "station_id": "P3-ST4",
+                  "segment_id": "P3",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": 559.82,
+                    "y": 420.24
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                }
+              ]
+            }
+          },
+          "ev-001": {
+            "id": "ev-001",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.8192789873257027,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-002": {
+            "id": "ev-002",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.88229110298991,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.05616302871014511,
+              "anomaly_count": 0,
+              "max_score": 3.8192789873257027,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-003": {
+            "id": "ev-003",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.992552220287493,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-004": {
+            "id": "ev-004",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.88415728174576,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.04842232635456867,
+              "anomaly_count": 0,
+              "max_score": 3.992552220287493,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-005": {
+            "id": "ev-005",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 49,
+              "max_score": 30.401696929096687,
+              "persistence_seconds": 49.0
+            }
+          },
+          "ev-006": {
+            "id": "ev-006",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.6940912554208,
+              "baseline_scale": 0.04356981227964617,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 1.2372413428774678,
+              "anomaly_count": 49,
+              "max_score": 30.401696929096687,
+              "pressure_drop_persistence_seconds": 49.0
+            }
+          },
+          "ev-007": {
+            "id": "ev-007",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 32.922368585664685,
+              "persistence_seconds": 48.0
+            }
+          },
+          "ev-008": {
+            "id": "ev-008",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.68677727022123,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 1.2368236371141847,
+              "anomaly_count": 48,
+              "max_score": 32.922368585664685,
+              "pressure_drop_persistence_seconds": 48.0
+            }
+          },
+          "ev-009": {
+            "id": "ev-009",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 21.451523852124403,
+              "persistence_seconds": 48.0
+            }
+          },
+          "ev-010": {
+            "id": "ev-010",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.49716276855074,
+              "baseline_scale": 0.04372903160283993,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.845698059839421,
+              "anomaly_count": 48,
+              "max_score": 21.451523852124403,
+              "pressure_drop_persistence_seconds": 48.0
+            }
+          },
+          "ev-011": {
+            "id": "ev-011",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 22.975390514240246,
+              "persistence_seconds": 48.0
+            }
+          },
+          "ev-012": {
+            "id": "ev-012",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.48442110003825,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.8396423010566707,
+              "anomaly_count": 48,
+              "max_score": 22.975390514240246,
+              "pressure_drop_persistence_seconds": 48.0
+            }
+          },
+          "ev-013": {
+            "id": "ev-013",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.4627656401964515,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-014": {
+            "id": "ev-014",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.29183256349785,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.010980955814943627,
+              "anomaly_count": 0,
+              "max_score": 2.4627656401964515,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-015": {
+            "id": "ev-015",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.9794453526399423,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-016": {
+            "id": "ev-016",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.30012338752005,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.022254333670503,
+              "anomaly_count": 0,
+              "max_score": 2.9794453526399423,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-017": {
+            "id": "ev-017",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.5574706380382306,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-018": {
+            "id": "ev-018",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.09063909313437,
+              "baseline_scale": 0.04277448934803396,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.017835792928735827,
+              "anomaly_count": 0,
+              "max_score": 2.5574706380382306,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-019": {
+            "id": "ev-019",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.328905006368487,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-020": {
+            "id": "ev-020",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.07334621360408,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.02189415423600849,
+              "anomaly_count": 0,
+              "max_score": 2.328905006368487,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-021": {
+            "id": "ev-021",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9757054353501502,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-022": {
+            "id": "ev-022",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.88134672888916,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.014089929611373009,
+              "anomaly_count": 0,
+              "max_score": 1.9757054353501502,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-023": {
+            "id": "ev-023",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1322427647220366,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-024": {
+            "id": "ev-024",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.89045162904593,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.007723215707059694,
+              "anomaly_count": 0,
+              "max_score": 2.1322427647220366,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-025": {
+            "id": "ev-025",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.142196188182922,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-026": {
+            "id": "ev-026",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.69817852859339,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.0032475913675114043,
+              "anomaly_count": 0,
+              "max_score": 3.142196188182922,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-027": {
+            "id": "ev-027",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.6076555850726777,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-028": {
+            "id": "ev-028",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.68654439144598,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.01670560793485265,
+              "anomaly_count": 0,
+              "max_score": 3.6076555850726777,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-029": {
+            "id": "ev-029",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.567269233555436,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-030": {
+            "id": "ev-030",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.49547465871791,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.002438763718799919,
+              "anomaly_count": 0,
+              "max_score": 2.567269233555436,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-031": {
+            "id": "ev-031",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 58,
+              "missing": 2,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.624251774076569,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-032": {
+            "id": "ev-032",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.48028396332941,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.022184037890298214,
+              "anomaly_count": 0,
+              "max_score": 2.624251774076569,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-033": {
+            "id": "ev-033",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.395569639799433,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-034": {
+            "id": "ev-034",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.09071109734185,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.015348494988032257,
+              "anomaly_count": 0,
+              "max_score": 2.395569639799433,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-035": {
+            "id": "ev-035",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.00279984856202,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-036": {
+            "id": "ev-036",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.09558966376247,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.005792240608201382,
+              "anomaly_count": 0,
+              "max_score": 2.00279984856202,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-037": {
+            "id": "ev-037",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.7785371493470592,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-038": {
+            "id": "ev-038",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.88568611649862,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.008666918875491092,
+              "anomaly_count": 0,
+              "max_score": 1.7785371493470592,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-039": {
+            "id": "ev-039",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.2799270557083418,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-040": {
+            "id": "ev-040",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.88156116722344,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.008905762201337097,
+              "anomaly_count": 0,
+              "max_score": 2.2799270557083418,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-041": {
+            "id": "ev-041",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.474624934348114,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-042": {
+            "id": "ev-042",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.68307235773563,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.013255567370691779,
+              "anomaly_count": 0,
+              "max_score": 3.474624934348114,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-043": {
+            "id": "ev-043",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.317640061581372,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-044": {
+            "id": "ev-044",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.69250069951622,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.0007716878052832499,
+              "anomaly_count": 0,
+              "max_score": 2.317640061581372,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-045": {
+            "id": "ev-045",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 47,
+              "missing": 13,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.4046439773755424,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-046": {
+            "id": "ev-046",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.4916311331997,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.0011353898426165188,
+              "anomaly_count": 0,
+              "max_score": 2.4046439773755424,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-047": {
+            "id": "ev-047",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.8947379670353361,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-048": {
+            "id": "ev-048",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.48814897573467,
+              "baseline_scale": 0.04073232974013896,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.007780718492043093,
+              "anomaly_count": 0,
+              "max_score": 1.8947379670353361,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-049": {
+            "id": "ev-049",
+            "kind": "coverage",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "coverage": 0.9868055555555556,
+              "usable_samples": 1421,
+              "received_samples": 1440,
+              "expected_samples": 1440,
+              "failure_domains_available": 6,
+              "unit": "fraction"
+            }
+          },
+          "ev-050": {
+            "id": "ev-050",
+            "kind": "event_criteria",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "hypothesis": "suspected_leak",
+              "supporting_sensor_ids": [
+                "P1-ST2-A",
+                "P1-ST2-B",
+                "P1-ST3-A",
+                "P1-ST3-B"
+              ],
+              "failure_domain_count": 2,
+              "station_count": 2,
+              "persistence_seconds": 48.0,
+              "detector": "pressure-median-mad-v2",
+              "criteria": "pressure-investigation-v2",
+              "operating_context": "No valve/compressor records supplied; operator verification required"
+            }
+          },
+          "ev-051": {
+            "id": "ev-051",
+            "kind": "location_fit",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "status": "located",
+              "best": {
+                "segment_id": "P1",
+                "chainage_m": 400.0,
+                "position": {
+                  "x": 0.0,
+                  "y": -400.0
+                },
+                "residual": null,
+                "strength": null
+              },
+              "compatible": [
+                {
+                  "segment_id": "P1",
+                  "chainage_m": 200.0,
+                  "position": {
+                    "x": 0.0,
+                    "y": -600.0
+                  },
+                  "residual": null,
+                  "strength": null
+                },
+                {
+                  "segment_id": "P1",
+                  "chainage_m": 600.0,
+                  "position": {
+                    "x": 0.0,
+                    "y": -200.0
+                  },
+                  "residual": null,
+                  "strength": null
+                }
+              ],
+              "inspection_start_m": 200.0,
+              "inspection_end_m": 600.0,
+              "station_bracket_m": [
+                100.0,
+                300.0,
+                500.0,
+                700.0
+              ],
+              "unit": "m",
+              "method": "pressure-alert-bracket-v2"
+            }
+          },
+          "ev-052": {
+            "id": "ev-052",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "SYNTHETIC_UNCALIBRATED"
+            }
+          },
+          "ev-053": {
+            "id": "ev-053",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "PRESSURE_PATTERNS_NOT_PROOF"
+            }
+          },
+          "ev-054": {
+            "id": "ev-054",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "OPERATING_CONTEXT_REQUIRED"
+            }
+          },
+          "ev-055": {
+            "id": "ev-055",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+            }
+          },
+          "ev-056": {
+            "id": "ev-056",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+            }
+          },
+          "ev-057": {
+            "id": "ev-057",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "COMPATIBLE_NOT_CONFIDENCE"
+            }
+          }
+        },
+        "claims": {
+          "claim-000": {
+            "id": "claim-000",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.8192789873257027,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-001"
+            ]
+          },
+          "claim-001": {
+            "id": "claim-001",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.992552220287493,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-003"
+            ]
+          },
+          "claim-002": {
+            "id": "claim-002",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 49,
+              "max_score": 30.401696929096687,
+              "persistence_seconds": 49.0
+            },
+            "evidence_ids": [
+              "ev-005"
+            ]
+          },
+          "claim-003": {
+            "id": "claim-003",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 32.922368585664685,
+              "persistence_seconds": 48.0
+            },
+            "evidence_ids": [
+              "ev-007"
+            ]
+          },
+          "claim-004": {
+            "id": "claim-004",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 21.451523852124403,
+              "persistence_seconds": 48.0
+            },
+            "evidence_ids": [
+              "ev-009"
+            ]
+          },
+          "claim-005": {
+            "id": "claim-005",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 48,
+              "max_score": 22.975390514240246,
+              "persistence_seconds": 48.0
+            },
+            "evidence_ids": [
+              "ev-011"
+            ]
+          },
+          "claim-006": {
+            "id": "claim-006",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.4627656401964515,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-013"
+            ]
+          },
+          "claim-007": {
+            "id": "claim-007",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.9794453526399423,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-015"
+            ]
+          },
+          "claim-008": {
+            "id": "claim-008",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.5574706380382306,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-017"
+            ]
+          },
+          "claim-009": {
+            "id": "claim-009",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.328905006368487,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-019"
+            ]
+          },
+          "claim-010": {
+            "id": "claim-010",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9757054353501502,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-021"
+            ]
+          },
+          "claim-011": {
+            "id": "claim-011",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1322427647220366,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-023"
+            ]
+          },
+          "claim-012": {
+            "id": "claim-012",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.142196188182922,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-025"
+            ]
+          },
+          "claim-013": {
+            "id": "claim-013",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.6076555850726777,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-027"
+            ]
+          },
+          "claim-014": {
+            "id": "claim-014",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.567269233555436,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-029"
+            ]
+          },
+          "claim-015": {
+            "id": "claim-015",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 58,
+              "missing": 2,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.624251774076569,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-031"
+            ]
+          },
+          "claim-016": {
+            "id": "claim-016",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.395569639799433,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-033"
+            ]
+          },
+          "claim-017": {
+            "id": "claim-017",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.00279984856202,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-035"
+            ]
+          },
+          "claim-018": {
+            "id": "claim-018",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.7785371493470592,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-037"
+            ]
+          },
+          "claim-019": {
+            "id": "claim-019",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.2799270557083418,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-039"
+            ]
+          },
+          "claim-020": {
+            "id": "claim-020",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.474624934348114,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-041"
+            ]
+          },
+          "claim-021": {
+            "id": "claim-021",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.317640061581372,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-043"
+            ]
+          },
+          "claim-022": {
+            "id": "claim-022",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 47,
+              "missing": 13,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.4046439773755424,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-045"
+            ]
+          },
+          "claim-023": {
+            "id": "claim-023",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.8947379670353361,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-047"
+            ]
+          },
+          "claim-024": {
+            "id": "claim-024",
+            "kind": "coverage",
+            "value": {
+              "coverage": 0.9868055555555556,
+              "usable_samples": 1421,
+              "received_samples": 1440,
+              "expected_samples": 1440,
+              "failure_domains_available": 6,
+              "unit": "fraction"
+            },
+            "evidence_ids": [
+              "ev-049"
+            ]
+          },
+          "claim-025": {
+            "id": "claim-025",
+            "kind": "hypothesis",
+            "value": {
+              "hypothesis": "suspected_leak",
+              "supporting_sensor_ids": [
+                "P1-ST2-A",
+                "P1-ST2-B",
+                "P1-ST3-A",
+                "P1-ST3-B"
+              ],
+              "failure_domain_count": 2,
+              "station_count": 2,
+              "persistence_seconds": 48.0,
+              "detector": "pressure-median-mad-v2",
+              "criteria": "pressure-investigation-v2",
+              "operating_context": "No valve/compressor records supplied; operator verification required"
+            },
+            "evidence_ids": [
+              "ev-050"
+            ]
+          },
+          "claim-026": {
+            "id": "claim-026",
+            "kind": "location",
+            "value": {
+              "status": "located",
+              "best": {
+                "segment_id": "P1",
+                "chainage_m": 400.0,
+                "position": {
+                  "x": 0.0,
+                  "y": -400.0
+                },
+                "residual": null,
+                "strength": null
+              },
+              "compatible": [
+                {
+                  "segment_id": "P1",
+                  "chainage_m": 200.0,
+                  "position": {
+                    "x": 0.0,
+                    "y": -600.0
+                  },
+                  "residual": null,
+                  "strength": null
+                },
+                {
+                  "segment_id": "P1",
+                  "chainage_m": 600.0,
+                  "position": {
+                    "x": 0.0,
+                    "y": -200.0
+                  },
+                  "residual": null,
+                  "strength": null
+                }
+              ],
+              "inspection_start_m": 200.0,
+              "inspection_end_m": 600.0,
+              "station_bracket_m": [
+                100.0,
+                300.0,
+                500.0,
+                700.0
+              ],
+              "unit": "m",
+              "method": "pressure-alert-bracket-v2"
+            },
+            "evidence_ids": [
+              "ev-051"
+            ]
+          },
+          "claim-027": {
+            "id": "claim-027",
+            "kind": "limitation",
+            "value": {
+              "code": "SYNTHETIC_UNCALIBRATED"
+            },
+            "evidence_ids": [
+              "ev-052"
+            ]
+          },
+          "claim-028": {
+            "id": "claim-028",
+            "kind": "limitation",
+            "value": {
+              "code": "PRESSURE_PATTERNS_NOT_PROOF"
+            },
+            "evidence_ids": [
+              "ev-053"
+            ]
+          },
+          "claim-029": {
+            "id": "claim-029",
+            "kind": "limitation",
+            "value": {
+              "code": "OPERATING_CONTEXT_REQUIRED"
+            },
+            "evidence_ids": [
+              "ev-054"
+            ]
+          },
+          "claim-030": {
+            "id": "claim-030",
+            "kind": "limitation",
+            "value": {
+              "code": "VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES"
+            },
+            "evidence_ids": [
+              "ev-055"
+            ]
+          },
+          "claim-031": {
+            "id": "claim-031",
+            "kind": "limitation",
+            "value": {
+              "code": "INSPECTION_INTERVAL_NOT_LEAK_POINT"
+            },
+            "evidence_ids": [
+              "ev-056"
+            ]
+          },
+          "claim-032": {
+            "id": "claim-032",
+            "kind": "limitation",
+            "value": {
+              "code": "COMPATIBLE_NOT_CONFIDENCE"
+            },
+            "evidence_ids": [
+              "ev-057"
+            ]
+          }
+        }
+      },
+      "window_start_seconds": 80.0,
+      "window_end_seconds": 140.0,
+      "traces": {
+        "P1-ST2-A": [
+          {
+            "seconds": 80.0,
+            "value": 79.70864381863133
+          },
+          {
+            "seconds": 81.0,
+            "value": 79.69333429190291
+          },
+          {
+            "seconds": 82.0,
+            "value": 79.72974860238827
+          },
+          {
+            "seconds": 83.0,
+            "value": 79.7006121701111
+          },
+          {
+            "seconds": 84.0,
+            "value": 79.65136166833582
+          },
+          {
+            "seconds": 85.0,
+            "value": 79.63176229938955
+          },
+          {
+            "seconds": 86.0,
+            "value": 79.63221645171596
+          },
+          {
+            "seconds": 87.0,
+            "value": 79.70534681507235
+          },
+          {
+            "seconds": 88.0,
+            "value": 79.65994739930387
+          },
+          {
+            "seconds": 89.0,
+            "value": 79.72955537972162
+          },
+          {
+            "seconds": 90.0,
+            "value": 79.71139657937557
+          },
+          {
+            "seconds": 91.0,
+            "value": 79.4597257390512
+          },
+          {
+            "seconds": 92.0,
+            "value": 79.1826452025521
+          },
+          {
+            "seconds": 93.0,
+            "value": 78.938385714815
+          },
+          {
+            "seconds": 94.0,
+            "value": 78.65321869728078
+          },
+          {
+            "seconds": 95.0,
+            "value": 78.43983855763254
+          },
+          {
+            "seconds": 96.0,
+            "value": 78.45333303555758
+          },
+          {
+            "seconds": 97.0,
+            "value": 78.42896894696665
+          },
+          {
+            "seconds": 98.0,
+            "value": 78.43131494783198
+          },
+          {
+            "seconds": 99.0,
+            "value": 78.43771113591127
+          },
+          {
+            "seconds": 100.0,
+            "value": 78.36949502723736
+          },
+          {
+            "seconds": 101.0,
+            "value": 78.45173899498091
+          },
+          {
+            "seconds": 102.0,
+            "value": 78.40628012504528
+          },
+          {
+            "seconds": 103.0,
+            "value": 78.42695366952616
+          },
+          {
+            "seconds": 104.0,
+            "value": 78.39217391498835
+          },
+          {
+            "seconds": 105.0,
+            "value": 78.44946067298613
+          },
+          {
+            "seconds": 106.0,
+            "value": 78.44267345239194
+          },
+          {
+            "seconds": 107.0,
+            "value": 78.43940767791705
+          },
+          {
+            "seconds": 108.0,
+            "value": 78.4704804471682
+          },
+          {
+            "seconds": 109.0,
+            "value": 78.48725472925301
+          },
+          {
+            "seconds": 110.0,
+            "value": 78.47102903136344
+          },
+          {
+            "seconds": 111.0,
+            "value": 78.48079724533982
+          },
+          {
+            "seconds": 112.0,
+            "value": 78.41019268884173
+          },
+          {
+            "seconds": 113.0,
+            "value": 78.48332534772968
+          },
+          {
+            "seconds": 114.0,
+            "value": 78.46230243114034
+          },
+          {
+            "seconds": 115.0,
+            "value": 78.43534045550943
+          },
+          {
+            "seconds": 116.0,
+            "value": 78.44079806828624
+          },
+          {
+            "seconds": 117.0,
+            "value": 78.42777115687453
+          },
+          {
+            "seconds": 118.0,
+            "value": 78.47967441924226
+          },
+          {
+            "seconds": 119.0,
+            "value": 78.43820202955865
+          },
+          {
+            "seconds": 120.0,
+            "value": 78.43195253223989
+          },
+          {
+            "seconds": 121.0,
+            "value": 78.44865815138162
+          },
+          {
+            "seconds": 122.0,
+            "value": 78.47167855260697
+          },
+          {
+            "seconds": 123.0,
+            "value": 78.44064008880903
+          },
+          {
+            "seconds": 124.0,
+            "value": 78.45684991254333
+          },
+          {
+            "seconds": 125.0,
+            "value": 78.46348308594176
+          },
+          {
+            "seconds": 126.0,
+            "value": 78.45059360586123
+          },
+          {
+            "seconds": 127.0,
+            "value": 78.44613182577883
+          },
+          {
+            "seconds": 128.0,
+            "value": 78.47167055017479
+          },
+          {
+            "seconds": 129.0,
+            "value": 78.4598913275406
+          },
+          {
+            "seconds": 130.0,
+            "value": 78.4897165417142
+          },
+          {
+            "seconds": 131.0,
+            "value": 78.51344322746499
+          },
+          {
+            "seconds": 132.0,
+            "value": 78.52482795800047
+          },
+          {
+            "seconds": 133.0,
+            "value": 78.52014099543157
+          },
+          {
+            "seconds": 134.0,
+            "value": 78.48202989607667
+          },
+          {
+            "seconds": 135.0,
+            "value": 78.46371918843722
+          },
+          {
+            "seconds": 136.0,
+            "value": 78.46510214340219
+          },
+          {
+            "seconds": 137.0,
+            "value": 78.4186533537319
+          },
+          {
+            "seconds": 138.0,
+            "value": 78.46866610728755
+          },
+          {
+            "seconds": 139.0,
+            "value": 78.46660192226055
+          }
+        ],
+        "P1-ST2-B": [
+          {
+            "seconds": 80.0,
+            "value": 79.66341831732544
+          },
+          {
+            "seconds": 81.0,
+            "value": 79.63047226123366
+          },
+          {
+            "seconds": 82.0,
+            "value": 79.65800260281243
+          },
+          {
+            "seconds": 83.0,
+            "value": 79.63167199853754
+          },
+          {
+            "seconds": 84.0,
+            "value": 79.68111627958898
+          },
+          {
+            "seconds": 85.0,
+            "value": 79.67221820592886
+          },
+          {
+            "seconds": 86.0,
+            "value": 79.73227647827963
+          },
+          {
+            "seconds": 87.0,
+            "value": 79.6896175673987
+          },
+          {
+            "seconds": 88.0,
+            "value": 79.61056517854304
+          },
+          {
+            "seconds": 89.0,
+            "value": 79.71353955755288
+          },
+          {
+            "seconds": 90.0,
+            "value": 79.68943404566868
+          },
+          {
+            "seconds": 91.0,
+            "value": null
+          },
+          {
+            "seconds": 92.0,
+            "value": 79.1996780340878
+          },
+          {
+            "seconds": 93.0,
+            "value": 78.94088696149551
+          },
+          {
+            "seconds": 94.0,
+            "value": 78.64869511405006
+          },
+          {
+            "seconds": 95.0,
+            "value": 78.41971171384496
+          },
+          {
+            "seconds": 96.0,
+            "value": 78.48144593519149
+          },
+          {
+            "seconds": 97.0,
+            "value": 78.413852069748
+          },
+          {
+            "seconds": 98.0,
+            "value": 78.45093104610778
+          },
+          {
+            "seconds": 99.0,
+            "value": 78.47711695214169
+          },
+          {
+            "seconds": 100.0,
+            "value": 78.41368308549183
+          },
+          {
+            "seconds": 101.0,
+            "value": 78.47209305499948
+          },
+          {
+            "seconds": 102.0,
+            "value": 78.39769604344171
+          },
+          {
+            "seconds": 103.0,
+            "value": 78.47229918289798
+          },
+          {
+            "seconds": 104.0,
+            "value": 78.40097365854757
+          },
+          {
+            "seconds": 105.0,
+            "value": 78.39481229205992
+          },
+          {
+            "seconds": 106.0,
+            "value": 78.44190955698853
+          },
+          {
+            "seconds": 107.0,
+            "value": 78.47036065403074
+          },
+          {
+            "seconds": 108.0,
+            "value": 78.45291471827417
+          },
+          {
+            "seconds": 109.0,
+            "value": 78.47590745912885
+          },
+          {
+            "seconds": 110.0,
+            "value": 78.44852483371756
+          },
+          {
+            "seconds": 111.0,
+            "value": 78.44406239758337
+          },
+          {
+            "seconds": 112.0,
+            "value": 78.42077501787007
+          },
+          {
+            "seconds": 113.0,
+            "value": 78.42318542878505
+          },
+          {
+            "seconds": 114.0,
+            "value": 78.41799831322918
+          },
+          {
+            "seconds": 115.0,
+            "value": 78.47403074156908
+          },
+          {
+            "seconds": 116.0,
+            "value": 78.41442210654468
+          },
+          {
+            "seconds": 117.0,
+            "value": 78.4272321244098
+          },
+          {
+            "seconds": 118.0,
+            "value": 78.45895837067795
+          },
+          {
+            "seconds": 119.0,
+            "value": 78.4203792804679
+          },
+          {
+            "seconds": 120.0,
+            "value": 78.43015499591492
+          },
+          {
+            "seconds": 121.0,
+            "value": 78.43123087743118
+          },
+          {
+            "seconds": 122.0,
+            "value": 78.41624154158418
+          },
+          {
+            "seconds": 123.0,
+            "value": 78.46880199800903
+          },
+          {
+            "seconds": 124.0,
+            "value": 78.48616597517854
+          },
+          {
+            "seconds": 125.0,
+            "value": 78.40357444453754
+          },
+          {
+            "seconds": 126.0,
+            "value": 78.46731575433414
+          },
+          {
+            "seconds": 127.0,
+            "value": 78.54795265341126
+          },
+          {
+            "seconds": 128.0,
+            "value": 78.44598608423658
+          },
+          {
+            "seconds": 129.0,
+            "value": 78.45127011353198
+          },
+          {
+            "seconds": 130.0,
+            "value": 78.53903037774079
+          },
+          {
+            "seconds": 131.0,
+            "value": 78.4489762201063
+          },
+          {
+            "seconds": 132.0,
+            "value": 78.40067178634804
+          },
+          {
+            "seconds": 133.0,
+            "value": 78.36988252679464
+          },
+          {
+            "seconds": 134.0,
+            "value": 78.52368850507949
+          },
+          {
+            "seconds": 135.0,
+            "value": 78.49293023184703
+          },
+          {
+            "seconds": 136.0,
+            "value": 78.44352221587604
+          },
+          {
+            "seconds": 137.0,
+            "value": 78.46168068255413
+          },
+          {
+            "seconds": 138.0,
+            "value": 78.48284085040531
+          },
+          {
+            "seconds": 139.0,
+            "value": 78.48049711620192
+          }
+        ],
+        "P1-ST3-A": [
+          {
+            "seconds": 80.0,
+            "value": 79.46981617761399
+          },
+          {
+            "seconds": 81.0,
+            "value": 79.52019582900357
+          },
+          {
+            "seconds": 82.0,
+            "value": 79.44140464014477
+          },
+          {
+            "seconds": 83.0,
+            "value": 79.46473273314872
+          },
+          {
+            "seconds": 84.0,
+            "value": 79.48160960663101
+          },
+          {
+            "seconds": 85.0,
+            "value": 79.46773105060126
+          },
+          {
+            "seconds": 86.0,
+            "value": 79.44307851357134
+          },
+          {
+            "seconds": 87.0,
+            "value": 79.41691862284854
+          },
+          {
+            "seconds": 88.0,
+            "value": 79.51468976857493
+          },
+          {
+            "seconds": 89.0,
+            "value": 79.45512666279096
+          },
+          {
+            "seconds": 90.0,
+            "value": 79.49094054846996
+          },
+          {
+            "seconds": 91.0,
+            "value": 79.28149356083307
+          },
+          {
+            "seconds": 92.0,
+            "value": 79.13442822164696
+          },
+          {
+            "seconds": 93.0,
+            "value": 79.01562912156626
+          },
+          {
+            "seconds": 94.0,
+            "value": 78.81425264860724
+          },
+          {
+            "seconds": 95.0,
+            "value": 78.64288033698908
+          },
+          {
+            "seconds": 96.0,
+            "value": 78.61175040494818
+          },
+          {
+            "seconds": 97.0,
+            "value": 78.59758116434074
+          },
+          {
+            "seconds": 98.0,
+            "value": 78.55910840409211
+          },
+          {
+            "seconds": 99.0,
+            "value": 78.56975905789085
+          },
+          {
+            "seconds": 100.0,
+            "value": 78.65045085129957
+          },
+          {
+            "seconds": 101.0,
+            "value": 78.59325205615544
+          },
+          {
+            "seconds": 102.0,
+            "value": 78.61311650395459
+          },
+          {
+            "seconds": 103.0,
+            "value": 78.63999722120163
+          },
+          {
+            "seconds": 104.0,
+            "value": 78.66108669731905
+          },
+          {
+            "seconds": 105.0,
+            "value": 78.64469986261176
+          },
+          {
+            "seconds": 106.0,
+            "value": 78.6203856116218
+          },
+          {
+            "seconds": 107.0,
+            "value": 78.6178973067593
+          },
+          {
+            "seconds": 108.0,
+            "value": 78.65518124037257
+          },
+          {
+            "seconds": 109.0,
+            "value": 78.63439307217048
+          },
+          {
+            "seconds": 110.0,
+            "value": 78.64454280258889
+          },
+          {
+            "seconds": 111.0,
+            "value": 78.68461287198306
+          },
+          {
+            "seconds": 112.0,
+            "value": 78.61991529709378
+          },
+          {
+            "seconds": 113.0,
+            "value": 78.66090433705531
+          },
+          {
+            "seconds": 114.0,
+            "value": 78.66850093721189
+          },
+          {
+            "seconds": 115.0,
+            "value": 78.73327218259571
+          },
+          {
+            "seconds": 116.0,
+            "value": 78.6804109581218
+          },
+          {
+            "seconds": 117.0,
+            "value": 78.6562843265264
+          },
+          {
+            "seconds": 118.0,
+            "value": 78.58645719825434
+          },
+          {
+            "seconds": 119.0,
+            "value": 78.67047973908876
+          },
+          {
+            "seconds": 120.0,
+            "value": 78.6730784216202
+          },
+          {
+            "seconds": 121.0,
+            "value": 78.64743451816543
+          },
+          {
+            "seconds": 122.0,
+            "value": 78.67885782997404
+          },
+          {
+            "seconds": 123.0,
+            "value": 78.66700282248499
+          },
+          {
+            "seconds": 124.0,
+            "value": 78.6508186359894
+          },
+          {
+            "seconds": 125.0,
+            "value": 78.61760844925318
+          },
+          {
+            "seconds": 126.0,
+            "value": 78.62569982392273
+          },
+          {
+            "seconds": 127.0,
+            "value": 78.67611952973492
+          },
+          {
+            "seconds": 128.0,
+            "value": 78.60003620714346
+          },
+          {
+            "seconds": 129.0,
+            "value": 78.62257348345553
+          },
+          {
+            "seconds": 130.0,
+            "value": 78.71451995250357
+          },
+          {
+            "seconds": 131.0,
+            "value": 78.65622479308738
+          },
+          {
+            "seconds": 132.0,
+            "value": 78.62907552164104
+          },
+          {
+            "seconds": 133.0,
+            "value": 78.66778833085401
+          },
+          {
+            "seconds": 134.0,
+            "value": 78.65211078143324
+          },
+          {
+            "seconds": 135.0,
+            "value": 78.65363525770957
+          },
+          {
+            "seconds": 136.0,
+            "value": 78.59655024118244
+          },
+          {
+            "seconds": 137.0,
+            "value": 78.65642700494635
+          },
+          {
+            "seconds": 138.0,
+            "value": 78.66123895498926
+          },
+          {
+            "seconds": 139.0,
+            "value": 78.67880694884123
+          }
+        ]
+      }
+    },
+    "S2": {
+      "snapshot": {
+        "id": "window-1bf3af519b26a393366ad604f1c7ddaf2270545ad4bad81db3ffa20cb27f50e2",
+        "tenant_id": "demo",
+        "site_id": "northsea",
+        "generation_id": "brief-S2",
+        "window_start": "2026-01-01T00:01:20Z",
+        "window_end": "2026-01-01T00:02:20Z",
+        "end_seconds": 140,
+        "revision": 1,
+        "predecessor_id": null,
+        "input_hash": "1646a0af466704bbfb986252cc2336371e4def3bdb842432b65219f96040fe50",
+        "pack_version": "pressure-pack-v3",
+        "baseline_version": "pressure-median-mad-v2",
+        "parameter_version": "pressure-window-v2",
+        "clock_seconds": 145.0,
+        "watermark_seconds": 140.0,
+        "created_at": "2026-11-05T17:45:57.876907Z",
+        "canonical_count": 1380,
+        "quality": {
+          "status": "DEGRADED",
+          "expected_samples": 1440,
+          "received_samples": 1380,
+          "usable_samples": 1378,
+          "coverage": 0.9569444444444445,
+          "failure_domains_available": 6,
+          "findings": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 64.02927961282394,
+              "persistence_seconds": 1.0,
+              "evidence_ids": [
+                "ev-001"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.604264174127735,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-003"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": true,
+              "peer_disagreement": true,
+              "anomaly_count": 29,
+              "max_score": 14.374558585476741,
+              "persistence_seconds": 27.0,
+              "evidence_ids": [
+                "ev-005"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.128695377467338,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-007"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.8481752972950236,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-009"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.7294493489538496,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-011"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9444913564594657,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-013"
+              ]
+            },
+            {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.5005125730663593,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-015"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.054366275345983,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-017"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.9203640817549115,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-019"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 62.848988037278986,
+              "persistence_seconds": 1.0,
+              "evidence_ids": [
+                "ev-021"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1492565760965476,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-023"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9995631588795248,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-025"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1909915294649807,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-027"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.911185656227744,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-029"
+              ]
+            },
+            {
+              "sensor_id": "P2-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.186416773752242,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-031"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.2314776189780616,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-033"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.395619931721882,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-035"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.7786196512824546,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-037"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.5678473937565514,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-039"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.802782014409644,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-041"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.479829619635865,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-043"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 63.221759734904026,
+              "persistence_seconds": 1.0,
+              "evidence_ids": [
+                "ev-045"
+              ]
+            },
+            {
+              "sensor_id": "P3-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.106189206189171,
+              "persistence_seconds": 0.0,
+              "evidence_ids": [
+                "ev-047"
+              ]
+            }
+          ],
+          "conflicts": [],
+          "issues": [
+            "PRESSURE_PATTERNS_NOT_PROOF",
+            "OPERATING_CONTEXT_REQUIRED"
+          ]
+        },
+        "event": {
+          "hypothesis": "sensor_or_telemetry_issue",
+          "eligible_hypotheses": [
+            "sensor_or_telemetry_issue",
+            "insufficient_evidence"
+          ],
+          "supporting_sensor_ids": [],
+          "failure_domain_count": 0,
+          "persistence_seconds": 0.0,
+          "segment_ids": [],
+          "evidence_ids": [
+            "ev-050"
+          ],
+          "counterevidence": [
+            "PRESSURE_PATTERNS_NOT_PROOF",
+            "OPERATING_CONTEXT_REQUIRED"
+          ],
+          "eligible_location": false,
+          "criteria_id": "pressure-investigation-v2"
+        },
+        "location": null,
+        "evidence": {
+          "ev-000": {
+            "id": "ev-000",
+            "kind": "sensor_metadata",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "pack_id": "northsea",
+              "pack_version": "pressure-pack-v3",
+              "sensors": [
+                {
+                  "id": "P1-ST1-A",
+                  "station_id": "P1-ST1",
+                  "segment_id": "P1",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -700.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST1-B",
+                  "station_id": "P1-ST1",
+                  "segment_id": "P1",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -700.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST2-A",
+                  "station_id": "P1-ST2",
+                  "segment_id": "P1",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -500.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST2-B",
+                  "station_id": "P1-ST2",
+                  "segment_id": "P1",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -500.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST3-A",
+                  "station_id": "P1-ST3",
+                  "segment_id": "P1",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -300.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST3-B",
+                  "station_id": "P1-ST3",
+                  "segment_id": "P1",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -300.0
+                  },
+                  "failure_domain_id": "gateway-P1-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST4-A",
+                  "station_id": "P1-ST4",
+                  "segment_id": "P1",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": 0.3,
+                    "y": -100.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P1-ST4-B",
+                  "station_id": "P1-ST4",
+                  "segment_id": "P1",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": -0.3,
+                    "y": -100.0
+                  },
+                  "failure_domain_id": "gateway-P1-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST1-A",
+                  "station_id": "P2-ST1",
+                  "segment_id": "P2",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": -79.82,
+                    "y": 60.24
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST1-B",
+                  "station_id": "P2-ST1",
+                  "segment_id": "P2",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": -80.18,
+                    "y": 59.76
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST2-A",
+                  "station_id": "P2-ST2",
+                  "segment_id": "P2",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": -239.82,
+                    "y": 180.24
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST2-B",
+                  "station_id": "P2-ST2",
+                  "segment_id": "P2",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": -240.18,
+                    "y": 179.76
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST3-A",
+                  "station_id": "P2-ST3",
+                  "segment_id": "P2",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": -399.82,
+                    "y": 300.24
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST3-B",
+                  "station_id": "P2-ST3",
+                  "segment_id": "P2",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": -400.18,
+                    "y": 299.76
+                  },
+                  "failure_domain_id": "gateway-P2-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST4-A",
+                  "station_id": "P2-ST4",
+                  "segment_id": "P2",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": -559.82,
+                    "y": 420.24
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P2-ST4-B",
+                  "station_id": "P2-ST4",
+                  "segment_id": "P2",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": -560.18,
+                    "y": 419.76
+                  },
+                  "failure_domain_id": "gateway-P2-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST1-A",
+                  "station_id": "P3-ST1",
+                  "segment_id": "P3",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": 80.18,
+                    "y": 59.76
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST1-B",
+                  "station_id": "P3-ST1",
+                  "segment_id": "P3",
+                  "chainage_m": 100.0,
+                  "position": {
+                    "x": 79.82,
+                    "y": 60.24
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST2-A",
+                  "station_id": "P3-ST2",
+                  "segment_id": "P3",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": 240.18,
+                    "y": 179.76
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST2-B",
+                  "station_id": "P3-ST2",
+                  "segment_id": "P3",
+                  "chainage_m": 300.0,
+                  "position": {
+                    "x": 239.82,
+                    "y": 180.24
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST3-A",
+                  "station_id": "P3-ST3",
+                  "segment_id": "P3",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": 400.18,
+                    "y": 299.76
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST3-B",
+                  "station_id": "P3-ST3",
+                  "segment_id": "P3",
+                  "chainage_m": 500.0,
+                  "position": {
+                    "x": 399.82,
+                    "y": 300.24
+                  },
+                  "failure_domain_id": "gateway-P3-0",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST4-A",
+                  "station_id": "P3-ST4",
+                  "segment_id": "P3",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": 560.18,
+                    "y": 419.76
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                },
+                {
+                  "id": "P3-ST4-B",
+                  "station_id": "P3-ST4",
+                  "segment_id": "P3",
+                  "chainage_m": 700.0,
+                  "position": {
+                    "x": 559.82,
+                    "y": 420.24
+                  },
+                  "failure_domain_id": "gateway-P3-1",
+                  "channels": [
+                    "pressure"
+                  ]
+                }
+              ]
+            }
+          },
+          "ev-001": {
+            "id": "ev-001",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 64.02927961282394,
+              "persistence_seconds": 1.0
+            }
+          },
+          "ev-002": {
+            "id": "ev-002",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.88229110298991,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.010317454272325222,
+              "anomaly_count": 2,
+              "max_score": 64.02927961282394,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-003": {
+            "id": "ev-003",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.604264174127735,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-004": {
+            "id": "ev-004",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.88415728174576,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.00831501336273277,
+              "anomaly_count": 0,
+              "max_score": 2.604264174127735,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-005": {
+            "id": "ev-005",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": true,
+              "peer_disagreement": true,
+              "anomaly_count": 29,
+              "max_score": 14.374558585476741,
+              "persistence_seconds": 27.0
+            }
+          },
+          "ev-006": {
+            "id": "ev-006",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.6940912554208,
+              "baseline_scale": 0.04356981227964617,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.2046703059445747,
+              "anomaly_count": 29,
+              "max_score": 14.374558585476741,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-007": {
+            "id": "ev-007",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.128695377467338,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-008": {
+            "id": "ev-008",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.68677727022123,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.013282686125904775,
+              "anomaly_count": 0,
+              "max_score": 2.128695377467338,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-009": {
+            "id": "ev-009",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.8481752972950236,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-010": {
+            "id": "ev-010",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.49716276855074,
+              "baseline_scale": 0.04372903160283993,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.0011701518387781107,
+              "anomaly_count": 0,
+              "max_score": 1.8481752972950236,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-011": {
+            "id": "ev-011",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.7294493489538496,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-012": {
+            "id": "ev-012",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.48442110003825,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.016340412684883177,
+              "anomaly_count": 0,
+              "max_score": 2.7294493489538496,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-013": {
+            "id": "ev-013",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9444913564594657,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-014": {
+            "id": "ev-014",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.29183256349785,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.015137703963461036,
+              "anomaly_count": 0,
+              "max_score": 1.9444913564594657,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-015": {
+            "id": "ev-015",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.5005125730663593,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-016": {
+            "id": "ev-016",
+            "kind": "channel_summary",
+            "sensor_id": "P1-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.30012338752005,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.0031943856096177115,
+              "anomaly_count": 0,
+              "max_score": 1.5005125730663593,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-017": {
+            "id": "ev-017",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.054366275345983,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-018": {
+            "id": "ev-018",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.09063909313437,
+              "baseline_scale": 0.04277448934803396,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.004779908427707369,
+              "anomaly_count": 0,
+              "max_score": 2.054366275345983,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-019": {
+            "id": "ev-019",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.9203640817549115,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-020": {
+            "id": "ev-020",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.07334621360408,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.016958727346846558,
+              "anomaly_count": 0,
+              "max_score": 2.9203640817549115,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-021": {
+            "id": "ev-021",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 62.848988037278986,
+              "persistence_seconds": 1.0
+            }
+          },
+          "ev-022": {
+            "id": "ev-022",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.88134672888916,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.014762936403400317,
+              "anomaly_count": 2,
+              "max_score": 62.848988037278986,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-023": {
+            "id": "ev-023",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1492565760965476,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-024": {
+            "id": "ev-024",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.89045162904593,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.005456092182399175,
+              "anomaly_count": 0,
+              "max_score": 2.1492565760965476,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-025": {
+            "id": "ev-025",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9995631588795248,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-026": {
+            "id": "ev-026",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.69817852859339,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.006597098225682885,
+              "anomaly_count": 0,
+              "max_score": 1.9995631588795248,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-027": {
+            "id": "ev-027",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1909915294649807,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-028": {
+            "id": "ev-028",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.68654439144598,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.01082595900369654,
+              "anomaly_count": 0,
+              "max_score": 2.1909915294649807,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-029": {
+            "id": "ev-029",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.911185656227744,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-030": {
+            "id": "ev-030",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.49547465871791,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.0010348484562712201,
+              "anomaly_count": 0,
+              "max_score": 2.911185656227744,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-031": {
+            "id": "ev-031",
+            "kind": "sensor_health",
+            "sensor_id": "P2-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P2-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.186416773752242,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-032": {
+            "id": "ev-032",
+            "kind": "channel_summary",
+            "sensor_id": "P2-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.48028396332941,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.021926407389457836,
+              "anomaly_count": 0,
+              "max_score": 2.186416773752242,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-033": {
+            "id": "ev-033",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.2314776189780616,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-034": {
+            "id": "ev-034",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST1-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.09071109734185,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.0013630473407033605,
+              "anomaly_count": 0,
+              "max_score": 2.2314776189780616,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-035": {
+            "id": "ev-035",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.395619931721882,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-036": {
+            "id": "ev-036",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST1-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 79.09558966376247,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.008662418279271833,
+              "anomaly_count": 0,
+              "max_score": 2.395619931721882,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-037": {
+            "id": "ev-037",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.7786196512824546,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-038": {
+            "id": "ev-038",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST2-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.88568611649862,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.01689031640371752,
+              "anomaly_count": 0,
+              "max_score": 2.7786196512824546,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-039": {
+            "id": "ev-039",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.5678473937565514,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-040": {
+            "id": "ev-040",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST2-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.88156116722344,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.015065254481569923,
+              "anomaly_count": 0,
+              "max_score": 3.5678473937565514,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-041": {
+            "id": "ev-041",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.802782014409644,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-042": {
+            "id": "ev-042",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST3-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.68307235773563,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.013692089402354668,
+              "anomaly_count": 0,
+              "max_score": 2.802782014409644,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-043": {
+            "id": "ev-043",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.479829619635865,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-044": {
+            "id": "ev-044",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST3-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.69250069951622,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.0019157692172058205,
+              "anomaly_count": 0,
+              "max_score": 2.479829619635865,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-045": {
+            "id": "ev-045",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 63.221759734904026,
+              "persistence_seconds": 1.0
+            }
+          },
+          "ev-046": {
+            "id": "ev-046",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST4-A",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.4916311331997,
+              "baseline_scale": 0.04,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": -0.0013234622248745609,
+              "anomaly_count": 2,
+              "max_score": 63.221759734904026,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-047": {
+            "id": "ev-047",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "sensor_id": "P3-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.106189206189171,
+              "persistence_seconds": 0.0
+            }
+          },
+          "ev-048": {
+            "id": "ev-048",
+            "kind": "channel_summary",
+            "sensor_id": "P3-ST4-B",
+            "channel": "pressure",
+            "value": {
+              "detector": "pressure-median-mad-v2",
+              "unit": "bar",
+              "baseline_median": 78.48814897573467,
+              "baseline_scale": 0.04073232974013896,
+              "anomaly_threshold": 5,
+              "median_pressure_drop_bar": 0.00447459011914475,
+              "anomaly_count": 0,
+              "max_score": 2.106189206189171,
+              "pressure_drop_persistence_seconds": 0.0
+            }
+          },
+          "ev-049": {
+            "id": "ev-049",
+            "kind": "coverage",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "coverage": 0.9569444444444445,
+              "usable_samples": 1378,
+              "received_samples": 1380,
+              "expected_samples": 1440,
+              "failure_domains_available": 6,
+              "unit": "fraction"
+            }
+          },
+          "ev-050": {
+            "id": "ev-050",
+            "kind": "event_criteria",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "hypothesis": "sensor_or_telemetry_issue",
+              "supporting_sensor_ids": [],
+              "failure_domain_count": 0,
+              "station_count": 0,
+              "persistence_seconds": 0.0,
+              "detector": "pressure-median-mad-v2",
+              "criteria": "pressure-investigation-v2",
+              "operating_context": "No valve/compressor records supplied; operator verification required"
+            }
+          },
+          "ev-051": {
+            "id": "ev-051",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "SYNTHETIC_UNCALIBRATED"
+            }
+          },
+          "ev-052": {
+            "id": "ev-052",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "PRESSURE_PATTERNS_NOT_PROOF"
+            }
+          },
+          "ev-053": {
+            "id": "ev-053",
+            "kind": "limitation",
+            "sensor_id": null,
+            "channel": null,
+            "value": {
+              "code": "OPERATING_CONTEXT_REQUIRED"
+            }
+          }
+        },
+        "claims": {
+          "claim-000": {
+            "id": "claim-000",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 64.02927961282394,
+              "persistence_seconds": 1.0
+            },
+            "evidence_ids": [
+              "ev-001"
+            ]
+          },
+          "claim-001": {
+            "id": "claim-001",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.604264174127735,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-003"
+            ]
+          },
+          "claim-002": {
+            "id": "claim-002",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": true,
+              "peer_disagreement": true,
+              "anomaly_count": 29,
+              "max_score": 14.374558585476741,
+              "persistence_seconds": 27.0
+            },
+            "evidence_ids": [
+              "ev-005"
+            ]
+          },
+          "claim-003": {
+            "id": "claim-003",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.128695377467338,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-007"
+            ]
+          },
+          "claim-004": {
+            "id": "claim-004",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.8481752972950236,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-009"
+            ]
+          },
+          "claim-005": {
+            "id": "claim-005",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.7294493489538496,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-011"
+            ]
+          },
+          "claim-006": {
+            "id": "claim-006",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9444913564594657,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-013"
+            ]
+          },
+          "claim-007": {
+            "id": "claim-007",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.5005125730663593,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-015"
+            ]
+          },
+          "claim-008": {
+            "id": "claim-008",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.054366275345983,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-017"
+            ]
+          },
+          "claim-009": {
+            "id": "claim-009",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.9203640817549115,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-019"
+            ]
+          },
+          "claim-010": {
+            "id": "claim-010",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 62.848988037278986,
+              "persistence_seconds": 1.0
+            },
+            "evidence_ids": [
+              "ev-021"
+            ]
+          },
+          "claim-011": {
+            "id": "claim-011",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1492565760965476,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-023"
+            ]
+          },
+          "claim-012": {
+            "id": "claim-012",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 1.9995631588795248,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-025"
+            ]
+          },
+          "claim-013": {
+            "id": "claim-013",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.1909915294649807,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-027"
+            ]
+          },
+          "claim-014": {
+            "id": "claim-014",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.911185656227744,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-029"
+            ]
+          },
+          "claim-015": {
+            "id": "claim-015",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P2-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.186416773752242,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-031"
+            ]
+          },
+          "claim-016": {
+            "id": "claim-016",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST1-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.2314776189780616,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-033"
+            ]
+          },
+          "claim-017": {
+            "id": "claim-017",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST1-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.395619931721882,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-035"
+            ]
+          },
+          "claim-018": {
+            "id": "claim-018",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.7786196512824546,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-037"
+            ]
+          },
+          "claim-019": {
+            "id": "claim-019",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 3.5678473937565514,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-039"
+            ]
+          },
+          "claim-020": {
+            "id": "claim-020",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST3-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 40,
+              "usable": 40,
+              "missing": 20,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.802782014409644,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-041"
+            ]
+          },
+          "claim-021": {
+            "id": "claim-021",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST3-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.479829619635865,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-043"
+            ]
+          },
+          "claim-022": {
+            "id": "claim-022",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 2,
+              "max_score": 63.221759734904026,
+              "persistence_seconds": 1.0
+            },
+            "evidence_ids": [
+              "ev-045"
+            ]
+          },
+          "claim-023": {
+            "id": "claim-023",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P3-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 0,
+              "max_score": 2.106189206189171,
+              "persistence_seconds": 0.0
+            },
+            "evidence_ids": [
+              "ev-047"
+            ]
+          },
+          "claim-024": {
+            "id": "claim-024",
+            "kind": "coverage",
+            "value": {
+              "coverage": 0.9569444444444445,
+              "usable_samples": 1378,
+              "received_samples": 1380,
+              "expected_samples": 1440,
+              "failure_domains_available": 6,
+              "unit": "fraction"
+            },
+            "evidence_ids": [
+              "ev-049"
+            ]
+          },
+          "claim-025": {
+            "id": "claim-025",
+            "kind": "hypothesis",
+            "value": {
+              "hypothesis": "sensor_or_telemetry_issue",
+              "supporting_sensor_ids": [],
+              "failure_domain_count": 0,
+              "station_count": 0,
+              "persistence_seconds": 0.0,
+              "detector": "pressure-median-mad-v2",
+              "criteria": "pressure-investigation-v2",
+              "operating_context": "No valve/compressor records supplied; operator verification required"
+            },
+            "evidence_ids": [
+              "ev-050"
+            ]
+          },
+          "claim-026": {
+            "id": "claim-026",
+            "kind": "limitation",
+            "value": {
+              "code": "SYNTHETIC_UNCALIBRATED"
+            },
+            "evidence_ids": [
+              "ev-051"
+            ]
+          },
+          "claim-027": {
+            "id": "claim-027",
+            "kind": "limitation",
+            "value": {
+              "code": "PRESSURE_PATTERNS_NOT_PROOF"
+            },
+            "evidence_ids": [
+              "ev-052"
+            ]
+          },
+          "claim-028": {
+            "id": "claim-028",
+            "kind": "limitation",
+            "value": {
+              "code": "OPERATING_CONTEXT_REQUIRED"
+            },
+            "evidence_ids": [
+              "ev-053"
+            ]
+          }
+        }
+      },
+      "window_start_seconds": 80.0,
+      "window_end_seconds": 140.0,
+      "traces": {
+        "P2-ST2-A": [
+          {
+            "seconds": 80.0,
+            "value": 78.89176084393377
+          },
+          {
+            "seconds": 81.0,
+            "value": 78.88856974198083
+          },
+          {
+            "seconds": 82.0,
+            "value": 78.89042646781985
+          },
+          {
+            "seconds": 83.0,
+            "value": 78.88913660195753
+          },
+          {
+            "seconds": 84.0,
+            "value": 78.90613166243521
+          },
+          {
+            "seconds": 85.0,
+            "value": 78.88289365902807
+          },
+          {
+            "seconds": 86.0,
+            "value": 78.8705682263506
+          },
+          {
+            "seconds": 87.0,
+            "value": 78.79292901960504
+          },
+          {
+            "seconds": 88.0,
+            "value": 78.86524224225822
+          },
+          {
+            "seconds": 89.0,
+            "value": 78.89149744073826
+          },
+          {
+            "seconds": 90.0,
+            "value": 78.85602457713941
+          },
+          {
+            "seconds": 91.0,
+            "value": 78.87704497573863
+          },
+          {
+            "seconds": 92.0,
+            "value": 78.8583813010492
+          },
+          {
+            "seconds": 93.0,
+            "value": 81.39023232036895
+          },
+          {
+            "seconds": 94.0,
+            "value": 78.91589878445434
+          },
+          {
+            "seconds": 95.0,
+            "value": 78.87717341851767
+          },
+          {
+            "seconds": 96.0,
+            "value": 78.8420521991642
+          },
+          {
+            "seconds": 97.0,
+            "value": null
+          },
+          {
+            "seconds": 98.0,
+            "value": 78.86187940171467
+          },
+          {
+            "seconds": 99.0,
+            "value": 78.8667029269843
+          },
+          {
+            "seconds": 100.0,
+            "value": 78.88494440323272
+          },
+          {
+            "seconds": 101.0,
+            "value": 78.93577576926859
+          },
+          {
+            "seconds": 102.0,
+            "value": 78.86590957836104
+          },
+          {
+            "seconds": 103.0,
+            "value": 78.89330095227237
+          },
+          {
+            "seconds": 104.0,
+            "value": 78.96776052971157
+          },
+          {
+            "seconds": 105.0,
+            "value": 78.90099688465723
+          },
+          {
+            "seconds": 106.0,
+            "value": 78.92547996841337
+          },
+          {
+            "seconds": 107.0,
+            "value": 78.90914367570026
+          },
+          {
+            "seconds": 108.0,
+            "value": 78.8610669322657
+          },
+          {
+            "seconds": 109.0,
+            "value": 78.85824692814496
+          },
+          {
+            "seconds": 110.0,
+            "value": 78.87820861544347
+          },
+          {
+            "seconds": 111.0,
+            "value": 78.94515970637926
+          },
+          {
+            "seconds": 112.0,
+            "value": 78.91262384838956
+          },
+          {
+            "seconds": 113.0,
+            "value": 78.88359748842359
+          },
+          {
+            "seconds": 114.0,
+            "value": 78.86932715368044
+          },
+          {
+            "seconds": 115.0,
+            "value": 78.98248765321478
+          },
+          {
+            "seconds": 116.0,
+            "value": 78.89610966529256
+          },
+          {
+            "seconds": 117.0,
+            "value": 78.92460379777829
+          },
+          {
+            "seconds": 118.0,
+            "value": 78.88688393325455
+          },
+          {
+            "seconds": 119.0,
+            "value": 78.92269700512473
+          },
+          {
+            "seconds": 120.0,
+            "value": 78.9274551337975
+          },
+          {
+            "seconds": 121.0,
+            "value": 78.91032462844353
+          },
+          {
+            "seconds": 122.0,
+            "value": 78.90932584295805
+          },
+          {
+            "seconds": 123.0,
+            "value": 78.89370542791026
+          },
+          {
+            "seconds": 124.0,
+            "value": 81.39530625038032
+          },
+          {
+            "seconds": 125.0,
+            "value": 78.93183102791116
+          },
+          {
+            "seconds": 126.0,
+            "value": 78.90457937105101
+          },
+          {
+            "seconds": 127.0,
+            "value": 78.87837933084239
+          },
+          {
+            "seconds": 128.0,
+            "value": 78.88596156877882
+          },
+          {
+            "seconds": 129.0,
+            "value": 78.94800982566842
+          },
+          {
+            "seconds": 130.0,
+            "value": 78.92886881658947
+          },
+          {
+            "seconds": 131.0,
+            "value": 78.92257776606188
+          },
+          {
+            "seconds": 132.0,
+            "value": 78.9874017432784
+          },
+          {
+            "seconds": 133.0,
+            "value": 78.86106529503452
+          },
+          {
+            "seconds": 134.0,
+            "value": 78.90737784717442
+          },
+          {
+            "seconds": 135.0,
+            "value": 78.94213159978064
+          },
+          {
+            "seconds": 136.0,
+            "value": 78.90512752344146
+          },
+          {
+            "seconds": 137.0,
+            "value": 78.93343505354304
+          },
+          {
+            "seconds": 138.0,
+            "value": 78.91609486242425
+          },
+          {
+            "seconds": 139.0,
+            "value": 78.94335447547998
+          }
+        ],
+        "P3-ST3-A": [
+          {
+            "seconds": 80.0,
+            "value": 78.68121355186508
+          },
+          {
+            "seconds": 82.0,
+            "value": 78.69313035773517
+          },
+          {
+            "seconds": 83.0,
+            "value": 78.72960562333209
+          },
+          {
+            "seconds": 85.0,
+            "value": 78.66925665642336
+          },
+          {
+            "seconds": 86.0,
+            "value": 78.6364265728836
+          },
+          {
+            "seconds": 88.0,
+            "value": 78.66741024461811
+          },
+          {
+            "seconds": 89.0,
+            "value": 78.74119511339725
+          },
+          {
+            "seconds": 91.0,
+            "value": 78.6839966393903
+          },
+          {
+            "seconds": 92.0,
+            "value": 78.70217263510355
+          },
+          {
+            "seconds": 94.0,
+            "value": 78.67972570771168
+          },
+          {
+            "seconds": 95.0,
+            "value": 78.67633631409542
+          },
+          {
+            "seconds": 97.0,
+            "value": 78.73314811933156
+          },
+          {
+            "seconds": 98.0,
+            "value": 78.66603048999467
+          },
+          {
+            "seconds": 100.0,
+            "value": 78.76084601308196
+          },
+          {
+            "seconds": 101.0,
+            "value": 78.7698545878779
+          },
+          {
+            "seconds": 103.0,
+            "value": 78.6961787486525
+          },
+          {
+            "seconds": 104.0,
+            "value": 78.67764746396878
+          },
+          {
+            "seconds": 106.0,
+            "value": 78.72437222144262
+          },
+          {
+            "seconds": 107.0,
+            "value": 78.69344981518084
+          },
+          {
+            "seconds": 109.0,
+            "value": 78.73353477980065
+          },
+          {
+            "seconds": 110.0,
+            "value": 78.6976822740985
+          },
+          {
+            "seconds": 112.0,
+            "value": 78.66619133619905
+          },
+          {
+            "seconds": 113.0,
+            "value": 78.67476296902383
+          },
+          {
+            "seconds": 115.0,
+            "value": 78.64651162149889
+          },
+          {
+            "seconds": 116.0,
+            "value": 78.68541076585454
+          },
+          {
+            "seconds": 118.0,
+            "value": 78.72534555528044
+          },
+          {
+            "seconds": 119.0,
+            "value": 78.69690950122632
+          },
+          {
+            "seconds": 121.0,
+            "value": 78.69661939304963
+          },
+          {
+            "seconds": 122.0,
+            "value": 78.79518363831201
+          },
+          {
+            "seconds": 124.0,
+            "value": 78.69721949970464
+          },
+          {
+            "seconds": 125.0,
+            "value": 78.65430003372595
+          },
+          {
+            "seconds": 127.0,
+            "value": 78.74136758832846
+          },
+          {
+            "seconds": 128.0,
+            "value": 78.69057299405497
+          },
+          {
+            "seconds": 130.0,
+            "value": 78.72879644451872
+          },
+          {
+            "seconds": 131.0,
+            "value": 78.7169197196781
+          },
+          {
+            "seconds": 133.0,
+            "value": 78.7239544686783
+          },
+          {
+            "seconds": 134.0,
+            "value": 78.67948658692077
+          },
+          {
+            "seconds": 136.0,
+            "value": 78.76171062813265
+          },
+          {
+            "seconds": 137.0,
+            "value": 78.70918957627059
+          },
+          {
+            "seconds": 139.0,
+            "value": 78.72932100603684
+          }
+        ],
+        "P1-ST2-A": [
+          {
+            "seconds": 80.0,
+            "value": 79.73218585723778
+          },
+          {
+            "seconds": 81.0,
+            "value": 79.65223734003338
+          },
+          {
+            "seconds": 82.0,
+            "value": 79.67653354720258
+          },
+          {
+            "seconds": 83.0,
+            "value": 79.6596315519459
+          },
+          {
+            "seconds": 84.0,
+            "value": 79.66331236637959
+          },
+          {
+            "seconds": 85.0,
+            "value": 79.62447121502179
+          },
+          {
+            "seconds": 86.0,
+            "value": 79.69491919668803
+          },
+          {
+            "seconds": 87.0,
+            "value": 79.68233478625946
+          },
+          {
+            "seconds": 88.0,
+            "value": 79.65541978451104
+          },
+          {
+            "seconds": 89.0,
+            "value": 79.6526725320037
+          },
+          {
+            "seconds": 90.0,
+            "value": 79.70083988515269
+          },
+          {
+            "seconds": 91.0,
+            "value": 79.68564487088364
+          },
+          {
+            "seconds": 92.0,
+            "value": 79.67988477578217
+          },
+          {
+            "seconds": 93.0,
+            "value": 79.74993166332285
+          },
+          {
+            "seconds": 94.0,
+            "value": 79.73390652158076
+          },
+          {
+            "seconds": 95.0,
+            "value": 79.7528996915254
+          },
+          {
+            "seconds": 96.0,
+            "value": 79.73098198698669
+          },
+          {
+            "seconds": 97.0,
+            "value": 79.77045147072984
+          },
+          {
+            "seconds": 98.0,
+            "value": 79.79039185007949
+          },
+          {
+            "seconds": 99.0,
+            "value": 79.77207065340401
+          },
+          {
+            "seconds": 100.0,
+            "value": 79.8160545386581
+          },
+          {
+            "seconds": 101.0,
+            "value": 79.83647845451381
+          },
+          {
+            "seconds": 102.0,
+            "value": 79.77721179999274
+          },
+          {
+            "seconds": 103.0,
+            "value": 79.84622487471773
+          },
+          {
+            "seconds": 104.0,
+            "value": 79.84564103414202
+          },
+          {
+            "seconds": 105.0,
+            "value": 79.88632185702475
+          },
+          {
+            "seconds": 106.0,
+            "value": 79.86997855068462
+          },
+          {
+            "seconds": 107.0,
+            "value": 79.8828056489509
+          },
+          {
+            "seconds": 108.0,
+            "value": 79.88517200186732
+          },
+          {
+            "seconds": 109.0,
+            "value": 79.8836920802541
+          },
+          {
+            "seconds": 110.0,
+            "value": 79.94700525499601
+          },
+          {
+            "seconds": 111.0,
+            "value": 79.92529484486067
+          },
+          {
+            "seconds": 112.0,
+            "value": 79.91120126570601
+          },
+          {
+            "seconds": 113.0,
+            "value": 79.96565520035229
+          },
+          {
+            "seconds": 114.0,
+            "value": 79.97746094485571
+          },
+          {
+            "seconds": 115.0,
+            "value": 79.97572983594515
+          },
+          {
+            "seconds": 116.0,
+            "value": 80.03394057455532
+          },
+          {
+            "seconds": 117.0,
+            "value": 80.03734990107306
+          },
+          {
+            "seconds": 118.0,
+            "value": 79.97768557611032
+          },
+          {
+            "seconds": 119.0,
+            "value": 80.04136635218165
+          },
+          {
+            "seconds": 120.0,
+            "value": 80.06092873959764
+          },
+          {
+            "seconds": 121.0,
+            "value": 80.07155324726139
+          },
+          {
+            "seconds": 122.0,
+            "value": 80.10253211678601
+          },
+          {
+            "seconds": 123.0,
+            "value": 80.08451970246098
+          },
+          {
+            "seconds": 124.0,
+            "value": 80.15771052500929
+          },
+          {
+            "seconds": 125.0,
+            "value": 80.1439833516596
+          },
+          {
+            "seconds": 126.0,
+            "value": 80.22342723692216
+          },
+          {
+            "seconds": 127.0,
+            "value": 80.08227168343969
+          },
+          {
+            "seconds": 128.0,
+            "value": 80.09331388551887
+          },
+          {
+            "seconds": 129.0,
+            "value": 80.19220650530066
+          },
+          {
+            "seconds": 130.0,
+            "value": 80.20106630820196
+          },
+          {
+            "seconds": 131.0,
+            "value": 80.25197945567223
+          },
+          {
+            "seconds": 132.0,
+            "value": 80.17842103718023
+          },
+          {
+            "seconds": 133.0,
+            "value": 80.23504542577083
+          },
+          {
+            "seconds": 134.0,
+            "value": 80.24868975146421
+          },
+          {
+            "seconds": 135.0,
+            "value": 80.24805093628088
+          },
+          {
+            "seconds": 136.0,
+            "value": 80.3203880745928
+          },
+          {
+            "seconds": 137.0,
+            "value": 80.25058096294018
+          },
+          {
+            "seconds": 138.0,
+            "value": 80.28467220404684
+          },
+          {
+            "seconds": 139.0,
+            "value": 80.27533488916166
+          }
+        ]
+      }
+    }
+  }
+}

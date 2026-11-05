@@ -1,0 +1,229 @@
+{
+  "source_version": "pressure-v3",
+  "method": "Sequential 5s hops; arrival-gated normalization; no model calls",
+  "seeds": [
+    91000,
+    91001,
+    91002
+  ],
+  "cases": [
+    {
+      "scenario": "S1",
+      "seed": 91000,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "possible_leak",
+      "first_expected_warning_clock_seconds": 115,
+      "source_onset_to_warning_seconds": 25,
+      "first_possible_leak_clock_seconds": 115,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "suspected_leak"
+    },
+    {
+      "scenario": "S1",
+      "seed": 91001,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "possible_leak",
+      "first_expected_warning_clock_seconds": 115,
+      "source_onset_to_warning_seconds": 25,
+      "first_possible_leak_clock_seconds": 115,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "suspected_leak"
+    },
+    {
+      "scenario": "S1",
+      "seed": 91002,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "possible_leak",
+      "first_expected_warning_clock_seconds": 115,
+      "source_onset_to_warning_seconds": 25,
+      "first_possible_leak_clock_seconds": 115,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "suspected_leak"
+    },
+    {
+      "scenario": "S2",
+      "seed": 91000,
+      "known_issue_onset_seconds": 0,
+      "expected_warning_kind": "sensor_telemetry",
+      "first_expected_warning_clock_seconds": 65,
+      "source_onset_to_warning_seconds": 65,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "sensor_or_telemetry_issue"
+    },
+    {
+      "scenario": "S2",
+      "seed": 91001,
+      "known_issue_onset_seconds": 0,
+      "expected_warning_kind": "sensor_telemetry",
+      "first_expected_warning_clock_seconds": 65,
+      "source_onset_to_warning_seconds": 65,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "sensor_or_telemetry_issue"
+    },
+    {
+      "scenario": "S2",
+      "seed": 91002,
+      "known_issue_onset_seconds": 0,
+      "expected_warning_kind": "sensor_telemetry",
+      "first_expected_warning_clock_seconds": 65,
+      "source_onset_to_warning_seconds": 65,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "sensor_or_telemetry_issue"
+    },
+    {
+      "scenario": "S3",
+      "seed": 91000,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "coverage_lost",
+      "first_expected_warning_clock_seconds": 120,
+      "source_onset_to_warning_seconds": 30,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S3",
+      "seed": 91001,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "coverage_lost",
+      "first_expected_warning_clock_seconds": 120,
+      "source_onset_to_warning_seconds": 30,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S3",
+      "seed": 91002,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "coverage_lost",
+      "first_expected_warning_clock_seconds": 120,
+      "source_onset_to_warning_seconds": 30,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S4",
+      "seed": 91000,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "unresolved",
+      "first_expected_warning_clock_seconds": 100,
+      "source_onset_to_warning_seconds": 10,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S4",
+      "seed": 91001,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "unresolved",
+      "first_expected_warning_clock_seconds": 100,
+      "source_onset_to_warning_seconds": 10,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S4",
+      "seed": 91002,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "unresolved",
+      "first_expected_warning_clock_seconds": 100,
+      "source_onset_to_warning_seconds": 10,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S5",
+      "seed": 91000,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "coverage_lost",
+      "first_expected_warning_clock_seconds": 120,
+      "source_onset_to_warning_seconds": 30,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S5",
+      "seed": 91001,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "coverage_lost",
+      "first_expected_warning_clock_seconds": 120,
+      "source_onset_to_warning_seconds": 30,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S5",
+      "seed": 91002,
+      "known_issue_onset_seconds": 90,
+      "expected_warning_kind": "coverage_lost",
+      "first_expected_warning_clock_seconds": 120,
+      "source_onset_to_warning_seconds": 30,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "insufficient_evidence"
+    },
+    {
+      "scenario": "S6",
+      "seed": 91000,
+      "known_issue_onset_seconds": null,
+      "expected_warning_kind": null,
+      "first_expected_warning_clock_seconds": null,
+      "source_onset_to_warning_seconds": null,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "no_event"
+    },
+    {
+      "scenario": "S6",
+      "seed": 91001,
+      "known_issue_onset_seconds": null,
+      "expected_warning_kind": null,
+      "first_expected_warning_clock_seconds": null,
+      "source_onset_to_warning_seconds": null,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "no_event"
+    },
+    {
+      "scenario": "S6",
+      "seed": 91002,
+      "known_issue_onset_seconds": null,
+      "expected_warning_kind": null,
+      "first_expected_warning_clock_seconds": null,
+      "source_onset_to_warning_seconds": null,
+      "first_possible_leak_clock_seconds": null,
+      "false_possible_leak_warning": false,
+      "mature_hypothesis": "no_event"
+    }
+  ],
+  "source_warning_delay_p50_seconds": 30.0,
+  "source_warning_delay_p95_seconds": 65.0,
+  "compute_p95_seconds": 0.19712733497144655,
+  "all_truth_leak_cases": 6,
+  "truth_leak_cases_with_possible_leak_warning": 3,
+  "all_truth_leak_case_recall": 0.5,
+  "gates": {
+    "expected_warnings_within_120_source_seconds": true,
+    "no_false_possible_leak_warnings": true,
+    "mature_outcomes_preserved": true,
+    "unobservable_leaks_explicitly_warn_about_coverage": true
+  },
+  "passed": true,
+  "limitations": [
+    "Synthetic source delay/local compute, not physical-sensor-to-operator latency",
+    "S2 faults start at zero, including warm-up; other issues start at 90",
+    "S5 remains in the all-truth leak denominator despite correct abstention",
+    "Repeated windows and authored cases are not independent field observations",
+    "No load, network, human acknowledgement or hydraulic validation"
+  ]
+}

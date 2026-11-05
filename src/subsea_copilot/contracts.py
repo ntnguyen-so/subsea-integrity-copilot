@@ -5,11 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-Channel = Literal["acoustic", "methane", "temperature"]
+Channel = Literal["pressure", "acoustic", "methane", "temperature"]
 Hypothesis = Literal[
     "suspected_leak",
     "sensor_or_telemetry_issue",
@@ -38,11 +38,11 @@ class Contract(BaseModel):
 
 
 def default_channels() -> list[Channel]:
-    return ["acoustic", "methane", "temperature"]
+    return ["pressure"]
 
 
 def default_scales() -> dict[Channel, float]:
-    return {"acoustic": 0.03, "methane": 0.015, "temperature": 0.03}
+    return {"pressure": 0.04, "acoustic": 0.03, "methane": 0.015, "temperature": 0.03}
 
 
 class Point(Contract):
@@ -52,8 +52,10 @@ class Point(Contract):
 
 class PipelineSegment(Contract):
     id: str
+    name: str = ""
     points: list[Point]
     length_m: float
+    diameter_m: float = Field(default=0.6, gt=0)
 
 
 class Sensor(Contract):
@@ -68,8 +70,8 @@ class Sensor(Contract):
 
 class SitePack(Contract):
     id: str = "northsea"
-    name: str = "NorthSea Synthetic Gas Network"
-    version: str = "pack-v1"
+    name: str = "NorthSea Pressure Monitoring Network"
+    version: str = "pressure-pack-v3"
     sensors: list[Sensor]
     segments: list[PipelineSegment]
     sample_seconds: int = 1
@@ -79,6 +81,7 @@ class SitePack(Contract):
     revision_seconds: int = 120
     min_observers: int = 3
     min_failure_domains: int = 2
+    min_stations: int = 2
     min_coverage: float = 0.6
     persistence_seconds: int = 15
     quiet_seconds: int = 30
@@ -129,6 +132,8 @@ class QualityFinding(Contract):
     hard_excluded: int = 0
     spike_count: int = 0
     drift_suspected: bool = False
+    peer_disagreement: bool = False
+    anomaly_count: int = 0
     max_score: float = 0
     persistence_seconds: float = 0
     evidence_ids: list[str] = Field(default_factory=list)
@@ -156,15 +161,15 @@ class EventAssessment(Contract):
     evidence_ids: list[str] = Field(default_factory=list)
     counterevidence: list[str] = Field(default_factory=list)
     eligible_location: bool = False
-    criteria_id: str = "event-rules-v1"
+    criteria_id: str = "pressure-investigation-v2"
 
 
 class LocationCandidate(Contract):
     segment_id: str
     chainage_m: float
     position: Point
-    residual: float
-    strength: float
+    residual: float | None = None
+    strength: float | None = None
 
 
 class LocationFit(Contract):
@@ -172,8 +177,11 @@ class LocationFit(Contract):
     best: LocationCandidate | None = None
     compatible: list[LocationCandidate] = Field(default_factory=list)
     reason: str
-    method: str = "acoustic-excess-distance-decay-v1"
-    grid_m: float = 25
+    method: str = "pressure-alert-bracket-v2"
+    grid_m: float = 0
+    inspection_start_m: float | None = None
+    inspection_end_m: float | None = None
+    station_bracket_m: list[float] = Field(default_factory=list)
 
 
 class EvidenceItem(Contract):
@@ -203,8 +211,8 @@ class WindowSnapshot(Contract):
     predecessor_id: str | None = None
     input_hash: str
     pack_version: str
-    baseline_version: str = "baseline-v1"
-    parameter_version: str = "window-v1"
+    baseline_version: str = "pressure-median-mad-v2"
+    parameter_version: str = "pressure-window-v2"
     clock_seconds: float
     watermark_seconds: float
     created_at: datetime = Field(default_factory=utc_now)
@@ -221,6 +229,7 @@ class ReplaySession(Contract):
     tenant_id: str = "demo"
     site_id: str = "northsea"
     scenario: str
+    source_version: Literal["legacy-v1", "pressure-v2", "pressure-v3"] = "legacy-v1"
     seed: int = 2026
     mode: Mode = "scripted"
     state: Literal["PAUSED", "PLAYING", "COMPLETED", "FAILED"] = "PAUSED"
@@ -254,6 +263,52 @@ class MonitoringEpisode(Contract):
     dispatch_status: str | None = None
 
 
+class HistoryInvestigation(Contract):
+    assessment: Literal["operating_change_plausible", "instrumentation_context", "unresolved"]
+    document_ids: list[str] = Field(default_factory=list, max_length=3)
+    rejected_document_ids: list[str] = Field(
+        default_factory=list,
+        max_length=3,
+        description=(
+            "Only successfully history.read documents with admissible=false. "
+            "Search-only hits must not appear here; use an empty list if none were fully read."
+        ),
+    )
+    comparison_call_ids: list[str] = Field(default_factory=list, max_length=2)
+    next_action: Literal[
+        "check_operating_records",
+        "review_instrumentation",
+        "inspect_supported_interval",
+        "restore_telemetry",
+        "human_review",
+    ] = "human_review"
+
+
+class CitedExplanation(Contract):
+    text: str = Field(min_length=1, max_length=600)
+    references: list[str] = Field(min_length=1, max_length=6)
+
+
+class CauseExplanation(CitedExplanation):
+    cause: Literal["leak", "operating_change", "instrumentation_or_telemetry"]
+    stance: Literal["possible", "not_established", "not_testable"]
+
+
+class EngineerInterpretation(Contract):
+    focus: Literal[
+        "root_cause",
+        "operating_context",
+        "sensor_quality",
+        "inspection_rationale",
+        "evidence_gaps",
+    ]
+    answer: CitedExplanation
+    competing_causes: list[CauseExplanation] = Field(min_length=1, max_length=3)
+    follow_up_questions: list[
+        Annotated[str, Field(min_length=1, max_length=200, pattern=r"\?\s*$")]
+    ] = Field(min_length=1, max_length=3)
+
+
 class AgentResult(Contract):
     outcome: Literal["supported", "insufficient_evidence"]
     claim_refs: list[str]
@@ -262,6 +317,36 @@ class AgentResult(Contract):
     hypothesis: Hypothesis | None = None
     recommendation_ids: list[str] = Field(default_factory=list)
     summary: str = ""
+    investigation: HistoryInvestigation | None = None
+    interpretation: EngineerInterpretation | None = None
+
+
+class GroundingSupport(Contract):
+    reference: str
+    quote: str = Field(min_length=8, max_length=500)
+
+
+class GroundingCheck(Contract):
+    paragraph_id: str = Field(min_length=1, max_length=50)
+    verdict: Literal["supported", "unsupported", "uncertain"]
+    reason: str = Field(min_length=1, max_length=350)
+    support: list[GroundingSupport] = Field(default_factory=list, max_length=4)
+
+
+class GroundingAssessment(Contract):
+    decision: Literal["accept", "revise"]
+    checks: list[GroundingCheck] = Field(min_length=3, max_length=7)
+
+
+class GroundingRound(Contract):
+    candidate_hash: str
+    assessment: GroundingAssessment
+
+
+class InterpretationReview(Contract):
+    protocol: Literal["grounding-v1"] = "grounding-v1"
+    source_hash: str
+    rounds: list[GroundingRound] = Field(min_length=1, max_length=2)
 
 
 class AgentTask(Contract):
@@ -293,6 +378,9 @@ class AgentTask(Contract):
     error_message: str | None = None
     automatic: bool = False
     idempotency_key: str | None = None
+    history_version: str | None = None
+    response_protocol: Literal["engineer-v1", "engineer-v2"] | None = None
+    interpretation_review: InterpretationReview | None = None
 
 
 class ConsoleEvent(Contract):

@@ -17,15 +17,27 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.types import Command
+from pydantic import BaseModel
 
 from subsea_copilot.contracts import (
     AgentResult,
     AgentRole,
     AgentTask,
+    GroundingAssessment,
+    GroundingRound,
+    InterpretationReview,
     Mode,
     ReplaySession,
     WindowSnapshot,
+    content_hash,
     utc_now,
+)
+from subsea_copilot.grounding import (
+    candidate_hash,
+    critic_context,
+    source_texts,
+    validate_assessment,
+    validate_revision,
 )
 from subsea_copilot.runtime.agent import WorkPlan, build_graph, tool_messages
 from subsea_copilot.runtime.gateway import ToolGateway
@@ -137,6 +149,14 @@ class AgentService:
         existing = self._optional_task(identifier)
         if existing is None:
             self._check_provider(session.id, session.mode)
+        history_version = existing.history_version if existing else None
+        if existing is None:
+            from subsea_copilot.synthetic import SOURCE_VERSION
+
+            if session.source_version == SOURCE_VERSION:
+                from subsea_copilot.history_data import history_index_rows
+
+                history_version = self.store.install_history(history_index_rows())
         task = AgentTask(
             id=identifier,
             root_id=identifier,
@@ -152,6 +172,10 @@ class AgentService:
             deadline=utc_now() + timedelta(seconds=300),
             automatic=automatic,
             idempotency_key=idempotency_key,
+            history_version=history_version,
+            response_protocol=existing.response_protocol
+            if existing
+            else ("engineer-v2" if history_version else None),
         )
         return self.store.create_task(task)
 
@@ -176,6 +200,14 @@ class AgentService:
 
     def _prompt_name(self, task: AgentTask) -> str:
         return PROMPT_NAMES[task.role]
+
+    @staticmethod
+    def _model_limit(task: AgentTask) -> int:
+        return (
+            6
+            if task.role == "operator_response" and task.response_protocol == "engineer-v2"
+            else REGISTRY[task.role].model_limit
+        )
 
     def _accept(
         self,
@@ -322,7 +354,24 @@ class AgentService:
         result_schema = (
             WorkPlan.model_json_schema() if phase == "plan" else AgentResult.model_json_schema()
         )
+        if phase == "plan" and task.history_version:
+            result_schema["properties"]["steps"]["enum"] = [
+                ["quality", "diagnosis", "answer"],
+                ["reuse", "answer"],
+            ]
         if phase != "plan":
+            if task.role != "operator_response" or task.response_protocol not in {
+                "engineer-v1",
+                "engineer-v2",
+            }:
+                result_schema["properties"]["interpretation"] = {"type": "null"}
+                for name in ("EngineerInterpretation", "CitedExplanation", "CauseExplanation"):
+                    result_schema.get("$defs", {}).pop(name, None)
+            else:
+                result_schema["required"].append("interpretation")
+                result_schema["properties"]["interpretation"] = {
+                    "$ref": "#/$defs/EngineerInterpretation"
+                }
             result_schema["properties"]["summary"] = {"type": "string", "const": ""}
             if task.role == "sensor_quality":
                 if quality_facts_available(snapshot):
@@ -380,6 +429,36 @@ class AgentService:
                     "state": t.state,
                     "claim_refs": t.result.claim_refs,
                     "evidence_ids": t.result.evidence_ids,
+                    "question": t.question,
+                    "investigation": t.result.investigation.model_dump(mode="json")
+                    if t.result.investigation
+                    else None,
+                    "investigation_reads": [
+                        {
+                            "tool": r["name"],
+                            "arguments": {
+                                k: v
+                                for k, v in r["arguments"].items()
+                                if k
+                                in {
+                                    "query",
+                                    "asset_ids",
+                                    "document_ids",
+                                    "sensor_ids",
+                                    "start_seconds",
+                                    "split_seconds",
+                                    "end_seconds",
+                                }
+                            },
+                        }
+                        for r in self.store.tool_receipts(t.id)
+                        if isinstance(r["name"], str)
+                        and r["name"].startswith("history.")
+                        and isinstance(r["arguments"], dict)
+                        and not r.get("error")
+                    ]
+                    if phase == "plan" and t.role == "event_diagnosis"
+                    else [],
                 }
                 for t in candidates
                 if t.result is not None
@@ -392,6 +471,27 @@ class AgentService:
             ),
             "requires_location": requires_location,
             "required_tools": sorted(REGISTRY[task.role].required),
+            "history_version": task.history_version,
+            "response_protocol": task.response_protocol,
+            "history_bounds": {
+                "end_seconds": snapshot.end_seconds,
+                "epoch_unix": snapshot.window_end.timestamp() - snapshot.end_seconds,
+                "coverage": snapshot.quality.coverage,
+            },
+            "history_sensors": self._history_sensors(snapshot)
+            if task.history_version and task.role == "event_diagnosis"
+            else [],
+            "history_scope": (
+                "Synthetic operational documents are incident-time filtered. "
+                "history.search retrieves ranked metadata/excerpts; "
+                "history.read opens discovered IDs. "
+                "history.compare computes before/after pressure from this generation. "
+                "Choose queries, documents, sensors and periods from observed evidence. "
+                "Draft/expired/superseded documents are not authority. "
+                "Association is not causation."
+            )
+            if task.history_version
+            else None,
             "result_schema": result_schema,
             "batch_instruction": (
                 "Planning uses no tools. Answer: batch independent required reads in one reply. "
@@ -399,17 +499,63 @@ class AgentService:
             ),
         }
 
+    @staticmethod
+    def _history_sensors(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+        from subsea_copilot.synthetic import generate_pack
+
+        concerns = {
+            f.sensor_id
+            for f in snapshot.quality.findings
+            if f.spike_count
+            or f.drift_suspected
+            or f.peer_disagreement
+            or f.hard_excluded
+            or f.missing > f.expected * 0.1
+        }
+        return [
+            {
+                "id": s.id,
+                "segment_id": s.segment_id,
+                "failure_domain": s.failure_domain_id,
+                "quality_concern": s.id in concerns,
+                "event_support": s.id in snapshot.event.supporting_sensor_ids,
+            }
+            for s in generate_pack(snapshot.site_id).sensors
+        ]
+
     def _graph(
-        self, task: AgentTask, snapshot: WindowSnapshot, phase: str
+        self,
+        task: AgentTask,
+        snapshot: WindowSnapshot,
+        phase: str,
+        candidate: AgentResult | None = None,
+        criticism: GroundingAssessment | None = None,
     ) -> tuple[dict[str, Any], AgentTask]:
         gateway = self._gateway(task, snapshot)
 
-        def validate(value: str) -> AgentResult:
+        critic = phase.startswith("critic-")
+        sources = (
+            source_texts(candidate, snapshot, self.store.tool_receipts(task.id))
+            if candidate
+            else {}
+        )
+
+        def validate(value: str) -> BaseModel:
             current = self.store.get_task(task.id)
             with self.telemetry.span("guardrail", {"task_id": task.id, "role": task.role}):
-                return self._accept(value, current, snapshot, gateway)
+                if critic:
+                    assert candidate is not None
+                    return validate_assessment(value, candidate, sources)
+                result = self._accept(value, current, snapshot, gateway)
+                if candidate is not None:
+                    validate_revision(candidate, result)
+                return result
 
-        graph = build_graph(self.checkpointer, validate)
+        graph = build_graph(
+            self.checkpointer,
+            validate,
+            GroundingAssessment.model_json_schema() if critic else None,
+        )
         thread_id = hashlib.sha256(
             json.dumps(
                 [
@@ -424,12 +570,38 @@ class AgentService:
             ).encode()
         ).hexdigest()
         config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
-        prompt_path = Path(__file__).resolve().parents[3] / "prompts" / self._prompt_name(task)
+        prompt_path = (
+            Path(__file__).resolve().parents[3]
+            / "prompts"
+            / ("critic.md" if critic else self._prompt_name(task))
+        )
         prompt = prompt_path.read_text(encoding="utf-8")
-        context = self._context(task, snapshot, phase)
+        context: dict[str, Any] = (
+            self._context(task, snapshot, "answer" if phase == "reflection" else phase)
+            if not critic
+            else critic_context(task, candidate, sources, phase)
+            if candidate
+            else {}
+        )
+        if phase == "reflection":
+            assert candidate is not None and criticism is not None
+            context.update(
+                {
+                    "phase": "reflection",
+                    "proposed_candidate": candidate.model_dump(mode="json"),
+                    "critic_feedback": criticism.model_dump(mode="json"),
+                    "reflection_instruction": (
+                        "Revise only interpretation to resolve ALL critique. Remove unsupported "
+                        "details; state gaps. Keep every checked field exactly unchanged. "
+                        "Use original source evidence, not the critic as factual authority."
+                    ),
+                }
+            )
         messages: list[AnyMessage] = [
             SystemMessage(
-                content=prompt + "\nBOUND_CONTEXT\n" + json.dumps(context, allow_nan=False)
+                content=prompt
+                + "\nBOUND_CONTEXT\n"
+                + json.dumps(context, allow_nan=False, separators=(",", ":"))
             )
         ]
         prior = graph.get_state(config) if self.checkpointer is not None else None
@@ -440,8 +612,18 @@ class AgentService:
                 return dict(prior.values["parsed"]), task
             output = graph.invoke(None, config)
         else:
-            if phase != "plan":
-                intake, task = self._required_intake(task, snapshot, context, gateway)
+            if phase != "plan" and not critic:
+                if phase == "reflection":
+                    intake = [
+                        {
+                            "name": r["name"],
+                            "output": {"result": r["result"], "error": r.get("error")},
+                        }
+                        for r in self.store.tool_receipts(task.id)
+                        if not r.get("error")
+                    ]
+                else:
+                    intake, task = self._required_intake(task, snapshot, context, gateway)
                 messages.append(
                     HumanMessage(
                         content=json.dumps(
@@ -449,18 +631,21 @@ class AgentService:
                                 "application_intake": intake,
                                 "instruction": (
                                     "Required reads are complete and audited. "
-                                    "Interpret this evidence and return the exact final schema; "
-                                    "do not exhaust health pagination."
+                                    "Interpret this evidence; do not exhaust health pagination. "
+                                    "If diagnosis has a history_version, "
+                                    "investigate with history tools "
+                                    "before returning the final schema. Otherwise return final."
                                 ),
                             },
                             allow_nan=False,
+                            separators=(",", ":"),
                         )
                     )
                 )
             output = graph.invoke({"messages": messages, "phase": phase, "repairs": 0}, config)
         # Instantiate a distinct model for this independently persisted role task.
         model = self.model_factory(task.role, task.mode).bind_tools(
-            [] if phase == "plan" else self._schemas(task)
+            [] if phase == "plan" or critic or phase == "reflection" else self._schemas(task)
         )
         resumed: Any
         while output.get("__interrupt__"):
@@ -472,20 +657,25 @@ class AgentService:
                 self._check_provider(task.generation_id, task.mode)
                 assert task.lease_token is not None
                 task = self.store.reserve_model_call(
-                    task.id, task.lease_token, REGISTRY[task.role].model_limit
+                    task.id, task.lease_token, self._model_limit(task)
                 )
                 gateway.task = task
                 receipts = self.store.tool_receipts(task.id)
                 seen = {r["name"] for r in receipts if not r.get("error")}
                 missing_reads = sorted(set(context["required_tools"]) - seen)
-                remaining_turns = REGISTRY[task.role].model_limit - task.model_calls
+                remaining_turns = self._model_limit(task) - task.model_calls
                 call_policy = {
                     "model_turns_after_this_reply": remaining_turns,
                     "new_tool_calls_available": REGISTRY[task.role].tool_limit - task.tool_calls,
                     "mandatory_reads_outstanding": missing_reads,
-                    "required_final_schema": context["result_schema"],
-                    "final_only": remaining_turns == 0 or phase == "plan",
-                    "preferred_action": "final"
+                    "final_schema_source": "BOUND_CONTEXT.result_schema",
+                    "final_only": remaining_turns == 0
+                    or phase == "plan"
+                    or critic
+                    or phase == "reflection",
+                    "preferred_action": "investigate_history_then_final"
+                    if task.role == "event_diagnosis" and task.history_version and remaining_turns
+                    else "final"
                     if not missing_reads or phase == "plan"
                     else "one_batch_of_all_independent_required_reads",
                     "review_scope": "Bounded health claims, not exhaustive pagination.",
@@ -494,7 +684,7 @@ class AgentService:
                     *request["messages"],
                     SystemMessage(
                         content="RUNTIME_REPLY_CONSTRAINTS\n"
-                        + json.dumps(call_policy, allow_nan=False)
+                        + json.dumps(call_policy, allow_nan=False, separators=(",", ":"))
                     ),
                 ]
                 call_id = str(uuid4())
@@ -503,6 +693,7 @@ class AgentService:
                     "call_id": call_id,
                     "attempt_id": self._attempt_id,
                     "role": task.role,
+                    "phase": phase,
                     "mode": task.mode,
                     "lease_token_hash": hashlib.sha256(
                         (task.lease_token or "").encode()
@@ -533,7 +724,12 @@ class AgentService:
                             and response.response_metadata.get("mode") == "scripted"
                         ):
                             raise ValidationError("mode_mismatch", "Scripted output is not live.")
-                        if response.tool_calls and (remaining_turns == 0 or phase == "plan"):
+                        if response.tool_calls and (
+                            remaining_turns == 0
+                            or phase == "plan"
+                            or critic
+                            or phase == "reflection"
+                        ):
                             raise ValidationError(
                                 "final_turn_reserved",
                                 "This reply must be a structured final, not another tool request.",
@@ -564,12 +760,55 @@ class AgentService:
             raise ValidationError(output["failure"], "Structured output rejected after one repair.")
         return output["parsed"], task
 
+    def _review_interpretation(
+        self,
+        task: AgentTask,
+        snapshot: WindowSnapshot,
+        result: AgentResult,
+    ) -> tuple[AgentResult, AgentTask]:
+        rounds = []
+        for index in range(2):
+            reviewed, task = self._graph(task, snapshot, f"critic-{index}", candidate=result)
+            assessment = GroundingAssessment.model_validate(reviewed)
+            rounds.append(
+                GroundingRound(candidate_hash=candidate_hash(result), assessment=assessment)
+            )
+            self._event(
+                task,
+                "answer.critique",
+                {
+                    "round": index + 1,
+                    "decision": assessment.decision,
+                    "issues": sum(check.verdict != "supported" for check in assessment.checks),
+                },
+            )
+            if assessment.decision == "accept":
+                sources = source_texts(result, snapshot, self.store.tool_receipts(task.id))
+                task.interpretation_review = InterpretationReview(
+                    rounds=rounds,
+                    source_hash=content_hash({key: value for key, value in sources.items()}),
+                )
+                return result, task
+            if index == 0:
+                revised, task = self._graph(
+                    task, snapshot, "reflection", candidate=result, criticism=assessment
+                )
+                result = AgentResult.model_validate(revised)
+        raise ValidationError(
+            "grounding_rejected",
+            "Independent review still found unsupported language after revision; report withheld.",
+        )
+
     def _orchestrate(self, task: AgentTask, snapshot: WindowSnapshot) -> AgentTask | None:
         parsed: dict[str, Any] | None = None
         if not task.plan:
             parsed, task = self._graph(task, snapshot, "plan")
             task.plan = parsed["steps"]
             task = self._save(task)
+        if task.history_version and "diagnosis" not in task.plan and "reuse" not in task.plan:
+            raise ValidationError(
+                "history_plan", "Current investigations require a diagnosis review."
+            )
         if "reuse" in task.plan:
             if self.store.reuse_task_ids(task.id):
                 return task
@@ -585,6 +824,10 @@ class AgentService:
                 raise ValidationError("reuse", "Reuse proposal cites incompatible source tasks.")
             if not any(t["role"] == "sensor_quality" for t in selected):
                 raise ValidationError("reuse", "No compatible accepted quality result to reuse.")
+            if task.history_version and not any(t["role"] == "event_diagnosis" for t in selected):
+                raise ValidationError(
+                    "history_reuse", "Reuse must include the checked history diagnosis."
+                )
             assert task.lease_token is not None
             self.store.authorize_reuse(task.id, [t["id"] for t in selected], task.lease_token)
             return task
@@ -629,6 +872,7 @@ class AgentService:
                 mode=task.mode,
                 deadline=task.deadline,
                 automatic=task.automatic,
+                history_version=task.history_version,
             )
             self.store.create_child(child, index, plan_revision=1, lease_token=task.lease_token)
             parent = self.store.get_task(task.id)
@@ -707,9 +951,43 @@ class AgentService:
                         return True
                 parsed, task = self._graph(task, snapshot, "answer")
                 result = AgentResult.model_validate(parsed)
+                if task.role == "operator_response" and task.response_protocol == "engineer-v2":
+                    result, task = self._review_interpretation(task, snapshot, result)
                 task.result = result
                 task.answer = render_result(result, task, snapshot)
+                if result.investigation is not None:
+                    from subsea_copilot.investigation import render_investigation
+
+                    sources = [task]
+                    if task.role == "operator_response":
+                        sources = [
+                            child
+                            for child in self._gateway(task, snapshot).dependencies()
+                            if child.role == "event_diagnosis"
+                        ]
+                    history_receipts = [
+                        receipt
+                        for source in sources
+                        for receipt in self.store.tool_receipts(source.id)
+                    ]
+                    task.answer += "\n" + render_investigation(
+                        result.investigation, history_receipts
+                    )
+                if result.interpretation is not None:
+                    from subsea_copilot.interpretation import render_interpretation
+
+                    task.answer = (
+                        render_interpretation(result.interpretation, task)
+                        + "\n\nCHECKED EVIDENCE\n"
+                        + task.answer
+                    )
                 task.state = "SUCCEEDED" if result.outcome == "supported" else "ABSTAINED"
+                if task.deadline <= utc_now():
+                    raise ValidationError("deadline", "Report completion exceeded root deadline.")
+                if task.response_protocol == "engineer-v2":
+                    self._accept(
+                        result.model_dump_json(), task, snapshot, self._gateway(task, snapshot)
+                    )
                 task = self._save(task)
                 self._event(
                     task,

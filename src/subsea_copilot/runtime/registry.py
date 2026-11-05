@@ -50,6 +50,9 @@ REGISTRY: dict[AgentRole, RolePolicy] = {
                 "event.counterevidence",
                 "location.fit",
                 "ontology.neighbors",
+                "history.search",
+                "history.read",
+                "history.compare",
             }
         ),
         frozenset({"task.result", "event.assess", "event.counterevidence"}),
@@ -71,7 +74,7 @@ RECOMMENDATIONS = {
     "review_sensor_evidence": "Review the cited sensor evidence.",
     "review_coverage": "Review observation coverage and data gaps.",
     "review_competing_hypotheses": "Review the computed competing hypotheses.",
-    "review_location_fit": "Review the compatible numerical location candidates.",
+    "review_location_fit": "Review the supported inspection interval and its assumptions.",
 }
 LIMITATIONS = frozenset(
     {
@@ -111,6 +114,54 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
             fields["ids"] = {"type": "array", "items": {"type": "string"}, "maxItems": 100}
         if name == "quality.sensor_patterns":
             fields["offset"] = {"type": "integer", "minimum": 0}
+        if name.startswith("history."):
+            fields["intent"] = {
+                "type": "string",
+                "enum": [
+                    "test_operating_change",
+                    "test_instrumentation",
+                    "check_prior_incident",
+                    "seek_counterevidence",
+                ],
+            }
+            required.append("intent")
+        if name == "history.search":
+            fields["query"] = {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "description": (
+                    "Use 2-8 topical keywords, not a long question. "
+                    "Ranked ANY-keyword matching; asset filters are separate."
+                ),
+            }
+            fields["asset_ids"] = {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1,
+                "maxItems": 4,
+                "description": "Segment scopes include their instruments and gateways.",
+            }
+            required.extend(["query", "asset_ids"])
+        if name == "history.read":
+            fields["document_ids"] = {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1,
+                "maxItems": 3,
+            }
+            required.append("document_ids")
+        if name == "history.compare":
+            fields["sensor_ids"] = {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 2,
+                "maxItems": 4,
+            }
+            for field in ("start_seconds", "split_seconds", "end_seconds"):
+                fields[field] = {"type": "integer", "minimum": 0}
+                required.append(field)
+            required.append("sensor_ids")
         schemas.append(
             {
                 "type": "function",

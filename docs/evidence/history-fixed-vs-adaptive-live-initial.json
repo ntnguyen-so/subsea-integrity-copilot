@@ -1,0 +1,842 @@
+{
+  "source_cohort": "runtime\\history-live-check.json",
+  "mode": "live",
+  "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+  "cases": [
+    {
+      "scenario": "S1",
+      "expected_context": "unresolved",
+      "numerical_only": {
+        "context": "not_reviewed",
+        "model_calls": 0
+      },
+      "fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare first instrument on each segment across the time-range midpoint.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "unresolved",
+        "document_ids": [
+          "LOG-COVERAGE-001",
+          "PROC-INSPECT-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.8999,
+              "after_median_bar": 79.8201,
+              "change_bar": -0.0798,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 88,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1045,
+              "after_median_bar": 79.1166,
+              "change_bar": 0.0121,
+              "invalid_received": 2
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 89,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1057,
+              "after_median_bar": 79.1152,
+              "change_bar": 0.0095,
+              "invalid_received": 1
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "procedure",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare quality-flagged instruments spread across segments, filling with segment representatives.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "unresolved",
+        "document_ids": [
+          "LOG-COVERAGE-001",
+          "PROC-INSPECT-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "1cbd34f748079db29c5c5b02c01e15a75c63de7b96a3d899173083bf11f0fa09",
+          "sensors": [
+            {
+              "sensor_id": "P3-ST4-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-1",
+              "before_usable": 90,
+              "after_usable": 67,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 78.5052,
+              "after_median_bar": 78.5045,
+              "change_bar": -0.0007,
+              "invalid_received": 23
+            },
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.8999,
+              "after_median_bar": 79.8201,
+              "change_bar": -0.0798,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 88,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1045,
+              "after_median_bar": 79.1166,
+              "change_bar": 0.0121,
+              "invalid_received": 2
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 89,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1057,
+              "after_median_bar": 79.1152,
+              "change_bar": 0.0095,
+              "invalid_received": 1
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "procedure",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_matches_context": true,
+      "adaptive": {
+        "assessment": "unresolved",
+        "matches_context": true,
+        "history_tool_choices": [
+          {
+            "name": "history.search",
+            "arguments": {
+              "query": "Incident operating logs valve compressor pressure changes across P1 P2 P3; localized P1 ST2 ST3 alerts; P3-ST4-A instrumentation maintenance",
+              "intent": "test_operating_change",
+              "site_id": "northsea",
+              "asset_ids": [
+                "P1",
+                "P2",
+                "P3",
+                "P3-ST4-A"
+              ],
+              "snapshot_id": "window-be2ff3141c4b8afcafca87c98c4d204f3eb01bc7eb8288aacc3e384ed6438f93",
+              "pack_version": "pressure-pack-v3",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          },
+          {
+            "name": "history.compare",
+            "arguments": {
+              "intent": "seek_counterevidence",
+              "site_id": "northsea",
+              "sensor_ids": [
+                "P1-ST2-A",
+                "P1-ST1-A",
+                "P2-ST2-A",
+                "P3-ST2-A"
+              ],
+              "end_seconds": 180,
+              "snapshot_id": "window-be2ff3141c4b8afcafca87c98c4d204f3eb01bc7eb8288aacc3e384ed6438f93",
+              "pack_version": "pressure-pack-v3",
+              "split_seconds": 90,
+              "start_seconds": 0,
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          }
+        ],
+        "diagnosis_model_calls": 3,
+        "diagnosis_tool_calls": 6
+      },
+      "fixed_matches_context": true
+    },
+    {
+      "scenario": "S2",
+      "expected_context": "instrumentation_context",
+      "numerical_only": {
+        "context": "not_reviewed",
+        "model_calls": 0
+      },
+      "fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare first instrument on each segment across the time-range midpoint.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "unresolved",
+        "document_ids": [
+          "LOG-COVERAGE-001",
+          "MAINT-SPIKE-P2-001",
+          "PROC-INSPECT-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "a214a19e1c7d7293f663409dca536073f796a7f0e8d7153876bf3fb662cc339d",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.9005,
+              "after_median_bar": 79.9085,
+              "change_bar": 0.008,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 89,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1104,
+              "after_median_bar": 79.106,
+              "change_bar": -0.0045,
+              "invalid_received": 1
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1053,
+              "after_median_bar": 79.1055,
+              "change_bar": 0.0002,
+              "invalid_received": 0
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "procedure",
+          "maintenance",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare quality-flagged instruments spread across segments, filling with segment representatives.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "instrumentation_context",
+        "document_ids": [
+          "LOG-COVERAGE-001",
+          "MAINT-SPIKE-P2-001",
+          "PROC-INSPECT-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "a214a19e1c7d7293f663409dca536073f796a7f0e8d7153876bf3fb662cc339d",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.9005,
+              "after_median_bar": 79.9085,
+              "change_bar": 0.008,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST2-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-1",
+              "before_usable": 90,
+              "after_usable": 89,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 78.8969,
+              "after_median_bar": 78.9091,
+              "change_bar": 0.0122,
+              "invalid_received": 1
+            },
+            {
+              "sensor_id": "P3-ST3-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 59,
+              "after_usable": 60,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 78.7028,
+              "after_median_bar": 78.7095,
+              "change_bar": 0.0067,
+              "invalid_received": 1
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 89,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1104,
+              "after_median_bar": 79.106,
+              "change_bar": -0.0045,
+              "invalid_received": 1
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "procedure",
+          "maintenance",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_matches_context": true,
+      "adaptive": {
+        "assessment": "unresolved",
+        "matches_context": false,
+        "history_tool_choices": [
+          {
+            "name": "history.search",
+            "arguments": {
+              "query": "Current approved sensor maintenance calibration telemetry faults and valve compressor operating logs; scattered quality concerns with no event-supporting sensors",
+              "intent": "test_instrumentation",
+              "site_id": "northsea",
+              "asset_ids": [
+                "P1-ST1-A",
+                "P1-ST2-A",
+                "P2-ST2-A",
+                "P3-ST3-A"
+              ],
+              "snapshot_id": "window-8fa109eb98cb56d941379d53d5a6e22cf477c33860037f8eb3b63f17768789e7",
+              "pack_version": "pressure-pack-v3",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": "history_query"
+          },
+          {
+            "name": "history.search",
+            "arguments": {
+              "query": "Approved maintenance calibration and telemetry faults for scattered sensor quality concerns; valve compressor operating logs",
+              "intent": "test_instrumentation",
+              "site_id": "northsea",
+              "asset_ids": [
+                "P1-ST1-A",
+                "P1-ST2-A",
+                "P2-ST2-A",
+                "P3-ST3-A"
+              ],
+              "snapshot_id": "window-8fa109eb98cb56d941379d53d5a6e22cf477c33860037f8eb3b63f17768789e7",
+              "pack_version": "pressure-pack-v3",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          },
+          {
+            "name": "history.compare",
+            "arguments": {
+              "intent": "test_instrumentation",
+              "site_id": "northsea",
+              "sensor_ids": [
+                "P1-ST1-A",
+                "P1-ST1-B",
+                "P2-ST2-A",
+                "P2-ST2-B"
+              ],
+              "end_seconds": 180,
+              "snapshot_id": "window-8fa109eb98cb56d941379d53d5a6e22cf477c33860037f8eb3b63f17768789e7",
+              "pack_version": "pressure-pack-v3",
+              "split_seconds": 90,
+              "start_seconds": 0,
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          },
+          {
+            "name": "history.compare",
+            "arguments": {
+              "intent": "seek_counterevidence",
+              "site_id": "northsea",
+              "sensor_ids": [
+                "P1-ST2-B",
+                "P2-ST1-B",
+                "P3-ST2-B",
+                "P3-ST3-B"
+              ],
+              "end_seconds": 180,
+              "snapshot_id": "window-8fa109eb98cb56d941379d53d5a6e22cf477c33860037f8eb3b63f17768789e7",
+              "pack_version": "pressure-pack-v3",
+              "split_seconds": 90,
+              "start_seconds": 0,
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          }
+        ],
+        "diagnosis_model_calls": 4,
+        "diagnosis_tool_calls": 7
+      },
+      "fixed_matches_context": false
+    },
+    {
+      "scenario": "S4",
+      "expected_context": "operating_change_plausible",
+      "numerical_only": {
+        "context": "not_reviewed",
+        "model_calls": 0
+      },
+      "fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare first instrument on each segment across the time-range midpoint.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "operating_change_plausible",
+        "document_ids": [
+          "PROC-OPS-001",
+          "OP-VALVE-001",
+          "PROC-INSPECT-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "d8af2d6fe660680bd3f88c54a94b2a9cb759598e299e07d6413bec490eb69001",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.8999,
+              "after_median_bar": 79.1585,
+              "change_bar": -0.7414,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 88,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1045,
+              "after_median_bar": 78.3667,
+              "change_bar": -0.7379,
+              "invalid_received": 2
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 89,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1057,
+              "after_median_bar": 78.3652,
+              "change_bar": -0.7404,
+              "invalid_received": 1
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "procedure",
+          "operation",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare quality-flagged instruments spread across segments, filling with segment representatives.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "operating_change_plausible",
+        "document_ids": [
+          "PROC-OPS-001",
+          "OP-VALVE-001",
+          "PROC-INSPECT-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "d8af2d6fe660680bd3f88c54a94b2a9cb759598e299e07d6413bec490eb69001",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.8999,
+              "after_median_bar": 79.1585,
+              "change_bar": -0.7414,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 88,
+              "after_usable": 90,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1045,
+              "after_median_bar": 78.3667,
+              "change_bar": -0.7379,
+              "invalid_received": 2
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 89,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1057,
+              "after_median_bar": 78.3652,
+              "change_bar": -0.7404,
+              "invalid_received": 1
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "procedure",
+          "operation",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_matches_context": true,
+      "adaptive": {
+        "assessment": "unresolved",
+        "matches_context": false,
+        "history_tool_choices": [
+          {
+            "name": "history.search",
+            "arguments": {
+              "query": "Approved incident-time valve compressor operating logs explaining common-mode pressure change across P1 P2 P3",
+              "intent": "test_operating_change",
+              "site_id": "northsea",
+              "asset_ids": [
+                "P1",
+                "P2",
+                "P3"
+              ],
+              "snapshot_id": "window-8595cac7e66afa79991125cba6cae9465b2d6100bcb61bad11c0801a9ee3720b",
+              "pack_version": "pressure-pack-v3",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          },
+          {
+            "name": "history.compare",
+            "arguments": {
+              "intent": "test_operating_change",
+              "site_id": "northsea",
+              "sensor_ids": [
+                "P1-ST1-A",
+                "P2-ST1-A",
+                "P3-ST1-A"
+              ],
+              "end_seconds": 180,
+              "snapshot_id": "window-8595cac7e66afa79991125cba6cae9465b2d6100bcb61bad11c0801a9ee3720b",
+              "pack_version": "pressure-pack-v3",
+              "split_seconds": 120,
+              "start_seconds": 0,
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          }
+        ],
+        "diagnosis_model_calls": 3,
+        "diagnosis_tool_calls": 5
+      },
+      "fixed_matches_context": true
+    },
+    {
+      "scenario": "S5",
+      "expected_context": "unresolved",
+      "numerical_only": {
+        "context": "not_reviewed",
+        "model_calls": 0
+      },
+      "fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare first instrument on each segment across the time-range midpoint.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "unresolved",
+        "document_ids": [
+          "LOG-COVERAGE-001",
+          "PROC-INSPECT-001",
+          "WO-TELEMETRY-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "2e658fead819bd7fd113632b0487b287918c808f901f6fa35678be939a2d5db4",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 0,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.8999,
+              "after_median_bar": null,
+              "change_bar": null,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 88,
+              "after_usable": 0,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1045,
+              "after_median_bar": null,
+              "change_bar": null,
+              "invalid_received": 2
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 0,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1057,
+              "after_median_bar": null,
+              "change_bar": null,
+              "invalid_received": 0
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "maintenance",
+          "procedure",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_policy": {
+        "policy": "Fixed broad query; read top three current hits; compare quality-flagged instruments spread across segments, filling with segment representatives.",
+        "execution": "Offline policy evaluation using actual scoped database reads; not a model execution or production receipt.",
+        "assessment": "unresolved",
+        "document_ids": [
+          "LOG-COVERAGE-001",
+          "PROC-INSPECT-001",
+          "WO-TELEMETRY-001"
+        ],
+        "comparison": {
+          "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+          "start_seconds": 0,
+          "split_seconds": 90,
+          "end_seconds": 180,
+          "as_of": "2026-01-01T00:03:05+00:00",
+          "input_hash": "2e658fead819bd7fd113632b0487b287918c808f901f6fa35678be939a2d5db4",
+          "sensors": [
+            {
+              "sensor_id": "P1-ST1-A",
+              "segment_id": "P1",
+              "failure_domain": "gateway-P1-0",
+              "before_usable": 90,
+              "after_usable": 0,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.8999,
+              "after_median_bar": null,
+              "change_bar": null,
+              "invalid_received": 0
+            },
+            {
+              "sensor_id": "P2-ST1-A",
+              "segment_id": "P2",
+              "failure_domain": "gateway-P2-0",
+              "before_usable": 88,
+              "after_usable": 0,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1045,
+              "after_median_bar": null,
+              "change_bar": null,
+              "invalid_received": 2
+            },
+            {
+              "sensor_id": "P3-ST1-A",
+              "segment_id": "P3",
+              "failure_domain": "gateway-P3-0",
+              "before_usable": 90,
+              "after_usable": 0,
+              "before_expected": 90,
+              "after_expected": 90,
+              "before_median_bar": 79.1057,
+              "after_median_bar": null,
+              "change_bar": null,
+              "invalid_received": 0
+            }
+          ],
+          "caveat": "Before/after association is not a causal test; missing periods stay unknown."
+        },
+        "guard_error": null,
+        "tool_reads": 3,
+        "model_calls": 0,
+        "document_types": [
+          "maintenance",
+          "procedure",
+          "procedure"
+        ],
+        "limitation": "Controlled small corpus; not a human-effort or field-performance experiment."
+      },
+      "quality_aware_fixed_matches_context": true,
+      "adaptive": {
+        "assessment": "unresolved",
+        "matches_context": true,
+        "history_tool_choices": [
+          {
+            "name": "history.search",
+            "arguments": {
+              "query": "Incident-time gateway maintenance, telemetry coverage loss and valve/compressor operating logs; widespread quality concerns except P1-ST2.",
+              "intent": "test_instrumentation",
+              "site_id": "northsea",
+              "asset_ids": [
+                "gateway-P1-0",
+                "gateway-P2-0",
+                "gateway-P3-0",
+                "P1-ST2-A"
+              ],
+              "snapshot_id": "window-f669a43f2b1610cbb259d150b6bc1ce978ef02497fffbea88a58294ea36cc967",
+              "pack_version": "pressure-pack-v3",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null
+          }
+        ],
+        "diagnosis_model_calls": 2,
+        "diagnosis_tool_calls": 4
+      },
+      "fixed_matches_context": true
+    }
+  ],
+  "adaptive_matches": 2,
+  "fixed_matches": 3,
+  "quality_aware_fixed_matches": 4,
+  "denominator": 4,
+  "buyer_decision": "Consider a read-only shadow pilot; do not approve production or claim savings from these synthetic cases.",
+  "limitations": [
+    "No new model calls in this comparison.",
+    "Fixed retrieval is a credible low-cost alternative, not a graph-ML performance trial.",
+    "Context labels are controlled fixture expectations, not field root-cause labels.",
+    "A matching fixed workflow weakens the case for extra LLM calls on that case.",
+    "Human investigation effort, customer ROI and novel-incident generalization remain unmeasured."
+  ]
+}

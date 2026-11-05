@@ -1,0 +1,1448 @@
+{
+  "created_at": "2026-11-05T11:36:47.494049+00:00",
+  "suite": "agents",
+  "mode": "live",
+  "agents": {
+    "passed": false,
+    "mode": "live",
+    "source_version": "pressure-v3",
+    "live_model_evidence": true,
+    "requested_model": "gpt-6.1-sol",
+    "observed_models": [
+      "gpt-6.1-sol"
+    ],
+    "observed_cli_versions": [
+      "1.0.105"
+    ],
+    "qualification_tenant_id": "qualification-7fb1dd1b76ec",
+    "population": "three questions x 1 repetitions x 4 pinned snapshots",
+    "questions": [
+      "Leak or faulty sensors?",
+      "Where should we inspect, and why?",
+      "What evidence supports this, and what remains unknown?"
+    ],
+    "investigation_protocol": "bounded-history-v1",
+    "generation_model_call_ceiling": 100,
+    "cohort_maximum_model_calls": 400,
+    "answer_count": 12,
+    "provider_blocked": null,
+    "results": [
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "590b487b-2437-5648-972c-393737c9734c",
+        "snapshot_id": "window-5d1dfc4efd6b0a5036794566996d05d4d9b160f4dd7a7d6623a7c2ecfbdef136",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 59.75,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 11,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7298,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6003
+            },
+            "duration_ms": 12032.00000000652,
+            "error": null,
+            "request_id": "3c04bb53-ee48-4013-a0f3-6ffc5a70c645"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 14166,
+              "output_tokens": 289,
+              "reasoning_tokens": 57,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12871
+            },
+            "duration_ms": 16625.0,
+            "error": null,
+            "request_id": "6dbf11c2-05cb-494a-a4a3-8545b1fa47c9"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": "input_too_large",
+            "request_id": null
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12026,
+              "output_tokens": 159,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10731
+            },
+            "duration_ms": 12562.999999965541,
+            "error": null,
+            "request_id": "e60a078e-de82-44c9-bd30-aa4b3b57d851"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12931,
+              "output_tokens": 365,
+              "reasoning_tokens": 58,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11636
+            },
+            "duration_ms": 15530.999999959022,
+            "error": null,
+            "request_id": "a5ee9825-aa6e-45d0-a0e1-82b273683315"
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "89ac7b08-3002-5280-80a6-e4fbe6318feb",
+        "snapshot_id": "window-5d1dfc4efd6b0a5036794566996d05d4d9b160f4dd7a7d6623a7c2ecfbdef136",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 64.563,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 12,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7507,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6212
+            },
+            "duration_ms": 9969.000000040978,
+            "error": null,
+            "request_id": "40072ef9-3eb2-4ec9-899a-d7bc8c177354"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 14175,
+              "output_tokens": 282,
+              "reasoning_tokens": 50,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12880
+            },
+            "duration_ms": 15375.0,
+            "error": null,
+            "request_id": "11995a26-41e1-47b4-8e81-5a784aa7f8d6"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12919,
+              "output_tokens": 557,
+              "reasoning_tokens": 95,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11624
+            },
+            "duration_ms": 20797.00000002049,
+            "error": null,
+            "request_id": "50551bb6-ed09-4934-8f4f-b015112f4a17"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 47.0000000204891,
+            "error": "input_too_large",
+            "request_id": null
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12021,
+              "output_tokens": 150,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10726
+            },
+            "duration_ms": 13202.99999997951,
+            "error": null,
+            "request_id": "540b7472-104d-4002-8020-dd5025deb65f"
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "f53497c4-c64b-590d-95d6-75aa16d1f7aa",
+        "snapshot_id": "window-5d1dfc4efd6b0a5036794566996d05d4d9b160f4dd7a7d6623a7c2ecfbdef136",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 62.421,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 4,
+        "tool_calls": 10,
+        "specialist_model_calls": 3,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7509,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6214
+            },
+            "duration_ms": 14250.0,
+            "error": null,
+            "request_id": "914295fb-4d14-4fa3-9ca6-56251070623a"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 14161,
+              "output_tokens": 295,
+              "reasoning_tokens": 63,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12866
+            },
+            "duration_ms": 14594.000000040978,
+            "error": null,
+            "request_id": "6043c848-0efb-47e5-aa32-9f08b9ccd757"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12932,
+              "output_tokens": 372,
+              "reasoning_tokens": 69,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11637
+            },
+            "duration_ms": 16890.999999945052,
+            "error": null,
+            "request_id": "c091dbe7-3675-467d-852f-17640bdf5d00"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12030,
+              "output_tokens": 158,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10735
+            },
+            "duration_ms": 14157.00000000652,
+            "error": null,
+            "request_id": "21f40cea-f063-41c2-815f-b7956381b072"
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "8dff5070-3cdc-547e-9f04-c1bc67215c46",
+        "snapshot_id": "window-5cf2b6c319d5662636bf501864f44ea0b952e16bf62931abb7c3ca059bec85fd",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 62.875,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 11,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7296,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6001
+            },
+            "duration_ms": 10750.0,
+            "error": null,
+            "request_id": "0afb1e06-774d-4ec7-b2a0-02626e0fd504"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13803,
+              "output_tokens": 224,
+              "reasoning_tokens": 43,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12508
+            },
+            "duration_ms": 14672.00000002049,
+            "error": null,
+            "request_id": "e1101cea-7480-4305-a2dc-676b1a6539b2"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 10935,
+              "output_tokens": 211,
+              "reasoning_tokens": 69,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 9640
+            },
+            "duration_ms": 13733.999999938533,
+            "error": null,
+            "request_id": "3ee2102d-a364-40ed-8ae3-a1753d85b1de"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11828,
+              "output_tokens": 521,
+              "reasoning_tokens": 87,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10533
+            },
+            "duration_ms": 19327.99999997951,
+            "error": null,
+            "request_id": "3509aa7b-9981-4ff2-aac7-2804b01edab7"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": "input_too_large",
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "3bab4c57-3bc9-58ef-a091-9fdb04861f31",
+        "snapshot_id": "window-5cf2b6c319d5662636bf501864f44ea0b952e16bf62931abb7c3ca059bec85fd",
+        "state": "SUCCEEDED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 90.235,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 6,
+        "tool_calls": 14,
+        "specialist_model_calls": 4,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "subsea_78c5872a725e433e803f92c114d143fd"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7472,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6177
+            },
+            "duration_ms": 10297.00000002049,
+            "error": null,
+            "request_id": "92446861-1025-4ed9-9a4f-c8b2710868dc"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12824,
+              "output_tokens": 314,
+              "reasoning_tokens": 39,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11529
+            },
+            "duration_ms": 13250.0,
+            "error": null,
+            "request_id": "2b114db4-f165-4078-aeb4-a8298aea2aa8"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13820,
+              "output_tokens": 230,
+              "reasoning_tokens": 49,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12525
+            },
+            "duration_ms": 15217.99999999348,
+            "error": null,
+            "request_id": "89045b85-9a5d-46ad-8d0a-fe69cb8e15e3"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11840,
+              "output_tokens": 433,
+              "reasoning_tokens": 145,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10545
+            },
+            "duration_ms": 18437.00000003446,
+            "error": null,
+            "request_id": "6b1a6c5d-5719-4532-ae1c-90758ebfc833"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 10946,
+              "output_tokens": 190,
+              "reasoning_tokens": 43,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 9651
+            },
+            "duration_ms": 15187.000000034459,
+            "error": null,
+            "request_id": "b0969ed5-1976-4d79-bbe3-1956a7d03522"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13178,
+              "output_tokens": 330,
+              "reasoning_tokens": 66,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11883
+            },
+            "duration_ms": 14437.000000034459,
+            "error": null,
+            "request_id": "a0a541c9-2600-4cce-81b7-1b4d001d86cd"
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "37e9b0a5-6bdb-5167-bd6c-470e92f4c2f8",
+        "snapshot_id": "window-5cf2b6c319d5662636bf501864f44ea0b952e16bf62931abb7c3ca059bec85fd",
+        "state": "SUCCEEDED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 26.578,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-006",
+          "claim-010",
+          "claim-014",
+          "claim-020",
+          "claim-022",
+          "claim-024",
+          "claim-025",
+          "claim-026",
+          "claim-027",
+          "claim-028"
+        ],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": {
+          "assessment": "unresolved",
+          "document_ids": [
+            "LOG-COVERAGE-001"
+          ],
+          "rejected_document_ids": [],
+          "comparison_call_ids": [
+            "subsea_78c5872a725e433e803f92c114d143fd"
+          ],
+          "next_action": "review_instrumentation"
+        },
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7670,
+              "output_tokens": 105,
+              "reasoning_tokens": 25,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6375
+            },
+            "duration_ms": 11515.00000001397,
+            "error": null,
+            "request_id": "b6dc9d31-2cd4-4c6a-ba05-74ac75402cb0"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12835,
+              "output_tokens": 299,
+              "reasoning_tokens": 35,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11540
+            },
+            "duration_ms": 14093.999999924563,
+            "error": null,
+            "request_id": "42926723-c09f-4560-8210-cd8223ff2960"
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "b26b15b4-1659-5231-aad9-f02cf5e57325",
+        "snapshot_id": "window-02d1db0089c664a379507c7371ee937e5e70fac0ac1961244c9cb1ca42b26e9c",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 55.406,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 10,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7302,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6007
+            },
+            "duration_ms": 10422.00000002049,
+            "error": null,
+            "request_id": "5d0852af-0c84-4788-97b8-6e704af9ace7"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13931,
+              "output_tokens": 234,
+              "reasoning_tokens": 39,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12636
+            },
+            "duration_ms": 13390.999999945052,
+            "error": null,
+            "request_id": "889566a0-0002-4ccb-b4d7-cc1c2c03d42e"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13173,
+              "output_tokens": 361,
+              "reasoning_tokens": 74,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11878
+            },
+            "duration_ms": 15905.999999959022,
+            "error": null,
+            "request_id": "d440b549-63d4-4917-adc0-edeaef1a21ba"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11718,
+              "output_tokens": 148,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10423
+            },
+            "duration_ms": 13233.999999938533,
+            "error": null,
+            "request_id": "1d80e519-9ba5-4c34-977c-85daeaef9ccc"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": "input_too_large",
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "15ec63da-a23e-59ef-97c9-6af047a53a76",
+        "snapshot_id": "window-02d1db0089c664a379507c7371ee937e5e70fac0ac1961244c9cb1ca42b26e9c",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 52.203,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 10,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7486,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6191
+            },
+            "duration_ms": 10172.00000002049,
+            "error": null,
+            "request_id": "15d11d62-4c26-4432-8913-66e3377a0cc1"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13944,
+              "output_tokens": 232,
+              "reasoning_tokens": 37,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12649
+            },
+            "duration_ms": 12094.000000040978,
+            "error": null,
+            "request_id": "8d40c9cf-4329-40cd-9d78-f4a54f3d5ad7"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11740,
+              "output_tokens": 146,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10445
+            },
+            "duration_ms": 11375.0,
+            "error": null,
+            "request_id": "87ae7471-c07b-4bc7-8a12-5c2ecbe7830a"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13182,
+              "output_tokens": 348,
+              "reasoning_tokens": 61,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11887
+            },
+            "duration_ms": 16125.0,
+            "error": null,
+            "request_id": "31443d91-0ff8-4c82-8084-513e02d2da11"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": "input_too_large",
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S4",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "0e974457-c810-5ae3-b4bf-23fb94766213",
+        "snapshot_id": "window-02d1db0089c664a379507c7371ee937e5e70fac0ac1961244c9cb1ca42b26e9c",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 49.078,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 10,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7477,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6182
+            },
+            "duration_ms": 9609.000000054948,
+            "error": null,
+            "request_id": "d5da815e-e6de-4050-9751-08ce53eeee79"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13938,
+              "output_tokens": 231,
+              "reasoning_tokens": 36,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12643
+            },
+            "duration_ms": 12015.999999945052,
+            "error": null,
+            "request_id": "29d79b78-f5ba-43db-9ff3-39b1803711ee"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13190,
+              "output_tokens": 342,
+              "reasoning_tokens": 53,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11895
+            },
+            "duration_ms": 13157.00000000652,
+            "error": null,
+            "request_id": "ad2d7446-6414-4a74-8925-17ba5d2c1cfa"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11726,
+              "output_tokens": 146,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 10431
+            },
+            "duration_ms": 11733.999999938533,
+            "error": null,
+            "request_id": "89d92254-0377-427d-b07a-2d007772e800"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": "input_too_large",
+            "request_id": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "4b9d484f-64c4-5034-8844-12f6830f1604",
+        "snapshot_id": "window-4782be4c8b61daa9bd985e718dd6b7ac4a6f0540b3209363eb3230637fb42a79",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 51.64,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 10,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7298,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6003
+            },
+            "duration_ms": 10108.999999938533,
+            "error": null,
+            "request_id": "8c341563-bf10-40c2-8e81-beb5c8084703"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13862,
+              "output_tokens": 230,
+              "reasoning_tokens": 35,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12567
+            },
+            "duration_ms": 11609.99999998603,
+            "error": null,
+            "request_id": "687be104-4f76-4c95-a1fd-fb2671b50123"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11267,
+              "output_tokens": 191,
+              "reasoning_tokens": 41,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 9972
+            },
+            "duration_ms": 13312.000000034459,
+            "error": null,
+            "request_id": "f52a1a0c-88a4-4ddf-b8a7-2ee1581b0ea3"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": "input_too_large",
+            "request_id": null
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12421,
+              "output_tokens": 370,
+              "reasoning_tokens": 71,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11126
+            },
+            "duration_ms": 14592.99999999348,
+            "error": null,
+            "request_id": "1ae8eee9-5f33-4275-969f-72a356d837b1"
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "20562a07-591f-5cf5-af80-675ed9505046",
+        "snapshot_id": "window-4782be4c8b61daa9bd985e718dd6b7ac4a6f0540b3209363eb3230637fb42a79",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 51.219,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 10,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7490,
+              "output_tokens": 48,
+              "reasoning_tokens": 15,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6195
+            },
+            "duration_ms": 9782.00000000652,
+            "error": null,
+            "request_id": "c80a2a0a-be26-41e2-8fa7-d812a4ad8f8d"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13881,
+              "output_tokens": 226,
+              "reasoning_tokens": 31,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12586
+            },
+            "duration_ms": 11937.999999965541,
+            "error": null,
+            "request_id": "6e79ad88-5d4b-4b80-b88b-ea0a95c49004"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12439,
+              "output_tokens": 362,
+              "reasoning_tokens": 64,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11144
+            },
+            "duration_ms": 14265.00000001397,
+            "error": null,
+            "request_id": "8abd7ab8-979b-4c2d-9c87-7c1fc9fce4a8"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": "input_too_large",
+            "request_id": null
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11244,
+              "output_tokens": 175,
+              "reasoning_tokens": 25,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 9949
+            },
+            "duration_ms": 13015.00000001397,
+            "error": null,
+            "request_id": "25c926ff-ab73-4228-b310-d425c649130c"
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "6a70ef84-1e2d-5226-921d-5358fec06d6d",
+        "snapshot_id": "window-4782be4c8b61daa9bd985e718dd6b7ac4a6f0540b3209363eb3230637fb42a79",
+        "state": "FAILED",
+        "accepted_correct": false,
+        "legitimate_abstention": false,
+        "error_code": "child_failed",
+        "elapsed_seconds": 56.312,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 5,
+        "tool_calls": 10,
+        "specialist_model_calls": 4,
+        "claim_refs": [],
+        "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation": null,
+        "model_receipts": [
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 7499,
+              "output_tokens": 31,
+              "reasoning_tokens": 0,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 6204
+            },
+            "duration_ms": 10547.00000002049,
+            "error": null,
+            "request_id": "8a1231c1-e0b2-4172-8d07-d2b7ea7aca3f"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 13881,
+              "output_tokens": 235,
+              "reasoning_tokens": 40,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 12586
+            },
+            "duration_ms": 11592.99999999348,
+            "error": null,
+            "request_id": "50b9f62e-372d-486f-a450-d1f795f9e5a3"
+          },
+          {
+            "mode": "live",
+            "requested_model": null,
+            "observed_model": null,
+            "model_identity_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": "input_too_large",
+            "request_id": null
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 11273,
+              "output_tokens": 216,
+              "reasoning_tokens": 61,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 9978
+            },
+            "duration_ms": 16937.00000003446,
+            "error": null,
+            "request_id": "a6bebeb6-bb16-40a1-8cac-1bfeff4cb2b2"
+          },
+          {
+            "mode": "live",
+            "requested_model": "gpt-6.1-sol",
+            "observed_model": "gpt-6.1-sol",
+            "model_identity_source": "cli_event",
+            "cli_version": "1.0.105",
+            "cli_version_source": "executable_version",
+            "usage": {
+              "input_tokens": 12434,
+              "output_tokens": 379,
+              "reasoning_tokens": 68,
+              "cache_read_tokens": 1292,
+              "cache_write_tokens": 11139
+            },
+            "duration_ms": 15062.000000034459,
+            "error": null,
+            "request_id": "1b23d98e-862d-49de-b1a6-7bf937633987"
+          }
+        ]
+      }
+    ],
+    "observability": {
+      "status": "ok",
+      "destinations": {
+        "langfuse": {
+          "status": "accepted",
+          "endpoint": "http://127.0.0.1:3001/api/public/otel/v1/traces",
+          "processor": "batch",
+          "queue_capacity": 256,
+          "batch_capacity": 64,
+          "accepted_batches": 71,
+          "failed_batches": 0,
+          "exporter_accepted": true,
+          "enqueued_spans": 256,
+          "completed_spans": 256,
+          "pending_spans": 0
+        },
+        "jaeger": {
+          "status": "accepted",
+          "endpoint": "http://127.0.0.1:4319/v1/traces",
+          "processor": "batch",
+          "queue_capacity": 256,
+          "batch_capacity": 64,
+          "accepted_batches": 75,
+          "failed_batches": 0,
+          "exporter_accepted": true,
+          "enqueued_spans": 256,
+          "completed_spans": 256,
+          "pending_spans": 0
+        }
+      },
+      "content_capture": false,
+      "synchronous_export": false,
+      "local_audit": "available",
+      "stored_trace_visibility": "verified",
+      "storage_verification_api": "langfuse_observations_v2",
+      "verified_trace_count": 1,
+      "verified_observation_tree_count": 1,
+      "closed": false,
+      "flush_failed": false,
+      "flush_diagnostic": {
+        "status": "completed",
+        "error_type": null
+      }
+    },
+    "single_agent_comparison": {
+      "task_id": "baseline-7dca2045ba4b4589abd2b4038bbdf382",
+      "snapshot_id": "window-5d1dfc4efd6b0a5036794566996d05d4d9b160f4dd7a7d6623a7c2ecfbdef136",
+      "mode": "live",
+      "population": "single model task with governed numerical tools",
+      "state": "SUCCEEDED",
+      "check_accepted": true,
+      "model_calls": 1,
+      "tool_calls": 4,
+      "child_count": 0,
+      "elapsed_seconds": 18.57799999997951,
+      "hypothesis": "suspected_leak",
+      "claim_refs": [
+        "claim-000",
+        "claim-001",
+        "claim-002",
+        "claim-003",
+        "claim-004",
+        "claim-005",
+        "claim-006",
+        "claim-022",
+        "claim-024",
+        "claim-025",
+        "claim-026",
+        "claim-027",
+        "claim-028",
+        "claim-029",
+        "claim-030",
+        "claim-031",
+        "claim-032"
+      ],
+      "outcome": "supported",
+      "error_code": null,
+      "live_model_evidence": true
+    },
+    "stored_trace_tree_verified": true,
+    "verified_trace_ids": [
+      "408b33d122cf073555c7d168cc9744e4"
+    ],
+    "monetary_inference_cost": null,
+    "limitation": "Synthetic-only cohort; scripted runs are not live-model evidence. Single-agent comparison is the numerical-only legacy policy, not same-history evidence."
+  },
+  "passed": false
+}

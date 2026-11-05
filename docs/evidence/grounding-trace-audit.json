@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "verification": "Queried Langfuse stored observations, not exporter HTTP acknowledgement.",
+  "results": [
+    {
+      "task_id": "9de7f11e-72be-5d32-aa05-1861b6ab035d",
+      "trace_id": "48dcf43f67b295f9d6813e49734a81d6",
+      "stored_observation_tree_verified": true
+    },
+    {
+      "task_id": "9ed96362-614c-5d3c-b5b5-e7bab12185df",
+      "trace_id": "a5bec4165d28b428619ca5c1db23cc9b",
+      "stored_observation_tree_verified": true
+    }
+  ],
+  "limitations": [
+    "Verifies stored connected observation types; not production tracing availability or answer correctness."
+  ]
+}

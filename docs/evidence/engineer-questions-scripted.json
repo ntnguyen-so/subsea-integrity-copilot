@@ -1,0 +1,385 @@
+{
+  "mode": "scripted",
+  "response_protocol": "engineer-v1",
+  "passed": true,
+  "results": [
+    {
+      "scenario": "S4",
+      "question": "Could a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?",
+      "root_id": "f8234f50-caab-587b-9597-1584ab06e99e",
+      "snapshot_id": "window-cef7ce9229bd9e0f8cbfc70868f5ce50322a0e2926b7022b9bb1d76ce57fe7ef",
+      "state": "ABSTAINED",
+      "error_code": null,
+      "accepted": true,
+      "interpretation": {
+        "focus": "operating_context",
+        "answer": {
+          "text": "Offline contract example: review the cited measurements and history for this question. A plausible explanation is not a confirmed cause; the checked evidence below retains the physical uncertainty.",
+          "references": [
+            "claim-000",
+            "OP-VALVE-001",
+            "a2762c9ae248461c8cfd232c887e8c7e"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "Offline contract example: operating activity remains a competing explanation to verify against current records and pressure timing.",
+            "references": [
+              "claim-000",
+              "OP-VALVE-001",
+              "a2762c9ae248461c8cfd232c887e8c7e"
+            ],
+            "cause": "operating_change",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "Are the operating records complete for the incident?",
+          "Could the affected instruments share a communication or power failure?"
+        ]
+      },
+      "answer": "ENGINEER QUESTION\nCould a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nOffline contract example: review the cited measurements and history for this question. A plausible explanation is not a confirmed cause; the checked evidence below retains the physical uncertainty.\nSources: claim-000, OP-VALVE-001, a2762c9ae248461c8cfd232c887e8c7e\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\noperating change (not established): Offline contract example: operating activity remains a competing explanation to verify against current records and pressure timing.\nSources: claim-000, OP-VALVE-001, a2762c9ae248461c8cfd232c887e8c7e\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nAre the operating records complete for the incident?\nCould the affected instruments share a communication or power failure?\n\nCHECKED EVIDENCE\nSCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 99.7% (1436/1440 observations).\nLimitations: COMMON_MODE_PRESSURE_CHANGE, OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, child_abstained, partial_health_review.\nA broad pressure change can reflect operating changes or a shared failure; no localized leak is asserted.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\n\nHISTORY-GROUNDED INVESTIGATION\nOperating-change explanation is plausible; a concurrent leak is not ruled out.\n[OP-VALVE-001 / revision 1] Executed upstream valve pressure-setpoint change at second 90: Fictional, nonconfidential executed operating log. At 2026-01-01T00:01:30Z (synthetic second 90), the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar. Execution was acknowledged at second 100 and the log became available at second 1\n[PROC-INSPECT-001 / revision 1] Pressure anomaly desk assessment and bounded inspection planning: Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure t\nNot current authority: [INC-TRANSIENT-001] status=approved, effective_to=2025-12-16T08:10:00Z.\nMeasured comparison [a2762c9ae248461c8cfd232c887e8c7e]: 30\u2013180s; split 90s.\nP1-ST1-A: median change -0.7365 bar; usable before 60/60, after 90/90.\nP2-ST1-A: median change -0.7376 bar; usable before 59/60, after 90/90.\nP3-ST1-A: median change -0.7373 bar; usable before 60/60, after 89/90.\nAsk the operator to verify operating records.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+      "elapsed_seconds": 5.172000000020489,
+      "model_receipts": [
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 16.00000006146729,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 47.0000000204891,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.999999945051968,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 30.999999959021807,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 16.00000006146729,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.999999945051968,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.999999945051968,
+          "error": null,
+          "request_id": null
+        }
+      ]
+    },
+    {
+      "scenario": "S2",
+      "question": "Is there evidence of sensor drift, or are we just assuming that every anomaly is a faulty sensor?",
+      "root_id": "fc7fbff2-b827-58ea-8eb9-14f78217e6b3",
+      "snapshot_id": "window-a81e3106e3e9d23f656da3b050f74f8c77b640dce375afad2f6cd96b10288d4c",
+      "state": "SUCCEEDED",
+      "error_code": null,
+      "accepted": true,
+      "interpretation": {
+        "focus": "sensor_quality",
+        "answer": {
+          "text": "Offline contract example: review the cited measurements and history for this question. A plausible explanation is not a confirmed cause; the checked evidence below retains the physical uncertainty.",
+          "references": [
+            "claim-000",
+            "MAINT-LINK-P3-001",
+            "a65fb56fc21c4aedbbfb46c8d78ff74c"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "Offline contract example: operating activity remains a competing explanation to verify against current records and pressure timing.",
+            "references": [
+              "claim-000",
+              "MAINT-LINK-P3-001",
+              "a65fb56fc21c4aedbbfb46c8d78ff74c"
+            ],
+            "cause": "operating_change",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "Are the operating records complete for the incident?",
+          "Could the affected instruments share a communication or power failure?"
+        ]
+      },
+      "answer": "ENGINEER QUESTION\nIs there evidence of sensor drift, or are we just assuming that every anomaly is a faulty sensor?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nOffline contract example: review the cited measurements and history for this question. A plausible explanation is not a confirmed cause; the checked evidence below retains the physical uncertainty.\nSources: claim-000, MAINT-LINK-P3-001, a65fb56fc21c4aedbbfb46c8d78ff74c\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\noperating change (not established): Offline contract example: operating activity remains a competing explanation to verify against current records and pressure timing.\nSources: claim-000, MAINT-LINK-P3-001, a65fb56fc21c4aedbbfb46c8d78ff74c\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nAre the operating records complete for the incident?\nCould the affected instruments share a communication or power failure?\n\nCHECKED EVIDENCE\nSCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True; paired-instrument disagreement: True.\nP1-ST4-A pressure: 40/60 usable; 20 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP2-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP2-ST4-A pressure: 40/60 usable; 20 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP3-ST3-A pressure: 40/60 usable; 20 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP3-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 95.6% (1377/1440 observations).\nSensor or telemetry issues warrant review; not a proven hardware diagnosis.\nLimitations: OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, partial_health_review.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\n\nHISTORY-GROUNDED INVESTIGATION\nMaintenance history supports instrumentation review, not a proven hardware diagnosis.\n[MAINT-LINK-P3-001 / revision 1] Branch B ST3-A sample loss on gateway P3-0: Fictional, nonconfidential telemetry maintenance note. Intermittent sample loss was observed on the P3-ST3-A channel carried by gateway-P3-0. Investigation has not separated channel scheduling from a local transmitter fault. ST1 and ST3 share this gateway; the\n[MAINT-CAL-P1-002 / revision 2] P1-ST2-A calibration repeatability exception: Fictional, nonconfidential maintenance note. Repeat calibration of P1-ST2-A showed warm-up dependent positive offset drift after the initial acceptable bench result. The transmitter remains in observation pending replacement; no correction has been applied to \nNot current authority: [MAINT-CAL-P1-DRAFT] status=draft, effective_to=None.\nMeasured comparison [a65fb56fc21c4aedbbfb46c8d78ff74c]: 30\u2013180s; split 90s.\nP1-ST1-A: median change 0.0088 bar; usable before 60/60, after 90/90.\nP1-ST2-A: median change 0.5392 bar; usable before 59/60, after 90/90.\nP1-ST4-A: median change 0.0168 bar; usable before 40/60, after 60/90.\nP2-ST2-A: median change 0.0182 bar; usable before 60/60, after 89/90.\nReview the cited instrumentation with the integrity engineer.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+      "elapsed_seconds": 3.7660000000614673,
+      "model_receipts": [
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 16.00000006146729,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 47.0000000204891,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 30.999999959021807,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 16.00000006146729,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 32.00000000651926,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.999999945051968,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 30.999999959021807,
+          "error": null,
+          "request_id": null
+        }
+      ]
+    },
+    {
+      "scenario": "S1",
+      "question": "Why is the proposed inspection area a range rather than an exact leak position?",
+      "root_id": "068c4205-80e0-533b-bb26-ae8db766b212",
+      "snapshot_id": "window-4c19cbd961766fb5b4755bd4e7336b0023861835469582e3c3b4686dbb814684",
+      "state": "SUCCEEDED",
+      "error_code": null,
+      "accepted": true,
+      "interpretation": {
+        "focus": "root_cause",
+        "answer": {
+          "text": "Offline contract example: review the cited measurements and history for this question. A plausible explanation is not a confirmed cause; the checked evidence below retains the physical uncertainty.",
+          "references": [
+            "claim-000",
+            "LOG-COVERAGE-001",
+            "f005ba9688ed4bc9a28f8a3d2a168981"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "Offline contract example: operating activity remains a competing explanation to verify against current records and pressure timing.",
+            "references": [
+              "claim-000",
+              "LOG-COVERAGE-001",
+              "f005ba9688ed4bc9a28f8a3d2a168981"
+            ],
+            "cause": "operating_change",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "Are the operating records complete for the incident?",
+          "Could the affected instruments share a communication or power failure?"
+        ]
+      },
+      "answer": "ENGINEER QUESTION\nWhy is the proposed inspection area a range rather than an exact leak position?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nOffline contract example: review the cited measurements and history for this question. A plausible explanation is not a confirmed cause; the checked evidence below retains the physical uncertainty.\nSources: claim-000, LOG-COVERAGE-001, f005ba9688ed4bc9a28f8a3d2a168981\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\noperating change (not established): Offline contract example: operating activity remains a competing explanation to verify against current records and pressure timing.\nSources: claim-000, LOG-COVERAGE-001, f005ba9688ed4bc9a28f8a3d2a168981\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nAre the operating records complete for the incident?\nCould the affected instruments share a communication or power failure?\n\nCHECKED EVIDENCE\nSCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP3-ST4-A pressure: 45/60 usable; 15 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 98.7% (1421/1440 observations).\nSuspected leak; not a confirmed diagnosis.\nWhy: 4 pressure instruments across 2 failure domains show overlapping drops for 59s. Review the cited sensor histories.\nPriority inspection interval: P1 200-600 m. This is an inspection bracket, not an exact leak position.\nWhy: affected stations at 300/500 m are bracketed by unaffected stations at 100/700 m. Inspection boundaries are the intervening station midpoints.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, INSPECTION_INTERVAL_NOT_LEAK_POINT, OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES, partial_health_review.\nCompatible candidates are not a confidence interval.\nStation spacing bounds an inspection priority, not the physical leak coordinate.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\n\nHISTORY-GROUNDED INVESTIGATION\nHistorical context does not resolve the cause; absence of a log is not absence of an event.\n[LOG-COVERAGE-001 / revision 1] Operating-log coverage and missing source limitations: Fictional, nonconfidential source coverage statement. This excerpt is not a complete plant historian: third-party upstream activity, manual field actions and delayed shift entries may be absent. No contemporaneous operation entry in this excerpt explains a loc\n[PROC-INSPECT-001 / revision 1] Pressure anomaly desk assessment and bounded inspection planning: Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure t\nMeasured comparison [f005ba9688ed4bc9a28f8a3d2a168981]: 30\u2013180s; split 90s.\nP1-ST1-A: median change -0.0748 bar; usable before 60/60, after 90/90.\nP1-ST2-A: median change -1.2415 bar; usable before 60/60, after 89/90.\nP1-ST3-A: median change -0.8568 bar; usable before 60/60, after 90/90.\nP1-ST4-A: median change -0.025 bar; usable before 60/60, after 90/90.\nReview the supported inspection interval with the integrity engineer.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+      "elapsed_seconds": 3.827999999979511,
+      "model_receipts": [
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.999999945051968,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.000000013969839,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 16.00000006146729,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 15.999999945051968,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 30.999999959021807,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 30.999999959021807,
+          "error": null,
+          "request_id": null
+        },
+        {
+          "mode": "scripted",
+          "requested_model": null,
+          "observed_model": null,
+          "model_identity_source": "scripted",
+          "cli_version": null,
+          "cli_version_source": null,
+          "usage": null,
+          "duration_ms": 32.00000000651926,
+          "error": null,
+          "request_id": null
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "SCRIPTED is an offline contract example, not genuine interpretation.",
+    "Citation membership is checked, not semantic entailment.",
+    "Model-written RCA context requires engineer review and is not a confirmed cause.",
+    "These questions demonstrate functionality, not effort savings or superiority."
+  ]
+}

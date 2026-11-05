@@ -2,10 +2,11 @@ from datetime import timedelta
 
 import pytest
 
+from subsea_copilot.anomaly import MedianMADDetector
 from subsea_copilot.contracts import PipelineSegment, Point
 from subsea_copilot.diagnostics import analyze_window
 from subsea_copilot.ingest import normalize_records
-from subsea_copilot.localization import locate
+from subsea_copilot.localization import locate, pipeline_distances
 from subsea_copilot.replay import ReplayClock, completed_endpoints
 from subsea_copilot.synthetic import generate_scenario
 
@@ -43,7 +44,7 @@ def snapshot(run, end=180, clock=185, observations=None, **kwargs):
         ("S1", "suspected_leak"),
         ("S2", "sensor_or_telemetry_issue"),
         ("S3", "insufficient_evidence"),
-        ("S4", "environmental_disturbance"),
+        ("S4", "insufficient_evidence"),
         ("S5", "insufficient_evidence"),
         ("S6", "no_event"),
     ],
@@ -51,7 +52,7 @@ def snapshot(run, end=180, clock=185, observations=None, **kwargs):
 def test_label_free_scenario_inference_and_quality(runs, scenario, expected):
     result = snapshot(runs[scenario])
     assert result.event.hypothesis == expected
-    assert result.quality.expected_samples == 72 * 60
+    assert result.quality.expected_samples == 24 * 60
     assert any(
         claim.value == {"code": "SYNTHETIC_UNCALIBRATED"} for claim in result.claims.values()
     )
@@ -60,6 +61,9 @@ def test_label_free_scenario_inference_and_quality(runs, scenario, expected):
         assert result.location.status == "located"
         assert result.location.best.segment_id == "P1"
         assert 350 <= result.location.best.chainage_m <= 450
+        assert result.location.inspection_start_m == 200
+        assert result.location.inspection_end_m == 600
+        assert result.location.best.residual is None
         assert result.quality.status == "DEGRADED"
         assert not any(
             finding.drift_suspected
@@ -142,7 +146,7 @@ def test_event_requires_raw_duration_not_count_or_simultaneous_spike(runs):
     assert result.location is None
 
 
-def test_crossing_candidates_are_ambiguous_and_model_mismatch_abstains(runs):
+def test_inspection_bracket_does_not_invent_coordinates_for_uninstrumented_crossing(runs):
     pack = runs["S1"][0].pack.model_copy(deep=True)
     pack.segments.append(
         PipelineSegment(
@@ -152,33 +156,33 @@ def test_crossing_candidates_are_ambiguous_and_model_mismatch_abstains(runs):
         )
     )
     excess = {
-        sensor.id: 12000
-        / ((sensor.position.x - 400) ** 2 + sensor.position.y**2 + pack.location_r0_m**2)
+        sensor.id: 1.0 if sensor.segment_id == "P1" and sensor.chainage_m in {300, 500} else 0
         for sensor in pack.sensors
     }
-    scales = {sensor.id: 0.03 for sensor in pack.sensors}
+    scales = {sensor.id: 0.04 for sensor in pack.sensors}
     fit = locate(pack, excess, scales, ["P1", "parallel"])
-    assert fit.status == "ambiguous"
-    assert {"P1", "parallel"} <= {candidate.segment_id for candidate in fit.compatible}
+    assert fit.status == "located"
+    assert {candidate.segment_id for candidate in fit.compatible} == {"P1"}
+    assert (fit.inspection_start_m, fit.inspection_end_m) == (200, 600)
     fit = locate(pack, {sensor.id: 0.8 for sensor in pack.sensors}, scales, ["P1"])
     assert fit.status == "withheld"
 
 
-def test_diagnosis_checks_nearby_crossing_even_without_associated_sensors(runs):
+def test_pressure_taps_on_one_pipe_do_not_localize_an_unconnected_crossing(runs):
     dataset, baseline, rows = runs["S1"]
     pack = dataset.pack.model_copy(deep=True)
-    crossing_x = snapshot(runs["S1"]).location.best.position.x
+    crossing_y = snapshot(runs["S1"]).location.best.position.y
     pack.segments.append(
         PipelineSegment(
             id="crossing",
-            points=[Point(x=crossing_x, y=-400), Point(x=crossing_x, y=400)],
+            points=[Point(x=-400, y=crossing_y), Point(x=400, y=crossing_y)],
             length_m=800,
         )
     )
     result = analyze_window(pack, baseline, rows, "crossing-run", 180, 185, dataset.epoch)
     assert result.event.hypothesis == "suspected_leak"
-    assert result.location.status == "ambiguous"
-    assert "crossing" in {candidate.segment_id for candidate in result.location.compatible}
+    assert result.location.status == "located"
+    assert "crossing" not in {candidate.segment_id for candidate in result.location.compatible}
 
 
 def test_dense_subsecond_samples_do_not_invent_persistence(runs):
@@ -206,9 +210,9 @@ def test_dense_subsecond_samples_do_not_invent_persistence(runs):
 def test_downward_usable_spike_is_health_evidence_not_hard_invalidity(runs):
     dataset, baseline, rows = runs["S6"]
     changed = [
-        row.model_copy(update={"value": 3.0})
+        row.model_copy(update={"value": 75.0})
         if row.sensor_id == "P1-ST1-A"
-        and row.channel == "temperature"
+        and row.channel == "pressure"
         and row.observed_at == dataset.epoch + timedelta(seconds=140)
         else row
         for row in rows
@@ -217,29 +221,27 @@ def test_downward_usable_spike_is_health_evidence_not_hard_invalidity(runs):
     finding = next(
         finding
         for finding in result.quality.findings
-        if finding.sensor_id == "P1-ST1-A" and finding.channel == "temperature"
+        if finding.sensor_id == "P1-ST1-A" and finding.channel == "pressure"
     )
     assert finding.spike_count == 1
     assert finding.hard_excluded == 0
     assert result.event.hypothesis == "sensor_or_telemetry_issue"
 
 
-def test_methane_only_never_implies_normal_or_leak(runs):
+def test_isolated_pressure_offset_with_healthy_paired_instrument_supports_fault_review(runs):
     dataset, baseline, rows = runs["S6"]
     changed = [
-        row.model_copy(update={"value": 0.8})
-        if row.sensor_id == "P1-ST1-A" and row.channel == "methane"
+        row.model_copy(update={"value": 78.0})
+        if row.sensor_id == "P1-ST1-A" and row.channel == "pressure"
         else row
         for row in rows
     ]
     result = analyze_window(
-        dataset.pack, baseline, changed, "methane-only", 180, 185, dataset.epoch
+        dataset.pack, baseline, changed, "isolated-offset", 180, 185, dataset.epoch
     )
-    assert result.event.hypothesis == "insufficient_evidence"
+    assert result.event.hypothesis == "sensor_or_telemetry_issue"
     assert result.location is None
-    assert any(
-        claim.value == {"code": "NO_ACOUSTIC_CORROBORATION"} for claim in result.claims.values()
-    )
+    assert next(f for f in result.quality.findings if f.sensor_id == "P1-ST1-A").peer_disagreement
 
 
 def test_one_and_ten_speed_have_equal_arrival_filtered_diagnostics(runs):
@@ -266,3 +268,222 @@ def test_one_and_ten_speed_have_equal_arrival_filtered_diagnostics(runs):
         assert first.input_hash == accelerated.input_hash
         assert first.event == accelerated.event
         assert first.quality == accelerated.quality
+
+
+def test_lightweight_model_uses_normal_preroll_and_does_not_adapt_away_a_drop():
+    model = MedianMADDetector.fit([80.0] * 60, 0.04, 5)
+    assert model.score(79) < -model.threshold
+    assert model.score(81) > model.threshold
+    assert model.center == 80
+    assert model.scale == 0.04
+
+
+def test_correlated_fault_in_one_gateway_is_not_independent_leak_evidence(runs):
+    dataset, baseline, rows = runs["S1"]
+    pack = dataset.pack.model_copy(deep=True)
+    for sensor in pack.sensors:
+        if sensor.segment_id == "P1" and sensor.chainage_m in {300, 500}:
+            sensor.failure_domain_id = "same-broken-gateway"
+    result = analyze_window(pack, baseline, rows, "shared-gateway", 180, 185, dataset.epoch)
+    assert result.event.hypothesis == "insufficient_evidence"
+    assert result.location is None
+
+
+def test_drops_at_different_times_do_not_form_a_spatial_event(runs):
+    dataset, baseline, rows = runs["S6"]
+    changed = []
+    for row in rows:
+        seconds = (row.observed_at - dataset.epoch).total_seconds()
+        station = row.sensor_id.rsplit("-", 1)[0]
+        if (station == "P1-ST2" and 120 <= seconds < 140) or (
+            station == "P1-ST3" and 150 <= seconds < 170
+        ):
+            row = row.model_copy(update={"value": 78.0})
+        changed.append(row)
+    result = analyze_window(dataset.pack, baseline, changed, "non-overlap", 180, 185, dataset.epoch)
+    assert result.event.hypothesis == "insufficient_evidence"
+    assert result.location is None
+
+
+def test_broad_operating_change_requires_context_not_a_forced_leak_diagnosis(runs):
+    result = snapshot(runs["S4"])
+    assert result.event.hypothesis == "insufficient_evidence"
+    assert "COMMON_MODE_PRESSURE_CHANGE" in result.event.counterevidence
+    assert "OPERATING_CONTEXT_REQUIRED" in result.event.counterevidence
+    assert result.location is None
+    assert sum(f.anomaly_count > 0 for f in result.quality.findings) == 24
+
+
+@pytest.mark.parametrize("broad", [True, False])
+def test_positive_pressure_changes_are_not_called_faults_or_brief_transients(runs, broad):
+    dataset, baseline, rows = runs["S6"]
+    changed = [
+        row.model_copy(update={"value": 82.0})
+        if broad or row.sensor_id.startswith(("P1-ST2-", "P1-ST3-"))
+        else row
+        for row in rows
+    ]
+    result = analyze_window(dataset.pack, baseline, changed, "positive", 180, 185, dataset.epoch)
+    assert result.event.hypothesis == "insufficient_evidence"
+    expected = "COMMON_MODE_PRESSURE_CHANGE" if broad else "UNEXPLAINED_PRESSURE_CHANGE"
+    assert expected in result.event.counterevidence
+    assert "CORRELATED_PRESSURE_TRANSIENT" not in result.event.counterevidence
+    assert result.location is None
+
+
+def test_short_correlated_transient_is_not_called_scattered_sensor_faults(runs):
+    dataset, baseline, rows = runs["S6"]
+    changed = [
+        row.model_copy(update={"value": 78.0})
+        if row.sensor_id.startswith(("P1-ST2-", "P1-ST3-"))
+        and 145 <= (row.observed_at - dataset.epoch).total_seconds() < 148
+        else row
+        for row in rows
+    ]
+    result = analyze_window(dataset.pack, baseline, changed, "transient", 180, 185, dataset.epoch)
+    assert result.event.hypothesis == "insufficient_evidence"
+    assert "CORRELATED_PRESSURE_TRANSIENT" in result.event.counterevidence
+    assert result.location is None
+
+
+def test_opposite_paired_offsets_are_not_independent_pressure_drop_evidence(runs):
+    dataset, baseline, rows = runs["S6"]
+    changed = []
+    for row in rows:
+        if row.sensor_id.startswith(("P1-ST2-", "P1-ST3-")):
+            row = row.model_copy(update={"value": 78.0 if row.sensor_id.endswith("-A") else 82.0})
+        changed.append(row)
+    result = analyze_window(dataset.pack, baseline, changed, "opposite", 180, 185, dataset.epoch)
+    assert result.event.hypothesis != "suspected_leak"
+    assert result.location is None
+    assert all(
+        finding.peer_disagreement
+        for finding in result.quality.findings
+        if finding.sensor_id.startswith(("P1-ST2-", "P1-ST3-"))
+    )
+
+
+def test_no_healthy_reference_on_both_sides_withholds_the_inspection_interval(runs):
+    pack = runs["S1"][0].pack
+    deficits = {
+        sensor.id: 1.0 if sensor.segment_id == "P1" and sensor.chainage_m <= 500 else 0
+        for sensor in pack.sensors
+    }
+    fit = locate(pack, deficits, {sensor.id: 0.04 for sensor in pack.sensors}, ["P1"])
+    assert fit.status == "withheld"
+    assert fit.inspection_start_m is None and fit.inspection_end_m is None
+
+
+def test_sustained_pressure_rise_is_not_a_healthy_localization_reference(runs):
+    dataset, baseline, rows = runs["S1"]
+    changed = [
+        row.model_copy(update={"value": 82.0}) if row.sensor_id.startswith("P1-ST4-") else row
+        for row in rows
+    ]
+    result = analyze_window(
+        dataset.pack, baseline, changed, "unhealthy-bracket", 180, 185, dataset.epoch
+    )
+    assert result.event.hypothesis == "suspected_leak"
+    assert result.location and result.location.status == "withheld"
+    assert result.location.inspection_start_m is None
+
+
+def test_single_drop_without_a_healthy_peer_abstains_instead_of_declaring_a_fault(runs):
+    dataset, baseline, rows = runs["S6"]
+    changed = [
+        row.model_copy(update={"value": 78.0}) if row.sensor_id == "P1-ST1-A" else row
+        for row in rows
+        if row.sensor_id != "P1-ST1-B"
+    ]
+    result = analyze_window(dataset.pack, baseline, changed, "unpaired", 180, 185, dataset.epoch)
+    assert result.event.hypothesis == "insufficient_evidence"
+    assert result.location is None
+
+
+def test_geometric_crossing_does_not_create_pipeline_connectivity(runs):
+    pack = runs["S1"][0].pack.model_copy(deep=True)
+    pack.segments.append(
+        PipelineSegment(
+            id="crossing",
+            points=[Point(x=-400, y=-400), Point(x=400, y=-400)],
+            length_m=800,
+        )
+    )
+    pack.sensors.append(
+        pack.sensors[0].model_copy(
+            update={
+                "id": "crossing-sensor",
+                "segment_id": "crossing",
+                "chainage_m": 400,
+                "position": Point(x=0, y=-400),
+            }
+        )
+    )
+    assert pipeline_distances(pack)["P1-ST2-A", "crossing-sensor"] == float("inf")
+
+
+def test_brief_network_is_upright_y_with_pipe_wall_pressure_taps(runs):
+    pack = runs["S1"][0].pack
+    trunk, left, right = pack.segments
+    assert trunk.name == "Trunk" and left.name == "Branch A" and right.name == "Branch B"
+    junction = trunk.points[-1]
+    assert trunk.points[0].x == junction.x
+    assert trunk.points[0].y < junction.y
+    assert left.points[0] == right.points[0] == junction
+    assert left.points[-1].x < junction.x < right.points[-1].x
+    assert left.points[-1].y > junction.y and right.points[-1].y > junction.y
+    for segment in pack.segments:
+        start, end = segment.points
+        dx, dy = end.x - start.x, end.y - start.y
+        for sensor in (item for item in pack.sensors if item.segment_id == segment.id):
+            axial = (
+                (sensor.position.x - start.x) * dx + (sensor.position.y - start.y) * dy
+            ) / segment.length_m
+            offset = (
+                abs(dx * (sensor.position.y - start.y) - dy * (sensor.position.x - start.x))
+                / segment.length_m
+            )
+            assert axial == pytest.approx(sensor.chainage_m)
+            assert offset == pytest.approx(segment.diameter_m / 2)
+
+
+def test_brief_examples_are_actual_demo_evidence_not_a_separate_story(runs):
+    import json
+    from pathlib import Path
+
+    frozen = json.loads(
+        (Path(__file__).parents[1] / "fixtures" / "synthetic" / "brief-evidence.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for scenario in ("S1", "S2"):
+        current = snapshot(runs[scenario], end=140, clock=145)
+        retained = frozen["examples"][scenario]["snapshot"]
+        assert retained["input_hash"] == current.input_hash
+        assert retained["quality"] == current.quality.model_dump(mode="json")
+        assert retained["event"] == current.event.model_dump(mode="json")
+        assert retained["location"] == (
+            current.location.model_dump(mode="json") if current.location else None
+        )
+        dataset, _, rows = runs[scenario]
+        for sensor, trace in frozen["examples"][scenario]["traces"].items():
+            assert trace == [
+                {
+                    "seconds": (row.observed_at - dataset.epoch).total_seconds(),
+                    "value": row.value if row.validity == "usable" else None,
+                }
+                for row in sorted(rows, key=lambda row: row.observed_at)
+                if row.sensor_id == sensor
+                and current.window_start <= row.observed_at < current.window_end
+                and row.received_at <= dataset.epoch + timedelta(seconds=145)
+            ]
+    for trace in frozen["examples"]["S1"]["traces"].values():
+        before = [row["value"] for row in trace if row["seconds"] < 90 and row["value"] is not None]
+        after = [
+            row["value"] for row in trace if row["seconds"] >= 130 and row["value"] is not None
+        ]
+        assert sum(before) / len(before) - sum(after) / len(after) > 0.5
+    findings = {f.sensor_id: f for f in snapshot(runs["S2"], end=140, clock=145).quality.findings}
+    assert findings["P2-ST2-A"].spike_count > 0
+    assert findings["P3-ST3-A"].missing > 0
+    assert findings["P1-ST2-A"].drift_suspected

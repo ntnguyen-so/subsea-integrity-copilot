@@ -195,7 +195,11 @@ BEGIN
        (SELECT 1 FROM subsea.episodes WHERE tenant_id=NEW.tenant_id
         AND site_id=NEW.site_id AND id=NEW.episode_id AND generation_id=NEW.generation_id)
     THEN RAISE EXCEPTION 'scope_error'; END IF;
-    limit_model := CASE NEW.role WHEN 'event_diagnosis' THEN 4 ELSE 3 END;
+    limit_model := CASE
+        WHEN NEW.role='operator_response' AND NEW.payload->>'response_protocol'='engineer-v2'
+            THEN 6
+        WHEN NEW.role='event_diagnosis' THEN 4
+        ELSE 3 END;
     limit_tool := CASE NEW.role WHEN 'event_diagnosis' THEN 8 ELSE 5 END;
     IF TG_OP='INSERT' THEN
         IF NEW.state <> 'QUEUED' OR NEW.model_calls <> 0 OR NEW.tool_calls <> 0
@@ -290,6 +294,8 @@ BEGIN
             IF total >= 2 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
         END IF;
     ELSE
+        IF NEW.payload->>'response_protocol' IS DISTINCT FROM OLD.payload->>'response_protocol'
+        THEN RAISE EXCEPTION 'scope_error'; END IF;
         IF (NEW.generation_id,NEW.root_id,NEW.parent_id,NEW.snapshot_id,NEW.episode_id,NEW.role,
             NEW.deadline,NEW.automatic,NEW.operator_id,NEW.idempotency_key)
            IS DISTINCT FROM

@@ -549,7 +549,7 @@ class CopilotCLIChatModel(BaseChatModel):
     runtime_dir: Path
     model_id: str | None = None
     timeout_seconds: float = Field(default=60, gt=0)
-    max_prompt_chars: int = Field(default=32000, gt=0)
+    max_prompt_chars: int = Field(default=48000, gt=0)
     max_final_chars: int = Field(default=12000, gt=0)
     max_capture_bytes: int = Field(default=2000000, gt=0)
     max_stderr_bytes: int = Field(default=64000, gt=0)

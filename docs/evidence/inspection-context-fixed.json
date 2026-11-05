@@ -1,0 +1,1114 @@
+{
+  "version": "inspection-context-v1",
+  "mode": "fixed",
+  "split": "all",
+  "data_sha256": "79bac6c244ec83571f2013b9e6163b156a159b78fe265d8f6cfbb145669527fd",
+  "policy_and_numeric_code_sha256": "6f183ac73d3146f559016d42455c87ac56bb903c7ea4bdc4386b016661fcadf1",
+  "evaluation_code_sha256": "b12bc8265261f9bd7e80f86f935acfc899bd6314d63a4ba3d2863e07b0529004",
+  "model_policy_sha256": "247889b8973afc4ca8f3aaa089d754d6f08b010fa5befcb78917d3dc23c43dc0",
+  "scope": "Fictional inspection-priority cases, not hydraulic source-location accuracy. All numerical candidates remain conditional; no area is cleared of a leak.",
+  "limitations": [
+    "Author-created synthetic rubric; held_out means excluded from development cases, not external customer validation or an independently authored blind trial.",
+    "This separate evaluation harness does not add replay scenarios to the console or override its physical localization gate.",
+    "All methods share the same numerical candidates and visible evidence.",
+    "Citation/scope checks do not prove semantic entailment; engineer review required.",
+    "First priority is not a leak clearance for any deprioritized area.",
+    "No geometry improvement, field accuracy, cost savings or universal superiority can be inferred from this suite.",
+    "An improved deterministic parser or structured execution data may close gaps.",
+    "Zero-candidate answers are code-owned abstentions, with zero LLM calls."
+  ],
+  "results": [
+    {
+      "id": "LC01",
+      "split": "development",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC02",
+      "split": "development",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "NOTE-A",
+          "assets": [
+            "P2"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "Branch A pressure-step test was performed at incident second 90. The completed step was applied to the operating line, including the ST2 and ST3 pressure stations. The resulting sustained pressure reduction is expected during this window. This supports an operating explanation, not a leak clearance.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P2",
+              "document_ids": [
+                "NOTE-A"
+              ],
+              "reason": "Current matching approved operation with explicit execution language."
+            }
+          ],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC03",
+      "split": "development",
+      "expected_first": [
+        "P1",
+        "P2"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "NOTE-B",
+          "assets": [
+            "P2"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Branch A pressure-step test was planned for incident second 90 but was not performed. The job was cancelled before any equipment movement. This approved entry records cancellation, not an executed pressure change.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC04",
+      "split": "development",
+      "expected_first": [
+        "P1",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC05",
+      "split": "held_out",
+      "expected_first": [
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "SHIFT-D",
+          "assets": [
+            "P2"
+          ],
+          "available": 120,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Branch A test sheet still says pending because the desk copy was never updated. At second 90 the field crew did in fact carry out the pressure reduction on the live branch, spanning ST2 and ST3. Independent position feedback and the shift supervisor's signed handover agree that the planned step happened. Pending describes paperwork, not execution.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC06",
+      "split": "held_out",
+      "expected_first": [
+        "P1",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "SHIFT-E",
+          "assets": [
+            "P3"
+          ],
+          "available": 115,
+          "effective": 90,
+          "status": "approved",
+          "body": "Pressure-test completion is confirmed for the topside training skid. This record was filed under the Branch B parent asset for accounting. No subsea pressure connection was made and the live Branch B pipeline remained untouched. The completed skid exercise cannot explain pressure drops at the subsea ST2 and ST3 stations.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC07",
+      "split": "held_out",
+      "expected_first": [
+        "P2"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "SHIFT-F",
+          "assets": [
+            "P1"
+          ],
+          "available": 125,
+          "effective": 90,
+          "status": "approved",
+          "body": "Trunk handover: the instruction to leave the pressure setpoint unchanged was withdrawn after the permit cleared. At incident second 90 the replacement instruction was acted on: the pressure was lowered along the operating Trunk through both ST2 and ST3. The final state is the lowered setting, not the earlier hold instruction.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC08",
+      "split": "held_out",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-G1",
+          "assets": [
+            "P1"
+          ],
+          "available": 100,
+          "effective": 90,
+          "status": "approved",
+          "body": "The pressure reduction was executed on the Trunk at second 90 through ST2 and ST3.",
+          "supersedes": null
+        },
+        {
+          "id": "ENTRY-G2",
+          "assets": [
+            "P3"
+          ],
+          "available": 130,
+          "effective": 90,
+          "status": "approved",
+          "body": "Corrected signed entry: the completed pressure reduction at second 90 was on Branch B through ST2 and ST3. The earlier Trunk label was a transcription error. Branch B is the verified operating-change area; no Trunk operation is recorded.",
+          "supersedes": "ENTRY-G1"
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P3"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P3"
+        ],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC09",
+      "split": "held_out",
+      "expected_first": [
+        "P2",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-H",
+          "assets": [
+            "P2"
+          ],
+          "available": 130,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Branch A pressure operation was completed last week. Today's signed handover quotes that completion to explain the procedure, not to record a movement during this incident. All Branch A operating settings were held constant from second 0 through second 180 today.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC10",
+      "split": "held_out",
+      "expected_first": [
+        "P1",
+        "P2"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-I",
+          "assets": [
+            "P1"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "A diagnostic pressure injection was completed at incident second 90 in the isolated calibration port of P1-ST2-A. The process connection to that one tap was isolated. P1-ST2-B and both P1-ST3 instruments remained connected to the live pipe. The exercise cannot account for the coherent drops at all four instruments.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC11",
+      "split": "held_out",
+      "expected_first": [
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "HANDOVER-J",
+          "assets": [
+            "P1"
+          ],
+          "available": 140,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Trunk permit sequence is complete. The record's word 'cancelled' refers to the first work slot, not the later operation. During the replacement slot at second 90, operators reduced live-line pressure through the ST2 and ST3 area, and field feedback verified the lower setting. This contemporaneous entry is an executed operation despite the obsolete cancellation heading.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC12",
+      "split": "held_out",
+      "expected_first": [
+        "P2",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-K",
+          "assets": [
+            "P2"
+          ],
+          "available": 100,
+          "effective": 90,
+          "status": "draft",
+          "body": "Proposed explanation: the Branch A pressure reduction was performed at incident second 90 through ST2 and ST3. This unsigned draft has not been verified by the operator.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC13",
+      "split": "held_out",
+      "expected_first": [],
+      "candidates": [],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC14",
+      "split": "held_out",
+      "expected_first": [],
+      "candidates": [],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC15",
+      "split": "held_out",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-L",
+          "assets": [
+            "P2"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "At incident second 90 the live Branch A pressure reduction was performed through ST2 and ST3. The operator verified completion. The scattered bad samples on a Branch B tap are a separate fault and do not account for the Trunk pressure drop.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P2",
+              "document_ids": [
+                "ENTRY-L"
+              ],
+              "reason": "Current matching approved operation with explicit execution language."
+            }
+          ],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC16",
+      "split": "held_out",
+      "expected_first": [
+        "P2",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-M1",
+          "assets": [
+            "P2"
+          ],
+          "available": 115,
+          "effective": 90,
+          "status": "approved",
+          "body": "The live Branch A pressure reduction was executed at incident second 90 through ST2 and ST3.",
+          "supersedes": null
+        },
+        {
+          "id": "ENTRY-M2",
+          "assets": [
+            "P2"
+          ],
+          "available": 120,
+          "effective": 90,
+          "status": "approved",
+          "body": "The shift supervisor reports that the Branch A pressure operation was cancelled before actuation. There was no live-line movement. This conflicts with ENTRY-M1; neither account has been withdrawn or verified against independent equipment feedback.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    }
+  ]
+}

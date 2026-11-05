@@ -1,8 +1,21 @@
 # Subsea Integrity Copilot
 
-Read-only FDE demo for a fictional offshore oil-and-gas operator's gas pipelines: distinguish coherent
-possible-leak evidence from sensor/telemetry faults, then identify a defensible
-inspection section or withhold location. **Synthetic data only; not a safety system.**
+Read-only FDE demo for a fictional offshore gas operator. Existing anomaly
+detectors flag pressure readings; agents help engineers investigate those alerts,
+distinguish sensor faults from possible leaks, and recommend a supported inspection
+interval or abstain. **Synthetic data only; not a safety system.**
+
+The product hypothesis is reusable expert knowledge: reviewed procedures and
+worked evidence help less-experienced engineers investigate at scale. Knowledge
+elicitation/approval and onboarding benefit still require customer validation.
+Assume ten minutes for manual analysis; allow up to **five minutes for a grounded
+LLM report**, prioritizing correctness. These are planning assumptions, not
+measured labor savings.
+
+The global **monitoring warning** is numerical and never waits for the LLM.
+It follows the latest window even when a historical investigation is pinned.
+Source loss is a coverage warning, not a no-leak conclusion. A disconnected
+browser labels the retained assessment as stale.
 
 Private repository: https://github.com/ntnguyen-so/subsea-integrity-copilot.
 Reviewers need repository access before the interview.
@@ -36,19 +49,118 @@ http://127.0.0.1:3001 (`operator@subsea.local`, `LF_ADMIN_PASSWORD`); optional J
 is http://127.0.0.1:16687. Services/volumes are project-owned and loopback-bound.
 Stopping Compose without `-v` preserves evidence.
 
-Create S1, select 10x speed, Play, then pause when a possible leak appears. Select
-a sensor with mouse or keyboard; inspect all three channels and raw/canonical
-records. Ask the three suggested questions and inspect the **pinned window,
-specialist tasks, cited evidence and counters**. Compare S2's scattered faults and
-S5's physical signal with too few observers. S3 demonstrates a shared-gateway/full-source
-outage, S4 a broad environmental disturbance, and S6 verified-normal variability.
+Create a **new pressure S1** generation, select 10x speed, Play, then pause when
+the inspection interval appears. Select a supporting sensor with mouse or keyboard;
+inspect its pressure history, normal-band thresholds, anomaly markers and
+raw/canonical records. Ask the three suggested questions and inspect the **pinned
+window, specialist tasks, cited evidence and counters**:
+"Leak or faulty sensors?", "Where should we inspect, and why?", and
+"What evidence supports this, and what remains unknown?"
+
+At the mature S1 window, nearby pressure drops support inspection of **P1,
+200-600m**, while a separate faulty sensor is still reported. Compare S2's
+scattered spikes, missing data and drift. S3 demonstrates a source outage; S4 a
+broad pressure change requiring operating-context review, not a localized leak;
+S5 an unobservable leak with inadequate coverage; S6 normal variability.
+The brief and console share an upright Y: Trunk P1 below, Branch A P2 to the
+left and Branch B P3 to the right. Each 800m pipe has stations at 100/300/500/700m,
+with A/B pressure taps on opposite walls of an assumed 0.6m pipe. Paired taps
+share a gateway and are not independent witnesses. Their wall offsets are
+enlarged only for readability. **Compare event / fault sensors** opens actual
+same-window histories on common pressure and UTC axes; S2 includes drift on the
+Trunk, spikes on Branch A and missing readings on Branch B.
+Archived source generations are labeled and cannot be replayed as pressure-v3.
 No actuator or shutdown endpoint exists.
+
+### Show an adaptive investigation
+
+Create a new S4 replay and pause at source clock 185s. Ask the third customer
+question. The numerical result remains **insufficient evidence**, with no leak
+location. The diagnosis agent chooses a document search, opens relevant records
+and selects a before/after pressure comparison. The synthetic valve log can
+support **operating change plausible**, not "no leak."
+
+Open **Agents → Investigation workspace** for the review handoff, readable
+source documents and before/after comparison tables. Expand **Execution details**
+for task dependencies, actual tool arguments and receipts.
+Contrast S2's maintenance-backed instrumentation review, S1's unresolved operating
+context despite a supported inspection interval, and S5's missing observations.
+These are not unrestricted autonomous discoveries: the agent chooses bounded
+read-only investigations; code checks citations, measurements and authority.
+
+The roles do not vote truth into existence. Quality feeds diagnosis, then
+response. Code checks numerical claims, scope and authority. New `engineer-v2`
+reports additionally pass a **separately prompted grounding critic** that reads
+original sources and reviews every answer, cause and verification question.
+Code requires complete review coverage and literal source quotes. Criticism
+allows one interpretation-only revision and a fresh review; a second rejection,
+provider failure, exhausted budget or deadline withholds the report.
+The acceptance record binds the exact result and evidence packet; downloads
+revalidate it. Expand **Independent grounding review** to inspect findings.
+
+The critic uses the same underlying model, not an independent expert or proof
+of correctness. Human review remains necessary; do not promise zero
+hallucinations. Archived `engineer-v1` reports remain explicitly unreviewed.
+The original failed counterexample is preserved unchanged in
+`docs\evidence\interpretation-grounding-audit.json`; new qualification is recorded
+separately in `docs\RESULTS.md`, including failed attempts.
+The current genuine runs include a false-photograph rejection/revision and a
+natural overclaim corrected after the critic distinguished period medians from
+sustained response. The six-report qualification cohort took 127-223s; that is
+functional evidence, not a field SLO or proof of labor savings.
+
+The corpus is `fixtures\synthetic\operational-history.json`. PostgreSQL full-text
+search provides small-corpus RAG without another service or embedding dependency.
+Structured pressure history stays in SQL, not a vector index. Future records are
+hidden; stale/draft records cannot support a current conclusion. Segment scopes
+include their sensors/gateways. Corpus versions
+are immutable and pinned to tasks; accepted responses inherit the diagnosis review.
+Customer operating/maintenance feeds remain unconnected.
+
+### Ask engineering questions, not just for a classification
+
+The LLM's role is interpretation and RCA context, not replacing the pressure
+detector. Try:
+
+- “Could a valve change explain this pressure pattern? What should we verify?”
+- “Is there evidence of drift, or are we assuming every anomaly is a faulty sensor?”
+- “Why is the inspection area a range rather than an exact leak position?”
+
+New answers open with a question-specific, **model-written engineering
+interpretation**, cited competing causes and follow-up verification questions.
+The checked numerical evidence remains a separate section. References must resolve
+to accepted claims or the specialist's reviewed history. Citation membership does
+**not** prove that the prose follows from its sources: the interpretation requires
+engineer review and cannot clear safety or establish a confirmed root cause.
+Planning reuses a prior review only when its investigated evidence fits the question.
+
+The **investigation handoff** brings the explanation together with the checked
+inspection interval or explicit withholding, competing causes, unresolved evidence
+and next review step. Click references to inspect actual source text or computed
+comparisons. A follow-up button only drafts a question against the original
+window; explicitly submit it to request another investigation. Moving to a new
+window never silently carries forward an old answer. Explicitly opened historical
+answers display a scope warning.
+
+**Download this investigation handoff (JSON)** exports the versioned packet, including exact
+task/window identities, source revisions, checked claims, executed checks and fresh
+call counts. It is not engineer approval, a work order or safety clearance. Reused
+specialists' earlier model calls are not counted as new calls; monetary cost remains
+unknown.
+
+```powershell
+uv run python scripts\qualify-engineer-questions.py --mode scripted `
+  --output runtime\engineer-questions-scripted.json
+# Explicit hosted inference; consumes Copilot allowance:
+uv run python scripts\qualify-engineer-questions.py --mode live `
+  --output runtime\engineer-questions-live.json
+```
 
 For an explicit synthetic availability check or live qualification:
 
 ```powershell
 uv run subsea provider-check --mode live --model gpt-6.1-sol
-uv run subsea evaluate --suite agents --mode live
+uv run subsea evaluate --suite agents --mode live --repetitions 1
 ```
 
 Live calls consume your Copilot allowance and may take minutes. Authentication or
@@ -56,6 +168,8 @@ quota failure blocks further live work; it does not stop numerical monitoring.
 There is no automatic provider switch/retry. The CLI is local, **inference is hosted**.
 The console and qualification pin `gpt-6.1-sol`; choose LIVE before creating a new
 generation to demonstrate real inference. SCRIPTED remains an explicit offline mode.
+Manual questions are capped at three per operator per minute across generations.
+An HTTP 429 requires waiting; creating another generation does not bypass that guard.
 
 ## Architecture and verification
 
@@ -65,12 +179,27 @@ workflows in PostgreSQL. Native OpenTelemetry exports bounded asynchronous spans
 to self-hosted Langfuse/Jaeger; stored trace visibility is checked separately from
 HTTP acceptance.
 
-Numerical code owns unit/time normalization, conflict quarantine, median/MAD
-anomalies, independent spatial corroboration and distance-decay fitting. Three
-scoped quality/diagnosis/response agents use read-only tools, immutable evidence,
+The lightweight stand-in for existing ML is a fitted **median/MAD one-class
+detector**, frozen on verified-normal pre-roll. Each instrument's normalized
+pressure deviation is scored against that baseline; no LLM training or heavy ML
+package is needed. Production detector integration remains future work.
+
+Numerical code owns unit/time normalization, conflict quarantine, two-sided
+anomaly alerts, sustained pressure-drop evidence and topology/time corroboration.
+A suspected leak requires at least three instruments at two stations in two
+failure domains, with 15s overlapping drops within 400m pipeline distance.
+Paired instruments alone do not establish independence. Healthy stations on both
+sides bound an inspection interval; its midpoint is **not a predicted leak point**.
+Broad changes, brief correlated transients, missing context and poor coverage
+retain explicit uncertainty rather than becoming forced leak/fault verdicts. Three
+scoped quality/diagnosis/response agents and a tool-free response critic use immutable evidence,
 bounded calls and checked claim IDs. The model cannot fabricate accepted numbers.
 Monitoring uses 60-second windows, 5-second hops and 5-second lateness, independently
 of the inference worker; late evidence creates revisions rather than rewriting history.
+
+Stop the demo server and finish any qualification cohorts before Python integration
+tests: their fixtures reapply the owned database schema. Do not run these migrations
+concurrently with workers or another test process.
 
 ```powershell
 . .\tools\load-environment.ps1
@@ -79,37 +208,153 @@ uv run ruff check .
 uv run mypy src
 npm run typecheck
 npm run build
-npx playwright test
 uv run subsea evaluate --suite agents --mode scripted
+uv run python scripts\evaluate-history-baseline.py `
+  docs\evidence\agents-history-scripted.json runtime\history-baseline.json
 ```
 
-Browser qualification requires the running server and installed Chrome. Numerical
-held-out results are in `fixtures\synthetic\evaluation-results.json`; fresh cohort
+Restart `uv run subsea serve` in another terminal, then run
+`npx playwright test --grep-invert "LIVE engineer"`.
+Browser qualification requires that server and installed Chrome. Run
+`uv run subsea evaluate --suite diagnostics --mode scripted` for the six-scenario
+held-out numerical evaluation. Numerical results are in
+`fixtures\synthetic\evaluation-results.json`; fresh cohort
 receipts go to ignored `eval\results`. Never substitute scripted success for live
 qualification or synthetic accuracy for field reliability.
 
-Final live qualification accepted 27/27 answers across S1/S2/S5, including required
-location abstentions, with actual `gpt-6.1-sol` receipts and a verified stored trace.
-The same-evidence single-agent baseline also passed with fewer calls and lower latency
-in this cohort; separate roles provide bounded authority and audit, not demonstrated accuracy
-improvement. See `docs\RESULTS.md` and `docs\evidence\agents-live.json` for measurements,
-retained failures and synthetic-only limitations.
+To reproduce sequential warning timing:
 
-See [the brief](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/ONE_PAGE_BRIEF.md),
+```powershell
+uv run python scripts\evaluate-warning-timeliness.py --seeds 3 `
+  --output runtime\warning-timeliness.json
+```
+
+This releases raw arrivals before normalization and scans every 5s hop. It
+measures synthetic source-time delay, not sensor-to-human delivery. The browser
+suite separately runs a local 1x warning-delivery journey and writes
+`docs\evidence\warning-browser-timing.json`. The report-processing target is
+300s from question admission to accepted result; UI/human receipt is a separate
+measurement. Include failed, withheld and deadline-missed investigations in a
+pilot, not only accepted reports.
+
+To explicitly exercise two real hosted-model turns through the browser, including
+source review, a generated follow-up and the downloaded handoff:
+
+```powershell
+. .\tools\load-environment.ps1
+$fixture = uv run python scripts\seed-handoff-replay.py | ConvertFrom-Json
+$env:SUBSEA_LIVE_HANDOFF_REPLAY = $fixture.id
+npx playwright test console.spec.ts --grep "LIVE engineer"
+```
+
+This seeds a paused, mature synthetic S4 window in the normal console tenant,
+without automatic agent roots. Both questions use normal authentication, scoping
+and rate limits. It consumes Copilot allowance; successful evidence is written to
+`docs\evidence\handoff-browser-engineer-v2-live.json`. A scripted browser pass alone does not
+qualify this hosted workflow.
+Use `scripts\seed-handoff-replay.py --scenario S1` to prepare a mature LIVE leak
+fixture without automatic model roots. Ask the three suggested questions before
+the meeting; present preserved answers as **recorded LIVE**, with their exact
+window and receipts, rather than promising three fresh runs in ten minutes.
+The prepared examples in `docs\evidence\prepared-s1-live.json` took 88-143s and
+all export the supported P1 200-600m interval. New installations must generate
+their own console state; the repository contains no database credentials/dump.
+
+Challenge the critic with invented inspection evidence, command/actual-position
+confusion, causal overreach, false calibration and unsafe control advice:
+
+```powershell
+uv run python scripts\qualify-grounding.py --task-id <accepted-live-S4-root-id> `
+  --output runtime\grounding-adversarial.json
+```
+
+This uses real source bodies from that console task without modifying its
+answer. The authored cohort qualifies the critic separately from the full
+author/revision workflow; it is not blind or field validation.
+
+To reproduce the complete critic/revision/re-review challenge on a new,
+isolated synthetic S4 workflow (deliberate draft injection, not a real inspection):
+
+```powershell
+uv run python scripts\qualify-engineer-questions.py --mode live `
+  --inject-unsupported-draft --output runtime\grounding-revision-live.json
+```
+
+The pressure hold-out matches all 120 expected mature-window outcomes. All 20
+observable-leak inspection intervals contain the simulated source; sensor-fault
+attribution still has **three false positives**. These are controlled synthetic
+results, not field accuracy. Pressure-only receipts are retained separately;
+they do not qualify the new history loop. Current investigation evidence and
+baseline comparisons are in `docs\RESULTS.md`. SCRIPTED is not hosted inference.
+Separate roles provide bounded authority and audit, not demonstrated accuracy
+improvement over one agent.
+
+The controlled scripted comparison matched four contextual expectations with
+adaptive retrieval, three with a broad fixed workflow and **four with a
+quality-aware fixed workflow using no LLM**. This is not proof agents outperform
+rules or graph ML. Buy a bounded shadow pilot only if real investigations show
+incremental value after model latency, integration and operating cost.
+
+### Context-sensitive inspection scenarios
+
+The separate inspection-priority lab contains **16 synthetic cases** on the
+same Y topology: four development cases and twelve frozen evaluation cases. It compares
+numerical-only prioritization, a frozen context-aware deterministic workflow and
+genuine hosted interpretation. All receive identical code-computed candidate
+intervals and incident-visible records; expected decisions are withheld from
+model input.
+
+Cases include cancelled versus executed work, obsolete paperwork headings,
+topside versus subsea asset scope, corrected tags, quoted past operations,
+single-tap calibration, conflicting logs, future/draft evidence, missing outer
+reference stations and concurrent bad samples. The question is **which supported
+area needs investigation first**, not whether an LLM calculates better coordinates.
+Deprioritization never clears an area of leaks.
+
+```powershell
+. .\tools\load-environment.ps1
+uv run python scripts\evaluate-inspection-context.py --mode fixed `
+  --output runtime\inspection-fixed.json
+# Genuine inference: up to 14 model calls; uses your Copilot allowance.
+uv run python scripts\evaluate-inspection-context.py --mode live `
+  --output runtime\inspection-live.json
+```
+
+See `docs\RESULTS.md` and `docs\evidence\inspection-context-live.json` for actual
+wins, ties, losses, source text and model receipts. Data/policy/code hashes retain
+the comparison's identity. This is an author-created evaluation, not independent
+customer validation; "held out" does not mean an externally authored blind test.
+The first hosted run matched **15/16** priority sets versus **12/16** for the
+context-aware fixed workflow, with four wins, one conservative loss and zero
+unjustified demotions. This is an inspection-priority comparison, not better leak
+coordinates. The lab is separate from the console's six replay scenarios and does **not**
+override its physical diagnosis/location gate. A better deterministic parser or
+structured execution data may close any measured interpretation gap.
+
+See [the one-page submission brief](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/SUBMISSION_BRIEF.md),
 [engineering report](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/REPORT.md)
-and the retained milestone/design plans in `docs`. Localization is a compatible
-range under an idealized model, not a calibrated confidence interval. Human
+and the retained milestone/design plans in `docs`. Inspection intervals follow
+station support, not inverse hydraulic localization or calibrated confidence. Human
 integrity engineers retain inspection and safety authority.
 
-The verified one-page attachment is `docs\ONE_PAGE_BRIEF.pdf`; regenerate it with
-`node scripts\render-brief.cjs` after editing the brief.
-The brief and deck share `docs\assets\pipeline-topology.svg`, generated from
-`packs\northsea.json` by their renderers. It shows the actual branching connectivity
-and station placement: three 800m segments, four A/B pairs per segment, 24 nodes.
-Offsets are exaggerated for readability; this is not a geographic scale drawing.
-The brief gives concrete S1 leak-candidate and S2 scattered-spike examples.
+Email `docs\SUBMISSION_BRIEF.pdf` (exactly one page), with the GitHub link,
+at least 24 hours before the meeting. Confirm reviewer repository access.
+The expanded narrative remains `docs\ONE_PAGE_BRIEF.pdf` (two pages), preserving
+the approved customer story and detailed assumptions. Regenerate both with
+`node scripts\render-brief.cjs`; it fails if the submission exceeds one page.
+Both brief panels and the deck topology are generated from the same
+`pressure-pack-v3` geometry used by the console. Rendering regenerates
+`fixtures\synthetic\brief-evidence.json` from actual mature S1/S2 snapshots and
+observations, then draws those sensors and pressure histories—not a separate
+illustrative dataset. Tests check source coordinates, sensor identities, quality
+patterns and numerical conclusions. Display offsets are exaggerated; the diagram
+is not a geographic scale drawing.
 
 ## Interview deck
+
+The deck follows the current pressure demo and the brief's three questions.
+Historical acoustic receipts remain separately labeled in the engineering report;
+they are not pressure-version evidence.
 
 Open `docs\INTERVIEW_DECK.html` directly in Chrome or Edge; no server is required
 for the presentation. `docs\INTERVIEW_DECK.pdf` is the widescreen audience export.

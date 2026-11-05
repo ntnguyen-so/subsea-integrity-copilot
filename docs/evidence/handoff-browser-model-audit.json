@@ -1,0 +1,245 @@
+{
+  "passed": true,
+  "replay_id": "handoff-10389874cddb4dcd9edf1630b99eed06",
+  "root_ids": [
+    "8cfcd675-ff5d-5bb1-a6db-79e594756bb8",
+    "13246d8d-5ae7-5f09-bb65-4c0bfa47a873"
+  ],
+  "model_receipts": [
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 6538,
+        "output_tokens": 47,
+        "reasoning_tokens": 14,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 5243
+      },
+      "duration_ms": 14702.99999997951,
+      "error": null,
+      "request_id": "53ba55cf-ca31-4bdc-89e0-6ac58c2d72fa"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13217,
+        "output_tokens": 933,
+        "reasoning_tokens": 65,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 11922
+      },
+      "duration_ms": 27280.99999995902,
+      "error": null,
+      "request_id": "e8bedc3d-04d0-4147-b875-df1194804a6f"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11179,
+        "output_tokens": 225,
+        "reasoning_tokens": 30,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9884
+      },
+      "duration_ms": 14187.000000034459,
+      "error": null,
+      "request_id": "be460bfd-977b-4ecc-938b-5cca62ffaa06"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10630,
+        "output_tokens": 146,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9335
+      },
+      "duration_ms": 15422.00000002049,
+      "error": null,
+      "request_id": "2643bcc6-4e76-4131-b567-4698c25b384d"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13830,
+        "output_tokens": 432,
+        "reasoning_tokens": 134,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12535
+      },
+      "duration_ms": 19750.0,
+      "error": null,
+      "request_id": "7d674170-559e-4155-bc30-50b651cbfcf4"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11965,
+        "output_tokens": 379,
+        "reasoning_tokens": 76,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10670
+      },
+      "duration_ms": 17359.99999998603,
+      "error": null,
+      "request_id": "a62e459c-f38a-4cb6-b481-2513fb495ac6"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13164,
+        "output_tokens": 871,
+        "reasoning_tokens": 44,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 11869
+      },
+      "duration_ms": 26250.0,
+      "error": null,
+      "request_id": "3dabee73-7619-4d22-890b-d0dc59000566"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 7116,
+        "output_tokens": 65,
+        "reasoning_tokens": 32,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 5821
+      },
+      "duration_ms": 13984.99999998603,
+      "error": null,
+      "request_id": "80bc2090-b0ce-466f-b722-1add111694be"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11183,
+        "output_tokens": 236,
+        "reasoning_tokens": 41,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9888
+      },
+      "duration_ms": 15094.000000040978,
+      "error": null,
+      "request_id": "b8533fa1-f06b-4756-9d91-fa6424a0bcd3"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13785,
+        "output_tokens": 501,
+        "reasoning_tokens": 127,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12490
+      },
+      "duration_ms": 20905.99999995902,
+      "error": null,
+      "request_id": "ea8b2d45-d116-4e2d-b219-c0fe1f282b20"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 15382,
+        "output_tokens": 329,
+        "reasoning_tokens": 39,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 14087
+      },
+      "duration_ms": 16312.000000034459,
+      "error": null,
+      "request_id": "bfc42898-d71d-4578-b96f-cf2c1dd1c330"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 10606,
+        "output_tokens": 180,
+        "reasoning_tokens": 34,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 9311
+      },
+      "duration_ms": 14407.00000000652,
+      "error": null,
+      "request_id": "d119ec6e-a06e-43c1-9c63-f12762ee69d0"
+    },
+    {
+      "mode": "live",
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 11950,
+        "output_tokens": 377,
+        "reasoning_tokens": 66,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 10655
+      },
+      "duration_ms": 18952.99999997951,
+      "error": null,
+      "request_id": "e643f0c7-8251-47c7-8570-cc3a5ec6f502"
+    }
+  ],
+  "limits": "Transport identity and error receipts, not proof of semantic correctness or field reliability."
+}

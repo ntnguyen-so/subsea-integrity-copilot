@@ -1,0 +1,1726 @@
+{
+  "version": "inspection-context-v1",
+  "mode": "live",
+  "split": "all",
+  "data_sha256": "79bac6c244ec83571f2013b9e6163b156a159b78fe265d8f6cfbb145669527fd",
+  "policy_and_numeric_code_sha256": "6f183ac73d3146f559016d42455c87ac56bb903c7ea4bdc4386b016661fcadf1",
+  "evaluation_code_sha256": "b12bc8265261f9bd7e80f86f935acfc899bd6314d63a4ba3d2863e07b0529004",
+  "model_policy_sha256": "247889b8973afc4ca8f3aaa089d754d6f08b010fa5befcb78917d3dc23c43dc0",
+  "scope": "Fictional inspection-priority cases, not hydraulic source-location accuracy. All numerical candidates remain conditional; no area is cleared of a leak.",
+  "limitations": [
+    "Author-created synthetic rubric; held_out means excluded from development cases, not external customer validation or an independently authored blind trial.",
+    "This separate evaluation harness does not add replay scenarios to the console or override its physical localization gate.",
+    "All methods share the same numerical candidates and visible evidence.",
+    "Citation/scope checks do not prove semantic entailment; engineer review required.",
+    "First priority is not a leak clearance for any deprioritized area.",
+    "No geometry improvement, field accuracy, cost savings or universal superiority can be inferred from this suite.",
+    "An improved deterministic parser or structured execution data may close gaps.",
+    "Zero-candidate answers are code-owned abstentions, with zero LLM calls."
+  ],
+  "results": [
+    {
+      "id": "LC01",
+      "split": "development",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [],
+          "explanation": "P1 remains first priority because no records were supplied to explain the pressure anomaly or verify a current live-line operation matching the 120\u2013180 second pressure window and the whole affected ST2/ST3 station group. The 200\u2013600 m bracket is provisional, not a confirmed leak location. Engineer review and verification of current approved operational records and sensor evidence are required; this decision does not clear the pipe of leaks."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 14.578000000095926,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5374,
+            "output_tokens": 151,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4079,
+            "reasoning_tokens": 33
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "a72f952c-e65b-495e-a550-7a2fbca74ed0",
+          "prompt_hash": "2de4f701533161d714e6811964c8608c4b1cbbaca8b97e06ff665b19065ea594",
+          "stdout_bytes": 70018,
+          "stderr_bytes": 0,
+          "result_hash": "db1140c3f85b065785a9e1cb581df0b5c1d6364ec0b872c994b83ae328921d0b",
+          "duration_ms": 14547.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC02",
+      "split": "development",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "NOTE-A",
+          "assets": [
+            "P2"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "Branch A pressure-step test was performed at incident second 90. The completed step was applied to the operating line, including the ST2 and ST3 pressure stations. The resulting sustained pressure reduction is expected during this window. This supports an operating explanation, not a leak clearance.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P2",
+              "document_ids": [
+                "NOTE-A"
+              ],
+              "reason": "Current matching approved operation with explicit execution language."
+            }
+          ],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P2",
+              "document_ids": [
+                "NOTE-A"
+              ],
+              "reason": "NOTE-A is approved, available by second 110, and effective at second 90. It confirms an executed pressure step on P2's operating line covering both ST2 and ST3, matching signal onset at second 90 and explaining the sustained pressure reduction during seconds 120\u2013180. This supports lower inspection priority, not leak clearance."
+            }
+          ],
+          "explanation": "P1 remains first priority because no supplied record explains its pressure behavior. P2 remains subject to investigation despite its documented operating explanation. The supplied numerical brackets are provisional inspection ranges, not confirmed leak locations. An engineer must review these priorities and verify the operation's timing, full station coverage, and consistency with the measured pressure response; neither pipe is cleared of leaks."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 16.06200000003446,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5521,
+            "output_tokens": 228,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4226,
+            "reasoning_tokens": 33
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "941450a3-139d-4220-bbd2-6104d34eec31",
+          "prompt_hash": "796a78e6acd9f34135fa3c8c7e06c23da2b85eeac9a9e619bd263cfbdb892614",
+          "stdout_bytes": 92356,
+          "stderr_bytes": 0,
+          "result_hash": "64d4870a73a1b7cb157cfaffa12a6a529583e6cfc42a027c7dff6fe37c8391b1",
+          "duration_ms": 16062.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC03",
+      "split": "development",
+      "expected_first": [
+        "P1",
+        "P2"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "NOTE-B",
+          "assets": [
+            "P2"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Branch A pressure-step test was planned for incident second 90 but was not performed. The job was cancelled before any equipment movement. This approved entry records cancellation, not an executed pressure change.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Both candidates remain unexplained. Approved NOTE-B records cancellation of the planned P2 pressure-step test before equipment movement, not an executed pressure change; it therefore cannot justify demotion. No supplied record verifies a current live-line operation matching seconds 120\u2013180 and the whole affected station group for either candidate. The supplied brackets are provisional inspection ranges, not confirmed leak positions, and neither pipe is cleared of leaks. Engineer review and verification of pressure-period activity and full affected-station coverage are required."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 14.843999999924563,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5505,
+            "output_tokens": 135,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4210,
+            "reasoning_tokens": 0
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "e9446d5b-2335-4ca6-b189-c5ec54efcf02",
+          "prompt_hash": "870742445da9cc05d6bf5226d588b6d89660ec8377ac400a6c4b6fb8191979a8",
+          "stdout_bytes": 63842,
+          "stderr_bytes": 0,
+          "result_hash": "0734344a899bd3edc6d84d734cf5741bf0b9cedb0adf5ea4e214af25ab350508",
+          "duration_ms": 14844.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC04",
+      "split": "development",
+      "expected_first": [
+        "P1",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Both candidates remain unexplained first inspection priorities. No records were supplied to verify a current approved live-line operation matching the 120\u2013180 second pressure window and each candidate's whole affected ST2/ST3 sensor group. The supplied 200\u2013600 m brackets are conditional inspection bounds, not confirmed leak locations; neither pipe is cleared of leaks. Verify operational records and affected-group coverage and timing. These priorities require engineer review."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 18.42200000002049,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5438,
+            "output_tokens": 120,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4143,
+            "reasoning_tokens": 0
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "b746d73b-9325-4b7e-84f3-36f120e94a84",
+          "prompt_hash": "dff10b8538699b3d3bbdea774ccc01957df800ba10262b9c6cefd1073b527c36",
+          "stdout_bytes": 58905,
+          "stderr_bytes": 0,
+          "result_hash": "fba3cdb9239977e14ae790e0422c932ac3b3144742414854482cf3ea679f1586",
+          "duration_ms": 18422.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC05",
+      "split": "held_out",
+      "expected_first": [
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "SHIFT-D",
+          "assets": [
+            "P2"
+          ],
+          "available": 120,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Branch A test sheet still says pending because the desk copy was never updated. At second 90 the field crew did in fact carry out the pressure reduction on the live branch, spanning ST2 and ST3. Independent position feedback and the shift supervisor's signed handover agree that the planned step happened. Pending describes paperwork, not execution.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P3"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P2",
+              "document_ids": [
+                "SHIFT-D"
+              ],
+              "reason": "Current approved SHIFT-D verifies an executed live-branch pressure reduction at second 90, matching signal onset and preceding the 120\u2013180-second pressure window. Its scope spans both ST2 and ST3, covering the whole affected station group. Independent position feedback and signed handover corroborate execution; pending refers only to paperwork."
+            }
+          ],
+          "explanation": "P3 remains unexplained and is first priority. P2 receives lower priority, not exclusion or leak clearance, because its verified live-line pressure step provides an operational explanation. Confirm that the reduced-pressure state persisted throughout seconds 120\u2013180 and review both candidates with an integrity engineer. The supplied 200\u2013600 m brackets are conditional inspection ranges, not confirmed leak locations."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 21.29700000002049,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5552,
+            "output_tokens": 326,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4257,
+            "reasoning_tokens": 132
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "49a69877-9ce5-4d4d-8b71-3c7083b3bdc3",
+          "prompt_hash": "5f8865824de8678a67739c1bcc1c6e034aa0716dbf97fcdf54180cc2d1654403",
+          "stdout_bytes": 97415,
+          "stderr_bytes": 0,
+          "result_hash": "b81c5830bfb7984edd1679a8c841ee6722ca58bf3805487634654aa8a9c87832",
+          "duration_ms": 21297.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC06",
+      "split": "held_out",
+      "expected_first": [
+        "P1",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "SHIFT-E",
+          "assets": [
+            "P3"
+          ],
+          "available": 115,
+          "effective": 90,
+          "status": "approved",
+          "body": "Pressure-test completion is confirmed for the topside training skid. This record was filed under the Branch B parent asset for accounting. No subsea pressure connection was made and the live Branch B pipeline remained untouched. The completed skid exercise cannot explain pressure drops at the subsea ST2 and ST3 stations.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Both candidates remain unexplained. Approved record SHIFT-E confirms only an isolated topside training-skid exercise, with no subsea pressure connection or live P3 pipeline work; it cannot explain the affected ST2 and ST3 pressure drops during 120\u2013180 seconds. No supplied record explains P1. The supplied brackets are provisional inspection ranges, not confirmed leak locations, and neither pipeline is cleared of leaks. Engineer review and verification of the pressure evidence and any current approved live-line activity covering the pressure period and whole affected station group are required."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 13.780999999959022,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5529,
+            "output_tokens": 144,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4234,
+            "reasoning_tokens": 0
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "8b536457-12c1-425c-8947-6c131ee1cebb",
+          "prompt_hash": "77d7d27d4b504269e376fedc249c9a0d7052752f4c4a4b81128223fccd287fef",
+          "stdout_bytes": 66454,
+          "stderr_bytes": 0,
+          "result_hash": "0eb4e9c5c0516912d1a4558f17511219428df75fd4445dae7548736819767e1f",
+          "duration_ms": 13766.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC07",
+      "split": "held_out",
+      "expected_first": [
+        "P2"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "SHIFT-F",
+          "assets": [
+            "P1"
+          ],
+          "available": 125,
+          "effective": 90,
+          "status": "approved",
+          "body": "Trunk handover: the instruction to leave the pressure setpoint unchanged was withdrawn after the permit cleared. At incident second 90 the replacement instruction was acted on: the pressure was lowered along the operating Trunk through both ST2 and ST3. The final state is the lowered setting, not the earlier hold instruction.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P2"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P1",
+              "document_ids": [
+                "SHIFT-F"
+              ],
+              "reason": "Approved SHIFT-F, available at second 125 before the incident clock of 185, records an executed pressure reduction on operating P1 at second 90 through both ST2 and ST3. The lowered setting remained the final state, covering the pressure window of seconds 120\u2013180 and the whole affected station group; the earlier hold instruction was withdrawn."
+            }
+          ],
+          "explanation": "P2 remains unexplained and is the first inspection priority. P1 has a documented live-line operational explanation matching signal onset and the subsequent pressure period, supporting lower priority only\u2014not exclusion or leak clearance. Candidate brackets remain conditional, not confirmed leak locations. An engineer must review these priorities and verify the operational account against pressure history; both candidates still require investigation."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 17.0,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5536,
+            "output_tokens": 247,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4241,
+            "reasoning_tokens": 51
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "9c46abf6-7af8-46af-b88c-fff8fbb135be",
+          "prompt_hash": "71a13d1557f494533d25161b26a5a8548d324664eea20e2ec321f78c3364aa60",
+          "stdout_bytes": 117458,
+          "stderr_bytes": 0,
+          "result_hash": "01c24990b63c4786fd2e29b01b2e40201e11716c89afff897943a8f53ac7d2fe",
+          "duration_ms": 16984.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC08",
+      "split": "held_out",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-G1",
+          "assets": [
+            "P1"
+          ],
+          "available": 100,
+          "effective": 90,
+          "status": "approved",
+          "body": "The pressure reduction was executed on the Trunk at second 90 through ST2 and ST3.",
+          "supersedes": null
+        },
+        {
+          "id": "ENTRY-G2",
+          "assets": [
+            "P3"
+          ],
+          "available": 130,
+          "effective": 90,
+          "status": "approved",
+          "body": "Corrected signed entry: the completed pressure reduction at second 90 was on Branch B through ST2 and ST3. The earlier Trunk label was a transcription error. Branch B is the verified operating-change area; no Trunk operation is recorded.",
+          "supersedes": "ENTRY-G1"
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P3"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P3"
+        ],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P3",
+              "document_ids": [
+                "ENTRY-G2"
+              ],
+              "reason": "Current approved correction records an executed pressure reduction on P3's Branch B at second 90, matching signal onset and affecting both ST2 and ST3, the whole supporting station group. This operating change precedes and explains a plausible pressure response in the 120\u2013180-second window."
+            }
+          ],
+          "explanation": "ENTRY-G2 explicitly supersedes ENTRY-G1; the earlier Trunk account cannot justify lowering P1's priority. P1 remains unexplained. P3 is lower priority, not excluded from investigation or cleared of leaks. The 200\u2013600 m brackets are conditional inspection bounds, not confirmed leak locations. Engineers must review these priorities and verify the operating change's persistence and pressure response throughout seconds 120\u2013180."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 18.75,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5581,
+            "output_tokens": 310,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4286,
+            "reasoning_tokens": 114
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "b83faaa2-2ad9-4bee-9882-8999ccff3ff9",
+          "prompt_hash": "49e400dde6fffeab771a7111a0cc7b5fbc1384a7f5056e72fd66878692df6ae9",
+          "stdout_bytes": 124698,
+          "stderr_bytes": 0,
+          "result_hash": "bb5dee0e3830eb0815a75637ee79855e54fcb358234f3f6f37c1e58755d03c4e",
+          "duration_ms": 18735.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC09",
+      "split": "held_out",
+      "expected_first": [
+        "P2",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-H",
+          "assets": [
+            "P2"
+          ],
+          "available": 130,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Branch A pressure operation was completed last week. Today's signed handover quotes that completion to explain the procedure, not to record a movement during this incident. All Branch A operating settings were held constant from second 0 through second 180 today.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Both candidates remain unexplained. Approved ENTRY-H quotes last week's Branch A operation, not an operation during this incident, and states settings were held constant from seconds 0\u2013180. It therefore does not establish a current live-line operation matching the 120\u2013180-second pressure window and P2's whole affected station group. No supplied record explains P3. The supplied 200\u2013600 m brackets are conditional inspection ranges, not confirmed leak positions; neither pipe is cleared of leaks. Engineer review and verification of current live-line activity, timing, and coverage of all supporting stations are required."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 14.280999999959022,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5521,
+            "output_tokens": 153,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4226,
+            "reasoning_tokens": 0
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "212306a1-568f-498e-a40a-7a0a3a9576af",
+          "prompt_hash": "c508d95daedf116e55a6aed743c730ce70ebdb29313df1c5bcfcc10126551750",
+          "stdout_bytes": 68766,
+          "stderr_bytes": 0,
+          "result_hash": "76d2b6bf19b14f432f4ccefae53457b077f38093b59b5d0716e0a2991692e6b0",
+          "duration_ms": 14281.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC10",
+      "split": "held_out",
+      "expected_first": [
+        "P1",
+        "P2"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-I",
+          "assets": [
+            "P1"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "A diagnostic pressure injection was completed at incident second 90 in the isolated calibration port of P1-ST2-A. The process connection to that one tap was isolated. P1-ST2-B and both P1-ST3 instruments remained connected to the live pipe. The exercise cannot account for the coherent drops at all four instruments.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Both candidates remain unexplained. Approved record ENTRY-I describes an isolated calibration-port injection at P1-ST2-A at second 90, not a live-line operation matching the 120\u2013180-second pressure window and the entire affected station group. P1-ST2-B and both P1-ST3 instruments remained connected to the live pipe; the exercise cannot explain the coherent four-instrument drops. No supplied record explains P2. The supplied inspection brackets are provisional, not confirmed leak locations, and neither pipe is cleared of leaks. Engineer review must verify pressure timing, instrument connectivity, and any current approved operational evidence covering each whole affected station group."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 13.890999999945052,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5540,
+            "output_tokens": 164,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4245,
+            "reasoning_tokens": 0
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "2cbb8b75-fe05-4bba-8b53-0e97fd152f82",
+          "prompt_hash": "f620b9665e5a781a56d97762143e235ef7e98c87c88af9d239e52231189fef6a",
+          "stdout_bytes": 71887,
+          "stderr_bytes": 0,
+          "result_hash": "c2c5319cdd0b795c292f064a2af6a41e34329c1fe05498fe2d05134433b59c68",
+          "duration_ms": 13891.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC11",
+      "split": "held_out",
+      "expected_first": [
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "HANDOVER-J",
+          "assets": [
+            "P1"
+          ],
+          "available": 140,
+          "effective": 90,
+          "status": "approved",
+          "body": "The Trunk permit sequence is complete. The record's word 'cancelled' refers to the first work slot, not the later operation. During the replacement slot at second 90, operators reduced live-line pressure through the ST2 and ST3 area, and field feedback verified the lower setting. This contemporaneous entry is an executed operation despite the obsolete cancellation heading.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P1"
+        ],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P3"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P1",
+              "document_ids": [
+                "HANDOVER-J"
+              ],
+              "reason": "Approved HANDOVER-J, available at second 140 before the incident clock of 185, records an executed live-line pressure reduction at signal onset, second 90, across both ST2 and ST3, with field verification of the lower setting. This provides an operational explanation for the subsequent 120\u2013180 pressure window. Cancellation concerned the earlier slot, not this operation."
+            }
+          ],
+          "explanation": "P3 remains unexplained and is first priority. P1 is lower priority, not excluded from investigation or cleared of leaks. Verify that P1's lower pressure setting persisted throughout seconds 120\u2013180 and review the supporting station measurements. Candidate brackets are conditional inspection ranges, not confirmed leak locations. These priorities require engineer review."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 20.938000000081956,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5549,
+            "output_tokens": 315,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4254,
+            "reasoning_tokens": 120
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "7bbaf5b3-8466-42f3-a00f-b1ce213f2cb7",
+          "prompt_hash": "1bda3f24206078a4dea0838d70bdf52f29b5055e275ceadeca7f7a72a70a709e",
+          "stdout_bytes": 97035,
+          "stderr_bytes": 0,
+          "result_hash": "f9162bb2324ad17a66b1af05afc9d0d989c58151087fb11513be8f86b88076e6",
+          "duration_ms": 20922.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC12",
+      "split": "held_out",
+      "expected_first": [
+        "P2",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-K",
+          "assets": [
+            "P2"
+          ],
+          "available": 100,
+          "effective": 90,
+          "status": "draft",
+          "body": "Proposed explanation: the Branch A pressure reduction was performed at incident second 90 through ST2 and ST3. This unsigned draft has not been verified by the operator.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Both candidates remain unexplained. ENTRY-K is an unsigned, unverified draft and cannot justify demotion of P2; its claim of an operation at second 90 does not verify a current live-line operation spanning the pressure window at seconds 120\u2013180 and the whole affected station group. No operational evidence explains P3. The supplied brackets are conditional inspection areas, not confirmed leak locations. Engineer review must verify approved current execution records, temporal coverage, and coverage of all supporting stations before any demotion. Neither pipe is cleared of leaks."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 14.952999999979511,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5512,
+            "output_tokens": 144,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4217,
+            "reasoning_tokens": 0
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "6c455a73-dda5-4e65-86fe-3bc3ec1c4bc3",
+          "prompt_hash": "956a49b22f6e8751c380b897e154551dd5187611dff9bf64e7808d638e9b3fba",
+          "stdout_bytes": 66110,
+          "stderr_bytes": 0,
+          "result_hash": "58ace059b3790933737cf403305de6386a4371421ca324d26ffe171d4e2631d8",
+          "duration_ms": 14953.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC13",
+      "split": "held_out",
+      "expected_first": [],
+      "candidates": [],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "error_code": null,
+        "model_calls": 0,
+        "elapsed_seconds": 0.0,
+        "receipt": {},
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC14",
+      "split": "held_out",
+      "expected_first": [],
+      "candidates": [],
+      "visible_records": [],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "error_code": null,
+        "model_calls": 0,
+        "elapsed_seconds": 0.0,
+        "receipt": {},
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC15",
+      "split": "held_out",
+      "expected_first": [
+        "P1"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P1",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P1-ST2-A",
+            "P1-ST2-B",
+            "P1-ST3-A",
+            "P1-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-L",
+          "assets": [
+            "P2"
+          ],
+          "available": 110,
+          "effective": 90,
+          "status": "approved",
+          "body": "At incident second 90 the live Branch A pressure reduction was performed through ST2 and ST3. The operator verified completion. The scattered bad samples on a Branch B tap are a separate fault and do not account for the Trunk pressure drop.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P1"
+          ],
+          "deprioritized": [
+            {
+              "segment_id": "P2",
+              "document_ids": [
+                "ENTRY-L"
+              ],
+              "reason": "Current matching approved operation with explicit execution language."
+            }
+          ],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P1",
+            "P2"
+          ],
+          "deprioritized": [],
+          "explanation": "ENTRY-L is approved and available, and reports an executed live Branch A pressure reduction through ST2 and ST3 at second 90. However, the supplied evidence does not map Branch A to either candidate or establish that this operation accounts for the pressure window at seconds 120\u2013180 across the candidate's whole affected station group. Its P2 asset tag alone is insufficient. The separate Branch B tap fault does not explain the Trunk pressure drop. Both candidates remain unexplained first inspection priorities. Their coordinate brackets are provisional, not confirmed leak locations. An engineer must verify branch-to-segment mapping, operational timing and full station-group coverage; neither pipe is cleared of leaks."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 20.26500000001397,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5509,
+            "output_tokens": 319,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4214,
+            "reasoning_tokens": 147
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "85979cbf-a208-4b98-be6a-c267c5784ade",
+          "prompt_hash": "7fe0d718f39fc4d675c8a1cac3857548847d808dfe44fc70053cb8f4aa5f7ea6",
+          "stdout_bytes": 91238,
+          "stderr_bytes": 0,
+          "result_hash": "7a332ef8e786961e5b52a3186cefce0465b6a95a37e7e5b536e9649c1924d309",
+          "duration_ms": 20265.0
+        },
+        "exact_first_priority": false,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [
+          "P2"
+        ],
+        "failed_answer": false
+      }
+    },
+    {
+      "id": "LC16",
+      "split": "held_out",
+      "expected_first": [
+        "P2",
+        "P3"
+      ],
+      "candidates": [
+        {
+          "segment_id": "P2",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P2-ST2-A",
+            "P2-ST2-B",
+            "P2-ST3-A",
+            "P2-ST3-B"
+          ]
+        },
+        {
+          "segment_id": "P3",
+          "inspection_start_m": 200.0,
+          "inspection_end_m": 600.0,
+          "supporting_sensors": [
+            "P3-ST2-A",
+            "P3-ST2-B",
+            "P3-ST3-A",
+            "P3-ST3-B"
+          ]
+        }
+      ],
+      "visible_records": [
+        {
+          "id": "ENTRY-M1",
+          "assets": [
+            "P2"
+          ],
+          "available": 115,
+          "effective": 90,
+          "status": "approved",
+          "body": "The live Branch A pressure reduction was executed at incident second 90 through ST2 and ST3.",
+          "supersedes": null
+        },
+        {
+          "id": "ENTRY-M2",
+          "assets": [
+            "P2"
+          ],
+          "available": 120,
+          "effective": 90,
+          "status": "approved",
+          "body": "The shift supervisor reports that the Branch A pressure operation was cancelled before actuation. There was no live-line movement. This conflicts with ENTRY-M1; neither account has been withdrawn or verified against independent equipment feedback.",
+          "supersedes": null
+        }
+      ],
+      "numerical_only": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Numerical-only: all computed candidate areas retain first priority."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "context_fixed": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "Frozen context-aware policy checks visibility, approval, supersession, asset tags, execution phrases and counterevidence. Ambiguity retains priority; no leak clearance."
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      },
+      "llm_context": {
+        "decision": {
+          "first_priority": [
+            "P2",
+            "P3"
+          ],
+          "deprioritized": [],
+          "explanation": "P2 remains first priority because approved records ENTRY-M1 and ENTRY-M2 conflict over whether the live-line operation occurred; neither supersedes the other, and independent equipment feedback has not verified either account. An operation reported at second 90 does not establish an operational explanation spanning pressure seconds 120\u2013180 across the whole ST2/ST3 station group. P3 has no supplied operational explanation. Verify equipment feedback, execution timing, and full affected-station coverage. Candidate brackets are conditional inspection bounds, not confirmed leak positions; neither pipe is cleared of leaks. These priorities require engineer review."
+        },
+        "error_code": null,
+        "model_calls": 1,
+        "elapsed_seconds": 14.155999999959022,
+        "receipt": {
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "usage": {
+            "input_tokens": 5561,
+            "output_tokens": 193,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 4266,
+            "reasoning_tokens": 38
+          },
+          "usage_available": true,
+          "usage_source": "owned_session",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "request_id": "5919f808-7659-4d0f-a078-fe9896401403",
+          "prompt_hash": "61408df8105476154512f754ce9048c30628ead1817b01c3080c22c496ec47a0",
+          "stdout_bytes": 81980,
+          "stderr_bytes": 0,
+          "result_hash": "fc4fbf5caeaab3ca331349d3e20d9bd363d6ddb477240b1ec1f77fee3beaffe8",
+          "duration_ms": 14156.0
+        },
+        "exact_first_priority": true,
+        "unjustified_demotions": [],
+        "excess_priority_areas": [],
+        "failed_answer": false
+      }
+    }
+  ]
+}

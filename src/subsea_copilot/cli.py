@@ -69,6 +69,7 @@ def main() -> None:
         "--suite", choices=["diagnostics", "agents", "qualification"], default="diagnostics"
     )
     evaluate.add_argument("--mode", choices=["scripted", "live"], default="scripted")
+    evaluate.add_argument("--repetitions", type=int, choices=[1, 2, 3], default=3)
     evaluate.add_argument("--output", type=Path, default=Path("eval") / "results")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -117,7 +118,7 @@ def main() -> None:
         elif args.command == "ingest":
             from .contracts import ReplaySession
             from .store import Store
-            from .synthetic import generate_scenario
+            from .synthetic import SOURCE_VERSION, generate_scenario
 
             settings = Settings.from_env()
             dataset = generate_scenario(args.scenario)
@@ -129,6 +130,7 @@ def main() -> None:
                     ReplaySession(
                         id="replay-" + uuid.uuid4().hex,
                         scenario=args.scenario,
+                        source_version=SOURCE_VERSION,
                         mode=args.mode,
                         epoch=dataset.epoch,
                     )
@@ -139,7 +141,7 @@ def main() -> None:
         else:
             from .qualification import run_qualification
 
-            report = run_qualification(args.suite, args.mode, args.output)
+            report = run_qualification(args.suite, args.mode, args.output, args.repetitions)
             print(json.dumps(report, indent=2))
             if not report.get("passed"):
                 raise SystemExit(1)

@@ -1,9 +1,11 @@
-"""Inspectable acoustic excess fit, not a calibrated confidence estimator."""
+"""Topology-aware pressure inspection brackets, not hydraulic leak coordinates."""
 
 from __future__ import annotations
 
 import math
+from collections import defaultdict
 from collections.abc import Mapping, Sequence
+from statistics import median
 
 from .contracts import LocationCandidate, LocationFit, PipelineSegment, Point, SitePack
 
@@ -25,89 +27,114 @@ def point_at_chainage(segment: PipelineSegment, chainage_m: float) -> Point:
     return segment.points[-1]
 
 
+def pipeline_distances(pack: SitePack) -> dict[tuple[str, str], float]:
+    """Only shared endpoints connect pipes; geometric crossings do not."""
+    endpoints = {
+        segment.id: (
+            (segment.points[0].x, segment.points[0].y),
+            (segment.points[-1].x, segment.points[-1].y),
+        )
+        for segment in pack.segments
+    }
+    vertices = {point for pair in endpoints.values() for point in pair}
+    routes = {(a, b): 0.0 if a == b else math.inf for a in vertices for b in vertices}
+    for segment in pack.segments:
+        a, b = endpoints[segment.id]
+        routes[a, b] = routes[b, a] = min(routes[a, b], segment.length_m)
+    for via in vertices:
+        for a in vertices:
+            for b in vertices:
+                routes[a, b] = min(routes[a, b], routes[a, via] + routes[via, b])
+    lengths = {segment.id: segment.length_m for segment in pack.segments}
+    result = {}
+    for first in pack.sensors:
+        for second in pack.sensors:
+            direct = (
+                abs(first.chainage_m - second.chainage_m)
+                if first.segment_id == second.segment_id
+                else math.inf
+            )
+            a_ends = zip(
+                endpoints[first.segment_id],
+                (first.chainage_m, lengths[first.segment_id] - first.chainage_m),
+                strict=True,
+            )
+            indirect = []
+            for endpoint_a, offset_a in a_ends:
+                for endpoint_b, offset_b in zip(
+                    endpoints[second.segment_id],
+                    (second.chainage_m, lengths[second.segment_id] - second.chainage_m),
+                    strict=True,
+                ):
+                    indirect.append(offset_a + routes[endpoint_a, endpoint_b] + offset_b)
+            result[first.id, second.id] = min(direct, *indirect)
+    return result
+
+
 def locate(
     pack: SitePack,
-    excess: Mapping[str, float],
+    deficits: Mapping[str, float],
     scales: Mapping[str, float],
     segment_ids: Sequence[str],
     weights: Mapping[str, float] | None = None,
 ) -> LocationFit:
-    sensors = [
-        sensor
-        for sensor in pack.sensors
-        if sensor.id in excess and sensor.id in scales and scales[sensor.id] > 0
-    ]
-    if len(sensors) < pack.min_observers:
-        return LocationFit(status="withheld", reason="Insufficient usable acoustic observers")
-    candidates = []
-    for segment in pack.segments:
-        if segment.id not in segment_ids:
+    stations: dict[tuple[str, float], list[bool]] = defaultdict(list)
+    observers = []
+    for sensor in pack.sensors:
+        if sensor.id not in deficits or sensor.id not in scales or scales[sensor.id] <= 0:
             continue
-        grid = [
-            index * pack.location_grid_m
-            for index in range(int(segment.length_m // pack.location_grid_m) + 1)
-        ]
-        if grid[-1] != segment.length_m:
-            grid.append(segment.length_m)
-        for chainage in grid:
-            point = point_at_chainage(segment, chainage)
-            kernels = []
-            observed = []
-            precision = []
-            for sensor in sensors:
-                distance2 = (sensor.position.x - point.x) ** 2 + (sensor.position.y - point.y) ** 2
-                kernels.append(1 / (distance2 + pack.location_r0_m**2))
-                observed.append(excess[sensor.id])
-                precision.append((weights or {}).get(sensor.id, 1) / scales[sensor.id] ** 2)
-            denominator = sum(w * k * k for w, k in zip(precision, kernels, strict=True))
-            if denominator <= 0:
-                continue
-            strength = max(
-                0.0,
-                sum(w * k * y for w, k, y in zip(precision, kernels, observed, strict=True))
-                / denominator,
-            )
-            residual = math.sqrt(
-                sum(
-                    w * (y - strength * k) ** 2
-                    for w, k, y in zip(precision, kernels, observed, strict=True)
-                )
-                / len(sensors)
-            )
-            candidates.append(
-                LocationCandidate(
-                    segment_id=segment.id,
-                    chainage_m=chainage,
-                    position=point,
-                    residual=residual,
-                    strength=strength,
-                )
-            )
-    if not candidates:
-        return LocationFit(status="withheld", reason="No relevant pipeline candidates")
-    candidates.sort(
-        key=lambda candidate: (candidate.residual, candidate.segment_id, candidate.chainage_m)
-    )
-    best = candidates[0]
-    if best.residual > 4:
+        if weights is not None and weights.get(sensor.id, 0) < pack.min_coverage:
+            continue
+        dropped = deficits[sensor.id] >= pack.anomaly_threshold * scales[sensor.id]
+        stations[sensor.segment_id, sensor.chainage_m].append(dropped)
+        if dropped and sensor.segment_id in segment_ids:
+            observers.append(sensor)
+    if (
+        len(observers) < pack.min_observers
+        or len({sensor.station_id for sensor in observers}) < pack.min_stations
+        or len({sensor.failure_domain_id for sensor in observers}) < pack.min_failure_domains
+    ):
+        return LocationFit(status="withheld", reason="Insufficient independent pressure observers")
+    affected = {sensor.segment_id for sensor in observers}
+    if len(affected) != 1:
         return LocationFit(
-            status="withheld", best=best, reason="Poor fit to idealized acoustic propagation model"
+            status="ambiguous", reason="Pressure evidence spans multiple pipe segments"
         )
-    compatible = [
-        candidate
-        for candidate in candidates
-        if candidate.residual <= best.residual + pack.compatible_residual_tolerance
+    segment_id = next(iter(affected))
+    positions = sorted({sensor.chainage_m for sensor in observers})
+    healthy = [
+        chainage
+        for (segment, chainage), flags in stations.items()
+        if segment == segment_id and not any(flags)
     ]
-    segments = {candidate.segment_id for candidate in compatible}
-    width = max(candidate.chainage_m for candidate in compatible) - min(
-        candidate.chainage_m for candidate in compatible
-    )
-    if len(segments) > 1:
-        status, reason = "ambiguous", "Multiple physically compatible pipeline segments"
-    elif width > pack.max_location_width_m:
-        status, reason = "withheld", "Compatible candidate set exceeds qualified width"
-    else:
-        status, reason = "located", "Compatible grid candidates, not a confidence interval"
+    before = [chainage for chainage in healthy if chainage < positions[0]]
+    after = [chainage for chainage in healthy if chainage > positions[-1]]
+    if not before or not after:
+        return LocationFit(
+            status="withheld", reason="No usable unaffected pressure stations on both sides"
+        )
+    if any(positions[0] < chainage < positions[-1] for chainage in healthy):
+        return LocationFit(status="ambiguous", reason="Disconnected pressure-drop regions")
+    lower = (max(before) + positions[0]) / 2
+    upper = (positions[-1] + min(after)) / 2
+    if upper - lower > pack.max_location_width_m:
+        return LocationFit(status="withheld", reason="Inspection bracket exceeds qualified width")
+    segment = next(segment for segment in pack.segments if segment.id == segment_id)
+
+    def candidate(chainage: float) -> LocationCandidate:
+        return LocationCandidate(
+            segment_id=segment_id,
+            chainage_m=chainage,
+            position=point_at_chainage(segment, chainage),
+        )
+
     return LocationFit(
-        status=status, best=best, compatible=compatible, reason=reason, grid_m=pack.location_grid_m
+        status="located",
+        best=candidate(median([lower, upper])),
+        compatible=[candidate(lower), candidate(upper)],
+        inspection_start_m=lower,
+        inspection_end_m=upper,
+        station_bracket_m=[max(before), positions[0], positions[-1], min(after)],
+        reason="Priority inspection interval between station midpoints; not an exact leak location "
+        "or a confidence interval",
     )

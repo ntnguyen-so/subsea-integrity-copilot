@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
@@ -37,6 +38,43 @@ class ScriptedChatModel(BaseChatModel):
                 if isinstance(m, SystemMessage) and isinstance(m.content, str)
             )
         )
+        if context["phase"].startswith("critic-"):
+            sources = context["source_texts"]
+            checks = []
+            for identifier, paragraph in context["candidate_paragraphs"].items():
+                supported = paragraph["text"].startswith("Offline contract example:") or paragraph[
+                    "text"
+                ] in {
+                    "Are the operating records complete for the incident?",
+                    "Could the affected instruments share a communication or power failure?",
+                }
+                reference = (
+                    next(iter(sources))
+                    if identifier.startswith("question:")
+                    else paragraph["references"][0]
+                )
+                checks.append(
+                    {
+                        "paragraph_id": identifier,
+                        "verdict": "supported" if supported else "unsupported",
+                        "reason": "Offline contract example only; not semantic qualification.",
+                        "support": [{"reference": reference, "quote": sources[reference][:120]}]
+                        if supported
+                        else [],
+                    }
+                )
+            critic_message = AIMessage(
+                content=json.dumps(
+                    {
+                        "decision": "accept"
+                        if all(c["verdict"] == "supported" for c in checks)
+                        else "revise",
+                        "checks": checks,
+                    }
+                ),
+                response_metadata={"mode": "scripted", "model_identity_source": "scripted"},
+            )
+            return ChatResult(generations=[ChatGeneration(message=critic_message)])
         scope = context["scope"]
         tool_outputs = [
             json.loads(m.content)
@@ -51,6 +89,7 @@ class ScriptedChatModel(BaseChatModel):
                     continue
                 if isinstance(data, dict) and "application_intake" in data:
                     tool_outputs.extend(entry["output"] for entry in data["application_intake"])
+        history_action, history_review = self._history_action(messages, tool_outputs, context)
         if context["phase"] == "plan":
             question = context["question"].lower()
             needs_diagnosis = (
@@ -64,14 +103,18 @@ class ScriptedChatModel(BaseChatModel):
                         "happen",
                         "diagnos",
                         "event",
+                        "evidence",
+                        "unknown",
                     )
                 )
                 or context["requires_location"]
             )
             compatible_tasks = context["compatible_tasks"]
+            needs_diagnosis |= bool(context.get("history_version"))
             has_diagnosis = any(t["role"] == "event_diagnosis" for t in compatible_tasks)
             if any(word in question for word in ("summary", "summarize", "saved", "reuse")):
                 needs_diagnosis = has_diagnosis
+            needs_diagnosis |= bool(context.get("history_version"))
             reuse_ids = []
             if compatible_tasks and (not needs_diagnosis or has_diagnosis):
                 steps = ["reuse", "answer"]
@@ -85,6 +128,8 @@ class ScriptedChatModel(BaseChatModel):
             else:
                 steps = ["quality", "answer"]
             message = AIMessage(content=json.dumps({"steps": steps, "reuse_task_ids": reuse_ids}))
+        elif history_action is not None:
+            message = history_action
         elif not tool_outputs:
             requests = []
             names = list(context["required_tools"])
@@ -122,6 +167,7 @@ class ScriptedChatModel(BaseChatModel):
             child_claims = set()
             child_abstained = False
             inherited_limits = set()
+            inherited_review = None
             for output in tool_outputs:
                 data = output.get("result") or {}
                 ledger.update(data.get("claims", {}))
@@ -130,6 +176,8 @@ class ScriptedChatModel(BaseChatModel):
                     child_claims.update(data["result"]["claim_refs"])
                     child_abstained |= data["state"] == "ABSTAINED"
                     inherited_limits.update(data["result"]["limitations"])
+                    if data["result"].get("investigation") is not None:
+                        inherited_review = data["result"]["investigation"]
             if self.role == "operator_response" and not context.get("baseline"):
                 ledger = {k: c for k, c in ledger.items() if k in child_claims}
             must_abstain = child_abstained or (
@@ -175,7 +223,56 @@ class ScriptedChatModel(BaseChatModel):
                 "recommendation_ids": ["review_sensor_evidence"]
                 if self.role == "operator_response"
                 else [],
+                "investigation": history_review
+                if self.role == "event_diagnosis"
+                else inherited_review,
             }
+            if context.get("response_protocol") in {"engineer-v1", "engineer-v2"}:
+                review_value = result["investigation"]
+                review = review_value if isinstance(review_value, dict) else {}
+                references = [
+                    *claims[:1],
+                    *review.get("document_ids", [])[:1],
+                    *review.get("comparison_call_ids", [])[:1],
+                ]
+                question = context["question"].lower()
+                focus = (
+                    "operating_context"
+                    if "valve" in question or "operating" in question
+                    else "inspection_rationale"
+                    if context["requires_location"]
+                    else "sensor_quality"
+                    if "sensor" in question or "drift" in question
+                    else "evidence_gaps"
+                    if "unknown" in question
+                    else "root_cause"
+                )
+                result["interpretation"] = {
+                    "focus": focus,
+                    "answer": {
+                        "text": (
+                            "Offline contract example: review the cited measurements and history "
+                            "for this question. A plausible explanation is not a confirmed cause; "
+                            "the checked evidence below retains the physical uncertainty."
+                        ),
+                        "references": references,
+                    },
+                    "competing_causes": [
+                        {
+                            "cause": "operating_change",
+                            "stance": "not_established",
+                            "text": (
+                                "Offline contract example: operating activity remains a competing "
+                                "explanation to verify against current records and pressure timing."
+                            ),
+                            "references": references,
+                        }
+                    ],
+                    "follow_up_questions": [
+                        "Are the operating records complete for the incident?",
+                        "Could the affected instruments share a communication or power failure?",
+                    ],
+                }
             message = AIMessage(content=json.dumps(result))
         message.response_metadata = {
             "requested_model": None,
@@ -185,3 +282,153 @@ class ScriptedChatModel(BaseChatModel):
             "mode": "scripted",
         }
         return ChatResult(generations=[ChatGeneration(message=message)])
+
+    def _history_action(
+        self,
+        messages: list[BaseMessage],
+        outputs: list[dict[str, Any]],
+        context: dict[str, Any],
+    ) -> tuple[AIMessage | None, dict[str, Any] | None]:
+        if (
+            self.role != "event_diagnosis"
+            or context["phase"] == "plan"
+            or not context.get("history_version")
+        ):
+            return None, None
+        data = [output.get("result") or {} for output in outputs]
+        assessment: dict[str, Any] = next(
+            (row["assessment"] for row in data if "assessment" in row), {}
+        )
+        hypothesis = assessment.get("hypothesis")
+        intent = (
+            "test_instrumentation"
+            if hypothesis == "sensor_or_telemetry_issue"
+            else "test_operating_change"
+            if "COMMON_MODE_PRESSURE_CHANGE" in assessment.get("counterevidence", [])
+            else "seek_counterevidence"
+        )
+
+        def action(name: str, arguments: dict[str, Any]) -> AIMessage:
+            return AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "id": uuid4().hex,
+                        "name": name,
+                        "args": {**context["scope"], "intent": intent, **arguments},
+                    }
+                ],
+            )
+
+        search = next((row for row in data if "search_method" in row), None)
+        if search is None:
+            query = (
+                "calibration OR gateway OR spike"
+                if intent == "test_instrumentation"
+                else "valve OR operating OR transient"
+                if intent == "test_operating_change"
+                else "pressure OR telemetry OR inspection"
+            )
+            return action("history.search", {"query": query, "asset_ids": ["northsea"]}), None
+        read_docs = [
+            doc
+            for row in data
+            if "documents" in row and "search_method" not in row
+            for doc in row["documents"]
+        ]
+        hits = search["documents"]
+        if not read_docs and hits:
+            approved = sorted(
+                [doc for doc in hits if doc["admissible"]],
+                key=lambda doc: (doc["type"] not in {"operation", "maintenance"}, doc["id"]),
+            )
+            rejected = [doc for doc in hits if not doc["admissible"]]
+            selected = (approved[:2] + rejected[:1]) if rejected else approved[:3]
+            if not selected:
+                selected = hits[:1]
+            return action("history.read", {"document_ids": [doc["id"] for doc in selected]}), None
+        comparisons = [
+            (message.tool_call_id, json.loads(message.content).get("result") or {})
+            for message in messages
+            if isinstance(message, ToolMessage) and isinstance(message.content, str)
+            if "sensors" in (json.loads(message.content).get("result") or {})
+        ]
+        if read_docs and not comparisons and context["history_bounds"]["end_seconds"] >= 20:
+            sensors = context["history_sensors"]
+            selected_sensors: list[str] = []
+            used: set[str] = set()
+            operation = next(
+                (doc for doc in read_docs if doc["type"] == "operation" and doc["admissible"]), None
+            )
+            for sensor in sensors:
+                if operation:
+                    key = sensor["segment_id"]
+                elif intent == "test_instrumentation":
+                    if not sensor["quality_concern"]:
+                        continue
+                    key = sensor["id"].rsplit("-", 1)[0]
+                else:
+                    support = next((item for item in sensors if item["event_support"]), None)
+                    if support and sensor["segment_id"] != support["segment_id"]:
+                        continue
+                    key = sensor["id"].rsplit("-", 1)[0]
+                if key not in used:
+                    selected_sensors.append(sensor["id"])
+                    used.add(key)
+                if len(selected_sensors) == 4:
+                    break
+            if len(selected_sensors) < 2:
+                selected_sensors = [s["id"] for s in sensors[:2]]
+            end = context["history_bounds"]["end_seconds"]
+            split = (
+                int(
+                    datetime.fromisoformat(operation["effective_from"]).timestamp()
+                    - context["history_bounds"]["epoch_unix"]
+                )
+                if operation
+                else end // 2
+            )
+            split = max(10, min(split, end - 10))
+            return action(
+                "history.compare",
+                {
+                    "sensor_ids": selected_sensors,
+                    "start_seconds": max(0, split - 60),
+                    "split_seconds": split,
+                    "end_seconds": end,
+                },
+            ), None
+        approved = [doc for doc in read_docs if doc["admissible"]]
+        changed = {
+            sensor["segment_id"]
+            for _, comparison in comparisons
+            for sensor in comparison["sensors"]
+            if sensor["change_bar"] is not None
+            and abs(sensor["change_bar"]) >= 0.2
+            and sensor["before_usable"] >= sensor["before_expected"] * 0.6
+            and sensor["after_usable"] >= sensor["after_expected"] * 0.6
+        }
+        operating = len(changed) >= 2 and any(doc["type"] == "operation" for doc in approved)
+        instrumentation = intent == "test_instrumentation" and any(
+            doc["type"] == "maintenance" for doc in approved
+        )
+        review = {
+            "assessment": "operating_change_plausible"
+            if operating
+            else "instrumentation_context"
+            if instrumentation
+            else "unresolved",
+            "document_ids": [doc["id"] for doc in approved],
+            "rejected_document_ids": [doc["id"] for doc in read_docs if not doc["admissible"]],
+            "comparison_call_ids": [identifier for identifier, _ in comparisons],
+            "next_action": "restore_telemetry"
+            if context["history_bounds"]["coverage"] < 0.6
+            else "check_operating_records"
+            if operating
+            else "review_instrumentation"
+            if instrumentation
+            else "inspect_supported_interval"
+            if context["usable_location"]
+            else "human_review",
+        }
+        return None, review

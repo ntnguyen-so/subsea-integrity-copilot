@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "mode": "live",
+  "replay_id": "handoff-ec30ca28eaa74cef9c69a2d4d671de42",
+  "task_id": "bcc8d90e-bff5-54f0-8920-8232222aa15a",
+  "checks": [
+    "Hosted mode visibly labeled",
+    "Prepared exact-window S1 answer selectable",
+    "P1 200-600m interval visible",
+    "Actual grounding findings and quotes expandable"
+  ],
+  "limitations": [
+    "Read-only prepared LIVE result, not fresh inference during this browser check."
+  ]
+}

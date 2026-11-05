@@ -10,11 +10,11 @@ from subsea_copilot.synthetic import generate_pack
 def record(**changes):
     values = {
         "sensor_id": "P1-ST1-A",
-        "channel": "methane",
+        "channel": "pressure",
         "observed_at": "2026-01-01 01:00:00 Europe/Oslo",
         "received_at": "2026-01-01T00:00:02Z",
-        "value": 1000,
-        "unit": "nmol/L",
+        "value": 100,
+        "unit": "kPa",
         "source_record_id": "one",
     }
     return RawRecord(**(values | changes))
@@ -25,7 +25,7 @@ def test_explicit_local_time_conversion_and_raw_provenance():
     observation = normalize_records([original], generate_pack())[0]
     assert observation.observed_at == datetime(2026, 1, 1, tzinfo=UTC)
     assert observation.value == 1
-    assert observation.unit == "umol/L"
+    assert observation.unit == "bar"
     assert observation.original == original
     assert len(observation.transformations) >= 2
 
@@ -68,7 +68,7 @@ def test_null_nonfinite_and_impossible_are_explicit(value, validity):
 
 
 def test_duplicates_and_conflicts_are_order_independent_not_last_write_wins():
-    first, second = record(), record(value=2000)
+    first, second = record(), record(value=200)
     assert len(normalize_records([first, first], generate_pack())) == 1
     forward = normalize_records([first, second, first], generate_pack())
     reverse = normalize_records([second, first], generate_pack())
@@ -108,7 +108,7 @@ def test_incremental_duplicates_emit_nothing_and_conflicts_replace_prior_observa
     assert len(initial) == 1
     assert initial[0].validity == "usable"
     assert buffer.ingest([first, first.model_copy()]) == []
-    conflict = record(value=2000)
+    conflict = record(value=200)
     changed = buffer.ingest([conflict])
     assert len(changed) == 2
     assert {row.validity for row in changed} == {"conflicted"}
@@ -128,19 +128,19 @@ def test_incremental_mixed_units_times_and_conflict_masks_match_batch(batch_size
     pack = generate_pack()
     records = [
         record(),
-        record(value="1000", source_record_id="two"),
+        record(value="100", source_record_id="two"),
         record(value=None, source_record_id="missing"),
         record(observed_at="not-zoned", source_record_id="timestamp"),
         record(unit="unknown", source_record_id="unit"),
-        record(value=2000),
+        record(value=200),
         record(),
         record(
             value=1,
-            unit="umol/L",
+            unit="bar",
             observed_at="2026-01-01T00:00:00Z",
             source_record_id="equivalent-unit-time",
         ),
-        record(value=3000),
+        record(value=300),
         record(value="-9999", source_record_id="missing"),
         record(value=None, source_record_id="missing"),
     ]
@@ -169,7 +169,7 @@ def test_incremental_keeps_captured_provenance_and_list_views_independent():
     original = record()
     first = buffer.ingest([original])[0]
     original.value = 9999
-    assert first.original.value == 1000
+    assert first.original.value == 100
     view = buffer.observations()
     view.clear()
     assert len(buffer.observations()) == 1
@@ -194,3 +194,15 @@ def test_incremental_hashes_only_new_batch_not_retained_history(monkeypatch):
     assert len(calls) == 1
     buffer.observations()
     assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    ("unit", "value"), [("bar", 1), ("kPa", 100), ("MPa", 0.1), ("Pa", 100000)]
+)
+def test_pressure_units_are_normalized_without_losing_source_values(unit, value):
+    original = record(unit=unit, value=value)
+    result = normalize_records([original], generate_pack())[0]
+    assert result.validity == "usable"
+    assert result.value == pytest.approx(1)
+    assert result.unit == "bar"
+    assert result.original == original

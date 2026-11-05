@@ -11,6 +11,7 @@ throttle; all other budgets remain unchanged.
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
@@ -39,6 +40,13 @@ from .contracts import (
 
 T = TypeVar("T", bound=Contract)
 TERMINAL = frozenset({"SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED"})
+
+
+def history_search_query(query: str) -> str:
+    words = re.findall(r"[A-Za-z][A-Za-z0-9_-]*", query)
+    return " OR ".join(
+        dict.fromkeys(word for word in words if word.upper() not in {"AND", "OR", "NOT"})
+    )
 
 
 class StoreError(RuntimeError):
@@ -483,6 +491,79 @@ class Store:
                 result.append(record)
             return sorted(result, key=lambda item: (item.observed_at, item.identity, item.id))
 
+    def install_history(self, documents: list[dict[str, Any]]) -> str:
+        ordered = sorted(documents, key=lambda row: row["id"])
+        encoded_documents: list[JsonValue] = list(ordered)
+        version = content_hash(encoded_documents)
+        with self._tx() as conn:
+            for document in documents:
+                conn.execute(
+                    "INSERT INTO subsea.history_documents "
+                    "(tenant_id,site_id,corpus_version,id,available_at,authored_at,"
+                    "effective_from,asset_ids,scenarios,payload) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
+                    (
+                        self.tenant_id,
+                        self.site_id,
+                        version,
+                        document["id"],
+                        document["available_at"],
+                        document["authored_at"],
+                        document["effective_from"],
+                        document["asset_ids"],
+                        document["scenarios"],
+                        Jsonb(document),
+                    ),
+                )
+                retained = conn.execute(
+                    "SELECT payload FROM subsea.history_documents "
+                    "WHERE corpus_version=%s AND id=%s",
+                    (version, document["id"]),
+                ).fetchone()
+                if retained is None or retained["payload"] != document:
+                    raise Conflict("immutable_history")
+        return version
+
+    def history_documents(
+        self,
+        generation_id: str,
+        version: str,
+        as_of: datetime,
+        *,
+        query: str | None = None,
+        assets: list[str] | None = None,
+        ids: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        query = history_search_query(query) if query is not None else None
+        with self._tx(read=True) as conn:
+            replay = self._get(conn, "replays", generation_id, ReplaySession)
+            rows = conn.execute(
+                "SELECT payload FROM subsea.history_documents "
+                "WHERE corpus_version=%s AND available_at<=%s AND authored_at<=%s "
+                "AND effective_from<=%s AND (cardinality(scenarios)=0 OR %s=ANY(scenarios)) "
+                "AND (%s::text[] IS NULL OR asset_ids && %s::text[]) "
+                "AND (%s::text[] IS NULL OR id=ANY(%s::text[])) "
+                "AND (%s::text IS NULL OR search_vector @@ websearch_to_tsquery('english',%s)) "
+                "ORDER BY (payload->>'status'='approved') DESC, "
+                "ts_rank(search_vector,websearch_to_tsquery('english',coalesce(%s,''))) DESC, "
+                "effective_from DESC,id LIMIT 6",
+                (
+                    version,
+                    as_of,
+                    as_of,
+                    as_of,
+                    replay.scenario,
+                    assets,
+                    assets,
+                    ids,
+                    ids,
+                    query,
+                    query,
+                    query,
+                ),
+            ).fetchall()
+            return [row["payload"] for row in rows]
+
     def save_window(self, snapshot: WindowSnapshot) -> WindowSnapshot:
         self._scope(snapshot)
         with self._tx() as conn:
@@ -881,6 +962,8 @@ class Store:
                 "created_at",
                 "automatic",
                 "idempotency_key",
+                "history_version",
+                "response_protocol",
                 "model_calls",
                 "tool_calls",
                 "lease_token",

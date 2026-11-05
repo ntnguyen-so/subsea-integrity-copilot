@@ -6,14 +6,22 @@ import math
 import random
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from typing import Literal
 
 from .contracts import PipelineSegment, Point, RawRecord, Sensor, SitePack
 
+SOURCE_VERSION: Literal["pressure-v3"] = "pressure-v3"
+CUSTOMER_QUESTIONS = [
+    "Leak or faulty sensors?",
+    "Where should we inspect, and why?",
+    "What evidence supports this, and what remains unknown?",
+]
+
 SCENARIOS = {
-    "S1": "Localized acoustic and delayed methane signal",
+    "S1": "Localized pressure drop with concurrent sensor faults",
     "S2": "Scattered sensor defects",
-    "S3": "Shared gateway outage",
-    "S4": "Broad environmental disturbance",
+    "S3": "Full-source telemetry outage",
+    "S4": "Broad operating pressure change; cause requires investigation",
     "S5": "Physical signal with insufficient observers",
     "S6": "Verified-normal variability",
 }
@@ -28,22 +36,22 @@ class ReplayDataset:
 
 
 def generate_pack(site_id: str = "northsea") -> SitePack:
-    """Three connected 800 m straight polylines, four paired stations each."""
+    """The brief's upright Y; paired pressure taps on opposite walls share a gateway."""
     lines = [
-        ("P1", (0.0, 0.0), (800.0, 0.0)),
-        ("P2", (800.0, 0.0), (1440.0, 480.0)),
-        ("P3", (800.0, 0.0), (1440.0, -480.0)),
+        ("P1", "Trunk", (0.0, -800.0), (0.0, 0.0)),
+        ("P2", "Branch A", (0.0, 0.0), (-640.0, 480.0)),
+        ("P3", "Branch B", (0.0, 0.0), (640.0, 480.0)),
     ]
     segments = []
     sensors = []
-    for segment_id, start, end in lines:
-        segments.append(
-            PipelineSegment(
-                id=segment_id,
-                points=[Point(x=start[0], y=start[1]), Point(x=end[0], y=end[1])],
-                length_m=800,
-            )
+    for segment_id, name, start, end in lines:
+        segment = PipelineSegment(
+            id=segment_id,
+            name=name,
+            points=[Point(x=start[0], y=start[1]), Point(x=end[0], y=end[1])],
+            length_m=800,
         )
+        segments.append(segment)
         dx, dy = (end[0] - start[0]) / 800, (end[1] - start[1]) / 800
         for station in range(4):
             chainage = 100.0 + 200 * station
@@ -56,8 +64,8 @@ def generate_pack(site_id: str = "northsea") -> SitePack:
                         segment_id=segment_id,
                         chainage_m=chainage,
                         position=Point(
-                            x=start[0] + dx * chainage - side * dy * 8,
-                            y=start[1] + dy * chainage + side * dx * 8,
+                            x=start[0] + dx * chainage - side * dy * segment.diameter_m / 2,
+                            y=start[1] + dy * chainage + side * dx * segment.diameter_m / 2,
                         ),
                         failure_domain_id=f"gateway-{segment_id}-{station % 2}",
                     )
@@ -92,16 +100,20 @@ def generate_scenario(
     epoch = datetime(2026, 1, 1, tzinfo=UTC)
     baseline: list[RawRecord] = []
     records: list[RawRecord] = []
-    # Run-level changes exercise noise, signal strength, response lag and missingness.
+    # Illustrative pressure footprints, not a transient hydraulic simulator.
     noise_multiplier = rng.uniform(0.8, 1.25)
-    strength = rng.uniform(11000, 15000)
-    lag = rng.randint(18, 25)
+    strength = rng.uniform(1.3, 1.8)
+    spread = rng.uniform(100, 130)
     leak_x = rng.choice([375.0, 400.0, 425.0])
     for second in range(-60, duration_seconds):
         normal = second < 0
         target = baseline if normal else records
         for index, sensor in enumerate(pack.sensors):
-            distance = math.hypot(sensor.position.x - leak_x, sensor.position.y)
+            distance = (
+                abs(sensor.chainage_m - leak_x)
+                if sensor.segment_id == "P1"
+                else 800 - leak_x + sensor.chainage_m
+            )
             active = second >= 90 and scenario in {"S1", "S5"}
             # S3 includes a full-source loss; the trusted source clock still advances.
             if not normal and scenario == "S3" and second >= 90:
@@ -109,38 +121,37 @@ def generate_scenario(
             if not normal and scenario == "S5" and second >= 90 and index not in {2, 3}:
                 continue
             for channel in sensor.channels:
-                unit = {"acoustic": "a.u.", "methane": "umol/L", "temperature": "degC"}[channel]
-                center, noise = {
-                    "acoustic": (1.0, 0.03),
-                    "methane": (0.2, 0.015),
-                    "temperature": (4.0, 0.03),
-                }[channel]
-                numeric_value = center + rng.gauss(0, noise * noise_multiplier)
-                if active and channel == "acoustic":
-                    numeric_value += strength / (distance * distance + pack.location_r0_m**2)
-                if active and second >= 90 + lag and channel == "methane":
-                    numeric_value += 2200 / (distance * distance + 80**2)
+                unit = "bar"
+                center = 80 - sensor.chainage_m * 0.001
+                if sensor.segment_id != "P1":
+                    center -= 0.8
+                numeric_value = center + rng.gauss(0, 0.04 * noise_multiplier)
+                numeric_value += 0.02 * math.sin(second / 18)
+                if active:
+                    ramp = min(1.0, (second - 90) / 5)
+                    numeric_value -= strength * math.exp(-0.5 * (distance / spread) ** 2) * ramp
                 if not normal and scenario == "S4" and second >= 90:
-                    if channel == "acoustic":
-                        numeric_value += 0.65
-                    if channel == "temperature":
-                        numeric_value += 0.3
+                    numeric_value -= 0.75
                 if not normal and scenario == "S2":
-                    if index == 18 and channel == "acoustic" and second >= 90:
+                    if index == 2 and second >= 90:
                         numeric_value += (second - 90) * 0.012
                     if index in {0, 10, 22} and second % 31 == 0:
-                        numeric_value += 4 if channel == "acoustic" else 0.5
+                        numeric_value += 2.5
                     if index in {6, 14, 20} and second % 3 == 0:
                         continue
                 value: float | str | None = numeric_value
                 if not normal and rng.random() < 0.004:
                     value = None
                 if not normal and scenario == "S1" and index == 22 and second >= 90:
-                    if channel == "temperature" and second % 4 == 0:
+                    if second % 4 == 0:
                         value = "-9999"
-                if channel == "methane" and index % 5 == 0 and value is not None:
-                    value = float(value) * 1000
-                    unit = "nmol/L"
+                if value is not None and value != "-9999":
+                    if index % 5 == 0:
+                        value = float(value) * 100
+                        unit = "kPa"
+                    elif index % 7 == 0:
+                        value = float(value) / 10
+                        unit = "MPa"
                 observed = epoch + timedelta(seconds=second)
                 delay = 0 if normal else (8 if second % 71 == 0 and index == 0 else 0)
                 record = RawRecord(

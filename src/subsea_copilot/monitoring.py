@@ -25,7 +25,7 @@ from .diagnostics import analyze_window
 from .ingest import CanonicalBuffer, normalize_records
 from .ontology import load_pack
 from .store import BudgetExceeded, Conflict, QueueFull, Store
-from .synthetic import ReplayDataset, generate_scenario
+from .synthetic import SOURCE_VERSION, ReplayDataset, generate_scenario
 from .validation import ValidationError as AgentValidationError
 
 if TYPE_CHECKING:
@@ -68,6 +68,11 @@ class Monitor:
         self.last_compute_seconds: float | None = None
 
     def _source(self, session: ReplaySession) -> SourceState:
+        if session.source_version != SOURCE_VERSION:
+            raise Conflict(
+                "Archived replay: create a new brief-aligned pressure scenario. "
+                "Historical snapshots and receipts are retained, not reinterpreted."
+            )
         cached = self._sources.get(session.id)
         if cached is not None:
             return cached
@@ -109,6 +114,7 @@ class Monitor:
                     tenant_id=self.store.tenant_id,
                     site_id=self.store.site_id,
                     scenario=scenario,
+                    source_version=SOURCE_VERSION,
                     seed=seed,
                     mode=mode,
                     epoch=dataset.epoch,
@@ -382,6 +388,8 @@ class Monitor:
     def tick(self) -> None:
         with self._lock:
             for session in self.store.list_replays():
+                if session.source_version != SOURCE_VERSION:
+                    continue
                 if session.state not in ("PLAYING", "PAUSED", "COMPLETED"):
                     continue
                 pending = any(

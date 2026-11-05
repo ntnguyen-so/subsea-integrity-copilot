@@ -7,7 +7,7 @@ const deck = pathToFileURL(path.join(process.cwd(), "docs", "INTERVIEW_DECK.html
 
 test("topology depicts the source pack's connectivity, station distribution and sensor identities", async ({ page }) => {
   const pack: {
-    segments: { id: string; length_m: number; points: { x: number; y: number }[] }[];
+    segments: { id: string; length_m: number; diameter_m: number; points: { x: number; y: number }[] }[];
     sensors: {
       id: string; station_id: string; segment_id: string; chainage_m: number;
       failure_domain_id: string; position: { x: number; y: number };
@@ -68,7 +68,7 @@ test("topology depicts the source pack's connectivity, station distribution and 
     const sy = physical.points[1].y - physical.points[0].y;
     const offset = Math.abs(sx * (source.position.y - physical.points[0].y) -
       sy * (source.position.x - physical.points[0].x)) / Math.hypot(sx, sy);
-    expect(offset).toBeCloseTo(8);
+    expect(offset).toBeCloseTo(physical.diameter_m / 2);
   }
   const clippedLabels = await page.locator("svg text").evaluateAll(nodes => nodes.some(node => {
     if (!(node instanceof SVGGraphicsElement)) throw new Error("Expected an SVG text label");
@@ -79,6 +79,20 @@ test("topology depicts the source pack's connectivity, station distribution and 
       box.y + box.height > svg.viewBox.baseVal.height;
   }));
   expect(clippedLabels).toBe(false);
+  const briefSource = readFileSync(path.join(process.cwd(), "docs", "ONE_PAGE_BRIEF.md"), "utf8");
+  expect(briefSource).toContain("(assets/pressure-leak-vs-sensor-faults.svg)");
+  await page.goto(pathToFileURL(path.join(process.cwd(), "docs", "assets", "pressure-leak-vs-sensor-faults.svg")).href);
+  const evidence = JSON.parse(readFileSync(path.join(process.cwd(), "fixtures", "synthetic", "brief-evidence.json"), "utf8"));
+  for (const scenario of ["S1", "S2"]) {
+    const panel = page.locator(`[data-scenario="${scenario}"]`);
+    await expect(panel.locator("circle[data-sensor-id]")).toHaveCount(pack.sensors.length);
+    for (const sensor of pack.sensors) {
+      await expect(panel.locator(`[data-sensor-id="${sensor.id}"]`)).toHaveAttribute("data-source-x", String(sensor.position.x));
+    }
+    for (const sensor of evidence.examples[scenario].snapshot.event.supporting_sensor_ids) {
+      await expect(panel.locator(`[data-sensor-id="${sensor}"]`)).toHaveAttribute("fill", "#efb735");
+    }
+  }
   await page.goto(deck + "#demo-contract");
   await expect(page.locator(".topology img")).toBeVisible();
   expect(await page.locator(".topology img").evaluate(image =>
@@ -127,7 +141,8 @@ test("deck follows the interview schedule and supports chapter, keyboard and not
 });
 
 test("interview clock survives navigation, pauses and resets without real waiting", async ({ page }) => {
-  await page.clock.install();
+  await page.clock.install({ time: new Date("2026-01-01T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-01-01T00:00:01Z"));
   await page.goto(deck);
   await page.locator("#timer-toggle").click();
   await page.clock.runFor(2100);

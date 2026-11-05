@@ -1,0 +1,516 @@
+{
+  "mode": "live",
+  "response_protocol": "engineer-v2",
+  "injected_unsupported_draft": true,
+  "passed": true,
+  "results": [
+    {
+      "scenario": "S4",
+      "question": "Could a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?",
+      "root_id": "50ae6267-e113-58da-aabd-a41eed8e20a8",
+      "snapshot_id": "window-4e6ac0acc29960cb187b3f2f633e1462afb0ab8949214829b7b07a5864b48d17",
+      "state": "ABSTAINED",
+      "error_code": null,
+      "accepted": true,
+      "interpretation": {
+        "focus": "root_cause",
+        "answer": {
+          "text": "A valve change could explain the broad pressure decrease: the logged setpoint reduction and reviewed comparison support that possibility, not a proven root cause. The log records a command and acknowledgement, not measured valve response. Before accepting causation, verify actual response and pressure-onset timing across independent gateways, account for missing observations, and check for persistent localized behavior. Neither leakage nor telemetry faults have been excluded.",
+          "references": [
+            "OP-VALVE-001",
+            "subsea_68d34ea586944cdeb93345f9ca81e96c",
+            "PROC-INSPECT-001",
+            "claim-024"
+          ]
+        },
+        "competing_causes": [
+          {
+            "text": "The logged setpoint reduction and broad decreases in the reviewed pressure comparison support an operating-change explanation. However, the comparison does not establish detailed onset timing or prove that the commanded change caused the whole pattern. Verify execution evidence against the pressure histories rather than treating acknowledgement alone as causal proof.",
+            "references": [
+              "OP-VALVE-001",
+              "subsea_68d34ea586944cdeb93345f9ca81e96c"
+            ],
+            "cause": "operating_change",
+            "stance": "possible"
+          },
+          {
+            "text": "A leak is not established by these pressure patterns. The operation log explicitly leaves coincident localized behavior unresolved. Review whether a persistent localized pattern remains after considering the operating change, using distinct stations and gateways; this review has not established a location.",
+            "references": [
+              "claim-027",
+              "OP-VALVE-001",
+              "PROC-INSPECT-001"
+            ],
+            "cause": "leak",
+            "stance": "not_established"
+          },
+          {
+            "text": "Reviewed health claims report no suspected drift or peer disagreement, and the historical comparison spans distinct gateways, which provides more corroboration than shared-gateway agreement alone. Nevertheless, health review is partial and missing observations remain unknown; instrumentation or telemetry has not been conclusively excluded.",
+            "references": [
+              "claim-000",
+              "claim-002",
+              "subsea_68d34ea586944cdeb93345f9ca81e96c",
+              "PROC-INSPECT-001"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "not_established"
+          }
+        ],
+        "follow_up_questions": [
+          "Can actual valve response and pressure-onset timing be verified against the logged command and acknowledgement (OP-VALVE-001)?",
+          "Do pressure histories across distinct gateways show a broad response without persistent localized residuals (PROC-INSPECT-001)?",
+          "Could missing observations or shared-gateway effects alter the interpretation of the reviewed pressure pattern (claim-024; PROC-INSPECT-001)?"
+        ]
+      },
+      "review": {
+        "protocol": "grounding-v1",
+        "source_hash": "3b5d68d6c1da6a0a5544f026e3b5c95f68340958968fa58b0fd61ac5b6139ca8",
+        "rounds": [
+          {
+            "candidate_hash": "c3ea83313961935fb56f82f6b55db3bb10b654cdacf7f4349e77f28db5b21ba9",
+            "assessment": {
+              "decision": "revise",
+              "checks": [
+                {
+                  "paragraph_id": "answer",
+                  "verdict": "unsupported",
+                  "reason": "OP-VALVE-001 records a commanded setpoint change, not an inspection, photograph, or pipe-wall crack. No supplied source confirms physical damage.",
+                  "support": []
+                },
+                {
+                  "paragraph_id": "cause:operating_change",
+                  "verdict": "supported",
+                  "reason": "The logged command and cross-segment decreases support a possible operating explanation, while the paragraph correctly withholds proof of causation, actual response, and onset timing.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "This entry records a commanded change, not measured pressure at the taps."
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "\"change_bar\": -0.7414, \"failure_domain\": \"gateway-P1-0\""
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "\"change_bar\": -0.7568, \"failure_domain\": \"gateway-P3-1\""
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:leak",
+                  "verdict": "supported",
+                  "reason": "The paragraph preserves the distinction between unproven leakage and excluded leakage, and appropriately requests localized-pattern review without assigning a location.",
+                  "support": [
+                    {
+                      "reference": "claim-027",
+                      "quote": "PRESSURE_PATTERNS_NOT_PROOF"
+                    },
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "coincident localized behavior is not excluded."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:instrumentation_or_telemetry",
+                  "verdict": "supported",
+                  "reason": "The cited health claims report neither suspected drift nor peer disagreement. Distinct gateway comparison adds corroboration without establishing exhaustive health coverage or excluding telemetry faults.",
+                  "support": [
+                    {
+                      "reference": "claim-000",
+                      "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0, \"max_score\": 20.018743548583373, \"missing\": 0, \"peer_disagreement\": false"
+                    },
+                    {
+                      "reference": "claim-002",
+                      "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0, \"max_score\": 18.52849009207491, \"missing\": 1, \"peer_disagreement\": false"
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "\"change_bar\": -0.7421, \"failure_domain\": \"gateway-P1-1\", \"invalid_received\": 1, \"segment_id\": \"P1\", \"sensor_id\": \"P1-ST2-A\""
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:0",
+                  "verdict": "supported",
+                  "reason": "This is a relevant read-only request to verify actual response and timing, not an assertion that acknowledgement proves movement.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "Execution was acknowledged at second 100 and the log became available at second 110."
+                    },
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "This entry records a commanded change, not measured pressure at the taps."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:1",
+                  "verdict": "supported",
+                  "reason": "The question appropriately seeks independent pressure-history corroboration and checks for unresolved localized residuals without presuming their absence.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:2",
+                  "verdict": "supported",
+                  "reason": "The question is grounded in incomplete usable coverage and the explicit shared-gateway independence limitation; it does not assert a telemetry fault.",
+                  "support": [
+                    {
+                      "reference": "claim-024",
+                      "quote": "\"coverage\": 0.9972222222222222, \"expected_samples\": 1440"
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "candidate_hash": "1eae867f41c6910a95462b29fc47b21d5fd283976af6280ef65c3437da2fbd22",
+            "assessment": {
+              "decision": "accept",
+              "checks": [
+                {
+                  "paragraph_id": "answer",
+                  "verdict": "supported",
+                  "reason": "Treats the operating change as plausible rather than proven, distinguishes acknowledgement from measured response, and preserves uncertainty about missing observations and competing explanations.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "This entry records a commanded change, not measured pressure at the taps."
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded."
+                    },
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:operating_change",
+                  "verdict": "supported",
+                  "reason": "The logged reduction and negative pressure changes support a possible operating explanation; aggregate comparisons do not establish onset timing or causation.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar."
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "\"change_bar\": -0.7414"
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "\"change_bar\": -0.7568"
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:leak",
+                  "verdict": "supported",
+                  "reason": "Does not infer a leak or location, and correctly retains coincident localized behavior as unresolved pending independent spatial review.",
+                  "support": [
+                    {
+                      "reference": "claim-027",
+                      "quote": "PRESSURE_PATTERNS_NOT_PROOF"
+                    },
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "coincident localized behavior is not excluded."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "A bounded inspection area requires support from distinct stations and gateways, with exclusions and missing observers recorded."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "cause:instrumentation_or_telemetry",
+                  "verdict": "supported",
+                  "reason": "Accurately bounds the negative health flags to reviewed claims and distinguishes distinct gateways from shared-gateway agreement without excluding telemetry faults.",
+                  "support": [
+                    {
+                      "reference": "claim-000",
+                      "quote": "\"drift_suspected\": false"
+                    },
+                    {
+                      "reference": "claim-002",
+                      "quote": "\"peer_disagreement\": false"
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    },
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:0",
+                  "verdict": "supported",
+                  "reason": "Relevant read-only verification request; does not presume measured valve response or established pressure-onset timing.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "Execution was acknowledged at second 100"
+                    },
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "This entry records a commanded change, not measured pressure at the taps."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:1",
+                  "verdict": "supported",
+                  "reason": "Requests independent pressure-history review for broad response and unresolved localized behavior without asserting either result.",
+                  "support": [
+                    {
+                      "reference": "OP-VALVE-001",
+                      "quote": "Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded."
+                    }
+                  ]
+                },
+                {
+                  "paragraph_id": "question:2",
+                  "verdict": "supported",
+                  "reason": "Appropriately asks whether incomplete observations and shared failure domains affect interpretation rather than treating coverage as clearance.",
+                  "support": [
+                    {
+                      "reference": "subsea_68d34ea586944cdeb93345f9ca81e96c",
+                      "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                    },
+                    {
+                      "reference": "PROC-INSPECT-001",
+                      "quote": "Agreement within a shared gateway is not independent telemetry corroboration."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "answer": "ENGINEER QUESTION\nCould a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nA valve change could explain the broad pressure decrease: the logged setpoint reduction and reviewed comparison support that possibility, not a proven root cause. The log records a command and acknowledgement, not measured valve response. Before accepting causation, verify actual response and pressure-onset timing across independent gateways, account for missing observations, and check for persistent localized behavior. Neither leakage nor telemetry faults have been excluded.\nSources: OP-VALVE-001, subsea_68d34ea586944cdeb93345f9ca81e96c, PROC-INSPECT-001, claim-024\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\noperating change (possible): The logged setpoint reduction and broad decreases in the reviewed pressure comparison support an operating-change explanation. However, the comparison does not establish detailed onset timing or prove that the commanded change caused the whole pattern. Verify execution evidence against the pressure histories rather than treating acknowledgement alone as causal proof.\nSources: OP-VALVE-001, subsea_68d34ea586944cdeb93345f9ca81e96c\nleak (not established): A leak is not established by these pressure patterns. The operation log explicitly leaves coincident localized behavior unresolved. Review whether a persistent localized pattern remains after considering the operating change, using distinct stations and gateways; this review has not established a location.\nSources: claim-027, OP-VALVE-001, PROC-INSPECT-001\ninstrumentation or telemetry (not established): Reviewed health claims report no suspected drift or peer disagreement, and the historical comparison spans distinct gateways, which provides more corroboration than shared-gateway agreement alone. Nevertheless, health review is partial and missing observations remain unknown; instrumentation or telemetry has not been conclusively excluded.\nSources: claim-000, claim-002, subsea_68d34ea586944cdeb93345f9ca81e96c, PROC-INSPECT-001\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nCan actual valve response and pressure-onset timing be verified against the logged command and acknowledgement (OP-VALVE-001)?\nDo pressure histories across distinct gateways show a broad response without persistent localized residuals (PROC-INSPECT-001)?\nCould missing observations or shared-gateway effects alter the interpretation of the reviewed pressure pattern (claim-024; PROC-INSPECT-001)?\n\nCHECKED EVIDENCE\nLIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 99.7% (1436/1440 observations).\nLimitations: COMMON_MODE_PRESSURE_CHANGE, OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, child_abstained, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nA broad pressure change can reflect operating changes or a shared failure; no localized leak is asserted.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.\nReview observation coverage and data gaps.\nReview the computed competing hypotheses.\n\nHISTORY-GROUNDED INVESTIGATION\nOperating-change explanation is plausible; a concurrent leak is not ruled out.\n[OP-VALVE-001 / revision 1] Executed upstream valve pressure-setpoint change at second 90: Fictional, nonconfidential executed operating log. At 2026-01-01T00:01:30Z (synthetic second 90), the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar. Execution was acknowledged at second 100 and the log became available at second 1\n[PROC-OPS-001 / revision 1] Pressure-setpoint change review index: Fictional, nonconfidential desk-review index. Explicit operation-history reference: OP-VALVE-001, upstream valve pressure-setpoint change at synthetic second 90. The event entry contains execution timing and affected segments. The associated historical compari\n[PROC-INSPECT-001 / revision 1] Pressure anomaly desk assessment and bounded inspection planning: Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure t\nMeasured comparison [subsea_68d34ea586944cdeb93345f9ca81e96c]: 0\u2013180s; split 90s.\nP1-ST1-A: median change -0.7414 bar; usable before 90/90, after 90/90.\nP1-ST2-A: median change -0.7421 bar; usable before 90/90, after 89/90.\nP2-ST1-A: median change -0.7379 bar; usable before 88/90, after 90/90.\nP3-ST2-A: median change -0.7568 bar; usable before 90/90, after 90/90.\nAsk the operator to verify operating records.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+      "elapsed_seconds": 185.96899999992456,
+      "model_receipts": [
+        {
+          "mode": "live",
+          "phase": "critic-0",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 10074,
+            "output_tokens": 1327,
+            "reasoning_tokens": 271,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 8779
+          },
+          "duration_ms": 31047.00000002049,
+          "error": null,
+          "request_id": "7c192e2f-a6cd-4b3b-8548-696dedbe724a"
+        },
+        {
+          "mode": "live",
+          "phase": "plan",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 6634,
+            "output_tokens": 47,
+            "reasoning_tokens": 14,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 5339
+          },
+          "duration_ms": 12125.0,
+          "error": null,
+          "request_id": "2c9416df-675b-487f-af21-064117bb77ab"
+        },
+        {
+          "mode": "live",
+          "phase": "reflection",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 14718,
+            "output_tokens": 899,
+            "reasoning_tokens": 42,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 13423
+          },
+          "duration_ms": 18765.00000001397,
+          "error": null,
+          "request_id": "fd2a79bf-c3da-4c63-bdf8-322d7ce4ae67"
+        },
+        {
+          "mode": "live",
+          "phase": "answer",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 13296,
+            "output_tokens": 922,
+            "reasoning_tokens": 64,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 12001
+          },
+          "duration_ms": 25875.0,
+          "error": null,
+          "request_id": "29059d15-acfb-4bf9-bd28-9a12d30abff1"
+        },
+        {
+          "mode": "live",
+          "phase": "critic-1",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 10178,
+            "output_tokens": 1242,
+            "reasoning_tokens": 283,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 8883
+          },
+          "duration_ms": 31077.99999997951,
+          "error": null,
+          "request_id": "54e6fa8a-fc0c-40ef-8e5e-c756017e559d"
+        },
+        {
+          "mode": "live",
+          "phase": "answer",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 11185,
+            "output_tokens": 234,
+            "reasoning_tokens": 39,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 9890
+          },
+          "duration_ms": 17359.99999998603,
+          "error": null,
+          "request_id": "7c50cc90-7966-4dec-937f-df7632888000"
+        },
+        {
+          "mode": "live",
+          "phase": "answer",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 13824,
+            "output_tokens": 369,
+            "reasoning_tokens": 78,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 12529
+          },
+          "duration_ms": 16250.0,
+          "error": null,
+          "request_id": "6e41aba4-f489-4be4-a639-5db2c062a718"
+        },
+        {
+          "mode": "live",
+          "phase": "answer",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 10635,
+            "output_tokens": 148,
+            "reasoning_tokens": 0,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 9340
+          },
+          "duration_ms": 12702.99999997951,
+          "error": null,
+          "request_id": "be40ea6f-7a37-429e-8160-4a333f1a2d94"
+        },
+        {
+          "mode": "live",
+          "phase": "answer",
+          "requested_model": "gpt-6.1-sol",
+          "observed_model": "gpt-6.1-sol",
+          "model_identity_source": "cli_event",
+          "cli_version": "1.0.105",
+          "cli_version_source": "executable_version",
+          "usage": {
+            "input_tokens": 11976,
+            "output_tokens": 397,
+            "reasoning_tokens": 82,
+            "cache_read_tokens": 1292,
+            "cache_write_tokens": 10681
+          },
+          "duration_ms": 16062.999999965541,
+          "error": null,
+          "request_id": "5b8f16fc-094d-41a0-95ac-a1969307a5ee"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "SCRIPTED is an offline contract example, not genuine interpretation.",
+    "Separate same-model critic; exact quotes and paragraph coverage checked by code.",
+    "Probabilistic semantic review cannot guarantee entailment or zero hallucinations.",
+    "Model-written RCA context requires engineer review and is not a confirmed cause.",
+    "These questions demonstrate functionality, not effort savings or superiority.",
+    "Optional attack changes a new provisional draft, not an accepted answer or source."
+  ]
+}
