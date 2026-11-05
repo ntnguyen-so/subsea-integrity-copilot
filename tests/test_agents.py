@@ -456,7 +456,11 @@ def test_scripted_contract_smoke_with_actual_numerical_ledger(scenario):
         checkpointer=InMemorySaver(),
     )
     assert baseline["check_accepted"] is True, baseline
-    assert baseline["hypothesis"] == snapshot.event.hypothesis
+    if snapshot.event.hypothesis == "insufficient_evidence":
+        assert baseline["outcome"] == "insufficient_evidence"
+        assert baseline["hypothesis"] is None
+    else:
+        assert baseline["hypothesis"] == snapshot.event.hypothesis
     assert baseline["child_count"] == 0
     quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
     quality.result.limitations.remove("partial_health_review")
@@ -552,6 +556,25 @@ def test_child_commit_survives_crash_before_runtime_returns(snapshot):
 
 
 def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
+    contexts = []
+
+    class InspectingAbstention(ScriptedChatModel):
+        def _generate(self, messages, *args, **kwargs):
+            import json
+
+            from langchain_core.messages import SystemMessage
+
+            context = json.loads(
+                next(
+                    m.content.split("\nBOUND_CONTEXT\n", 1)[1]
+                    for m in messages
+                    if isinstance(m, SystemMessage) and "\nBOUND_CONTEXT\n" in m.content
+                )
+            )
+            if context["phase"] == "answer":
+                contexts.append(context)
+            return super()._generate(messages, *args, **kwargs)
+
     class AbstainedQuality(ScriptedChatModel):
         def _generate(self, *args, **kwargs):
             import json
@@ -564,12 +587,17 @@ def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
                 message.content = json.dumps(payload)
             return result
 
+    snapshot.claims = {
+        ref: claim
+        for ref, claim in snapshot.claims.items()
+        if claim.kind not in {"coverage", "sensor_health"}
+    }
     store, service = service_for(
         snapshot,
         lambda role, mode: (
             AbstainedQuality(role=role)
             if role == "sensor_quality"
-            else ScriptedChatModel(role=role)
+            else InspectingAbstention(role=role)
         ),
     )
     root = submit(service, snapshot, "What caused this leak?")
@@ -579,6 +607,34 @@ def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
     assert "child_abstained" in answer.result.limitations
     assert answer.result.hypothesis is None
     assert "event" not in answer.result.claim_refs
+    assert {context["role"] for context in contexts} == {
+        "event_diagnosis",
+        "operator_response",
+    }
+    for context in contexts:
+        properties = context["result_schema"]["properties"]
+        assert properties["outcome"]["const"] == "insufficient_evidence"
+        assert properties["hypothesis"] == {"type": "null"}
+        assert properties["limitations"]["contains"] == {"const": "child_abstained"}
+        assert "event" not in properties["claim_refs"]["items"]["enum"]
+    diagnosis = next(t for t in store.tasks.values() if t.role == "event_diagnosis")
+    from subsea_copilot.validation import validate_result
+
+    with pytest.raises(ValidationError) as error:
+        validate_result(
+            diagnosis.result.model_copy(
+                update={
+                    "limitations": [
+                        code for code in diagnosis.result.limitations if code != "child_abstained"
+                    ],
+                }
+            ),
+            diagnosis,
+            snapshot,
+            store.tool_receipts(diagnosis.id),
+            ToolGateway(store, diagnosis, snapshot, FakeTelemetry()).dependencies(),
+        )
+    assert error.value.code == "abstention"
 
 
 def postgres_settings():
@@ -960,3 +1016,58 @@ def test_prefetched_quality_handles_extra_round_and_repair_without_spending_fina
         assert quality.model_calls == 2
         assert quality.tool_calls == (5 if behavior == "extra_read" else 4)
     assert sum(t.model_calls for t in store.tasks.values()) <= 10
+
+
+def test_actual_s2_quality_decline_is_repaired_without_relaxing_event_abstention():
+    import json
+
+    from langchain_core.messages import SystemMessage
+
+    from subsea_copilot.diagnostics import analyze_window
+    from subsea_copilot.ingest import normalize_records
+    from subsea_copilot.synthetic import generate_scenario
+
+    class InitiallyDeclinesQuality(ScriptedChatModel):
+        def _generate(self, *args, **kwargs):
+            result = super()._generate(*args, **kwargs)
+            constraints = json.loads(
+                next(
+                    m.content.split("RUNTIME_REPLY_CONSTRAINTS\n", 1)[1]
+                    for m in reversed(args[0])
+                    if isinstance(m, SystemMessage)
+                    and m.content.startswith("RUNTIME_REPLY_CONSTRAINTS\n")
+                )
+            )
+            if constraints["model_turns_after_this_reply"] == 2:
+                payload = json.loads(result.generations[0].message.content)
+                payload["outcome"] = "insufficient_evidence"
+                result.generations[0].message.content = json.dumps(payload)
+            return result
+
+    source = generate_scenario("S2", duration_seconds=180)
+    snapshot = analyze_window(
+        source.pack,
+        normalize_records(source.baseline, source.pack),
+        normalize_records(source.records, source.pack),
+        "generation",
+        180,
+        185,
+        source.epoch,
+    )
+    store, service = service_for(
+        snapshot,
+        lambda role, mode: (
+            InitiallyDeclinesQuality(role=role)
+            if role == "sensor_quality"
+            else ScriptedChatModel(role=role)
+        ),
+        checkpointer=InMemorySaver(),
+    )
+    root = submit(service, snapshot, "Possible leak or instrumentation issue?")
+    drain(service)
+    quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
+    assert quality.state == "SUCCEEDED"
+    assert quality.model_calls == 2
+    answer = store.get_task(root.id)
+    assert answer.state == "SUCCEEDED"
+    assert answer.result.hypothesis == "sensor_or_telemetry_issue"

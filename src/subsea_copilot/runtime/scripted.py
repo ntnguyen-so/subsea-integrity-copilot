@@ -132,7 +132,11 @@ class ScriptedChatModel(BaseChatModel):
                     inherited_limits.update(data["result"]["limitations"])
             if self.role == "operator_response" and not context.get("baseline"):
                 ledger = {k: c for k, c in ledger.items() if k in child_claims}
-            if child_abstained:
+            must_abstain = child_abstained or (
+                context["result_schema"]["properties"]["outcome"].get("const")
+                == "insufficient_evidence"
+            )
+            if must_abstain:
                 ledger = {
                     k: c for k, c in ledger.items() if c["kind"] not in {"hypothesis", "location"}
                 }
@@ -155,13 +159,13 @@ class ScriptedChatModel(BaseChatModel):
                 limitations.append("child_abstained")
             if context["requires_location"] and (
                 not context["usable_location"]
-                or child_abstained
+                or must_abstain
                 or hypothesis == "insufficient_evidence"
             ):
                 limitations.append("location_withheld")
             result = {
                 "outcome": "insufficient_evidence"
-                if (child_abstained or hypothesis == "insufficient_evidence")
+                if (must_abstain or hypothesis == "insufficient_evidence")
                 else "supported",
                 "claim_refs": claims,
                 "evidence_ids": evidence,

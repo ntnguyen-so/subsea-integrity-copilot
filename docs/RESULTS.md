@@ -6,14 +6,15 @@ thesis PDF, credentials or copied marketing artwork is included.
 
 | Gate | Evidence/status |
 |---|---|
-| Python regressions | 160 tests passed against the independently owned PostgreSQL environment. |
+| Python regressions | 167 tests passed against the independently owned PostgreSQL environment. |
 | Static checks | Ruff, strict mypy over 27 source files, TypeScript typecheck and esbuild passed. |
 | Dependencies | Installed public package versions audited; no known vulnerabilities reported. Not a security certification. |
 | Numerical hold-out | 120 mature windows, 20 seeds x six scenarios; frozen report in `fixtures\synthetic\evaluation-results.json`. |
 | Scripted PostgreSQL agents | 27/27 accepted-correct answers; real durable graph, checked claims and baseline, not real inference. |
 | Actual stored observability | Scripted cohort's agent/generation/tool/guardrail tree verified in Langfuse v2 observations; Jaeger also verified during integration. |
 | Live Copilot agents | First cohort: 2/27 accepted-correct; 25 child failures, mostly turn/tool-budget exhaustion. Release gate failed; protocol correction and requalification are required. |
-| Corrected live cohort | 24/27 accepted-correct: all S1 leak/localization and S5 missing-data answers passed. Three first-repetition S2 answers failed abstention propagation; correction remains in progress. Live baseline passed. |
+| Intake live cohort | 24/27 accepted-correct: all S1 leak/localization and S5 missing-data answers passed. Three first-repetition S2 answers failed abstention propagation. Live baseline passed. |
+| Quality-scope correction | Grounded quality findings are supported even when physical evidence is absent. One bounded live S2 root passed (four models/eleven tools/~67s); final full live requalification is running. |
 | Browser | All three real-Chrome cases passed: controls, moving windows, keyboard sensor selection, charts/raw evidence, pinned questions/tasks, truthful counters, all pipeline chips and reconnect stability. |
 | One-page brief | Original PDF rendered with installed Chrome; exactly one page verified. |
 

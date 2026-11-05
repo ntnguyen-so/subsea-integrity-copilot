@@ -39,7 +39,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -57,7 +57,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -75,7 +75,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -93,7 +93,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -153,7 +153,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -171,7 +171,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -189,7 +189,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -207,7 +207,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -267,7 +267,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -285,7 +285,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -303,7 +303,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -321,7 +321,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -381,7 +381,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -399,7 +399,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -417,7 +417,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -435,7 +435,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -496,7 +496,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -514,7 +514,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -532,7 +532,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -550,7 +550,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -568,7 +568,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -586,7 +586,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -604,7 +604,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -685,7 +685,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -703,7 +703,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -721,7 +721,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -773,7 +773,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -791,7 +791,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -809,7 +809,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -827,7 +827,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -887,7 +887,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -905,7 +905,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -923,7 +923,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -941,7 +941,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1014,7 +1014,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1032,7 +1032,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1050,7 +1050,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1102,7 +1102,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1120,7 +1120,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1138,7 +1138,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1156,7 +1156,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1216,7 +1216,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1234,7 +1234,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1252,7 +1252,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1312,7 +1312,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1330,7 +1330,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1348,7 +1348,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1366,7 +1366,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1426,7 +1426,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1444,7 +1444,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1462,7 +1462,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1480,7 +1480,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1540,7 +1540,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1558,7 +1558,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1576,7 +1576,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1636,7 +1636,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1654,7 +1654,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1672,7 +1672,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1732,7 +1732,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1750,7 +1750,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1768,7 +1768,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1786,7 +1786,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1846,7 +1846,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1864,7 +1864,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1882,7 +1882,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1900,7 +1900,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1960,7 +1960,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1978,7 +1978,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -1996,7 +1996,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2014,7 +2014,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2074,7 +2074,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2092,7 +2092,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2110,7 +2110,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2128,7 +2128,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2189,7 +2189,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2207,7 +2207,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2225,7 +2225,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2243,7 +2243,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2261,7 +2261,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2279,7 +2279,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2297,7 +2297,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2365,7 +2365,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2383,7 +2383,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2401,7 +2401,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2419,7 +2419,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2479,7 +2479,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2497,7 +2497,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2515,7 +2515,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2533,7 +2533,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2594,7 +2594,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2612,7 +2612,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2630,7 +2630,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2648,7 +2648,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2666,7 +2666,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2684,7 +2684,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2702,7 +2702,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2770,7 +2770,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2788,7 +2788,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2806,7 +2806,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2824,7 +2824,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2884,7 +2884,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2902,7 +2902,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2920,7 +2920,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2981,7 +2981,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -2999,7 +2999,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3017,7 +3017,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3035,7 +3035,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3053,7 +3053,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3071,7 +3071,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3089,7 +3089,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3157,7 +3157,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3175,7 +3175,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3193,7 +3193,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {
@@ -3211,7 +3211,7 @@
             "mode": "live",
             "requested_model": "gpt-6.1-sol",
             "observed_model": "gpt-6.1-sol",
-            "model_source": null,
+            "model_identity_source": "cli_event",
             "cli_version": "1.0.105",
             "cli_version_source": "executable_version",
             "usage": {

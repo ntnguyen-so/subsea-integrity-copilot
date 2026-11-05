@@ -180,3 +180,85 @@ def test_section_answer_requires_computed_location_or_explicit_abstention(snapsh
         )
         == unsupported
     )
+
+
+def test_quality_support_is_about_sensor_findings_not_physical_corroboration(snapshot):
+    snapshot.event.hypothesis = "insufficient_evidence"
+    task = quality_task(snapshot)
+    assert validate_result(valid_result(), task, snapshot, receipts()).outcome == "supported"
+    with pytest.raises(ValidationError) as error:
+        validate_result(
+            valid_result().model_copy(update={"outcome": "insufficient_evidence"}),
+            task,
+            snapshot,
+            receipts(),
+        )
+    assert error.value.code == "quality_outcome"
+    with pytest.raises(ValidationError) as error:
+        validate_result(
+            valid_result().model_copy(
+                update={"claim_refs": ["limit"], "evidence_ids": ["limit-e"]}
+            ),
+            task,
+            snapshot,
+            receipts(),
+        )
+    assert error.value.code == "quality_scope"
+
+
+@pytest.mark.parametrize(
+    "hypothesis",
+    ["suspected_leak", "sensor_or_telemetry_issue", "environmental_disturbance", "no_event"],
+)
+def test_abstention_still_rejects_categorical_hypothesis_claims(snapshot, hypothesis):
+    from subsea_copilot.runtime.baseline import BASELINE_CLAIMS
+    from subsea_copilot.validation import validate_grounded_result
+
+    task = quality_task(snapshot).model_copy(
+        update={
+            "role": "operator_response",
+            "purpose": "evaluate_single_agent_baseline",
+        }
+    )
+    snapshot.claims["event"].value = hypothesis
+    result = valid_result().model_copy(
+        update={
+            "outcome": "insufficient_evidence",
+            "claim_refs": ["coverage", "event", "limit"],
+            "evidence_ids": ["coverage-e", "event-e", "limit-e"],
+            "hypothesis": None,
+        }
+    )
+    with pytest.raises(ValidationError) as error:
+        validate_grounded_result(result, task, snapshot, [], claim_kinds=BASELINE_CLAIMS)
+    assert error.value.code == "abstention"
+
+
+def test_abstention_still_rejects_position_even_with_withheld_limitation(snapshot):
+    from test_agents import located_snapshot
+
+    from subsea_copilot.runtime.baseline import BASELINE_CLAIMS
+    from subsea_copilot.validation import validate_grounded_result
+
+    snapshot = located_snapshot(snapshot)
+    task = quality_task(snapshot).model_copy(
+        update={
+            "role": "operator_response",
+            "purpose": "evaluate_single_agent_baseline",
+        }
+    )
+    result = AgentResult(
+        outcome="insufficient_evidence",
+        claim_refs=["coverage", "location", "limit"],
+        evidence_ids=["coverage-e", "location-e", "limit-e"],
+        limitations=["synthetic_data", "location_withheld"],
+    )
+    with pytest.raises(ValidationError) as error:
+        validate_grounded_result(
+            result,
+            task,
+            snapshot,
+            [{"name": "location.fit"}],
+            claim_kinds=BASELINE_CLAIMS,
+        )
+    assert error.value.code == "abstention"

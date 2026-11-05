@@ -34,6 +34,7 @@ from subsea_copilot.validation import (
     ValidationError,
     abstention_claim_allowed,
     compatible,
+    quality_facts_available,
     question_requires_location,
     render_result,
     validate_result,
@@ -324,25 +325,41 @@ class AgentService:
         if phase != "plan":
             result_schema["properties"]["summary"] = {"type": "string", "const": ""}
             if task.role == "sensor_quality":
+                if quality_facts_available(snapshot):
+                    result_schema["properties"]["outcome"] = {
+                        "type": "string",
+                        "const": "supported",
+                    }
                 result_schema["properties"]["hypothesis"] = {"type": "null"}
                 result_schema["properties"]["recommendation_ids"] = {
                     "type": "array",
                     "maxItems": 0,
                 }
             child_abstained = any(t.state == "ABSTAINED" for t in candidates)
+            assesses_event = (
+                task.role == "event_diagnosis"
+                or task.purpose == "evaluate_single_agent_baseline"
+                or any(t.role == "event_diagnosis" for t in candidates)
+            )
             must_abstain = task.role != "sensor_quality" and (
-                child_abstained or snapshot.event.hypothesis == "insufficient_evidence"
+                child_abstained
+                or assesses_event
+                and snapshot.event.hypothesis == "insufficient_evidence"
             )
             if must_abstain:
                 result_schema["properties"]["outcome"] = {
-                    "type": "string", "const": "insufficient_evidence",
+                    "type": "string",
+                    "const": "insufficient_evidence",
                 }
                 result_schema["properties"]["hypothesis"] = {"type": "null"}
                 result_schema["properties"]["claim_refs"]["items"] = {
                     "type": "string",
-                    "enum": [ref for ref, claim in snapshot.claims.items()
-                             if claim.kind in REGISTRY[task.role].claim_kinds
-                             and abstention_claim_allowed(claim, snapshot)],
+                    "enum": [
+                        ref
+                        for ref, claim in snapshot.claims.items()
+                        if claim.kind in REGISTRY[task.role].claim_kinds
+                        and abstention_claim_allowed(claim)
+                    ],
                 }
             if child_abstained and task.role != "sensor_quality":
                 result_schema["properties"]["limitations"]["contains"] = {

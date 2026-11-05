@@ -35,9 +35,9 @@ recommendation_ids/summary only. The transport final value is always a STRING,
 not an object. RUNTIME_REPLY_CONSTRAINTS.final_only prohibits tool requests.
 
 On specialist abstention use outcome insufficient_evidence and hypothesis null.
-Keep child_abstained. Retain supported partial sensor/telemetry evidence only when
-its claim ID is allowed by result_schema; never carry a physical-event hypothesis
-or positive location into that abstention. A withheld location contains no position.
+Keep child_abstained. Retain coverage and sensor-health claim IDs allowed by
+result_schema; never carry any categorical hypothesis or location claim into that
+abstention. Declare location_withheld as a limitation without asserting a position.
 
 Questions asking which pipeline section/segment to inspect are location questions,
 not health-only questions. BOUND_CONTEXT.requires_location marks this requirement.

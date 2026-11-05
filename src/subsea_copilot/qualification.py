@@ -33,7 +33,7 @@ PRIMARY_QUESTIONS = [
 TERMINALS = {"SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED"}
 JSON_ADAPTER = TypeAdapter[JsonValue](JsonValue)
 MODEL_METADATA_KEYS = (
-    "mode", "requested_model", "observed_model", "model_source", "cli_version",
+    "mode", "requested_model", "observed_model", "model_identity_source", "cli_version",
     "cli_version_source", "usage", "duration_ms", "error", "request_id",
 )
 

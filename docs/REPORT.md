@@ -53,6 +53,12 @@ attributed to the application. Exact schemas and final-turn protection avoid spe
 the role budget on unbounded health pagination. No call ceiling or certainty gate was
 relaxed.
 
+Quality support is scoped to observed coverage and sensor-health facts, not proof
+of a physical event or a particular hardware failure. This distinction prevents
+a quality specialist from abstaining merely because the parent asks about a leak.
+Actual specialist abstention still propagates explicitly; insufficient physical
+evidence cannot carry categorical event or location claims.
+
 A root has at most two children, ten model calls, eighteen tool calls and a
 300-second elapsed bound. Automatic roots are episode-triggered/coalesced, not
 scheduled every hop. Manual admission is scoped across generations. These are demo
