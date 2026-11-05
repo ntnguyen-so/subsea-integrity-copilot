@@ -94,6 +94,22 @@ def test_repeated_control_does_not_advance_clock_twice(monitor: Monitor) -> None
     assert monitor.store.get_window(second.latest_window_id).quality.status == "WARMING_UP"
 
 
+def test_idle_history_does_not_rehydrate_all_sensor_streams(
+    monitor: Monitor, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    replay = monitor.create("S1", 2026, "scripted", "idle-history")
+    monitor.control(replay.id, "step", None, "one")
+    monitor.control(replay.id, "step", None, "two")
+    monitor._sources.clear()
+
+    def forbidden(_replay: object) -> None:
+        raise AssertionError("Idle history must not block startup by regenerating streams")
+
+    monkeypatch.setattr(monitor, "_source", forbidden)
+    monitor.tick()
+    assert monitor.store.get_replay(replay.id).clock_seconds == 10
+
+
 def test_completed_source_drains_bounded_window_backlog(monitor: Monitor) -> None:
     replay = monitor.create("S6", 2026, "scripted", "bounded-drain")
     monitor._source(replay).received_seconds = []

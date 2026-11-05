@@ -32,6 +32,7 @@ from subsea_copilot.runtime.gateway import ToolGateway
 from subsea_copilot.runtime.registry import REGISTRY, tool_schemas
 from subsea_copilot.validation import (
     ValidationError,
+    abstention_claim_allowed,
     compatible,
     question_requires_location,
     render_result,
@@ -327,6 +328,25 @@ class AgentService:
                 result_schema["properties"]["recommendation_ids"] = {
                     "type": "array",
                     "maxItems": 0,
+                }
+            child_abstained = any(t.state == "ABSTAINED" for t in candidates)
+            must_abstain = task.role != "sensor_quality" and (
+                child_abstained or snapshot.event.hypothesis == "insufficient_evidence"
+            )
+            if must_abstain:
+                result_schema["properties"]["outcome"] = {
+                    "type": "string", "const": "insufficient_evidence",
+                }
+                result_schema["properties"]["hypothesis"] = {"type": "null"}
+                result_schema["properties"]["claim_refs"]["items"] = {
+                    "type": "string",
+                    "enum": [ref for ref, claim in snapshot.claims.items()
+                             if claim.kind in REGISTRY[task.role].claim_kinds
+                             and abstention_claim_allowed(claim, snapshot)],
+                }
+            if child_abstained and task.role != "sensor_quality":
+                result_schema["properties"]["limitations"]["contains"] = {
+                    "const": "child_abstained",
                 }
         return {
             "phase": phase,

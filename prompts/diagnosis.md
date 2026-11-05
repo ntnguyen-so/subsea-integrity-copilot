@@ -24,6 +24,14 @@ Use exactly the supplied result_schema: outcome, claim_refs, evidence_ids,
 limitations, hypothesis, recommendation_ids, summary. No status or confidence.
 Retain every quality child's limitation, including partial_health_review.
 
+If quality ABSTAINED, final outcome must be insufficient_evidence, hypothesis must
+be null, and limitations must include child_abstained. You may still cite ledger-
+backed coverage, sensor-health, eligible sensor_or_telemetry_issue findings, and
+explicit withheld-location decisions without positions. Do not cite suspected_leak,
+environmental_disturbance, no_event, or any positive location in an abstention.
+The supplied result_schema lists allowed abstention claim IDs. A repair changes
+the offending claim references; changing hypothesis alone does not fix them.
+
 For section/segment/location questions (BOUND_CONTEXT.requires_location), an
 eligible numerical fit must be read and its location claim included in a supported
 result. Otherwise explicitly include location_withheld, with no asserted location.

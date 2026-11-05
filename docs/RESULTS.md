@@ -6,15 +6,15 @@ thesis PDF, credentials or copied marketing artwork is included.
 
 | Gate | Evidence/status |
 |---|---|
-| Python regressions | 159 tests passed against the independently owned PostgreSQL environment. |
+| Python regressions | 160 tests passed against the independently owned PostgreSQL environment. |
 | Static checks | Ruff, strict mypy over 27 source files, TypeScript typecheck and esbuild passed. |
 | Dependencies | Installed public package versions audited; no known vulnerabilities reported. Not a security certification. |
 | Numerical hold-out | 120 mature windows, 20 seeds x six scenarios; frozen report in `fixtures\synthetic\evaluation-results.json`. |
 | Scripted PostgreSQL agents | 27/27 accepted-correct answers; real durable graph, checked claims and baseline, not real inference. |
 | Actual stored observability | Scripted cohort's agent/generation/tool/guardrail tree verified in Langfuse v2 observations; Jaeger also verified during integration. |
 | Live Copilot agents | First cohort: 2/27 accepted-correct; 25 child failures, mostly turn/tool-budget exhaustion. Release gate failed; protocol correction and requalification are required. |
-| Corrected live smoke | All three roles succeeded on S1: four real model calls, twelve tools, 55.34s; supported suspected leak with a location claim. Full requalification is running. |
-| Browser | Both real-Chrome cases passed: controls, moving windows, keyboard sensor selection, three charts, raw evidence, pinned questions/tasks and reconnect stability. |
+| Corrected live cohort | 24/27 accepted-correct: all S1 leak/localization and S5 missing-data answers passed. Three first-repetition S2 answers failed abstention propagation; correction remains in progress. Live baseline passed. |
+| Browser | All three real-Chrome cases passed: controls, moving windows, keyboard sensor selection, charts/raw evidence, pinned questions/tasks, truthful counters, all pipeline chips and reconnect stability. |
 | One-page brief | Original PDF rendered with installed Chrome; exactly one page verified. |
 
 Numerical leak precision/recall are 1.0 only in the controlled mature-window
@@ -30,6 +30,8 @@ pause. Bulk ingestion also held the generation fence for ~32s, producing a real
 in the synthetic contention probe. These were addressed at bootstrap, claim/routing,
 observability API and bounded-window scheduling boundaries; failed receipts are
 retained locally rather than overwritten.
+Idle paused/completed history is not regenerated during monitor startup; only
+playing streams or unfinished window backlogs rehydrate source buffers.
 
 Monitoring continues through missing input and unavailable inference. Completed
 sources drain their bounded processing backlog. The console must expose actual
@@ -62,6 +64,9 @@ bundle and submit the exact checked schema. Intake reads count as tools, not mod
 generations; the final turn is reserved and free-text summary must be empty.
 This is a deliberate refinement of deterministic intake/authority outside the model,
 not a claim that the LLM autonomously chose every read.
+That intake version's complete live receipt is `evidence\agents-live-intake.json`.
+Its remaining failures are explicit dependency-abstention checks, not auth/quota,
+numerical detection or a reason to relax the physical-certainty gate.
 
 Reviewer access and email submission are not performed automatically. The owner
 must grant access to the private repository and send the brief/link at least

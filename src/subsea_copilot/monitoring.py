@@ -23,6 +23,7 @@ from .contracts import (
 )
 from .diagnostics import analyze_window
 from .ingest import CanonicalBuffer, normalize_records
+from .ontology import load_pack
 from .store import BudgetExceeded, Conflict, QueueFull, Store
 from .synthetic import ReplayDataset, generate_scenario
 from .validation import ValidationError as AgentValidationError
@@ -321,7 +322,7 @@ class Monitor:
                 episode.segment_ids = snapshot.event.segment_ids
             elif (
                 snapshot.end_seconds - episode.last_qualified_seconds
-                >= self._source(session).dataset.pack.quiet_seconds
+                >= load_pack(session.site_id).quiet_seconds
             ):
                 episode.state = "QUIET"
             if material:
@@ -383,8 +384,25 @@ class Monitor:
             for session in self.store.list_replays():
                 if session.state not in ("PLAYING", "PAUSED", "COMPLETED"):
                     continue
+                pending = any(
+                    row.pending_window_id is not None
+                    for row in self.store.list_episodes(session.id)
+                )
+                caught_up = False
+                if session.state != "PLAYING":
+                    pack = load_pack(session.site_id)
+                    target = min(
+                        session.duration_seconds,
+                        max(0, int(
+                            (session.clock_seconds - pack.lateness_seconds) // pack.hop_seconds
+                        )) * pack.hop_seconds,
+                    )
+                    caught_up = session.last_endpoint >= target
+                    if caught_up and not pending:
+                        continue
                 if self.store.acquire_monitor_lease(session.id, self.owner, ttl_seconds=10):
-                    self._advance(session, self._source(session))
+                    if not caught_up:
+                        self._advance(session, self._source(session))
                     current = self.store.get_replay(session.id)
                     pending = any(
                         row.pending_window_id is not None

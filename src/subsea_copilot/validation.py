@@ -4,7 +4,7 @@ import json
 import re
 from typing import Any, NoReturn
 
-from subsea_copilot.contracts import AgentResult, AgentTask, WindowSnapshot
+from subsea_copilot.contracts import AgentResult, AgentTask, Claim, WindowSnapshot
 from subsea_copilot.runtime.registry import LIMITATIONS, RECOMMENDATIONS, REGISTRY, RolePolicy
 
 
@@ -193,21 +193,43 @@ def _validate_with_policy(
             reject(
                 "abstention", "Abstained specialist permits only explicit insufficient evidence."
             )
-    physical_values = [
-        c.value
+    disallowed_abstention_claims = [
+        c
         for r, c in snapshot.claims.items()
-        if r in result.claim_refs and c.kind in {"hypothesis", "location"}
+        if r in result.claim_refs and not abstention_claim_allowed(c, snapshot)
     ]
     if result.outcome == "insufficient_evidence" and (
         result.hypothesis not in {None, "insufficient_evidence"}
-        or any(
-            v != "insufficient_evidence"
-            and not (isinstance(v, dict) and v.get("hypothesis") == "insufficient_evidence")
-            for v in physical_values
-        )
+        or disallowed_abstention_claims
     ):
         reject("abstention", "Insufficient evidence cannot assert a physical event or location.")
     if len(set(result.claim_refs)) != len(result.claim_refs):
+
+
+def withheld_location_claim(claim: Claim, snapshot: WindowSnapshot) -> bool:
+    value = claim.value
+    if not isinstance(value, dict) or claim.kind != "location" or value.get("status") != "withheld":
+        return False
+    if set(value) - {"status", "best", "compatible", "reason", "unit", "method", "grid_m"}:
+        return False
+    if value.get("best") is not None or value.get("compatible", []) != []:
+        return False
+    return snapshot.location is None or (
+        snapshot.location.status == "withheld" and snapshot.location.best is None
+        and not snapshot.location.compatible
+    )
+
+
+def abstention_claim_allowed(claim: Claim, snapshot: WindowSnapshot) -> bool:
+    if claim.kind == "location":
+        return withheld_location_claim(claim, snapshot)
+    if claim.kind == "hypothesis":
+        hypothesis = claim.value.get("hypothesis") if isinstance(claim.value, dict) else claim.value
+        return hypothesis == "insufficient_evidence" or (
+            hypothesis == "sensor_or_telemetry_issue"
+            and hypothesis in snapshot.event.eligible_hypotheses
+        )
+    return claim.kind in {"coverage", "sensor_health", "limitation"} != len(result.claim_refs):
         reject("citations", "Duplicate claims.")
     for ref in result.claim_refs:
         claim = snapshot.claims.get(ref)
@@ -216,6 +238,10 @@ def _validate_with_policy(
         if not set(claim.evidence_ids) <= set(result.evidence_ids):
             reject("evidence", "Every claim's source evidence must be cited.")
         if claim.kind == "location":
+            if withheld_location_claim(claim, snapshot):
+                if not ({"location_withheld", "LOCATION_WITHHELD"} & set(result.limitations)):
+                    reject("location_withheld_required", "Withheld localization must be explicit.")
+                continue
             if "location.fit" not in received and (
                 task.role == "event_diagnosis" or not specialist_contract
             ):
@@ -270,7 +296,11 @@ def _validate_with_policy(
             {"location_withheld", "LOCATION_WITHHELD"} & set(result.limitations)
         ):
             reject("location_withheld_required", "Unavailable localization must be explicit.")
-    if result.hypothesis is not None:
+    if task.role == "sensor_quality" and result.hypothesis is not None:
+        reject("hypothesis", "Quality cannot make event-hypothesis assertions.")
+    if result.hypothesis is not None and not (
+        result.outcome == "insufficient_evidence" and result.hypothesis == "insufficient_evidence"
+    ):
         if task.role == "sensor_quality" or result.hypothesis not in (
             snapshot.event.eligible_hypotheses + ["insufficient_evidence"]
         ):
@@ -355,8 +385,18 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                 claim.value.get("hypothesis") if isinstance(claim.value, dict) else claim.value
             )
             if hypothesis in labels:
-                lines.append(labels[hypothesis])
+                if result.outcome == "insufficient_evidence" and (
+                    hypothesis == "sensor_or_telemetry_issue"
+                ):
+                    lines.append(
+                        "Snapshot diagnostics support sensor/telemetry issues; "
+                        "the physical-event assessment remains insufficient."
+                    )
+                else:
+                    lines.append(labels[hypothesis])
         elif claim.kind == "location" and snapshot.location:
+            if withheld_location_claim(claim, snapshot):
+                continue
             lines.append(f"Numerical fit: {snapshot.location.status}. Compatible candidates:")
             for candidate in snapshot.location.compatible:
                 lines.append(

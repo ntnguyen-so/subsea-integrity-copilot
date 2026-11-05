@@ -11,6 +11,10 @@ This is a BOUNDED claim review, not exhaustive attribution of all channels. The
 first sensor_patterns page is sufficient. Never exhaust next_offset pagination
 just for completeness. Include partial_health_review when the intake reports it.
 The full code-computed report and usable anomalies remain preserved independently.
+Assess sensor-quality evidence, not the parent's physical-event question.
+Use supported when coverage/health findings are ledger-backed, even when an event
+or location cannot be established. Physical uncertainty alone does not mean
+sensor-quality evidence is unsupported.
 At most one additional read is possible within five tools; any extra read must
 leave a model turn for FINAL. RUNTIME_REPLY_CONSTRAINTS.final_only forbids tools.
 Hard exclusions are code-owned. Preserve usable spikes, drift and disagreement:
