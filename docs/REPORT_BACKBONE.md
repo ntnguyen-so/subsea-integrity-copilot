@@ -3,7 +3,7 @@
 This is the outline for the later engineering report and interview presentation.
 The completed narrative is `REPORT.md`, with measurements in `RESULTS.md`.
 This retained outline is not evidence that every proposed gate has passed.
-Keep `ONE_PAGE_BRIEF_DRAFT.md` short; the report is supporting technical material.
+Keep `ONE_PAGE_BRIEF.md` short; the report is supporting technical material.
 Use `TECHNICAL_IMPLEMENTATION_PLAN.md` for the three-agent contracts, shared runtime,
 LLM/statistical boundaries and CustomerOps-style Copilot CLI integration.
 Use `REALTIME_STACK_AND_UI_SPEC.md` for the required CustomerOps stack, continuous

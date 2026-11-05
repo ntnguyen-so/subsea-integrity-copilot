@@ -4,7 +4,7 @@ const { chromium } = require("@playwright/test");
 
 async function main() {
   const source = await fs.readFile(
-    path.join(__dirname, "..", "docs", "ONE_PAGE_BRIEF_DRAFT.md"), "utf8",
+    path.join(__dirname, "..", "docs", "ONE_PAGE_BRIEF.md"), "utf8",
   );
   const escape = value => value.replace(/[&<>"]/g, character =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[character]);

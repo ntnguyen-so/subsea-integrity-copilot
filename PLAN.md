@@ -531,7 +531,7 @@ integration questions, not verified DanaOS defects.
 | Builder; deep dives and customer collaboration | Working three-question demo, reproducible outcomes and a constrained pilot ask. |
 | Resolve ambiguity; clean solutions from domain complexity | Independent sensor-health/event axes, abstention, conditional localization and explicit physical assumptions. |
 | Initiative; flag problems beyond immediate scope | Common-mode failure, synthetic-to-real gap, source conflicts, model availability and platform-integration boundaries. |
-| Prospect, users and reasons unsigned | Sections 1 and 9; `docs\ONE_PAGE_BRIEF_DRAFT.md`. |
+| Prospect, users and reasons unsigned | Sections 1 and 9; `docs\ONE_PAGE_BRIEF.md`. |
 | At least 2-3 realistic questions and imperfect non-confidential data | Sections 3-4; three live questions and six synthetic scenarios. |
 | GitHub repo with short runnable README | M6 mandatory gate; real link verified before submission, not invented now. |
 | Brief submitted >= 24 h before third round | M6 plus calendar buffer; meeting date is not supplied, so do not invent a deadline or send email. |

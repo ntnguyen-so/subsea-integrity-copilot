@@ -94,7 +94,7 @@ in this cohort; separate roles provide bounded authority and audit, not demonstr
 improvement. See `docs\RESULTS.md` and `docs\evidence\agents-live.json` for measurements,
 retained failures and synthetic-only limitations.
 
-See [the brief](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/ONE_PAGE_BRIEF_DRAFT.md),
+See [the brief](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/ONE_PAGE_BRIEF.md),
 [engineering report](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/REPORT.md)
 and the retained milestone/design plans in `docs`. Localization is a compatible
 range under an idealized model, not a calibrated confidence interval. Human
