@@ -3,10 +3,21 @@
 ## Decision and discovery
 
 **Proposed:** a four-week read-only shadow pilot for fictional NorthSea Integrity
-Operations, after data/security approval. The budget owner wants lower triage
+Operations, an offshore oil-and-gas prospect whose gas pipelines are modeled here,
+after data/security approval. The budget owner wants lower triage
 effort without new safety liability. The instrumentation lead needs reproducible
 evidence, credible sensor independence and honest localization uncertainty.
 The unsigned alternative is their existing dashboard plus manual investigation.
+The proposed agent augments that workflow as a read-only evidence layer; it does
+not require replacing the customer's digital data platform.
+
+The commercial risk is asymmetric, not simply "too many alerts": false alarms can
+mobilize offshore personnel, vessels or ROVs unnecessarily; missed releases can
+cause environmental damage and liability. Oil-line spills add cleanup exposure,
+but this gas-signature demo does not establish oil-spill detection. Serious
+regulatory non-compliance can threaten licences; revocation is a possible legal
+consequence, not the automatic result of every missed leak. Mobilization cost and
+the prospect's exposure are discovery assumptions, not measured customer facts.
 
 The thesis motivates marine quality/provenance and interpretable anomaly analysis;
 defense slide 47 motivates distributed sensing. Neither validates this demo's leak
@@ -15,6 +26,35 @@ derivations and honest counters. AITOMATIC's public console informs the original
 interactive visual design; it is not a reproduced DanaOS product or integration.
 Source/JD mapping and milestone acceptance criteria remain in `PLAN.md` and
 `TECHNICAL_IMPLEMENTATION_PLAN.md`.
+
+### Source grounding and boundaries
+
+**Research:** thesis Paper C, "Synthesized Data Quality Requirements and Roadmap
+for Improving Reusability of In-situ Marine Data," IEEE RE 2023, pp. 65-76
+(thesis PDF viewer pages 162-164), identifies strict accuracy, currentness,
+completeness and consistency needs for pipeline monitoring. It discusses business
+loss from false alarms and environmental risk from delayed or missed detection,
+including missing data and environmental/sensor confounders. It does not establish
+the fictional prospect's inspection costs, validated localization or automatic
+licence revocation. Defense slides 16 and 18-21 motivate source-aware quality
+semantics and stakeholder-specific requirements; slide 47 motivates distributed
+sensing. Neither an 85% target from other research use cases nor a research latency
+example is adopted as a pipeline safety SLA. Edge AdapAD/Green Edge AI is not
+claimed as implemented.
+
+**Regulatory qualification:** an
+[archived Norwegian Petroleum Act translation](https://s3.amazonaws.com/rgi-documents/be789afe11121decb40cf578900808634aed5aa2.pdf),
+PDF pages 38-39, section 10-13 permits revocation for serious or repeated violations;
+section 10-16 addresses temporary suspension. This supports a conditional risk
+scenario, not legal advice or verified current applicability to the prospect.
+The thesis and legal source are distinct.
+
+**Public industry context:** [Falkor's product description](https://falkor.com/products/falkor)
+positions industrial intelligence around connecting people, systems and workflows
+and combining simulation, physics-based AI and operational tools. This informs
+the evidence-layer positioning, not a claim of implemented Falkor/DanaOS integration
+or proven vendor capability. Private interview material is not reproduced or used
+as a published architecture specification.
 
 ## Implemented architecture
 
@@ -123,8 +163,12 @@ Auth/quota failure preserves monitoring and returns explicit unavailable status.
 
 **Proposed:** week 1 connector/schema/security review; week 2 shadow replay and
 expert adjudication; week 3 operator workflow; week 4 joint gate review.
-Measure reviewed false alarms, supported sensitivity where labels exist, coverage,
-latency and median triage effort. Stop or revise when acceptance is not met.
+Compare reviewed false alarms and median triage effort with the existing workflow;
+assess missed-event sensitivity separately where labels or validated tests exist.
+Track coverage and latency, with inadequate coverage explicitly unknown rather
+than healthy. Agree safety and commercial gates before the pilot; do not optimize
+away alarms at the expense of missed releases. Stop or revise when acceptance is
+not met.
 
 Illustrative capacity value: `120 alerts/month x 0.25h x USD100/h x 12 = USD36,000/year`.
 This is not verified savings or a vendor quote. Pilot scope/pricing needs approval;

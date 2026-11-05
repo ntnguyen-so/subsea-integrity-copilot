@@ -1,6 +1,6 @@
 # Subsea Integrity Copilot
 
-Read-only FDE demo for a fictional offshore gas operator: distinguish coherent
+Read-only FDE demo for a fictional offshore oil-and-gas operator's gas pipelines: distinguish coherent
 possible-leak evidence from sensor/telemetry faults, then identify a defensible
 inspection section or withhold location. **Synthetic data only; not a safety system.**
 
