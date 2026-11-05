@@ -1,0 +1,2130 @@
+{
+  "created_at": "2026-11-05T03:54:28.967432+00:00",
+  "suite": "agents",
+  "mode": "scripted",
+  "agents": {
+    "passed": true,
+    "mode": "scripted",
+    "live_model_evidence": false,
+    "requested_model": null,
+    "observed_models": [],
+    "observed_cli_versions": [],
+    "qualification_tenant_id": "qualification-88f96e4365c8",
+    "population": "three questions x three repetitions x three pinned snapshots",
+    "generation_model_call_ceiling": 100,
+    "cohort_maximum_model_calls": 300,
+    "answer_count": 27,
+    "provider_blocked": null,
+    "results": [
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "73ee8006-adc5-54c4-ac4d-95d00aac3571",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 3.468,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 4,
+        "tool_calls": 12,
+        "specialist_model_calls": 2,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 47.0000000204891,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "73ee8006-adc5-54c4-ac4d-95d00aac3571",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          },
+          {
+            "task_id": "e7ad0f63-e998-56f6-b0b5-3cb455d7e47a",
+            "role": "sensor_quality",
+            "state": "SUCCEEDED",
+            "model_calls": 1,
+            "tool_calls": 4,
+            "error_code": null
+          },
+          {
+            "task_id": "33e3d1a1-f2c5-589f-b8b0-76384db61d85",
+            "role": "event_diagnosis",
+            "state": "SUCCEEDED",
+            "model_calls": 1,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "1d0c13f5-c459-5628-aa1e-280c726025b3",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.375,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "1d0c13f5-c459-5628-aa1e-280c726025b3",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "0572c6c0-49b2-5a5e-a741-6e090de895f5",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.063,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "0572c6c0-49b2-5a5e-a741-6e090de895f5",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "090a8caa-a2f7-586f-859f-c858453d5ebd",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.156,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "090a8caa-a2f7-586f-859f-c858453d5ebd",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "d6c2acb2-fb5e-514a-8379-6ce64f6fab9f",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.078,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "d6c2acb2-fb5e-514a-8379-6ce64f6fab9f",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "ba7bad4f-e99e-5830-9406-1d0a4ccbda91",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.11,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "ba7bad4f-e99e-5830-9406-1d0a4ccbda91",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "3c4d73ec-a7f5-5801-8bae-62d2e39326eb",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.25,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "3c4d73ec-a7f5-5801-8bae-62d2e39326eb",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "0f99345b-ad26-5705-ab23-540f08df0960",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.078,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nSuspected leak; not a confirmed diagnosis.\nNumerical fit: located. Compatible candidates:\nP1: 375.0 m; residual 0.162.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "0f99345b-ad26-5705-ab23-540f08df0960",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S1",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "60eb4911-b099-5be0-8b05-5d8d14a33002",
+        "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.0,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-016",
+          "claim-018",
+          "claim-021",
+          "claim-072",
+          "claim-075",
+          "claim-076",
+          "claim-077",
+          "claim-078"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST3-B methane: 60/60 usable; 0 missing; 0 code-excluded observations; 6 usable spikes; drift suspicion: False.\nP1-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False.\nP1-ST4-B acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 1 usable spikes; drift suspicion: False.\nUsable coverage: 99.3% (4289/4320 observations).\nLimitations: COMPATIBLE_NOT_CONFIDENCE, GRID_NOT_ACCURACY, LOCATION_MODEL_SIMPLIFIED, SYNTHETIC_UNCALIBRATED, partial_health_review.\nCompatible candidates are not a confidence interval.\nThe numerical grid spacing is not localization accuracy.\nLocation uses a simplified numerical propagation model.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "60eb4911-b099-5be0-8b05-5d8d14a33002",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "5e2e7564-f060-5b44-bba4-b7ba7fb90b52",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 2.829,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 4,
+        "tool_calls": 11,
+        "specialist_model_calls": 2,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "5e2e7564-f060-5b44-bba4-b7ba7fb90b52",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          },
+          {
+            "task_id": "b76a3c62-c8ab-570d-b0ca-1f8965aad87d",
+            "role": "sensor_quality",
+            "state": "SUCCEEDED",
+            "model_calls": 1,
+            "tool_calls": 4,
+            "error_code": null
+          },
+          {
+            "task_id": "0581240c-0ef0-5c1e-b066-58ecf6f87694",
+            "role": "event_diagnosis",
+            "state": "SUCCEEDED",
+            "model_calls": 1,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "96946359-f8e1-5283-ad69-9b0792e9551c",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.015,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "96946359-f8e1-5283-ad69-9b0792e9551c",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "4f77b695-8690-524e-a513-7ec96d48ff04",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.203,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "4f77b695-8690-524e-a513-7ec96d48ff04",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "f1fdf769-2d0c-5c1c-8143-78dc09e66bfb",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.75,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "f1fdf769-2d0c-5c1c-8143-78dc09e66bfb",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "3d266063-7465-5fcf-8543-c5a6147070fc",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.485,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "3d266063-7465-5fcf-8543-c5a6147070fc",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "0b40f556-ccbd-5c2f-9e1a-8f8a2ec5742b",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.328,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "0b40f556-ccbd-5c2f-9e1a-8f8a2ec5742b",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "66ac5346-a919-5544-94c4-1039af6c540f",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.109,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "66ac5346-a919-5544-94c4-1039af6c540f",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "236dbaba-c3cd-5fa2-b5fd-11bca007a86c",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.078,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-073",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nSensor or telemetry issue is supported.\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "236dbaba-c3cd-5fa2-b5fd-11bca007a86c",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S2",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "fa89062f-5852-52e7-aa83-efb6d475593e",
+        "snapshot_id": "window-36a7d3a1a87888026c78626b61ce0177efcb536b3a8b307ad8061879e0a3e9f1",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.344,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-030",
+          "claim-031",
+          "claim-032",
+          "claim-054",
+          "claim-066",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP2-ST2-A temperature: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nP3-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: True.\nP3-ST4-A acoustic: 60/60 usable; 0 missing; 0 code-excluded observations; 2 usable spikes; drift suspicion: False.\nUsable coverage: 95.3% (4119/4320 observations).\nLimitations: NO_METHANE_CORROBORATION, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "fa89062f-5852-52e7-aa83-efb6d475593e",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 1,
+        "root_id": "846d79a4-92b9-51b4-be27-fb098d4cab41",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 2.25,
+        "roles": [
+          "operator_response",
+          "sensor_quality",
+          "event_diagnosis"
+        ],
+        "child_count": 2,
+        "model_calls": 4,
+        "tool_calls": 11,
+        "specialist_model_calls": 2,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "846d79a4-92b9-51b4-be27-fb098d4cab41",
+            "role": "operator_response",
+            "state": "ABSTAINED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          },
+          {
+            "task_id": "c863cb3f-ec9d-5662-80a1-a761e4f0de31",
+            "role": "sensor_quality",
+            "state": "SUCCEEDED",
+            "model_calls": 1,
+            "tool_calls": 4,
+            "error_code": null
+          },
+          {
+            "task_id": "922d2c94-674f-5084-ae26-01ea931fac55",
+            "role": "event_diagnosis",
+            "state": "ABSTAINED",
+            "model_calls": 1,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 1,
+        "root_id": "4cc012ef-7eca-58cd-af4b-39b853089d1b",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 0.953,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "4cc012ef-7eca-58cd-af4b-39b853089d1b",
+            "role": "operator_response",
+            "state": "ABSTAINED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 1,
+        "root_id": "95214834-50ad-59e0-863c-7975996bbba4",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 0.782,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "95214834-50ad-59e0-863c-7975996bbba4",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 2,
+        "root_id": "3b9a64d9-3095-5d7a-878a-c722f9278bf2",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.781,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "3b9a64d9-3095-5d7a-878a-c722f9278bf2",
+            "role": "operator_response",
+            "state": "ABSTAINED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 2,
+        "root_id": "212181ea-2a5f-50d5-a44f-6207edf6770c",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.453,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "212181ea-2a5f-50d5-a44f-6207edf6770c",
+            "role": "operator_response",
+            "state": "ABSTAINED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 2,
+        "root_id": "3b589380-cb98-5085-919c-bbf87c9df839",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.25,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.999999945051968,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "3b589380-cb98-5085-919c-bbf87c9df839",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 1,
+        "repetition": 3,
+        "root_id": "b5cd0473-1a4c-5c2c-a753-13f1d34767ee",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 0.891,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 16.00000006146729,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "b5cd0473-1a4c-5c2c-a753-13f1d34767ee",
+            "role": "operator_response",
+            "state": "ABSTAINED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 2,
+        "repetition": 3,
+        "root_id": "1a1c6c02-1062-53c0-aafd-3384e847508b",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "ABSTAINED",
+        "accepted_correct": true,
+        "legitimate_abstention": true,
+        "error_code": null,
+        "elapsed_seconds": 1.296,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 4,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 31.00000007543713,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 15.000000013969839,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nInsufficient evidence.\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, child_abstained, location_withheld, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "1a1c6c02-1062-53c0-aafd-3384e847508b",
+            "role": "operator_response",
+            "state": "ABSTAINED",
+            "model_calls": 2,
+            "tool_calls": 4,
+            "error_code": null
+          }
+        ]
+      },
+      {
+        "scenario": "S5",
+        "question_index": 3,
+        "repetition": 3,
+        "root_id": "b030b8b0-dba1-5dd5-9f90-c836258ddf1b",
+        "snapshot_id": "window-71e435d59bdbd2f705f72848b4424247156d51cfd445f28704c6564188160de8",
+        "state": "SUCCEEDED",
+        "accepted_correct": true,
+        "legitimate_abstention": false,
+        "error_code": null,
+        "elapsed_seconds": 1.172,
+        "roles": [
+          "operator_response"
+        ],
+        "child_count": 0,
+        "model_calls": 2,
+        "tool_calls": 3,
+        "specialist_model_calls": 0,
+        "claim_refs": [
+          "claim-000",
+          "claim-001",
+          "claim-002",
+          "claim-003",
+          "claim-004",
+          "claim-005",
+          "claim-006",
+          "claim-007",
+          "claim-072",
+          "claim-074",
+          "claim-075"
+        ],
+        "model_receipts": [
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 32.00000000651926,
+            "error": null,
+            "request_id": null
+          },
+          {
+            "mode": "scripted",
+            "requested_model": null,
+            "observed_model": null,
+            "model_source": null,
+            "cli_version": null,
+            "cli_version_source": null,
+            "usage": null,
+            "duration_ms": 30.999999959021807,
+            "error": null,
+            "request_id": null
+          }
+        ],
+        "answer": "SCRIPTED \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:03:00+00:00\nSupported snapshot evidence:\nP1-ST1-A acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-A temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B acoustic: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B methane: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST1-B temperature: 0/60 usable; 60 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A acoustic: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nP1-ST2-A methane: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False.\nUsable coverage: 8.3% (359/4320 observations).\nLimitations: COVERAGE_LOST, SYNTHETIC_UNCALIBRATED, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/72; additional findings remain in the pinned quality report.\nReview the cited sensor evidence.",
+        "task_summary": [
+          {
+            "task_id": "b030b8b0-dba1-5dd5-9f90-c836258ddf1b",
+            "role": "operator_response",
+            "state": "SUCCEEDED",
+            "model_calls": 2,
+            "tool_calls": 3,
+            "error_code": null
+          }
+        ]
+      }
+    ],
+    "observability": {
+      "status": "ok",
+      "destinations": {
+        "langfuse": {
+          "status": "accepted",
+          "endpoint": "http://127.0.0.1:3001/api/public/otel/v1/traces",
+          "processor": "batch",
+          "queue_capacity": 256,
+          "batch_capacity": 64,
+          "accepted_batches": 38,
+          "failed_batches": 0,
+          "exporter_accepted": true,
+          "enqueued_spans": 260,
+          "completed_spans": 260,
+          "pending_spans": 0
+        },
+        "jaeger": {
+          "status": "accepted",
+          "endpoint": "http://127.0.0.1:4319/v1/traces",
+          "processor": "batch",
+          "queue_capacity": 256,
+          "batch_capacity": 64,
+          "accepted_batches": 41,
+          "failed_batches": 0,
+          "exporter_accepted": true,
+          "enqueued_spans": 260,
+          "completed_spans": 260,
+          "pending_spans": 0
+        }
+      },
+      "content_capture": false,
+      "synchronous_export": false,
+      "local_audit": "available",
+      "stored_trace_visibility": "verified",
+      "storage_verification_api": "langfuse_observations_v2",
+      "verified_trace_count": 1,
+      "verified_observation_tree_count": 1,
+      "closed": false,
+      "flush_failed": false,
+      "flush_diagnostic": {
+        "status": "completed",
+        "error_type": null
+      }
+    },
+    "single_agent_comparison": {
+      "task_id": "baseline-a820b6395c4a4bf6b7bf107c16dcfe09",
+      "snapshot_id": "window-711c5efaf8308eefa036c91b49dab7a252fa8fd39119aa69451330425880917f",
+      "mode": "scripted",
+      "population": "single model task with governed numerical tools",
+      "state": "SUCCEEDED",
+      "check_accepted": true,
+      "model_calls": 1,
+      "tool_calls": 4,
+      "child_count": 0,
+      "elapsed_seconds": 0.8129999999655411,
+      "hypothesis": "suspected_leak",
+      "claim_refs": [
+        "claim-073",
+        "claim-075",
+        "claim-076",
+        "claim-077",
+        "claim-078",
+        "claim-074",
+        "claim-072",
+        "claim-000",
+        "claim-001",
+        "claim-002",
+        "claim-003",
+        "claim-004",
+        "claim-016",
+        "claim-018",
+        "claim-021"
+      ],
+      "outcome": "supported",
+      "error_code": null,
+      "live_model_evidence": false
+    },
+    "stored_trace_tree_verified": true,
+    "verified_trace_ids": [
+      "d329b41269f9ce86c0a4c7b7d029db51"
+    ],
+    "monetary_inference_cost": null,
+    "limitation": "Synthetic-only cohort; scripted runs are not live-model evidence."
+  },
+  "passed": true
+}

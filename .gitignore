@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.env
+.env.*
+!.env.example
+/runtime/
+web/dist/
+eval/results/
+*.log
+*.egg-info/
+test-results/
+playwright-report/

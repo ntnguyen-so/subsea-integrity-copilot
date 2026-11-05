@@ -1,0 +1,457 @@
+{
+  "id": "northsea",
+  "name": "NorthSea Synthetic Gas Network",
+  "version": "pack-v1",
+  "sensors": [
+    {
+      "id": "P1-ST1-A",
+      "station_id": "P1-ST1",
+      "segment_id": "P1",
+      "chainage_m": 100.0,
+      "position": {
+        "x": 100.0,
+        "y": -8.0
+      },
+      "failure_domain_id": "gateway-P1-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST1-B",
+      "station_id": "P1-ST1",
+      "segment_id": "P1",
+      "chainage_m": 100.0,
+      "position": {
+        "x": 100.0,
+        "y": 8.0
+      },
+      "failure_domain_id": "gateway-P1-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST2-A",
+      "station_id": "P1-ST2",
+      "segment_id": "P1",
+      "chainage_m": 300.0,
+      "position": {
+        "x": 300.0,
+        "y": -8.0
+      },
+      "failure_domain_id": "gateway-P1-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST2-B",
+      "station_id": "P1-ST2",
+      "segment_id": "P1",
+      "chainage_m": 300.0,
+      "position": {
+        "x": 300.0,
+        "y": 8.0
+      },
+      "failure_domain_id": "gateway-P1-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST3-A",
+      "station_id": "P1-ST3",
+      "segment_id": "P1",
+      "chainage_m": 500.0,
+      "position": {
+        "x": 500.0,
+        "y": -8.0
+      },
+      "failure_domain_id": "gateway-P1-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST3-B",
+      "station_id": "P1-ST3",
+      "segment_id": "P1",
+      "chainage_m": 500.0,
+      "position": {
+        "x": 500.0,
+        "y": 8.0
+      },
+      "failure_domain_id": "gateway-P1-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST4-A",
+      "station_id": "P1-ST4",
+      "segment_id": "P1",
+      "chainage_m": 700.0,
+      "position": {
+        "x": 700.0,
+        "y": -8.0
+      },
+      "failure_domain_id": "gateway-P1-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P1-ST4-B",
+      "station_id": "P1-ST4",
+      "segment_id": "P1",
+      "chainage_m": 700.0,
+      "position": {
+        "x": 700.0,
+        "y": 8.0
+      },
+      "failure_domain_id": "gateway-P1-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST1-A",
+      "station_id": "P2-ST1",
+      "segment_id": "P2",
+      "chainage_m": 100.0,
+      "position": {
+        "x": 884.8,
+        "y": 53.6
+      },
+      "failure_domain_id": "gateway-P2-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST1-B",
+      "station_id": "P2-ST1",
+      "segment_id": "P2",
+      "chainage_m": 100.0,
+      "position": {
+        "x": 875.2,
+        "y": 66.4
+      },
+      "failure_domain_id": "gateway-P2-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST2-A",
+      "station_id": "P2-ST2",
+      "segment_id": "P2",
+      "chainage_m": 300.0,
+      "position": {
+        "x": 1044.8,
+        "y": 173.6
+      },
+      "failure_domain_id": "gateway-P2-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST2-B",
+      "station_id": "P2-ST2",
+      "segment_id": "P2",
+      "chainage_m": 300.0,
+      "position": {
+        "x": 1035.2,
+        "y": 186.4
+      },
+      "failure_domain_id": "gateway-P2-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST3-A",
+      "station_id": "P2-ST3",
+      "segment_id": "P2",
+      "chainage_m": 500.0,
+      "position": {
+        "x": 1204.8,
+        "y": 293.6
+      },
+      "failure_domain_id": "gateway-P2-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST3-B",
+      "station_id": "P2-ST3",
+      "segment_id": "P2",
+      "chainage_m": 500.0,
+      "position": {
+        "x": 1195.2,
+        "y": 306.4
+      },
+      "failure_domain_id": "gateway-P2-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST4-A",
+      "station_id": "P2-ST4",
+      "segment_id": "P2",
+      "chainage_m": 700.0,
+      "position": {
+        "x": 1364.8,
+        "y": 413.6
+      },
+      "failure_domain_id": "gateway-P2-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P2-ST4-B",
+      "station_id": "P2-ST4",
+      "segment_id": "P2",
+      "chainage_m": 700.0,
+      "position": {
+        "x": 1355.2,
+        "y": 426.4
+      },
+      "failure_domain_id": "gateway-P2-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST1-A",
+      "station_id": "P3-ST1",
+      "segment_id": "P3",
+      "chainage_m": 100.0,
+      "position": {
+        "x": 875.2,
+        "y": -66.4
+      },
+      "failure_domain_id": "gateway-P3-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST1-B",
+      "station_id": "P3-ST1",
+      "segment_id": "P3",
+      "chainage_m": 100.0,
+      "position": {
+        "x": 884.8,
+        "y": -53.6
+      },
+      "failure_domain_id": "gateway-P3-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST2-A",
+      "station_id": "P3-ST2",
+      "segment_id": "P3",
+      "chainage_m": 300.0,
+      "position": {
+        "x": 1035.2,
+        "y": -186.4
+      },
+      "failure_domain_id": "gateway-P3-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST2-B",
+      "station_id": "P3-ST2",
+      "segment_id": "P3",
+      "chainage_m": 300.0,
+      "position": {
+        "x": 1044.8,
+        "y": -173.6
+      },
+      "failure_domain_id": "gateway-P3-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST3-A",
+      "station_id": "P3-ST3",
+      "segment_id": "P3",
+      "chainage_m": 500.0,
+      "position": {
+        "x": 1195.2,
+        "y": -306.4
+      },
+      "failure_domain_id": "gateway-P3-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST3-B",
+      "station_id": "P3-ST3",
+      "segment_id": "P3",
+      "chainage_m": 500.0,
+      "position": {
+        "x": 1204.8,
+        "y": -293.6
+      },
+      "failure_domain_id": "gateway-P3-0",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST4-A",
+      "station_id": "P3-ST4",
+      "segment_id": "P3",
+      "chainage_m": 700.0,
+      "position": {
+        "x": 1355.2,
+        "y": -426.4
+      },
+      "failure_domain_id": "gateway-P3-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    },
+    {
+      "id": "P3-ST4-B",
+      "station_id": "P3-ST4",
+      "segment_id": "P3",
+      "chainage_m": 700.0,
+      "position": {
+        "x": 1364.8,
+        "y": -413.6
+      },
+      "failure_domain_id": "gateway-P3-1",
+      "channels": [
+        "acoustic",
+        "methane",
+        "temperature"
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "id": "P1",
+      "points": [
+        {
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "x": 800.0,
+          "y": 0.0
+        }
+      ],
+      "length_m": 800.0
+    },
+    {
+      "id": "P2",
+      "points": [
+        {
+          "x": 800.0,
+          "y": 0.0
+        },
+        {
+          "x": 1440.0,
+          "y": 480.0
+        }
+      ],
+      "length_m": 800.0
+    },
+    {
+      "id": "P3",
+      "points": [
+        {
+          "x": 800.0,
+          "y": 0.0
+        },
+        {
+          "x": 1440.0,
+          "y": -480.0
+        }
+      ],
+      "length_m": 800.0
+    }
+  ],
+  "sample_seconds": 1,
+  "window_seconds": 60,
+  "hop_seconds": 5,
+  "lateness_seconds": 5,
+  "revision_seconds": 120,
+  "min_observers": 3,
+  "min_failure_domains": 2,
+  "min_coverage": 0.6,
+  "persistence_seconds": 15,
+  "quiet_seconds": 30,
+  "neighborhood_m": 400.0,
+  "methane_lag_seconds": 25,
+  "anomaly_threshold": 5.0,
+  "minimum_scales": {
+    "acoustic": 0.03,
+    "methane": 0.015,
+    "temperature": 0.03
+  },
+  "location_grid_m": 25.0,
+  "location_r0_m": 40.0,
+  "compatible_residual_tolerance": 2.0,
+  "max_location_width_m": 400.0
+}

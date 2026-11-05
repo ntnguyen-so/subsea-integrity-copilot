@@ -1,0 +1,147 @@
+name: subsea-langfuse
+
+services:
+  web:
+    image: docker.langfuse.com/langfuse/langfuse@sha256:43e27dc6cf4fc852d90b3dc96784b2f479605cea8d106ddcd2064eb1a289e065
+    restart: unless-stopped
+    depends_on: &ready
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${SUBSEA_LANGFUSE_PORT:-3001}:3000"
+    environment: &langfuse
+      NEXTAUTH_URL: http://127.0.0.1:${SUBSEA_LANGFUSE_PORT:-3001}
+      NEXTAUTH_SECRET: ${LF_NEXTAUTH_SECRET:?Load owned environment}
+      DATABASE_URL: postgresql://subsea_lf:${LF_POSTGRES_PASSWORD:?Load owned environment}@postgres:5432/subsea_lf
+      SALT: ${LF_SALT:?Load owned environment}
+      ENCRYPTION_KEY: ${LF_ENCRYPTION_KEY:?Load owned environment}
+      TELEMETRY_ENABLED: "false"
+      CLICKHOUSE_MIGRATION_URL: clickhouse://clickhouse:9000
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: subsea_lf
+      CLICKHOUSE_PASSWORD: ${LF_CLICKHOUSE_PASSWORD:?Load owned environment}
+      CLICKHOUSE_CLUSTER_ENABLED: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_AUTH: ${LF_REDIS_PASSWORD:?Load owned environment}
+      REDIS_TLS_ENABLED: "false"
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: subsea-langfuse
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: auto
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: subsea-minio
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${LF_MINIO_PASSWORD:?Load owned environment}
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://minio:9000
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: subsea-langfuse
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: auto
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: subsea-minio
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${LF_MINIO_PASSWORD:?Load owned environment}
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://127.0.0.1:${SUBSEA_LANGFUSE_MEDIA_PORT:-9091}
+      LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT: http://minio:9000
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+      LANGFUSE_S3_BATCH_EXPORT_ENABLED: "false"
+      LANGFUSE_INIT_ORG_ID: subsea-copilot
+      LANGFUSE_INIT_ORG_NAME: Subsea Copilot Local
+      LANGFUSE_INIT_PROJECT_ID: subsea-copilot
+      LANGFUSE_INIT_PROJECT_NAME: Subsea Copilot
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:?Load owned environment}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_SECRET_KEY:?Load owned environment}
+      LANGFUSE_INIT_USER_EMAIL: operator@subsea.local
+      LANGFUSE_INIT_USER_NAME: Subsea Local Operator
+      LANGFUSE_INIT_USER_PASSWORD: ${LF_ADMIN_PASSWORD:?Load owned environment}
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    image: docker.langfuse.com/langfuse/langfuse-worker@sha256:04e2f89a3eca5e8fdc89221d1e9586978e5f846866b5e1be7fcd7f9841c3ddb8
+    restart: unless-stopped
+    depends_on: *ready
+    environment:
+      <<: *langfuse
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://minio:9000
+    logging: *logging
+
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: subsea_lf
+      POSTGRES_DB: subsea_lf
+      POSTGRES_PASSWORD: ${LF_POSTGRES_PASSWORD:?Load owned environment}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "subsea_lf", "-d", "subsea_lf"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    logging: *logging
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.12
+    user: "101:101"
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: subsea_lf
+      CLICKHOUSE_PASSWORD: ${LF_CLICKHOUSE_PASSWORD:?Load owned environment}
+    volumes:
+      - clickhouse:/var/lib/clickhouse
+      - clickhouse-logs:/var/log/clickhouse-server
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    logging: *logging
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${LF_REDIS_PASSWORD:?Load owned environment}", "--maxmemory-policy", "noeviction"]
+    environment:
+      REDISCLI_AUTH: ${LF_REDIS_PASSWORD:?Load owned environment}
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    logging: *logging
+
+  minio:
+    image: cgr.dev/chainguard/minio
+    restart: unless-stopped
+    entrypoint: sh
+    command: -c 'mkdir -p /data/subsea-langfuse && minio server --address ":9000" --console-address ":9001" /data'
+    environment:
+      MINIO_ROOT_USER: subsea-minio
+      MINIO_ROOT_PASSWORD: ${LF_MINIO_PASSWORD:?Load owned environment}
+    ports:
+      - "127.0.0.1:${SUBSEA_LANGFUSE_MEDIA_PORT:-9091}:9000"
+    volumes:
+      - minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    logging: *logging
+
+volumes:
+  postgres:
+  clickhouse:
+  clickhouse-logs:
+  redis:
+  minio:

@@ -1,0 +1,87 @@
+{
+  "generator": "original-synthetic-v1",
+  "epoch": "2026-01-01T00:00:00+00:00",
+  "development_seeds": [
+    2026
+  ],
+  "held_out_seeds": [
+    91000,
+    91001,
+    91002,
+    91003,
+    91004,
+    91005,
+    91006,
+    91007,
+    91008,
+    91009,
+    91010,
+    91011,
+    91012,
+    91013,
+    91014,
+    91015,
+    91016,
+    91017,
+    91018,
+    91019
+  ],
+  "evaluation_only": true,
+  "truth_module": "subsea_copilot.evaluation",
+  "fixture_notes": [
+    "24 nodes, 12 paired stations; gateway domains are assumptions",
+    "Acoustic relative power in arbitrary units, not hydrophone sound pressure",
+    "Verified-normal pre-roll separate from arrival stream",
+    "Response starts at 90s, methane lag sampled 18-25s",
+    "Half-open windows and explicit UTC/local zoned timestamps"
+  ],
+  "pack_hash": "64e45983a5b0fb1e2e8751e77cb1c878ed34cd49756cf5726ff6b805a991210a",
+  "frozen_parameters": {
+    "id": "northsea",
+    "name": "NorthSea Synthetic Gas Network",
+    "version": "pack-v1",
+    "sample_seconds": 1,
+    "window_seconds": 60,
+    "hop_seconds": 5,
+    "lateness_seconds": 5,
+    "revision_seconds": 120,
+    "min_observers": 3,
+    "min_failure_domains": 2,
+    "min_coverage": 0.6,
+    "persistence_seconds": 15,
+    "quiet_seconds": 30,
+    "neighborhood_m": 400.0,
+    "methane_lag_seconds": 25,
+    "anomaly_threshold": 5.0,
+    "minimum_scales": {
+      "acoustic": 0.03,
+      "methane": 0.015,
+      "temperature": 0.03
+    },
+    "location_grid_m": 25.0,
+    "location_r0_m": 40.0,
+    "compatible_residual_tolerance": 2.0,
+    "max_location_width_m": 400.0
+  },
+  "mature_fixture_window_seconds": [
+    120,
+    180
+  ],
+  "mature_fixture_clock_seconds": 185,
+  "scenarios": {
+    "S1": "Localized acoustic and delayed methane signal",
+    "S2": "Scattered sensor defects",
+    "S3": "Shared gateway outage",
+    "S4": "Broad environmental disturbance",
+    "S5": "Physical signal with insufficient observers",
+    "S6": "Verified-normal variability"
+  },
+  "labels_are_evaluation_only": true,
+  "baseline_file": "normal-preroll.jsonl",
+  "synthetic_units": {
+    "acoustic": "a.u. relative power, not sound pressure",
+    "methane": "umol/L",
+    "temperature": "degC"
+  },
+  "health_rule": "isolated absolute residual excursions; >=2 spikes or score>=10 for primary fault suspicion; persistence uses raw event time"
+}

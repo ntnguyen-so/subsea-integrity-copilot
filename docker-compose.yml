@@ -1,0 +1,35 @@
+name: subsea-copilot
+
+services:
+  db:
+    image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: subsea_admin
+      POSTGRES_DB: subsea
+      POSTGRES_PASSWORD: ${SUBSEA_DB_ADMIN_PASSWORD:?Dot-source tools/load-environment.ps1 first}
+    ports:
+      - "127.0.0.1:${SUBSEA_DB_PORT:-15433}:5432"
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "subsea_admin", "-d", "subsea"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.22.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${SUBSEA_JAEGER_PORT:-16687}:16686"
+      - "127.0.0.1:${SUBSEA_JAEGER_OTLP_PORT:-4319}:4318"
+    logging: *logging
+
+volumes:
+  database:
