@@ -14,3 +14,38 @@
 .monitoring-warning.attention { border-color: #ef8368; background: #39271f; }
 .monitoring-warning.warning { border-color: #d3ac60; background: #312e22; }
 .case-report-target { font-weight: 600; }
+
+.masthead{padding:12px 24px}.notice{padding:7px 24px}.toolbar{padding:10px 24px;gap:10px}
+.clock-strip{grid-template-columns:1.35fr 1fr 1.2fr 1fr}.clock-strip>div{padding:9px 16px}
+.clock-strip strong{font-size:11px;line-height:1.5}.clock-strip .muted{display:block;font-size:10px;line-height:1.4;margin-top:4px}
+.monitoring-warning{padding:11px 15px;margin-bottom:12px;font-size:12px}
+.selection-strip{padding-bottom:12px}.selection-strip strong{font-size:11px}
+.workflow-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:5px;margin-bottom:12px;background:#171713}
+.workflow-strip>div{padding:9px 12px;border-right:1px solid var(--line);min-width:0}
+.workflow-strip strong{display:block;font-size:11px;line-height:1.6;font-weight:400;overflow-wrap:anywhere}
+.live-grid{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:12px}
+.panel{padding:13px}.panel-heading{padding-bottom:10px;margin-bottom:10px}
+.pipe{stroke:#237c87;stroke-width:14}.inspection-interval{fill:none;stroke:var(--amber);stroke-width:9;stroke-linecap:round}
+.map-wrap svg{min-height:0}.map-legend{gap:9px;margin:9px 0}
+.topology-panel #deployment-summary{font-size:11px}.topology-panel .summary{padding:8px;margin-top:9px;font-size:11px}
+#location-summary{font-size:12px;margin-top:8px}.manual-panel{margin-top:0}
+.manual-panel .chart svg{max-height:215px}.manual-panel .chart p{font-size:10px;line-height:1.4}
+.manual-panel .chart-foot{margin-top:9px;font-size:10px}.manual-panel .chart-foot button{font-size:11px;padding:7px}
+#trend-basis{font-size:11px;margin-bottom:10px}.manual-panel .subheading{margin-top:16px;margin-bottom:0}
+.sensor-list{max-height:235px;margin-top:0}.sensor-list th,.sensor-list td{min-width:0;padding:7px 6px;font-size:10px}
+.sensor-list th:first-child{width:64px;white-space:nowrap}.sensor-list td:first-child{text-align:center}
+.sensor-list input{accent-color:var(--amber)}.sensor-list button{border:0;background:transparent;padding:0;color:var(--cyan);font:11px Consolas,monospace;text-align:left;white-space:nowrap}
+.sensor-list th{z-index:1}.sensor-list+p,#sensor-list-basis{font-size:10px;margin-top:7px}
+.agent-status-panel,.engineer-details{margin-top:12px}.agent-status-panel .panel-heading{margin-bottom:9px}
+.automatic-timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.automatic-timeline strong{display:block;font:11px/1.6 Consolas,monospace;overflow-wrap:anywhere}
+.automatic-conclusion{margin:10px 0;font-size:13px}.automatic-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.automatic-actions .muted,.agent-status-panel>.muted{font-size:11px}.automatic-actions button{flex-shrink:0;font-size:12px}
+.agent-status-panel>.muted{margin-top:8px}.comparison-controls{display:flex;gap:8px;flex-wrap:wrap}
+.engineer-details>summary{cursor:pointer;color:var(--amber);font-size:12px}
+.engineer-details[open]>summary{margin-bottom:16px}.context-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.context-grid .gate-panel{grid-column:auto}.context-grid .gate-panel #gate-content{display:block}
+.context-grid .list{max-height:300px;overflow:auto}.investigation-grid{margin-top:12px}
+@media(max-width:1200px){.clock-strip{grid-template-columns:1fr 1fr}.workflow-strip{grid-template-columns:1fr 1fr}.live-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.automatic-actions{align-items:start;flex-direction:column}}
+@media(max-width:900px){.live-grid,.context-grid{grid-template-columns:1fr}.automatic-timeline{grid-template-columns:1fr}.manual-panel .chart svg{max-height:none}.selection-strip .control{max-width:100%}.toolbar .control{max-width:100%}}
+@media(max-width:480px){.clock-strip{grid-template-columns:1fr}.workflow-strip{grid-template-columns:1fr 1fr}.masthead,.toolbar{padding:12px}.sensor-list{max-height:250px}.automatic-actions button{max-width:100%}}

@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="154.516551">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T02:48:50.091Z" hostname="" tests="1" failures="0" skipped="0" time="63.722" errors="0">
+<testcase name="server-confirmed clock and selected trends stay live; only explicit review pins them" classname="dashboard.spec.ts" time="63.722">
+</testcase>
+</testsuite>
+<testsuite name="warning.spec.ts" timestamp="2026-11-06T02:48:50.091Z" hostname="" tests="1" failures="0" skipped="0" time="88.881" errors="0">
+<testcase name="1x replay delivers a clear warning independently of the pinned investigation" classname="warning.spec.ts" time="88.881">
+</testcase>
+</testsuite>
+</testsuites>

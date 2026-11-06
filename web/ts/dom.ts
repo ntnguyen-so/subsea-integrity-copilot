@@ -25,7 +25,7 @@ export function svg<K extends keyof SVGElementTagNameMap>(tag: K, attributes: Re
 }
 export function time(value: string): string {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toISOString().replace("T", " ").replace(".000Z", " UTC");
+  return Number.isNaN(date.getTime()) ? value : date.toISOString().replace("T", " ").replace(/(?:\.000)?Z$/, " UTC");
 }
 export function bounds(start: string, end: string): string {
   return `[${time(start)}, ${time(end)})`;

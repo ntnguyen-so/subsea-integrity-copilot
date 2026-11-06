@@ -1,16 +1,16 @@
 {
   "mode": "scripted",
   "passed": true,
-  "replay_id": "replay-6a8aba94a205fa24d38fd990",
+  "replay_id": "replay-80fc8a4cdfe6da5ede7da03e",
   "replay_speed": 1,
   "known_source_onset_seconds": 90,
   "play_start_source_seconds": 80,
-  "warning_snapshot_id": "window-6c1bb084225187d3973951daa9d20f68b7e5daf6c13f5d836859f4317f428439",
-  "source_onset_to_warning_basis_seconds": 25.344000000040978,
-  "wall_play_request_to_observed_warning_seconds": 38.105616799999986,
+  "warning_snapshot_id": "window-abdb6d4d9b4661719998b2a9276bd5b044b8e93d5b4a8e38c711facf3973598c",
+  "source_onset_to_warning_basis_seconds": 26.156000000075437,
+  "wall_play_request_to_observed_warning_seconds": 38.04063139999995,
   "estimated_wall_onset_to_observed_warning_bounds_seconds": [
-    27.463094399999974,
-    28.105616799999986
+    27.386208799999963,
+    28.040631399999953
   ],
   "target_seconds": 120,
   "limitations": [

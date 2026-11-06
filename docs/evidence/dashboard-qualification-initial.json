@@ -1,0 +1,58 @@
+{
+  "passed": false,
+  "mode": "scripted",
+  "hosted_requests": 0,
+  "command": "npm run typecheck && npm run build && npx playwright test dashboard.spec.ts --grep-invert '^LIVE'",
+  "results": {
+    "passed": 2,
+    "failed": 2,
+    "skipped": 1
+  },
+  "failures": [
+    {
+      "test": "server-confirmed clock and selected trends stay live; only explicit review pins them",
+      "failure": "Connection label stayed Stale / projection unavailable after network restoration.",
+      "resolution_under_test": "A successful coherent projection restores Connected only when the actual EventSource is OPEN."
+    },
+    {
+      "test": "monitoring controls and manual instruments fit a narrow viewport",
+      "failure": "An unfinished fault-injection route from the preceding test rejected during teardown.",
+      "resolution_under_test": "Wait for in-flight route handlers before changing routes or ending the injecting test."
+    }
+  ],
+  "limitations": [
+    "Initial development run, not the final qualification.",
+    "Raw browser error output is not published because it included an authenticated local session cookie."
+  ],
+  "first_recheck": {
+    "passed": 3,
+    "failed": 1,
+    "clock_recovery_passed": true,
+    "failure": "Changing fault-injection routes briefly allowed an unmodified projection to race the second injected state.",
+    "resolution_under_test": "Keep one route installed for both injected states; drain it only at final teardown."
+  },
+  "first_hosted_dashboard_attempt": {
+    "passed": false,
+    "failure": "Selected pressure chart never displayed anomaly points during accelerated streaming under concurrent load.",
+    "root_cause": "New hops superseded every in-flight sensor read, discarding its result and repeatedly clearing the chart.",
+    "resolution_under_test": "Single-flight, latest-coalesced sensor reads; atomically advance the visible map, alarm list and trend only after scoped observations arrive. The numerical warning remains independently current.",
+    "note": "The original hosted attempt artifact and its actual automatic tasks are retained separately, not relabeled as a successful journey."
+  },
+  "second_hosted_dashboard_attempt": {
+    "passed": false,
+    "stream_and_live_trend_assertions_passed": true,
+    "failure": "The separate Playwright API observer failed with read ECONNRESET during a projection GET.",
+    "service_health_after_failure": "Numerical monitor and agent worker both running; the original automatic tasks continued.",
+    "resolution_under_test": "Permit at most two Playwright transport retries for ECONNRESET on idempotent observation GETs only. No inference retry, budget change or provider-timeout increase.",
+    "credential_handling": "The local session-cookie line is redacted from the retained failure XML."
+  },
+  "third_hosted_dashboard_attempt": {
+    "passed": false,
+    "replay_id": "replay-20ac17eafe2cccbd5943a840",
+    "failure": "The aggregate observer timed out after 300s waiting for the latest accepted report.",
+    "root_cause": "An unresolved source-95 root occupied the serial worker for 222.592025s before budget-blocked withholding. The newer source-115 root then succeeded in 120.252964s.",
+    "resolution_under_test": "Gather first unresolved-only context for at most one source window, immediately bypassing this hold for a qualifying leak, instrumentation issue or lost coverage. Do not start a new full report solely for NORMAL/DEGRADED changes when the physical decision remains unchanged.",
+    "safety_boundary": "Numerical warnings and manual inspection remain immediate. No inference retry, raised timeout, relaxed critic or silent task rebase.",
+    "terminal_audits": "dashboard-live-third-agent-operations.json"
+  }
+}

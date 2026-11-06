@@ -310,7 +310,10 @@ class Monitor:
             old = self.store.get_window(episode.current_window_id)
             material = (
                 old.event.hypothesis != snapshot.event.hypothesis
-                or old.quality.status != snapshot.quality.status
+                or (
+                    old.quality.status != snapshot.quality.status
+                    and "COVERAGE_LOST" in (old.quality.status, snapshot.quality.status)
+                )
                 or old.event.segment_ids != snapshot.event.segment_ids
             )
             if old.location and old.location.best and snapshot.location and snapshot.location.best:
@@ -343,6 +346,29 @@ class Monitor:
         if material:
             episode.pending_window_id = snapshot.id
         episode = self.store.save_episode(episode)
+        if episode.auto_roots == 0 and episode.pending_window_id and not active_roots:
+            if (
+                episode.dispatch_status == "gathering_context"
+                and snapshot.event.hypothesis == "no_event"
+            ):
+                episode.pending_window_id = None
+                episode.dispatch_status = "resolved_before_dispatch"
+                self.store.save_episode(episode)
+                return
+            pack = load_pack(session.site_id)
+            if (
+                snapshot.event.hypothesis == "insufficient_evidence"
+                and snapshot.quality.status != "COVERAGE_LOST"
+                and snapshot.end_seconds - episode.first_seen_seconds < pack.window_seconds
+            ):
+                # Do not let a transient, unresolved job block a maturing leak alarm.
+                episode.pending_window_id = snapshot.id
+                episode.dispatch_status = "gathering_context"
+                self.store.save_episode(episode)
+                return
+            if episode.dispatch_status == "gathering_context":
+                episode.pending_window_id = snapshot.id
+                episode = self.store.save_episode(episode)
         if episode.pending_window_id is None or active_roots or episode.state == "QUIET":
             return
         basis = self.store.get_window(episode.pending_window_id)
@@ -401,9 +427,13 @@ class Monitor:
                     pack = load_pack(session.site_id)
                     target = min(
                         session.duration_seconds,
-                        max(0, int(
-                            (session.clock_seconds - pack.lateness_seconds) // pack.hop_seconds
-                        )) * pack.hop_seconds,
+                        max(
+                            0,
+                            int(
+                                (session.clock_seconds - pack.lateness_seconds) // pack.hop_seconds
+                            ),
+                        )
+                        * pack.hop_seconds,
                     )
                     caught_up = session.last_endpoint >= target
                     if caught_up and not pending:

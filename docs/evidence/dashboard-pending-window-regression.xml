@@ -1,0 +1,8 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="59.906921">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T03:06:42.950Z" hostname="" tests="2" failures="0" skipped="0" time="58.557" errors="0">
+<testcase name="server-confirmed clock and selected trends stay live; only explicit review pins them" classname="dashboard.spec.ts" time="33.034">
+</testcase>
+<testcase name="pinning a pending live read never presents the previous window as the new evidence" classname="dashboard.spec.ts" time="25.523">
+</testcase>
+</testsuite>
+</testsuites>

@@ -22,6 +22,7 @@ test("actual projection counters and every pipeline chip are explicit", async ({
   const calls = projection.tasks.reduce((sum, task) => sum + task.model_calls, 0);
   await expect(page.locator("#budget-usage")).toContainText(`${calls} model calls in listed tasks`);
   await expect(page.locator("#budget-usage")).toContainText("generation model-call limit: unknown");
+  await page.locator(".engineer-details > summary").click();
   const chips = page.locator("#ontology .chip.entity");
   await expect(chips).toHaveCount(projection.pack.segments.length);
   for (const segment of projection.pack.segments) {
@@ -57,6 +58,8 @@ test("real sensor charts survive projection refreshes on a pinned window", async
   const sensor = page.locator("#topology [data-sensor]").first();
   await sensor.focus();
   await page.keyboard.press("Enter");
+  await expect(page.locator("#selected-basis")).toContainText("CURRENT VIEW");
+  await page.locator("#window-history").selectOption(replay.latest_window_id!);
   await expect(page.locator("#selected-basis")).toContainText("PINNED");
   const basis = await page.locator("#selected-basis").textContent();
   for (let index = 0; index < 3; index++) await page.locator("#reconnect").click();

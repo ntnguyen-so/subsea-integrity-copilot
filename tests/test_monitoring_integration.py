@@ -100,6 +100,96 @@ def test_repeated_control_does_not_advance_clock_twice(monitor: Monitor) -> None
     assert monitor.store.get_window(second.latest_window_id).quality.status == "WARMING_UP"
 
 
+def test_maturing_leak_bypasses_unresolved_hold_without_an_obsolete_llm_job(
+    monitor: Monitor,
+) -> None:
+    replay = monitor.create("S1", 2026, "scripted", "unresolved-then-leak")
+    for index in range(20):
+        monitor.control(replay.id, "step", None, f"triage-{index}")
+    episode = monitor.store.list_episodes(replay.id)[0]
+    assert episode.dispatch_status == "gathering_context"
+    assert episode.first_seen_seconds == 95
+    assert not monitor.store.list_tasks(replay.id)
+    for index in range(4):
+        monitor.control(replay.id, "step", None, f"leak-{index}")
+    roots = monitor.store.list_tasks(replay.id)
+    assert len(roots) == 1
+    basis = monitor.store.get_window(roots[0].snapshot_id)
+    assert basis.end_seconds == 110
+    assert basis.event.hypothesis == "suspected_leak"
+    assert basis.location and basis.location.status == "located"
+    latest = monitor.store.get_window(monitor.store.get_replay(replay.id).latest_window_id)
+    assert latest.quality.status == "DEGRADED"
+    assert monitor.store.list_episodes(replay.id)[0].pending_window_id is None
+
+
+@pytest.mark.parametrize("scenario", ["S2", "S3", "S5"])
+def test_instrumentation_and_coverage_warnings_bypass_context_hold(
+    monitor: Monitor,
+    scenario: str,
+) -> None:
+    replay = monitor.create(scenario, 2026, "scripted", "immediate-" + scenario)
+    for index in range(60):
+        current = monitor.control(replay.id, "step", None, f"source-{index}")
+        if not current.latest_window_id:
+            continue
+        snapshot = monitor.store.get_window(current.latest_window_id)
+        if snapshot.quality.status != "COVERAGE_LOST" and (
+            snapshot.event.hypothesis != "sensor_or_telemetry_issue"
+        ):
+            continue
+        roots = monitor.store.list_tasks(replay.id)
+        assert len(roots) == 1
+        assert roots[0].snapshot_id == snapshot.id
+        assert monitor.store.list_episodes(replay.id)[0].dispatch_status == "queued"
+        return
+    pytest.fail("The scenario did not reach its instrumentation/coverage warning")
+
+
+def test_persistent_unresolved_pattern_is_admitted_on_its_latest_context(
+    monitor: Monitor,
+) -> None:
+    replay = monitor.create("S4", 2026, "scripted", "persistent-unresolved")
+    for index in range(30):
+        monitor.control(replay.id, "step", None, f"collect-{index}")
+    episode = monitor.store.list_episodes(replay.id)[0]
+    assert episode.dispatch_status == "gathering_context"
+    assert not monitor.store.list_tasks(replay.id)
+    monitor.control(replay.id, "step", None, "source-155")
+    monitor.control(replay.id, "step", None, "source-160")
+    roots = monitor.store.list_tasks(replay.id)
+    assert len(roots) == 1
+    basis = monitor.store.get_window(roots[0].snapshot_id)
+    assert basis.end_seconds == 155
+    assert basis.event.hypothesis == "insufficient_evidence"
+    assert basis.location is None
+
+
+def test_resolved_transient_does_not_spend_an_llm_report(
+    monitor: Monitor,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    replay = monitor.create("S4", 2026, "scripted", "resolved-unresolved")
+    for index in range(20):
+        monitor.control(replay.id, "step", None, f"collect-{index}")
+    original = monitor._snapshot
+
+    def resolved(*args, **kwargs):
+        snapshot = original(*args, **kwargs)
+        return snapshot.model_copy(
+            update={
+                "event": snapshot.event.model_copy(update={"hypothesis": "no_event"}),
+            }
+        )
+
+    monkeypatch.setattr(monitor, "_snapshot", resolved)
+    monitor.control(replay.id, "step", None, "detector-resolved")
+    episode = monitor.store.list_episodes(replay.id)[0]
+    assert episode.dispatch_status == "resolved_before_dispatch"
+    assert episode.pending_window_id is None
+    assert not monitor.store.list_tasks(replay.id)
+
+
 def test_possible_leak_warning_does_not_wait_for_a_working_llm(monitor: Monitor, monkeypatch):
     replay = monitor.create("S1", 2026, "live", "leak-without-provider")
     monkeypatch.setattr(monitor.agents, "health", lambda: {"available": False})

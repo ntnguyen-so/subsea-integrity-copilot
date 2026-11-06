@@ -1,0 +1,36 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="1" time="76.708788">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T03:04:35.039Z" hostname="" tests="1" failures="0" skipped="0" time="75.187" errors="1">
+<testcase name="LIVE automatic investigation completes while independent monitoring and manual review continue" classname="dashboard.spec.ts" time="75.187">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\dashboard-final-hosted\dashboard-LIVE-automatic-i-aceca--and-manual-review-continue\error-context.md]]
+]]>
+</system-out>
+<error message="apiRequestContext.get: read ECONNRESET" type="Error">
+<![CDATA[  dashboard.spec.ts:242:5 › LIVE automatic investigation completes while independent monitoring and manual review continue
+
+    Error: apiRequestContext.get: read ECONNRESET
+    Call log:
+      - → GET http://127.0.0.1:8086/api/replays/replay-27da0d689cbbdef6aa396f2a/projection
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+        - cookie: [REDACTED local session credential]
+
+
+      267 |     expect(progressed.tasks.some(task => task.automatic && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(task.state))).toBe(true);
+      268 |     await expect.poll(async () => {
+    > 269 |       const response = await page.request.get(`/api/replays/${id}/projection`);
+          |                                           ^
+      270 |       const projection: Projection = await response.json();
+      271 |       const roots = projection.tasks.filter(task => task.automatic && !task.parent_id);
+      272 |       const newest = [...roots].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+        at _test.expect.poll.timeout (C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:269:43)
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:268:5
+
+    Error Context: ..\..\test-results\dashboard-final-hosted\dashboard-LIVE-automatic-i-aceca--and-manual-review-continue\error-context.md
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,40 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="76.575111">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T02:48:50.060Z" hostname="" tests="1" failures="1" skipped="0" time="74.895" errors="0">
+<testcase name="LIVE automatic investigation completes while independent monitoring and manual review continue" classname="dashboard.spec.ts" time="74.895">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\dashboard-hosted\dashboard-LIVE-automatic-i-aceca--and-manual-review-continue\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).not.toHaveCount(expected) failed" type="expect.not.toHaveCount">
+<![CDATA[  dashboard.spec.ts:198:5 › LIVE automatic investigation completes while independent monitoring and manual review continue
+
+    Error: expect(locator).not.toHaveCount(expected) failed
+
+    Locator:  locator('#channel-charts [data-anomaly=true]')
+    Expected: not 0
+    Received: 0
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "not toHaveCount" locator('#channel-charts [data-anomaly=true]') with timeout 15000ms
+      - waiting for locator('#channel-charts [data-anomaly=true]')
+        33 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      213 |     await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak", { timeout: 30_000 });
+      214 |     await page.getByRole("button", { name: "Trend P1-ST2-A", exact: true }).click();
+    > 215 |     await expect(page.locator("#channel-charts [data-anomaly=true]")).not.toHaveCount(0);
+          |                                                                           ^
+      216 |     await expect.poll(async () => Number(await page.locator("#source-clock").getAttribute("data-confirmed-seconds"))).toBeGreaterThan(185);
+      217 |     await page.locator("#play").click();
+      218 |     await expect(page.locator("#play")).toHaveText("Play");
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:215:75
+
+    Error Context: ..\..\test-results\dashboard-hosted\dashboard-LIVE-automatic-i-aceca--and-manual-review-continue\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

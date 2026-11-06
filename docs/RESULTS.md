@@ -1,5 +1,67 @@
 # Qualification results
 
+## Monitoring-first engineer dashboard
+
+The Live workspace now puts the approved brief's Y topology beside a continuously
+following pressure trend and instrument/alarm list. All 24 instrument positions
+and A/B wall sides match the brief; only the supported inspection interval is
+highlighted. Engineers can inspect raw measurements, compare chosen instruments
+and pin immutable historical evidence without stopping numerical monitoring.
+Simulated source UTC, actual admission/report UTC and historical report basis are
+separate. No browser-extrapolated telemetry is displayed.
+
+**Final offline cohort: 18/18 browser journeys passed.** This includes exact
+brief geometry, delayed sensor reads during accelerated replay, atomic
+map/trend/list scope, pinning an in-flight window, disconnected-clock behavior,
+failure withholding, explicit unresolved triage, a 390px viewport and the existing
+manual investigation/deck journeys. **16/16 monitoring integration cases passed,**
+including immediate qualifying leak/instrumentation/coverage admission, persistent
+ambiguity and resolved transients. Ruff, strict mypy over 38 source files,
+TypeScript and the UI build passed. Evidence:
+`evidence\dashboard-release-browser.xml` and
+`evidence\dashboard-admission-regression.xml`.
+
+**A fresh genuine automatic journey passed.** S1 streamed through normal APIs
+while the selected pressure trend and independent numerical warning remained
+usable. One automatic root used the first qualifying source window, **110s**,
+and produced the reviewed **P1 200-600m** inspection handoff in **145.08s from
+admission**, using seven hosted requests, all reporting `gpt-6.1-sol`. The complete
+browser journey took **170.74s**, including setup, stream observation and report
+review. All twelve persisted-operation checks passed on a fresh read-only audit:
+collaboration, scopes, receipts, source timing, authority, bounds, critic and
+attestation. No inference retry, raised timeout or weaker critic was used.
+Evidence: `evidence\dashboard-release-live-browser.xml`,
+`evidence\dashboard-release-live.json.gz` and
+`evidence\dashboard-release-agent-operations.json`.
+The [dashboard screenshot](assets/engineer-dashboard-live.png) shows this actual
+preserved hosted result, not fresh inference every time the page opens.
+
+Earlier failures remain failures:
+
+| Hosted attempt | Observed failure | Correction |
+|---|---|---|
+| First | Fast hops repeatedly invalidated in-flight sensor reads, starving the chart. | Coalesce reads; retain the last complete view; commit matching map, list and trend together. |
+| Second | The separate API observer disconnected with `ECONNRESET`; the live chart had passed. | At most two transport retries on idempotent observation GETs only, never inference. |
+| Third | An unresolved root exhausted its budget after 222.59s; a newer useful report then took another 120.25s. The aggregate 300s observation failed. | First unresolved-only episodes gather at most one source window; actionable warnings bypass the hold. Minor NORMAL/DEGRADED changes alone no longer trigger duplicate physical reports. |
+
+Original observation artifacts, failed browser XML and complete terminal root
+audits are retained in the `dashboard-live-initial`, `dashboard-live-second` and
+`dashboard-live-third` evidence files; the failure index is
+`evidence\dashboard-qualification-initial.json`. Later report completion does not
+relabel those failed journeys. Repeated raw projection observations are losslessly
+gzip-compressed JSON; complete terminal operation audits remain readable JSON.
+One successful post-fix synthetic journey is
+functional qualification, **not** a reliability estimate, field response SLO,
+independent prose-accuracy study or timed human-usability result.
+
+Numerical warnings and manual inspection never wait for triage or an LLM.
+The unresolved hold uses source time; the 300s task budget starts at admission.
+An unresolved transient that clears needs no report; persistent ambiguity uses
+the latest evidence at the review boundary. Changed physical hypotheses,
+segments, material location or lost/recovered coverage still trigger review.
+Accepted older reports remain visibly historical, never silently rebased.
+The five-minute operator walkthrough is a design target, not a usability finding.
+
 ## Current matched agent-operations evaluation
 
 The new [operations evaluation](AGENT_EVALUATION.md) runs all six scenarios and

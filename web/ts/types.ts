@@ -28,7 +28,7 @@ export interface WindowSnapshot {
   evidence: Record<string, EvidenceItem>; claims: Record<string, Claim>;
 }
 export interface ReplaySession { id: string; site_id: string; scenario: string; source_version: "legacy-v1" | "pressure-v2" | "pressure-v3"; seed: number; mode: Mode; state: "PAUSED" | "PLAYING" | "COMPLETED" | "FAILED"; clock_seconds: number; speed: Speed; duration_seconds: number; epoch: string; latest_window_id: string | null; version: number; updated_at: string; error: string | null }
-export interface MonitoringEpisode { id: string; site_id: string; generation_id: string; state: string; hypothesis: string; basis_window_id: string; current_window_id: string; segment_ids: string[]; material_revision: number; pending_window_id: string | null; auto_roots: number; dispatch_status: string | null }
+export interface MonitoringEpisode { id: string; site_id: string; generation_id: string; state: string; hypothesis: string; basis_window_id: string; current_window_id: string; segment_ids: string[]; first_seen_seconds: number; material_revision: number; pending_window_id: string | null; auto_roots: number; dispatch_status: string | null }
 export interface HistoryInvestigation { assessment: "operating_change_plausible" | "instrumentation_context" | "unresolved"; document_ids: string[]; rejected_document_ids: string[]; comparison_call_ids: string[]; next_action: string }
 export interface CitedExplanation { text: string; references: string[] }
 export interface CauseExplanation extends CitedExplanation { cause: "leak" | "operating_change" | "instrumentation_or_telemetry"; stance: "possible" | "not_established" | "not_testable" }

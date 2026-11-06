@@ -49,13 +49,51 @@ http://127.0.0.1:3001 (`operator@subsea.local`, `LF_ADMIN_PASSWORD`); optional J
 is http://127.0.0.1:16687. Services/volumes are project-owned and loopback-bound.
 Stopping Compose without `-v` preserves evidence.
 
-Create a **new pressure S1** generation, select 10x speed, Play, then pause when
-the inspection interval appears. Select a supporting sensor with mouse or keyboard;
-inspect its pressure history, normal-band thresholds, anomaly markers and
-raw/canonical records. Ask the three suggested questions and inspect the **pinned
-window, specialist tasks, cited evidence and counters**:
-"Leak or faulty sensors?", "Where should we inspect, and why?", and
-"What evidence supports this, and what remains unknown?"
+### Five-minute operator walkthrough
+
+The Live workspace starts with the familiar pipeline map, instrument/alarm list
+and pressure trend. The four-step strip connects **sensor stream → numerical
+detectors → automatic agent analysis → engineer review**, without making chat a
+prerequisite for investigating an alarm.
+
+1. Choose **S1** and **COPILOT HOSTED** for a genuine LLM demonstration
+   (**SCRIPTED** is explicitly an offline contract example). Create a generation,
+   select 10x speed and Play. The continuously updated UTC clock comes from the
+   server, never browser-extrapolated measurements. Samples arrive every simulated
+   second; 60s windows slide every 5s after the 5s lateness allowance.
+2. Select a station on the map or an instrument in the alarm list. Its pressure
+   trend continues following received windows. Inspect threshold crossings, gaps
+   and paired instruments just as in a manual investigation. Check up to four
+   instruments for a custom same-window comparison. During fast replay or slow
+   reads, the map, alarm list and trend advance together only after scoped
+   observations arrive; the last complete view stays visible instead of flashing
+   blank or mixing windows. The latest numerical warning remains independent.
+3. Qualifying leak, instrumentation and coverage-loss warnings automatically queue
+   the specialists. A first **unresolved-only** pattern instead shows explicit
+   evidence triage for at most one source window; a qualifying warning bypasses
+   that hold immediately. Persistent ambiguity is investigated using its latest
+   evidence; a resolved transient needs no LLM report. Numerical warnings and
+   manual review never wait. In **Automatic investigation**, distinguish simulated
+   source UTC from actual queue/report UTC. Replay speed accelerates the source,
+   not the LLM.
+4. Pause when the supported interval appears. Review the report and its original
+   evidence. A newer material warning can wait for bounded dispatch while an older
+   investigation is retained; historical reports are labeled, never silently
+   rebased. Failures withhold reports without clearing numerical warnings.
+   Minor quality changes still update the dashboard, but do not alone queue an
+   identical physical investigation. A changed hypothesis, affected segment,
+   material location or lost/recovered coverage remains a dispatch trigger.
+5. Open raw records, compare histories or ask a question to **pin** an immutable
+   window. The independent stream keeps running; **Follow current** resumes the
+   live inspector. Detection criteria and provenance remain available in the
+   expandable details, and full agent receipts remain in Agents.
+
+The three suggested questions are "Leak or faulty sensors?", "Where should we
+inspect, and why?", and "What evidence supports this, and what remains unknown?"
+This is a five-minute handover design, not a measured human-usability result.
+The 300s report budget starts at admission. Source-time triage, wall-clock queue
+time and source-to-warning/report latency are distinct; accelerated replay does
+not establish a field response-time guarantee.
 
 At the mature S1 window, nearby pressure drops support inspection of **P1,
 200-600m**, while a separate faulty sensor is still reported. Compare S2's
@@ -66,8 +104,10 @@ The brief and console share an upright Y: Trunk P1 below, Branch A P2 to the
 left and Branch B P3 to the right. Each 800m pipe has stations at 100/300/500/700m,
 with A/B pressure taps on opposite walls of an assumed 0.6m pipe. Paired taps
 share a gateway and are not independent witnesses. Their wall offsets are
-enlarged only for readability. **Compare event / fault sensors** opens actual
-same-window histories on common pressure and UTC axes; S2 includes drift on the
+enlarged only for readability; A/B wall sides match the brief. The amber line marks
+only the computed inspection interval, not the whole pipe. **Compare event / fault
+sensors** supplies a default selection when no custom instruments are checked,
+opening actual same-window histories on common pressure and UTC axes; S2 includes drift on the
 Trunk, spikes on Branch A and missing readings on Branch B.
 Archived source generations are labeled and cannot be replayed as pressure-v3.
 No actuator or shutdown endpoint exists.
@@ -282,6 +322,21 @@ without automatic agent roots. Both questions use normal authentication, scoping
 and rate limits. It consumes Copilot allowance; successful evidence is written to
 `docs\evidence\handoff-browser-engineer-v2-live.json`. A scripted browser pass alone does not
 qualify this hosted workflow.
+
+To qualify the actual **automatic** stream-to-report dashboard path:
+
+```powershell
+. .\tools\load-environment.ps1
+$env:SUBSEA_QUALIFY_DASHBOARD_LIVE = "1"
+npx playwright test dashboard.spec.ts --grep "LIVE automatic"
+```
+
+This creates a real LIVE S1 replay through normal APIs, observes monitoring and
+manual trends while hosted analysis is in flight, then checks the automatic
+handoff and its grounding review. Every observed root, including failures, is
+retained in a new `runtime\dashboard-live-<replay-id>.json` artifact. One successful
+journey is functional qualification, not an accuracy or availability estimate.
+
 Use `scripts\seed-handoff-replay.py --scenario S1` to prepare a mature LIVE leak
 fixture without automatic model roots. Ask the three suggested questions before
 the meeting; present preserved answers as **recorded LIVE**, with their exact

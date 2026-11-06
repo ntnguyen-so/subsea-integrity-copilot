@@ -1,0 +1,38 @@
+<testsuites id="" name="" tests="14" failures="0" skipped="0" errors="0" time="295.675671">
+<testsuite name="console.spec.ts" timestamp="2026-11-06T02:43:22.359Z" hostname="" tests="5" failures="0" skipped="0" time="192.029" errors="0">
+<testcase name="real replay, sensor evidence, pinned questions and keyboard navigation" classname="console.spec.ts" time="50.984">
+</testcase>
+<testcase name="pressure S2 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="47.84">
+</testcase>
+<testcase name="pressure S4 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="40.531">
+</testcase>
+<testcase name="pressure S5 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="39.815">
+</testcase>
+<testcase name="asking a question opens Agents before its task detail read completes" classname="console.spec.ts" time="12.859">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T02:43:22.359Z" hostname="" tests="3" failures="0" skipped="0" time="90.009" errors="0">
+<testcase name="brief geometry, correct wall sides and manual comparison agree with actual evidence" classname="dashboard.spec.ts" time="43.202">
+</testcase>
+<testcase name="automatic report timestamps are explicit and failed analysis cannot clear a numerical warning" classname="dashboard.spec.ts" time="27.639">
+</testcase>
+<testcase name="monitoring controls and manual instruments fit a narrow viewport" classname="dashboard.spec.ts" time="19.168">
+</testcase>
+</testsuite>
+<testsuite name="deck.spec.ts" timestamp="2026-11-06T02:43:22.359Z" hostname="" tests="4" failures="0" skipped="0" time="5.934" errors="0">
+<testcase name="topology depicts the source pack&apos;s connectivity, station distribution and sensor identities" classname="deck.spec.ts" time="0.964">
+</testcase>
+<testcase name="deck follows the interview schedule and supports chapter, keyboard and notes navigation" classname="deck.spec.ts" time="0.972">
+</testcase>
+<testcase name="interview clock survives navigation, pauses and resets without real waiting" classname="deck.spec.ts" time="0.748">
+</testcase>
+<testcase name="all slides fit desktop presentation and print pages, with readable mobile scrolling" classname="deck.spec.ts" time="3.25">
+</testcase>
+</testsuite>
+<testsuite name="sensor.spec.ts" timestamp="2026-11-06T02:43:22.359Z" hostname="" tests="2" failures="0" skipped="0" time="5.836" errors="0">
+<testcase name="actual projection counters and every pipeline chip are explicit" classname="sensor.spec.ts" time="1.688">
+</testcase>
+<testcase name="real sensor charts survive projection refreshes on a pinned window" classname="sensor.spec.ts" time="4.148">
+</testcase>
+</testsuite>
+</testsuites>

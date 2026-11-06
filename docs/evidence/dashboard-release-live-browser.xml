@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="172.394497">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T03:30:29.093Z" hostname="" tests="1" failures="0" skipped="0" time="171.03" errors="0">
+<testcase name="LIVE automatic investigation completes while independent monitoring and manual review continue" classname="dashboard.spec.ts" time="171.03">
+</testcase>
+</testsuite>
+</testsuites>
