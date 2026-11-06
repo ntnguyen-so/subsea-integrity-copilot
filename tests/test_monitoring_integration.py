@@ -55,7 +55,7 @@ def monitor(settings: Settings) -> Iterator[Monitor]:
             telemetry.close()
 
 
-@pytest.mark.parametrize("failure", ["proxy_auth", "proxy_quota"])
+@pytest.mark.parametrize("failure", ["proxy_auth", "proxy_quota", "knowledge_unavailable"])
 def test_outage_windows_progress_when_provider_is_unavailable(
     monitor: Monitor,
     monkeypatch: pytest.MonkeyPatch,

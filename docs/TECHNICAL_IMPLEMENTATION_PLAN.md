@@ -1,6 +1,6 @@
 # Technical implementation plan: Subsea Integrity Copilot
 
-Status: implemented design specification. Actual measurements and release-gate status
+Status: evolving implementation specification. Actual measurements and release-gate status
 are recorded in `RESULTS.md`; planned criteria below are not themselves test evidence.
 
 This document supersedes the original plan's single-LLM/local-HTTP design. The system
@@ -61,6 +61,47 @@ Important source boundaries:
 
 ## 2. Responsibility boundary: LLM versus numerical methods
 
+**Current pressure/joint-RCA refinement.** Numerical screening remains a
+reproducible, conservative measurement-plane warning, not the complete expert
+causal classifier. The response agent independently proposes regional possible
+causes from joint measurements, operational records and pinned knowledge.
+Several causes can coexist; abstaining on a numerical location does not forbid
+an explicitly uncertain causal discussion. No agent may fabricate a qualified
+inspection interval, confirm a leak or clear the warning.
+
+S7 supplies all 112 instrument summaries, not only threshold supporters.
+Before/after tools compare up to eight instruments jointly with bucketed profiles,
+usable overlap, correlation, graph distance, extrema and adjacent steps. This
+supports inspecting near/far/quiet, shared-infrastructure and independent
+controls without encoding those observations into a fixed causal decision tree.
+Correlation and topology remain measurements, not hydraulic validation.
+
+### Knowledge capture and application
+
+Inspired by [DANA's CAPTURE/APPLY distinction](https://arxiv.org/html/2410.02823v1),
+the Git-curated JSON corpus separates heuristic knowledge from an investigation
+program. Cards include provenance, exact applicability, revisions, natural-language
+guidance, checks, counterexamples and limitations. The current research corpus is
+synthetic-advisory-only; a genuine expert elicitation/approval workflow is a
+pilot prerequisite, not implemented platform capability.
+
+At admission the service selects a bounded role/scope/status/time-compatible
+packet, withholds declared conflicts and pins the full immutable packet to
+root/children. Actual processing time is distinct from incident time. Root plans
+receive the procedure; specialist views receive relevant cards; response views
+retain guidance and counterexamples without redundant heuristic step lists.
+All original cards remain in the pinned packet and source review.
+Models annotate knowledge-planned history calls with applicable knowledge IDs
+and a discriminating question. Final regional paragraphs require actual
+comparison membership and knowledge-plus-case references. The grounding critic
+checks original source support, not causal truth or operational approval.
+
+Undeclared semantic contradictions, expert agreement, knowledge usefulness and
+change approval require human evaluation. The paired knowledge-on/off S7 study
+holds the raw input hash constant and records failures, calls, latency and
+actual context use. One accepted pair is not an accuracy or time-saving result.
+The existing strong fixed-workflow comparisons remain published.
+
 The system has two cooperating planes. The **measurement plane** computes findings
 reproducibly without an LLM. The **investigation plane** uses LLM agents to select
 relevant checks, organize supported hypotheses, explain contradictions and answer
@@ -72,9 +113,9 @@ the operator. Existing alarms and safety procedures never depend on LLM availabi
 | Missingness, freshness, completeness, failure domains | Deterministic checks and event-time windows. | Absence is not a physical excursion; correlated failures require declared metadata. |
 | Per-channel anomaly features | Verified-normal median/MAD residuals, persistence and peer comparisons. | Fast, inspectable and usable without labeled leakage examples. |
 | Event evidence eligibility | Versioned symbolic rules over usable readings, channel agreement, locality and independent failure domains. | A persuasive narrative cannot replace corroboration or change safety criteria. |
-| Candidate pipeline location | Noise-weighted distance-decay fitting on measured acoustic excess. | Metres, residuals and ambiguity must come from a declared computation. |
+| Candidate pipeline location | Current pressure-profile inspection-interval fit; original acoustic design retained only as historical context. | Metres, residuals and ambiguity must come from a declared computation; no point or wave-speed accuracy claim. |
 | Choose relevant evidence, explain a quality issue | Sensor Quality Agent using bounded read-only tools. | LLM helps with contextual investigation and explanation, not raw scoring. |
-| Compare permitted event explanations | Event Diagnosis Agent using computed evidence and counterevidence. | LLM can synthesize observations, but can select only code-supported conclusions. |
+| Compare event explanations | Diagnosis chooses joint measurements and records; response independently synthesizes possible regional causes with knowledge. | Checked numerical claims remain ledger-bound; uncertain causal reasoning is not restricted to the detector label. |
 | Interpret the question, request specialists, communicate | Operator Response Agent. | Semantic work routing and audience-specific explanations benefit from language reasoning. |
 | Accept claims, render numbers, authorize actions | Application validators, claim ledger and renderer. | Writer self-assessment is not verification. |
 
@@ -414,16 +455,16 @@ Lease ownership is checked before publishing any tool/result outcome. A stale wo
 cannot finalize after another attempt claims the task. Parent wait/resume and expired
 attempts do not reset counters or the root workflow deadline.
 
-### Initial bounds
+### Runtime bounds
 
 | Scope | Hard limit |
 |---|---|
 | Quality task | 3 model turns, 5 tool calls, at most 1 repair. |
 | Diagnosis task | 4 model turns, 8 tool calls, at most 1 repair. |
-| Response task | 3 model turns including work planning/resumption/synthesis; 5 tool calls; at most 1 repair. |
+| Response task | Engineer-v2 allows up to 6 model calls including planning, grounding criticism and reflection; the root's 10-call ceiling still applies. |
 | Root workflow | 10 model calls total, 18 tool calls, 2 child tasks, 300 seconds elapsed across children and resumptions. |
 | Transport | At most 60 seconds per call, bounded by remaining workflow time; one CLI subprocess at a time. |
-| Evidence payload | 12 KiB per tool result; return pagination/summary explicitly instead of silently truncating required evidence. |
+| Evidence payload | 16 KiB per raw tool result. Diagnosis also bounds cumulative normalized JSON delivery to 21 Ki characters, with explicit `context_budget_exceeded` errors and mandatory report limitations. No silent truncation. |
 
 Repairs consume existing turn budgets. A parent can resume without another model call
 when it only needs to schedule its already authorized next step. Expected simple

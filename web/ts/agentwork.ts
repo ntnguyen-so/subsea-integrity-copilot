@@ -28,7 +28,7 @@ export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], 
   const calls = members.reduce((sum, task) => sum + task.model_calls, 0);
   const tools = members.reduce((sum, task) => sum + task.tool_calls, 0);
   text("agent-activity-state", !current ? "Connection unavailable · last recorded agent status below"
-    : done ? "Agent report ready · review findings beyond the detector"
+    : done ? "Agent investigation ready · review findings and next checks"
       : active ? `Agents ${root.state === "QUEUED" ? "queued" : "investigating"} · no reviewed report yet`
         : "Agent report withheld · detector warnings remain active");
   text("agent-elapsed", `${duration(elapsed)} real processing ${done || !active ? "elapsed" : "since admission"} · ${calls} ${root.mode === "live" ? "hosted" : "SCRIPTED"} calls · ${tools} tool calls`);
@@ -92,7 +92,7 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
     }
     progress.append(card);
   }
-  findings.append(node("h3", "What the agents checked beyond the detector"));
+  findings.append(node("h3", "Investigation evidence · beyond individual sensor alerts"));
   if (error) {
     findings.append(node("p", `Work record unavailable: ${error}. No source checks are inferred. Reconnect to reload.`, "summary"));
     return;
@@ -113,7 +113,13 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
   const comparisons = receipts.filter(receipt => receipt.name === "history.compare" && !receipt.error);
   const search = [...receipts].reverse().find(receipt => receipt.name === "history.search" && !receipt.error);
   const args = search ? record(search.arguments) : null;
-  findings.append(node("p", `${documents.size} historical records read · ${comparisons.length} pressure comparisons recorded${file?.interpretation_review ? ` · ${file.interpretation_review.rounds.length} grounding-review round(s); final decision accepted` : " · no reviewed interpretation yet"}.`, "agent-work-counts"));
+  const review = file?.interpretation_review;
+  const decision = review?.rounds[review.rounds.length - 1]?.assessment.decision;
+  const decisionLabel = decision === "accept" ? "accepted" : decision;
+  const reviewStatus = review
+    ? `${review.rounds.length} source-grounding review round(s) completed${decisionLabel ? ` · final decision ${decisionLabel}` : ""}`
+    : "no reviewed interpretation yet";
+  findings.append(node("p", `${documents.size} operational records read · ${comparisons.length} pressure comparisons recorded · ${reviewStatus}.`, "agent-work-counts"));
   if (file?.reused_task_ids.length) findings.append(node("p",
     `${file.reused_task_ids.length} compatible specialist handoffs reused; their recorded reads are not new model calls.`, "muted"));
   if (args && typeof args.query === "string") findings.append(node("p",
@@ -125,6 +131,55 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
         : "Investigation failed or abstained without an accepted handoff. No new cause is established.", "muted"));
     return;
   }
+  const regions = file.interpretation?.regional_assessments;
+  if (regions?.length) {
+    const panel = node("section", "", "agent-regions");
+    panel.append(node("h3", "Agent conclusions by sensor group"),
+      node("p", file.interpretation_review
+        ? "Model-written explanations with source-grounding review; separate from numerical detector flags. Physical causes remain unconfirmed."
+        : "Model-written explanations from an archived handoff; no current-protocol grounding review. Separate from detector flags; physical causes remain unconfirmed.", "muted"));
+    const groups = node("div", "", "agent-region-grid");
+    const labels = {
+      leak_pattern: "Leak-compatible pressure pattern",
+      instrumentation_or_telemetry: "Instrumentation or telemetry explanation",
+      operating_change: "Operating-change explanation",
+      unresolved: "Cause unresolved",
+    };
+    for (const [index, region] of regions.entries()) {
+      const item = node("article", "", "agent-region");
+      item.dataset.region = String(index);
+      item.dataset.hypothesis = region.hypothesis;
+      item.append(node("h4", labels[region.hypothesis]),
+        node("p", `${region.sensor_ids.length} sensor(s) · ${region.sensor_ids.join(", ")}`, "agent-region-sensors"),
+        node("p", region.text),
+        node("p", `Review references: ${region.references.join(", ") || "None recorded"}`, "muted"));
+      groups.append(item);
+    }
+    panel.append(groups);
+    findings.append(panel);
+  }
+  const historySteps = file.steps.filter(step => step.tool.startsWith("history."));
+  if (historySteps.length) {
+    const panel = section("why-these-checks");
+    panel.className = "agent-checks";
+    panel.append(node("summary", `Why these checks · ${historySteps.length} recorded history call(s)`),
+      node("p", "Recorded tool arguments, not proposed checks. Review the call IDs alongside the conclusion references above.", "muted"));
+    const checks = node("ol");
+    for (const step of [...historySteps].sort((a, b) => a.sequence - b.sequence)) {
+      const ids = step.arguments.knowledge_ids;
+      const knowledgeIds = Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string") : [];
+      const question = step.arguments.check_question;
+      const item = node("li");
+      item.dataset.callId = step.call_id;
+      item.append(node("strong", knowledgeIds.length ? knowledgeIds.join(", ") : "No knowledge IDs recorded"),
+        node("p", `→ ${typeof question === "string" && question.trim() ? question : "No check question recorded"}`),
+        node("code", `→ ${step.tool} · ${step.call_id}`));
+      if (step.error) item.append(node("p", `Call failed: ${step.error}. No successful check is inferred.`, "muted"));
+      checks.append(item);
+    }
+    panel.append(checks);
+    findings.append(panel);
+  }
   for (const source of file.sources) {
     const id = source.document.id;
     if (typeof id !== "string") continue;
@@ -134,6 +189,50 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
     if (typeof source.document.title === "string") row.append(node("strong", source.document.title));
     if (typeof source.document.body === "string") row.append(node("p", source.document.body));
     findings.append(row);
+  }
+  const knowledge = file.knowledge_packet;
+  if (knowledge) {
+    const applied = knowledge.cards.filter(card => file.knowledge_used_ids.includes(card.id));
+    const panel = section("domain-knowledge");
+    panel.className = "agent-knowledge";
+    panel.append(node("summary", `Domain guidance · ${applied.length} card(s) cited with case evidence`));
+    if (!applied.length) panel.append(node("p", "No domain guidance was cited in this handoff.", "muted"));
+    for (const card of applied) {
+      const item = node("article", "", "knowledge-card");
+      item.dataset.knowledge = card.id;
+      item.append(node("h4", card.title), node("p", card.guidance));
+      if (card.applies_when) item.append(node("p", `Applies when: ${card.applies_when}`, "muted"));
+      for (const [label, entries] of [
+        ["Recommended verification · not execution receipts", card.verification_steps],
+        ["Counterexamples to check", card.counterexamples],
+      ] as const) {
+        if (!entries?.length) continue;
+        item.append(node("strong", label));
+        const checks = node("ul");
+        for (const entry of entries) checks.append(node("li", entry));
+        item.append(checks);
+      }
+      if (card.limitations.length) {
+        item.append(node("strong", "When not to rely on this guidance"));
+        const limits = node("ul");
+        for (const limitation of card.limitations) limits.append(node("li", limitation));
+        item.append(limits);
+      }
+      const provenance = section(`knowledge-provenance:${card.id}`);
+      provenance.append(node("summary", "Sources, review basis and authority"),
+        node("p", `${card.id} · ${knowledge.version} · pinned ${time(knowledge.selected_at)} at investigation time, not incident time.`, "muted"),
+        node("p", "Curated for this synthetic workspace and research-derived; not pipeline-SME approved. Guidance supports review, not a confirmed leak or hardware diagnosis.", "muted"),
+        node("p", `Review basis: ${card.review_basis}`, "muted"));
+      for (const source of card.sources) provenance.append(node("p",
+        `${source.reference} · ${source.locator}. ${source.boundary}`, "muted"));
+      item.append(provenance);
+      panel.append(item);
+    }
+    if (Object.keys(knowledge.excluded).length) panel.append(node("p",
+      `Withheld guidance: ${Object.entries(knowledge.excluded).map(([id, reason]) => `${id}: ${friendly(reason)}`).join("; ")}`, "muted"));
+    findings.append(panel);
+  } else {
+    findings.append(node("p", "Archived handoff: no pinned domain-knowledge packet.", "muted"));
   }
   const quotes = new Set<string>();
   const cited = new Set(file.sources.filter(source => source.use === "cited").map(source => source.document.id));
@@ -155,7 +254,8 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
       causes.append(item);
     }
     findings.append(causes);
-    findings.append(node("p", `Engineer verification needed: ${file.interpretation.follow_up_questions[0]}`, "agent-next-question"));
+    const nextCheck = file.interpretation.follow_up_questions[0];
+    if (nextCheck) findings.append(node("p", `Engineer verification needed: ${nextCheck}`, "agent-next-question"));
   }
   findings.append(node("p", `${file.next_action} ${file.interpretation_review
     ? "Same-model critic and exact-source checks are not a correctness guarantee."

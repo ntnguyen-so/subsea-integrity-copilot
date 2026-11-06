@@ -854,7 +854,7 @@ class Store:
         # (including question, role, mode and pinned evidence) must remain identical.
         ignored = {"id", "root_id", "created_at", "updated_at", "deadline"}
         current = proposed.model_dump(mode="json", exclude=ignored)
-        previous = {key: value for key, value in existing.items() if key not in ignored}
+        previous = AgentTask.model_validate(existing).model_dump(mode="json", exclude=ignored)
         return previous == current
 
     def create_task(self, task: AgentTask, *, operator_id: str = "local") -> AgentTask:
@@ -973,6 +973,7 @@ class Store:
                 "automatic",
                 "idempotency_key",
                 "history_version",
+                "knowledge_packet",
                 "response_protocol",
                 "model_calls",
                 "tool_calls",
@@ -1449,7 +1450,9 @@ class Store:
         *,
         lease_token: str | None = None,
     ) -> None:
-        if result is not None and len(json.dumps(result).encode("utf-8")) > 12 * 1024:
+        from .contracts import TOOL_RESULT_MAX_BYTES
+
+        if result is not None and len(json.dumps(result).encode("utf-8")) > TOOL_RESULT_MAX_BYTES:
             raise Conflict("tool_payload_too_large")
         self._receipt(
             task_id,

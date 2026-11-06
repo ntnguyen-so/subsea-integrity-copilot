@@ -1,0 +1,50 @@
+{
+  "review_kind": "Independent AI role-play reviews, not human SME or actual customer approval",
+  "basis": [
+    "knowledge-live-current.json",
+    "joint-pattern-hosted-ui-current.json",
+    "../assets/knowledge-guided-investigation.png",
+    "joint-timing-live-current.json",
+    "joint-timing-live-initial.json",
+    "joint-timing-live-second.json",
+    "joint-timing-live-third.json"
+  ],
+  "engineering": {
+    "agent_id": "abb7c9ff-0284-4525-ac7c-71e80ca3cc98",
+    "decision": "Satisfied for a credible synthetic RCA-investigation meeting",
+    "checked": [
+      "Actual profiles, comparison scopes, contextual records and citations",
+      "Aligned complete eight-instrument pulse and recovery",
+      "Staggered temporal groups despite identical split-median changes",
+      "Maintenance timing and affected-scope counterevidence",
+      "Abstention, withheld localization and propagated context-budget limitation",
+      "Generic automatic question with agent-selected P5, P7 and P2 comparisons",
+      "Weak connected P4-ST1 evidence against near-quiet P6 in the fresh automatic run",
+      "Dashboard separates detector warnings, agent hypotheses and withheld localization"
+    ],
+    "residual_limits": [
+      "The -0.501 statistic is zero-lag Pearson correlation, not lagged cross-correlation or propagation",
+      "Authored probes establish neither diagnostic accuracy nor reliability nor controlled knowledge benefit",
+      "Production suitability, calibrated gas hydraulics and human pipeline-SME approval remain unestablished"
+    ]
+  },
+  "buyer": {
+    "agent_id": "6e11794d-8df0-45c9-8d05-8844ec13edea",
+    "decision": "Yes to a buyer meeting and pilot-design discussion",
+    "dashboard_gate": "Met: actual receipt and screenshot agree; no new material objection",
+    "remaining_purchase_gates": [
+      "Repeatable completion across frozen cases including failures and late attempts",
+      "Independent SME adjudication against strong fixed and manual workflows",
+      "Total human handling-time measurement",
+      "Data authorization, connector responsibilities, actual fee and usage cap, and exit terms"
+    ],
+    "scope_boundary": "Timing probes supply the instruments, interval and split; the separate automatic S7 run uses a generic question and agent-selected comparisons. Neither establishes superiority or repeatability."
+  },
+  "not_established": [
+    "Field accuracy",
+    "Knowledge superiority",
+    "Measured labor savings",
+    "Actual willingness to pay",
+    "Production or safety authority"
+  ]
+}

@@ -10,11 +10,15 @@ from .contracts import (
     WindowSnapshot,
     content_hash,
 )
+from .knowledge import KnowledgePacket
 from .validation import ValidationError, parse_json
 
 
 def candidate_hash(result: AgentResult) -> str:
-    return content_hash(result.model_dump(mode="json"))
+    value = result.model_dump(mode="json")
+    if value["interpretation"] and not value["interpretation"].get("regional_assessments"):
+        value["interpretation"].pop("regional_assessments", None)
+    return content_hash(value)
 
 
 def validate_revision(candidate: AgentResult, revised: AgentResult) -> None:
@@ -33,6 +37,10 @@ def paragraphs(result: AgentResult) -> dict[str, dict[str, Any]]:
         **{
             f"cause:{cause.cause}": cause.model_dump(mode="json")
             for cause in value.competing_causes
+        },
+        **{
+            f"region:{index}": region.model_dump(mode="json")
+            for index, region in enumerate(value.regional_assessments)
         },
         **{
             f"question:{index}": {"text": question, "references": []}
@@ -58,6 +66,15 @@ def critic_context(
         "source_texts": sources,
         "checked_outcome": result.outcome,
         "limitations": result.limitations,
+        "knowledge_review": (
+            "KN sources are research-curated guidance, not incident observations "
+            "or expert approval. "
+            "Check that cited guidance actually applies to the cited case evidence, that its "
+            "prerequisites and counterexamples are respected, and that neither measurements nor "
+            "causal certainty are invented. A knowledge quote alone cannot support a case fact."
+            " For each supported paragraph citing KN guidance, anchor both a KN source and "
+            "a non-KN case-evidence source with exact quotes."
+        ),
         "result_schema": GroundingAssessment.model_json_schema(),
     }
 
@@ -66,11 +83,41 @@ def source_texts(
     result: AgentResult,
     snapshot: WindowSnapshot,
     receipts: list[dict[str, Any]],
+    knowledge: KnowledgePacket | None = None,
 ) -> dict[str, str]:
     sources = {
         ref: json.dumps(snapshot.claims[ref].model_dump(mode="json"), sort_keys=True)
         for ref in result.claim_refs
     }
+    if knowledge and result.interpretation:
+        cited = {
+            reference
+            for paragraph in result.interpretation.cited_paragraphs()
+            for reference in paragraph.references
+        }
+        sources.update(
+            {
+                card.id: json.dumps(
+                    card.model_dump(
+                        mode="json",
+                        include={
+                            "id",
+                            "title",
+                            "status",
+                            "applies_when",
+                            "guidance",
+                            "verification_steps",
+                            "counterexamples",
+                            "limitations",
+                            "review_basis",
+                        },
+                    ),
+                    sort_keys=True,
+                )
+                for card in knowledge.cards
+                if card.id in cited
+            }
+        )
     review = result.investigation
     if review is None:
         return sources
@@ -123,6 +170,17 @@ def validate_assessment(
                 raise ValidationError(
                     "grounding_quotes", "Quote is not in the cited original source."
                 )
+        if check.verdict == "supported" and any(
+            ref.startswith("KN-") for ref in expected[check.paragraph_id]["references"]
+        ):
+            anchored = {support.reference for support in check.support}
+            if not any(ref.startswith("KN-") for ref in anchored) or not any(
+                not ref.startswith("KN-") for ref in anchored
+            ):
+                raise ValidationError(
+                    "grounding_knowledge",
+                    "Applied guidance requires exact anchors to both knowledge and case evidence.",
+                )
     all_supported = all(check.verdict == "supported" for check in assessment.checks)
     if (assessment.decision == "accept") != all_supported:
         raise ValidationError("grounding_decision", "Acceptance requires every paragraph to pass.")
@@ -141,7 +199,7 @@ def validate_review(
     final = record.rounds[-1]
     if final.candidate_hash != candidate_hash(result):
         raise ValidationError("grounding_identity", "Review does not bind this exact result.")
-    sources = source_texts(result, snapshot, receipts)
+    sources = source_texts(result, snapshot, receipts, task.knowledge_packet)
     if record.source_hash != content_hash({key: value for key, value in sources.items()}):
         raise ValidationError("grounding_identity", "Reviewed evidence packet changed.")
     assessment = validate_assessment(final.assessment, result, sources)

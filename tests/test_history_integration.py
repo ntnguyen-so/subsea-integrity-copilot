@@ -1,5 +1,7 @@
+import json
 import os
 from datetime import timedelta
+from pathlib import Path
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -8,7 +10,7 @@ import pytest
 
 from subsea_copilot.casefile import build_casefile
 from subsea_copilot.config import Settings
-from subsea_copilot.contracts import EngineerInterpretation, ReplaySession
+from subsea_copilot.contracts import AgentTask, EngineerInterpretation, ReplaySession, utc_now
 from subsea_copilot.diagnostics import analyze_window
 from subsea_copilot.grounding import (
     source_texts,
@@ -22,14 +24,15 @@ from subsea_copilot.ingest import normalize_records
 from subsea_copilot.interpretation import validate_interpretation
 from subsea_copilot.investigation import validate_investigation
 from subsea_copilot.llm.copilot_cli import CopilotCLIChatModel, ProviderError
+from subsea_copilot.profiles import compact_comparison, comparison_sensors
 from subsea_copilot.runtime.checkpointer import postgres_checkpointer
 from subsea_copilot.runtime.gateway import ToolGateway
 from subsea_copilot.runtime.scripted import ScriptedChatModel
 from subsea_copilot.runtime.workflow import AgentService
 from subsea_copilot.store import Conflict, Store, migrate
-from subsea_copilot.synthetic import SOURCE_VERSION, generate_scenario
+from subsea_copilot.synthetic import EXTENDED_PACK_VERSION, SOURCE_VERSION, generate_scenario
 from subsea_copilot.telemetry import Telemetry
-from subsea_copilot.validation import ValidationError
+from subsea_copilot.validation import ValidationError, compatible
 
 pytestmark = pytest.mark.integration
 
@@ -48,21 +51,77 @@ def settings():
     return configured
 
 
+class PromptBoundedScripted(ScriptedChatModel):
+    runtime_dir: Path
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        wire = CopilotCLIChatModel(runtime_dir=self.runtime_dir)
+        with patch("subsea_copilot.llm.copilot_cli.shutil.which", return_value=None):
+            with pytest.raises(ProviderError) as failure:
+                wire._generate(messages, tools=self.bound_schemas)
+            if failure.value.code != "cli_missing":
+                pytest.fail(
+                    f"{self.role}: {failure.value.code}; "
+                    f"message sizes={[len(m.content) for m in messages]}"
+                )
+        response = super()._generate(messages, stop, run_manager, **kwargs)
+        message = response.generations[0].message
+        context = json.loads(messages[0].content.split("\nBOUND_CONTEXT\n", 1)[1])
+        if (
+            self.role == "operator_response"
+            and context["phase"] == "answer"
+            and context["scope"]["pack_version"] == EXTENDED_PACK_VERSION
+        ):
+            candidate = json.loads(message.content)
+            candidate["interpretation"]["answer"]["text"] = (
+                "An independent inspection photograph confirms a pipe-wall crack."
+            )
+            message.content = json.dumps(candidate)
+        if (
+            self.role == "event_diagnosis"
+            and '"network_pressure_table":{' in messages[0].content
+            and not message.tool_calls
+            and not any(m.type == "human" and '"repair"' in m.content for m in messages)
+        ):
+            candidate = json.loads(message.content)
+            candidate["limitations"].append("unsupported_test_code")
+            message.content = json.dumps(candidate)
+        return response
+
+    def _history_action(self, messages, outputs, context):
+        action, review = super()._history_action(messages, outputs, context)
+        if (
+            action
+            and action.tool_calls[0]["name"] == "history.read"
+            and context.get("network_pressure_table")
+        ):
+            table = context["network_pressure_table"]
+            ids = [row[0] for row in table["rows"]]
+            arguments = {
+                key: value
+                for key, value in action.tool_calls[0]["args"].items()
+                if key != "document_ids"
+            }
+            end = context["history_bounds"]["end_seconds"]
+            for sensors in (ids[::14][:8], ids[7::14][:8]):
+                action.tool_calls.append(
+                    {
+                        "name": "history.compare",
+                        "id": uuid4().hex,
+                        "args": {
+                            **arguments,
+                            "sensor_ids": sensors,
+                            "start_seconds": end - 60,
+                            "split_seconds": end - 30,
+                            "end_seconds": end,
+                        },
+                    }
+                )
+        return action, review
+
+
 @pytest.fixture(scope="module")
 def investigated(settings):
-    class PromptBoundedScripted(ScriptedChatModel):
-        def _generate(self, messages, stop=None, run_manager=None, **kwargs):
-            wire = CopilotCLIChatModel(runtime_dir=settings.runtime_dir)
-            with patch("subsea_copilot.llm.copilot_cli.shutil.which", return_value=None):
-                with pytest.raises(ProviderError) as failure:
-                    wire._generate(messages, tools=self.bound_schemas)
-                if failure.value.code != "cli_missing":
-                    pytest.fail(
-                        f"{self.role}: {failure.value.code}; "
-                        f"message sizes={[len(m.content) for m in messages]}"
-                    )
-            return super()._generate(messages, stop, run_manager, **kwargs)
-
     with Store(
         settings.database_dsn,
         tenant_id="history-test-" + uuid4().hex,
@@ -73,7 +132,12 @@ def investigated(settings):
         try:
             with postgres_checkpointer(settings.checkpoint_dsn) as saver:
                 service = AgentService(
-                    store, lambda role, mode: PromptBoundedScripted(role=role), saver, telemetry
+                    store,
+                    lambda role, mode: PromptBoundedScripted(
+                        role=role, runtime_dir=settings.runtime_dir
+                    ),
+                    saver,
+                    telemetry,
                 )
                 scenarios = {}
                 for scenario in ("S1", "S2", "S4", "S5"):
@@ -158,6 +222,110 @@ def test_context_changes_investigation_without_overriding_numerical_uncertainty(
             assert snapshot.location is None
     assert "OP-VALVE-001" in cases["S4"][2].answer
     assert "concurrent leak is not ruled out" in cases["S4"][2].answer
+
+
+def test_extended_network_uses_its_own_corpus_and_versioned_pressure_history(settings):
+    with Store(
+        settings.database_dsn,
+        tenant_id="extended-history-" + uuid4().hex,
+        tools_dsn=settings.tools_dsn,
+        qualification=True,
+    ) as store:
+        telemetry = Telemetry(runtime_dir=settings.runtime_dir)
+        try:
+            with postgres_checkpointer(settings.checkpoint_dsn) as saver:
+                service = AgentService(
+                    store,
+                    lambda role, mode: PromptBoundedScripted(
+                        role=role, runtime_dir=settings.runtime_dir
+                    ),
+                    saver,
+                    telemetry,
+                )
+                source = generate_scenario("S7", duration_seconds=180)
+                replay = store.create_replay(
+                    ReplaySession(
+                        id="extended-history-" + uuid4().hex,
+                        tenant_id=store.tenant_id,
+                        scenario="S7",
+                        source_version=SOURCE_VERSION,
+                        clock_seconds=145,
+                        epoch=source.epoch,
+                    )
+                )
+                rows = normalize_records(source.records, source.pack)
+                store.save_observations(replay.id, rows)
+                snapshot = store.save_window(
+                    analyze_window(
+                        source.pack,
+                        normalize_records(source.baseline, source.pack),
+                        rows,
+                        replay.id,
+                        140,
+                        145,
+                        source.epoch,
+                        tenant_id=store.tenant_id,
+                    )
+                )
+                root = service.submit_question(
+                    replay, snapshot, "Where should we inspect, and why?", "extended-history"
+                )
+                for _ in range(20):
+                    if store.get_task(root.id).state in {"SUCCEEDED", "ABSTAINED", "FAILED"}:
+                        break
+                    assert service.run_once()
+                root = store.get_task(root.id)
+                assert root.state == "SUCCEEDED", (root.error_code, service.health())
+                assert len(root.interpretation_review.rounds) == 2
+                tasks = store.list_tasks(replay.id)
+                diagnosis = next(task for task in tasks if task.role == "event_diagnosis")
+                assert diagnosis.model_calls == 4  # Includes the bounded schema repair.
+                receipts = store.tool_receipts(diagnosis.id)
+                documents = [
+                    document
+                    for receipt in receipts
+                    if receipt["name"] == "history.read"
+                    for document in receipt["result"]["documents"]
+                ]
+                assert documents and all(
+                    "EXTENDED" in document["id"] or "P7-GW" in document["id"]
+                    for document in documents
+                )
+                comparison = next(r for r in receipts if r["name"] == "history.compare")
+                assert comparison["result"]["sensors"]
+                table = service._network_pressure_table(snapshot)
+                assert table["total_instruments"] == len(table["rows"]) == 112
+                assert len(comparison["result"]["joint_pattern"]["sensor_order"]) >= 2
+                extended = read_history(
+                    store,
+                    diagnosis,
+                    snapshot,
+                    "history.compare",
+                    {
+                        **comparison["arguments"],
+                        "sensor_ids": [s.id for s in source.pack.sensors[:8]],
+                    },
+                )
+                assert len(extended["sensors"]) == 8
+                assert len(json.dumps(extended).encode()) <= 12 * 1024
+                compact = compact_comparison(extended)
+                assert comparison_sensors(compact) == extended["sensors"]
+                assert (
+                    len(
+                        json.dumps(
+                            {
+                                "documents": documents,
+                                "comparisons": [compact, compact],
+                            },
+                            separators=(",", ":"),
+                        ).encode()
+                    )
+                    < 11 * 1024
+                )
+                assert sum(task.model_calls for task in tasks) <= 10
+                assert sum(task.tool_calls for task in tasks) <= 18
+        finally:
+            telemetry.close()
 
 
 def test_operations_audit_checks_actual_handoffs_review_and_provenance(investigated):
@@ -467,6 +635,110 @@ def test_engineer_followups_are_questions_not_unbounded_commands(investigated):
         EngineerInterpretation.model_validate(fields)
 
 
+def test_knowledge_is_pinned_inherited_and_applied_to_case_evidence(investigated):
+    store, cases, _ = investigated
+    for _, snapshot, root, diagnosis in cases.values():
+        assert root.knowledge_packet.cards
+        assert diagnosis.knowledge_packet == root.knowledge_packet
+        assert root.knowledge_packet.selected_at > snapshot.window_end
+        assert root.result.interpretation.regional_assessments
+        sources = source_texts(
+            root.result, snapshot, store.tool_receipts(root.id), root.knowledge_packet
+        )
+        assert root.knowledge_packet.cards[0].id in sources
+        forged = root.model_copy(
+            update={
+                "knowledge_packet": root.knowledge_packet.model_copy(
+                    update={"selected_at": root.knowledge_packet.selected_at + timedelta(seconds=1)}
+                )
+            }
+        )
+        with pytest.raises(Conflict, match="task_identity_conflict"):
+            store.save_task(forged, root.version)
+        knowledge_only = root.result.model_copy(deep=True)
+        knowledge_only.interpretation.answer.references = [root.knowledge_packet.cards[0].id]
+        with pytest.raises(ValidationError, match="case evidence"):
+            validate_interpretation(knowledge_only, root)
+        unapplied = root.result.model_copy(deep=True)
+        for paragraph in unapplied.interpretation.cited_paragraphs():
+            paragraph.references = [
+                ref for ref in paragraph.references if not ref.startswith("KN-")
+            ]
+        with pytest.raises(ValidationError, match="at least one pinned"):
+            validate_interpretation(unapplied, root)
+        knowledge_quote_only = root.interpretation_review.rounds[-1].assessment.model_copy(
+            deep=True
+        )
+        knowledge_quote_only.checks[0].support = [
+            support
+            for support in knowledge_quote_only.checks[0].support
+            if support.reference.startswith("KN-")
+        ]
+        with pytest.raises(ValidationError, match="both knowledge and case"):
+            validate_assessment(knowledge_quote_only, root.result, sources)
+        assert compatible(root, diagnosis, snapshot)
+        changed_knowledge = diagnosis.model_copy(update={"knowledge_packet": None})
+        assert not compatible(root, changed_knowledge, snapshot)
+        forged_group = root.result.model_copy(deep=True)
+        forged_group.interpretation.regional_assessments[0].sensor_ids[0] = "UNOBSERVED-SENSOR"
+        with pytest.raises(ValidationError, match="their cited executed comparisons"):
+            validate_interpretation(forged_group, root, store.tool_receipts(root.id))
+
+
+def test_database_itself_fences_packet_mutation_and_wrong_child_inheritance(investigated):
+    store, cases, _ = investigated
+    replay, snapshot, original, _ = cases["S1"]
+    identifier = "knowledge-pin-" + uuid4().hex
+    root = store.create_task(
+        AgentTask(
+            id=identifier,
+            root_id=identifier,
+            generation_id=replay.id,
+            tenant_id=store.tenant_id,
+            site_id=store.site_id,
+            snapshot_id=snapshot.id,
+            role="operator_response",
+            purpose=original.purpose,
+            question="Pin test",
+            mode="scripted",
+            deadline=utc_now() + timedelta(seconds=299),
+            knowledge_packet=original.knowledge_packet,
+        )
+    )
+    claimed = store.claim_task("knowledge-pin-test", task_id=root.id)
+    assert claimed is not None
+    with pytest.raises(Conflict, match="task_identity_conflict"):
+        with store._tx(token=claimed.lease_token) as conn:
+            store._update_task(conn, claimed.model_copy(update={"knowledge_packet": None}))
+    child = claimed.model_copy(
+        update={
+            "id": "knowledge-child-" + uuid4().hex,
+            "parent_id": claimed.id,
+            "role": "sensor_quality",
+            "purpose": "assess_sensor_quality",
+            "state": "QUEUED",
+            "knowledge_packet": None,
+            "version": 1,
+        }
+    )
+    with pytest.raises(Conflict, match="task_identity_conflict"):
+        store.create_child(child, 0, lease_token=claimed.lease_token)
+    assert store.get_task(root.id).knowledge_packet == original.knowledge_packet
+    store.save_task(claimed.model_copy(update={"state": "CANCELLED"}), claimed.version)
+
+
+def test_scripted_paired_ablation_keeps_identical_measurements_and_separate_knowledge(settings):
+    from subsea_copilot.knowledge_evaluation import qualify_knowledge
+
+    report = qualify_knowledge("scripted")
+    assert report["passed"] and report["matching_input_hashes"]
+    off, on = report["arms"]
+    assert off["casefile"]["knowledge_packet"] is None
+    assert on["casefile"]["knowledge_used_ids"]
+    assert off["casefile"]["inspection"] == on["casefile"]["inspection"]
+    assert off["numerical_hypothesis"] == on["numerical_hypothesis"]
+
+
 @pytest.mark.parametrize(
     "tamper", ["missing", "candidate", "source", "quote", "coverage", "decision"]
 )
@@ -507,7 +779,9 @@ def test_uncertain_critic_withholds_report_after_one_revision(investigated):
     assessment.checks[0].verdict = "uncertain"
     assessment.checks[0].reason = "A valve command does not prove a physical movement."
     validate_assessment(
-        assessment, root.result, source_texts(root.result, snapshot, store.tool_receipts(root.id))
+        assessment,
+        root.result,
+        source_texts(root.result, snapshot, store.tool_receipts(root.id), root.knowledge_packet),
     )
     phases = []
 
@@ -670,7 +944,10 @@ def test_fabricated_assertion_is_revised_and_reviewed_with_persisted_budget(
             ):
                 message = output.generations[0].message
                 result = json.loads(message.content)
-                result["interpretation"]["answer"] = {
+                interpretation = (
+                    result if context["phase"] == "reflection" else result["interpretation"]
+                )
+                interpretation["answer"] = {
                     "text": "An independent inspection photograph confirms a pipe-wall crack.",
                     "references": ["OP-VALVE-001"],
                 }

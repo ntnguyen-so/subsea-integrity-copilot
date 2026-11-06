@@ -12,6 +12,20 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from langchain_core.outputs import ChatGeneration, ChatResult
 from pydantic import Field
 
+from subsea_copilot.profiles import comparison_documents, comparison_sensors, expanded_evidence
+
+
+def decoded_output(content: str) -> dict[str, Any]:
+    output: dict[str, Any] = json.loads(content)
+    value = output.get("result")
+    if isinstance(value, dict) and value.get("encoding") == "columnar-comparison-v1":
+        output = {**output, "result": {**value, "sensors": comparison_sensors(value)}}
+    elif isinstance(value, dict) and value.get("encoding") == "columnar-documents-v1":
+        output = {**output, "result": {**value, "documents": comparison_documents(value)}}
+    elif isinstance(value, dict) and value.get("encoding") == "referenced-evidence-v1":
+        output = {**output, "result": expanded_evidence(value)}
+    return output
+
 
 class ScriptedChatModel(BaseChatModel):
     role: str
@@ -53,12 +67,22 @@ class ScriptedChatModel(BaseChatModel):
                     if identifier.startswith("question:")
                     else paragraph["references"][0]
                 )
+                anchors = list(
+                    dict.fromkeys(
+                        [
+                            reference,
+                            *(ref for ref in paragraph["references"] if ref.startswith("KN-")),
+                        ]
+                    )
+                )
                 checks.append(
                     {
                         "paragraph_id": identifier,
                         "verdict": "supported" if supported else "unsupported",
                         "reason": "Offline contract example only; not semantic qualification.",
-                        "support": [{"reference": reference, "quote": sources[reference][:120]}]
+                        "support": [
+                            {"reference": ref, "quote": sources[ref][:120]} for ref in anchors
+                        ]
                         if supported
                         else [],
                     }
@@ -75,9 +99,28 @@ class ScriptedChatModel(BaseChatModel):
                 response_metadata={"mode": "scripted", "model_identity_source": "scripted"},
             )
             return ChatResult(generations=[ChatGeneration(message=critic_message)])
+        if context["phase"] == "reflection":
+            revised_interpretation = context["proposed_interpretation"]
+            revised_interpretation["answer"]["text"] = (
+                "Offline contract example: review the cited measurements and records; "
+                "physical causes remain unconfirmed."
+            )
+            return ChatResult(
+                generations=[
+                    ChatGeneration(
+                        message=AIMessage(
+                            content=json.dumps(revised_interpretation),
+                            response_metadata={
+                                "mode": "scripted",
+                                "model_identity_source": "scripted",
+                            },
+                        )
+                    )
+                ]
+            )
         scope = context["scope"]
         tool_outputs = [
-            json.loads(m.content)
+            decoded_output(m.content)
             for m in messages
             if isinstance(m, ToolMessage) and isinstance(m.content, str)
         ]
@@ -88,7 +131,10 @@ class ScriptedChatModel(BaseChatModel):
                 except ValueError:
                     continue
                 if isinstance(data, dict) and "application_intake" in data:
-                    tool_outputs.extend(entry["output"] for entry in data["application_intake"])
+                    tool_outputs.extend(
+                        decoded_output(json.dumps(entry["output"]))
+                        for entry in data["application_intake"]
+                    )
         history_action, history_review = self._history_action(messages, tool_outputs, context)
         if context["phase"] == "plan":
             question = context["question"].lower()
@@ -235,6 +281,9 @@ class ScriptedChatModel(BaseChatModel):
                     *review.get("document_ids", [])[:1],
                     *review.get("comparison_call_ids", [])[:1],
                 ]
+                knowledge = context.get("domain_knowledge") or {}
+                if knowledge.get("cards"):
+                    references.append(knowledge["cards"][0]["id"])
                 question = context["question"].lower()
                 focus = (
                     "operating_context"
@@ -247,13 +296,19 @@ class ScriptedChatModel(BaseChatModel):
                     if "unknown" in question
                     else "root_cause"
                 )
-                result["interpretation"] = {
+                interpretation: dict[str, Any] = {
                     "focus": focus,
                     "answer": {
                         "text": (
                             "Offline contract example: review the cited measurements and history "
                             "for this question. A plausible explanation is not a confirmed cause; "
                             "the checked evidence below retains the physical uncertainty."
+                            + (
+                                " Research guidance is applied to those observations, not proof "
+                                "of a leak or approved operating authority."
+                                if knowledge
+                                else ""
+                            )
                         ),
                         "references": references,
                     },
@@ -273,6 +328,30 @@ class ScriptedChatModel(BaseChatModel):
                         "Could the affected instruments share a communication or power failure?",
                     ],
                 }
+                comparisons = [
+                    comparison
+                    for output in tool_outputs
+                    for comparison in (
+                        (output.get("result") or {}).get("reviewed_context") or {}
+                    ).get("comparisons", [])
+                ]
+                if knowledge and comparisons:
+                    comparison = comparisons[0]
+                    interpretation["regional_assessments"] = [
+                        {
+                            "sensor_ids": [
+                                sensor["sensor_id"] for sensor in comparison_sensors(comparison)
+                            ],
+                            "hypothesis": "unresolved",
+                            "text": (
+                                "Offline contract example: the cited joint pressure comparison "
+                                "requires expert review of spatial and temporal alternatives. "
+                                "This fixture does not establish a physical cause."
+                            ),
+                            "references": [comparison["call_id"], knowledge["cards"][0]["id"]],
+                        }
+                    ]
+                result["interpretation"] = interpretation
             message = AIMessage(content=json.dumps(result))
         message.response_metadata = {
             "requested_model": None,
@@ -309,6 +388,13 @@ class ScriptedChatModel(BaseChatModel):
         )
 
         def action(name: str, arguments: dict[str, Any]) -> AIMessage:
+            knowledge = context.get("domain_knowledge") or {}
+            if knowledge.get("cards"):
+                arguments = {
+                    **arguments,
+                    "knowledge_ids": [knowledge["cards"][0]["id"]],
+                    "check_question": "Which observed alternatives need expert verification?",
+                }
             return AIMessage(
                 content="",
                 tool_calls=[
@@ -348,13 +434,25 @@ class ScriptedChatModel(BaseChatModel):
                 selected = hits[:1]
             return action("history.read", {"document_ids": [doc["id"] for doc in selected]}), None
         comparisons = [
-            (message.tool_call_id, json.loads(message.content).get("result") or {})
+            (message.tool_call_id, decoded_output(message.content).get("result") or {})
             for message in messages
             if isinstance(message, ToolMessage) and isinstance(message.content, str)
-            if "sensors" in (json.loads(message.content).get("result") or {})
+            if "sensors" in (decoded_output(message.content).get("result") or {})
         ]
         if read_docs and not comparisons and context["history_bounds"]["end_seconds"] >= 20:
             sensors = context["history_sensors"]
+            if not sensors and context.get("network_pressure_table"):
+                table = context["network_pressure_table"]
+                mapped = [dict(zip(table["columns"], row, strict=True)) for row in table["rows"]]
+                sensors = [
+                    {
+                        **row,
+                        "id": row["sensor_id"],
+                        "segment_id": row["sensor_id"].split("-")[0],
+                        "event_support": False,
+                    }
+                    for row in mapped
+                ]
             selected_sensors: list[str] = []
             used: set[str] = set()
             operation = next(
@@ -428,7 +526,7 @@ class ScriptedChatModel(BaseChatModel):
             else "review_instrumentation"
             if instrumentation
             else "inspect_supported_interval"
-            if context["usable_location"]
+            if context["inspection_interval_available"]
             else "human_review",
         }
         return None, review

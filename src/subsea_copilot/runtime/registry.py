@@ -91,6 +91,7 @@ LIMITATIONS = frozenset(
         "uncalibrated_model",
         "missing_data",
         "partial_health_review",
+        "context_budget_exceeded",
     }
 )
 
@@ -115,6 +116,17 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
         if name == "quality.sensor_patterns":
             fields["offset"] = {"type": "integer", "minimum": 0}
         if name.startswith("history."):
+            fields["knowledge_ids"] = {
+                "type": "array",
+                "items": {"type": "string"},
+                "maxItems": 3,
+                "description": "Pinned KN cards motivating this check.",
+            }
+            fields["check_question"] = {
+                "type": "string",
+                "maxLength": 240,
+                "description": "What competing explanation will this read help distinguish?",
+            }
             fields["intent"] = {
                 "type": "string",
                 "enum": [
@@ -156,7 +168,11 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
                 "type": "array",
                 "items": {"type": "string"},
                 "minItems": 2,
-                "maxItems": 4,
+                "maxItems": 8,
+                "description": (
+                    "Joint pressure profiles, graph distances, paired-complete correlations, "
+                    "coverage and before/after changes. Select groups and contrasting observers."
+                ),
             }
             for field in ("start_seconds", "split_seconds", "end_seconds"):
                 fields[field] = {"type": "integer", "minimum": 0}

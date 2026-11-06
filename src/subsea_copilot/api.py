@@ -53,7 +53,7 @@ class LoginForm(Contract):
 
 
 class ReplayCreate(Contract):
-    scenario: Literal["S1", "S2", "S3", "S4", "S5", "S6"]
+    scenario: Literal["S1", "S2", "S3", "S4", "S5", "S6", "S7"]
     seed: int = Field(default=2026, ge=0, le=2**32 - 1)
     mode: Mode = "scripted"
     workflow: Workflow = "agent_assisted"

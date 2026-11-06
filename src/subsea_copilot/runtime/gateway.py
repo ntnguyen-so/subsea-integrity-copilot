@@ -3,9 +3,114 @@
 import json
 from typing import Any
 
-from subsea_copilot.contracts import AgentTask, WindowSnapshot
+from subsea_copilot.contracts import (
+    TOOL_RESULT_MAX_BYTES,
+    AgentTask,
+    QualityFinding,
+    Sensor,
+    WindowSnapshot,
+)
+from subsea_copilot.profiles import compact_comparison
 from subsea_copilot.runtime.registry import REGISTRY, tool_schemas
+from subsea_copilot.synthetic import generate_pack
 from subsea_copilot.validation import ValidationError, compatible
+
+
+def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
+    support = set(snapshot.event.supporting_sensor_ids)
+    return sorted(
+        snapshot.quality.findings,
+        key=lambda f: (
+            f.sensor_id not in support if len(snapshot.quality.findings) > 32 else False,
+            not bool(
+                f.hard_excluded
+                or f.spike_count
+                or f.drift_suspected
+                or f.peer_disagreement
+                or f.missing > f.expected * 0.1
+            ),
+            f.sensor_id,
+            f.channel,
+        ),
+    )
+
+
+def context_sensors(snapshot: WindowSnapshot) -> list[Sensor]:
+    sensors = generate_pack(snapshot.site_id, version=snapshot.pack_version).sensors
+    if len(sensors) <= 32:
+        return sensors
+    findings = {finding.sensor_id: finding for finding in ranked_findings(snapshot)}
+    by_id = {sensor.id: sensor for sensor in sensors}
+    ordered = [by_id[identifier] for identifier in findings]
+    selected = {
+        sensor.id: sensor for sensor in sensors if sensor.id in snapshot.event.supporting_sensor_ids
+    }
+    for segment in dict.fromkeys(sensor.segment_id for sensor in sensors):
+        on_branch = [sensor for sensor in ordered if sensor.segment_id == segment]
+        for flagged in (True, False):
+            candidate = next(
+                (
+                    sensor
+                    for sensor in on_branch
+                    if bool(
+                        findings[sensor.id].anomaly_count
+                        or findings[sensor.id].missing
+                        or findings[sensor.id].hard_excluded
+                    )
+                    == flagged
+                ),
+                None,
+            )
+            if candidate is not None:
+                selected[candidate.id] = candidate
+    for sensor in ordered:
+        if len(selected) >= 24:
+            break
+        selected[sensor.id] = sensor
+    return list(selected.values())[:24]
+
+
+def pressure_regions(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+    if len(snapshot.quality.findings) <= 32:
+        return []
+    pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
+    summaries = {
+        evidence.sensor_id: evidence.value
+        for evidence in snapshot.evidence.values()
+        if evidence.kind == "channel_summary" and isinstance(evidence.value, dict)
+    }
+    regions = []
+    for segment in pack.segments:
+        region: dict[str, Any] = {"segment_id": segment.id}
+        for direction in ("drop", "rise"):
+            observed = [
+                (sensor, summaries.get(sensor.id, {}).get(f"pressure_{direction}_period_seconds"))
+                for sensor in pack.sensors
+                if sensor.segment_id == segment.id
+            ]
+            periods: list[tuple[Sensor, tuple[float, float]]] = []
+            for sensor, period in observed:
+                if period is None:
+                    continue
+                if (
+                    not isinstance(period, list)
+                    or len(period) != 2
+                    or not isinstance(period[0], int | float)
+                    or not isinstance(period[1], int | float)
+                ):
+                    raise ValidationError("pressure_timing", "Invalid measured excursion period.")
+                periods.append((sensor, (float(period[0]), float(period[1]))))
+            region[direction] = {
+                "sensor_ids": [sensor.id for sensor, _ in periods],
+                "failure_domain_ids": sorted({sensor.failure_domain_id for sensor, _ in periods}),
+                "earliest_run_start_seconds": min(
+                    (period[0] for _, period in periods), default=None
+                ),
+                "latest_run_end_seconds": max((period[1] for _, period in periods), default=None),
+            }
+        if region["drop"]["sensor_ids"] or region["rise"]["sensor_ids"]:
+            regions.append(region)
+    return regions
 
 
 class ToolGateway:
@@ -47,6 +152,24 @@ class ToolGateway:
         if name not in REGISTRY[self.task.role].tools:
             raise ValidationError("tool_authority", "Tool is not allowed for this role.")
         self._validate_arguments(name, arguments, schemas)
+        if name.startswith("history.") and self.task.knowledge_packet:
+            applicable = {
+                card.id for card in self.task.knowledge_packet.cards if self.task.role in card.roles
+            }
+            selected = arguments.get("knowledge_ids")
+            question = arguments.get("check_question")
+            if (
+                not isinstance(selected, list)
+                or not 1 <= len(selected) <= 3
+                or any(not isinstance(ref, str) or ref not in applicable for ref in selected)
+                or len(set(selected)) != len(selected)
+                or not isinstance(question, str)
+                or not 1 <= len(question.strip()) <= 240
+            ):
+                raise ValidationError(
+                    "knowledge_check_plan",
+                    "Declare applicable knowledge_ids and a discriminating check_question.",
+                )
 
     def _validate_arguments(
         self,
@@ -126,20 +249,7 @@ class ToolGateway:
             }
         if name == "quality.sensor_patterns":
             start = arguments.get("offset", 0)
-            findings = sorted(
-                snapshot.quality.findings,
-                key=lambda f: (
-                    not bool(
-                        f.hard_excluded
-                        or f.spike_count
-                        or f.drift_suspected
-                        or f.peer_disagreement
-                        or f.missing > f.expected * 0.1
-                    ),
-                    f.sensor_id,
-                    f.channel,
-                ),
-            )
+            findings = ranked_findings(snapshot)
             page = findings[start : start + 8]
             identities = {(f.sensor_id, f.channel) for f in page}
             selected = {
@@ -166,12 +276,26 @@ class ToolGateway:
                 ),
             }
         if name == "ontology.neighbors":
+            metadata = [
+                e.model_dump(mode="json")
+                for e in snapshot.evidence.values()
+                if e.kind in {"sensor_metadata", "topology", "ontology"}
+            ]
+            if len(snapshot.quality.findings) > 32:
+                selected_ids = {sensor.id for sensor in context_sensors(snapshot)}
+                for item in metadata:
+                    value = item["value"]
+                    if isinstance(value, dict) and isinstance(value.get("sensors"), list):
+                        value["sensors"] = [
+                            sensor for sensor in value["sensors"] if sensor["id"] in selected_ids
+                        ]
+                        value["scope"] = {
+                            "total_instruments": len(snapshot.quality.findings),
+                            "included_instruments": len(value["sensors"]),
+                            "partial": True,
+                        }
             return {
-                "metadata": [
-                    e.model_dump(mode="json")
-                    for e in snapshot.evidence.values()
-                    if e.kind in {"sensor_metadata", "topology", "ontology"}
-                ],
+                "metadata": metadata,
                 "failure_domain_count": snapshot.quality.failure_domains_available,
             }
         if name == "event.assess":
@@ -249,7 +373,7 @@ class ToolGateway:
                         if document["id"] in review.document_ids
                     ],
                     "comparisons": [
-                        {"call_id": receipt["call_id"], **receipt["result"]}
+                        compact_comparison({"call_id": receipt["call_id"], **receipt["result"]})
                         for receipt in reads
                         if receipt["call_id"] in review.comparison_call_ids
                         and not receipt.get("error")
@@ -290,8 +414,33 @@ class ToolGateway:
                 if name.startswith("history."):
                     result["investigation_step"] = self.task.tool_calls
                     result["intent"] = arguments["intent"]
-                if len(json.dumps(result, allow_nan=False).encode()) > 12 * 1024:
-                    raise ValidationError("payload_too_large", "Required evidence exceeds 12 KiB.")
+                if len(json.dumps(result, allow_nan=False).encode()) > TOOL_RESULT_MAX_BYTES:
+                    result = None
+                    raise ValidationError("payload_too_large", "Required evidence exceeds 16 KiB.")
+                if self.task.role == "event_diagnosis":
+                    from subsea_copilot.runtime.agent import model_tool_result
+
+                    delivered = [
+                        receipt["result"]
+                        for receipt in self.store.tool_receipts(self.task.id)
+                        if not receipt.get("error")
+                    ]
+                    total = sum(
+                        len(
+                            json.dumps(
+                                model_tool_result({"result": item, "error": None}),
+                                allow_nan=False,
+                                separators=(",", ":"),
+                            )
+                        )
+                        for item in [*delivered, result]
+                    )
+                    if total > 21 * 1024:
+                        result = None
+                        raise ValidationError(
+                            "context_budget_exceeded",
+                            "Read budget exhausted; narrow the request or report the gap.",
+                        )
             except ValidationError as exc:
                 error = exc.code
             self.store.record_tool_call(

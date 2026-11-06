@@ -9,6 +9,10 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
+from .knowledge import KnowledgePacket
+
+TOOL_RESULT_MAX_BYTES = 16 * 1024
+
 Channel = Literal["pressure", "acoustic", "methane", "temperature"]
 Hypothesis = Literal[
     "suspected_leak",
@@ -296,6 +300,13 @@ class CauseExplanation(CitedExplanation):
     stance: Literal["possible", "not_established", "not_testable"]
 
 
+class RegionalAssessment(CitedExplanation):
+    sensor_ids: list[str] = Field(min_length=2, max_length=12)
+    hypothesis: Literal[
+        "leak_pattern", "instrumentation_or_telemetry", "operating_change", "unresolved"
+    ] = Field(description="Agent-generated possible explanation, not a confirmed physical cause.")
+
+
 class EngineerInterpretation(Contract):
     focus: Literal[
         "root_cause",
@@ -306,9 +317,13 @@ class EngineerInterpretation(Contract):
     ]
     answer: CitedExplanation
     competing_causes: list[CauseExplanation] = Field(min_length=1, max_length=3)
+    regional_assessments: list[RegionalAssessment] = Field(default_factory=list, max_length=3)
     follow_up_questions: list[
         Annotated[str, Field(min_length=1, max_length=200, pattern=r"\?\s*$")]
     ] = Field(min_length=1, max_length=3)
+
+    def cited_paragraphs(self) -> list[CitedExplanation]:
+        return [self.answer, *self.competing_causes, *self.regional_assessments]
 
 
 class AgentResult(Contract):
@@ -337,7 +352,7 @@ class GroundingCheck(Contract):
 
 class GroundingAssessment(Contract):
     decision: Literal["accept", "revise"]
-    checks: list[GroundingCheck] = Field(min_length=3, max_length=7)
+    checks: list[GroundingCheck] = Field(min_length=3, max_length=10)
 
 
 class GroundingRound(Contract):
@@ -381,6 +396,7 @@ class AgentTask(Contract):
     automatic: bool = False
     idempotency_key: str | None = None
     history_version: str | None = None
+    knowledge_packet: KnowledgePacket | None = None
     response_protocol: Literal["engineer-v1", "engineer-v2"] | None = None
     interpretation_review: InterpretationReview | None = None
 

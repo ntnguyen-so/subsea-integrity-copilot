@@ -1,0 +1,124 @@
+<testsuites id="" name="" tests="7" failures="3" skipped="0" errors="0" time="904.0888960000001">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T12:01:06.667Z" hostname="" tests="7" failures="3" skipped="0" time="898.636" errors="0">
+<testcase name="brief geometry, correct wall sides and manual comparison agree with actual evidence" classname="dashboard.spec.ts" time="160.787">
+</testcase>
+<testcase name="extended network supports readable branch focus without hiding manual cross-branch evidence" classname="dashboard.spec.ts" time="150.115">
+</testcase>
+<testcase name="automatic report timestamps are explicit and failed analysis cannot clear a numerical warning" classname="dashboard.spec.ts" time="84.938">
+</testcase>
+<testcase name="light theme has readable contrast and the map, chart and legend agree on pressure anomalies" classname="dashboard.spec.ts" time="131.35">
+</testcase>
+<testcase name="knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links" classname="dashboard.spec.ts" time="126.606">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\test-results\dashboard-knowledge-assist-cb32b-ual-guidance-to-check-links\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  dashboard.spec.ts:504:5 › knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#agent-activity-state')
+    Expected substring: "Agent report ready"
+    Received string:    "Agent investigation ready · review findings and next checks"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toContainText" locator('#agent-activity-state') with timeout 15000ms
+      - waiting for locator('#agent-activity-state')
+        9 × locator resolved to <strong id="agent-activity-state">Agents investigating · no reviewed report yet</strong>
+          - unexpected value "Agents investigating · no reviewed report yet"
+        24 × locator resolved to <strong id="agent-activity-state">Agent investigation ready · review findings and n…</strong>
+           - unexpected value "Agent investigation ready · review findings and next checks"
+
+
+      504 |
+      505 | test("knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links", async ({ page }) => {
+    > 506 |   await prepare(page, "S7", 23);
+          |                                                       ^
+      507 |   await expect(page.locator("#agent-activity-state")).toContainText("Agent report ready");
+      508 |   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
+      509 |   const response = await page.request.get(`/api/tasks/${taskId}/casefile`);
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:506:55
+
+    Error Context: ..\..\test-results\dashboard-knowledge-assist-cb32b-ual-guidance-to-check-links\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="153.294">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\test-results\dashboard-two-customer-mod-9e5bf-igation-on-matching-S1-data\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  dashboard.spec.ts:530:5 › two customer modes separate individual sensor alerts from agent investigation on matching S1 data 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#agent-activity-state')
+    Expected substring: "Agent report ready"
+    Received string:    "Agent investigation ready · review findings and next checks"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toContainText" locator('#agent-activity-state') with timeout 15000ms
+      - waiting for locator('#agent-activity-state')
+        33 × locator resolved to <strong id="agent-activity-state">Agent investigation ready · review findings and n…</strong>
+           - unexpected value "Agent investigation ready · review findings and next checks"
+
+
+      563 |   await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
+      564 |   await expect(page.locator("#location-summary")).toContainText("200–600m");
+    > 565 |   await expect(page.locator("#event-summary")).toContainText("not an LLM report");
+          |                                                       ^
+      566 |   await expect(page.locator("#agent-activity-state")).toContainText("Agent report ready");
+      567 |   await expect(page.locator("#agent-findings")).toContainText("historical records read");
+      568 |   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:565:55
+
+    Error Context: ..\..\test-results\dashboard-two-customer-mod-9e5bf-igation-on-matching-S1-data\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="agent work stays separate from a running detector and rejects mismatched automatic handoffs" classname="dashboard.spec.ts" time="91.546">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\test-results\dashboard-agent-work-stays-88059-smatched-automatic-handoffs\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  dashboard.spec.ts:587:5 › agent work stays separate from a running detector and rejects mismatched automatic handoffs 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#agent-activity-state')
+    Expected substring: "Agent report ready"
+    Received string:    "Agent investigation ready · review findings and next checks"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toContainText" locator('#agent-activity-state') with timeout 15000ms
+      - waiting for locator('#agent-activity-state')
+        9 × locator resolved to <strong id="agent-activity-state">Connection unavailable · last recorded agent stat…</strong>
+          - unexpected value "Connection unavailable · last recorded agent status below"
+        24 × locator resolved to <strong id="agent-activity-state">Agent investigation ready · review findings and n…</strong>
+           - unexpected value "Agent investigation ready · review findings and next checks"
+
+
+      607 |   await expect(page.locator("#source-clock")).toContainText("PAUSED");
+      608 |   pending = false;
+    > 609 |   await page.locator("#reconnect").click();
+          |                                                       ^
+      610 |   await expect(page.locator("#agent-activity-state")).toContainText("Agent report ready");
+      611 |   await expect(page.locator("#agent-findings")).toContainText("final decision accepted");
+      612 |   const source = page.locator("#agent-findings .agent-source").first();
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:609:55
+
+    Error Context: ..\..\test-results\dashboard-agent-work-stays-88059-smatched-automatic-handoffs\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

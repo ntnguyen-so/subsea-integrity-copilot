@@ -14,7 +14,7 @@ from pydantic import JsonValue
 
 from .diagnostics import analyze_window
 from .ingest import CanonicalBuffer, normalize_records
-from .synthetic import SCENARIOS, SOURCE_VERSION, generate_scenario
+from .synthetic import SOURCE_VERSION, generate_scenario
 from .warning import monitoring_warning
 
 EXPECTED = {
@@ -86,7 +86,7 @@ def evaluate(seeds: tuple[int, ...] = HELD_OUT_SEEDS) -> dict[str, Any]:
     fault_tp = fault_fp = fault_fn = 0
     elapsed = []
     started = time.perf_counter()
-    for scenario in SCENARIOS:
+    for scenario in EXPECTED:
         for seed in seeds:
             data = generate_scenario(scenario, seed, duration_seconds=180)
             truth = evaluation_truth(scenario, seed)
@@ -131,7 +131,7 @@ def evaluate(seeds: tuple[int, ...] = HELD_OUT_SEEDS) -> dict[str, Any]:
                 widths.append(fit.inspection_end_m - fit.inspection_start_m)
     gates = {
         "all_scenarios_match_expected_investigation": all(
-            confusion[scenario].get(EXPECTED[scenario], 0) == len(seeds) for scenario in SCENARIOS
+            confusion[scenario].get(EXPECTED[scenario], 0) == len(seeds) for scenario in EXPECTED
         ),
         "no_non_leak_false_leak_conclusions": false_positive == 0,
         "detectable_leak_recall_at_least_90_percent": detected >= len(seeds) * 0.9,
@@ -205,7 +205,7 @@ def evaluate_warning_timeliness(seed_count: int = 3) -> dict[str, JsonValue]:
     }
     cases: list[WarningTimingCase] = []
     compute_seconds = []
-    for scenario in SCENARIOS:
+    for scenario in EXPECTED:
         for seed in HELD_OUT_SEEDS[:seed_count]:
             data = generate_scenario(scenario, seed, duration_seconds=180)
             baseline = normalize_records(data.baseline, data.pack)

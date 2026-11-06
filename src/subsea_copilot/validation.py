@@ -62,6 +62,8 @@ def compatible(task: AgentTask, other: AgentTask, snapshot: WindowSnapshot) -> b
         and other.snapshot_id == snapshot.id
         and other.mode == task.mode
         and other.history_version == task.history_version
+        and (other.knowledge_packet.identity() if other.knowledge_packet else None)
+        == (task.knowledge_packet.identity() if task.knowledge_packet else None)
         and other.purpose == REGISTRY[other.role].purpose
         and other.state in {"SUCCEEDED", "ABSTAINED"}
         and other.result is not None
@@ -137,6 +139,11 @@ def _validate_with_policy(
         or task.generation_id != snapshot.generation_id
     ):
         reject("scope", "Result scope differs from pinned evidence.")
+    if task.knowledge_packet and (
+        task.knowledge_packet.site_id != snapshot.site_id
+        or task.knowledge_packet.pack_version != snapshot.pack_version
+    ):
+        reject("knowledge_scope", "Domain guidance differs from the pinned site or geometry.")
     if result.summary not in {"", "Evidence references only."}:
         reject("certainty", "Unrestricted prose is not an accepted factual channel.")
     if task.purpose != policy.purpose:
@@ -270,6 +277,8 @@ def _validate_with_policy(
     if not set(result.limitations) <= LIMITATIONS | ledger_codes:
         reject("limitations", "Unknown uncertainty vocabulary.")
     mandatory = set(ledger_codes)
+    if any(receipt.get("error") == "context_budget_exceeded" for receipt in receipts):
+        mandatory.add("context_budget_exceeded")
     if snapshot.quality.status == "WARMING_UP" and "WARMING_UP" not in ledger_codes:
         mandatory.add("warming_up")
     if snapshot.quality.status == "COVERAGE_LOST" and "COVERAGE_LOST" not in ledger_codes:
@@ -354,7 +363,7 @@ def _validate_with_policy(
         reject("history_authority", "Only a history-enabled diagnosis can introduce context.")
     from subsea_copilot.interpretation import validate_interpretation
 
-    validate_interpretation(result, task)
+    validate_interpretation(result, task, receipts)
     if task.response_protocol == "engineer-v2" and task.state in {"SUCCEEDED", "ABSTAINED"}:
         from subsea_copilot.grounding import validate_review
 

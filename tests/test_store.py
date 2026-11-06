@@ -33,6 +33,12 @@ def test_retry_identity_keeps_execution_inputs() -> None:
     assert not Store._compatible(original.model_dump(mode="json"), changed)
 
 
+def test_archived_retry_without_new_optional_knowledge_field_remains_compatible() -> None:
+    original = task()
+    archived = original.model_dump(mode="json", exclude={"knowledge_packet"})
+    assert Store._compatible(archived, original)
+
+
 def test_store_refuses_unbounded_scope_before_connecting() -> None:
     with pytest.raises(ScopeError):
         Store("not a database", tenant_id="")

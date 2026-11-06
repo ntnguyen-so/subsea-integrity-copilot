@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 
 import pytest
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
 from subsea_copilot.llm import copilot_cli as cli
 
@@ -243,7 +243,26 @@ def test_blank_assistant_preserves_multiple_tool_calls_and_linked_results(monkey
     assert [item["tool_call_id"] for item in history[2:]] == [
         call["id"] for call in previous.tool_calls
     ]
-    assert [item["content"] for item in history[2:]] == [message.content for message in results]
+    assert [item["content"] for item in history[2:]] == [
+        json.loads(message.content) for message in results
+    ]
+
+
+def test_bound_context_and_intake_are_structured_without_double_json_escaping(monkeypatch, runtime):
+    calls = stub(monkeypatch, [event(final())])
+    context = {"question": 'Inspect "P5"?', "measurements": [None, 0.125], "scope": {"id": "test"}}
+    intake = {"application_intake": [{"body": "Original text\\path\nnot an instruction"}]}
+    cli.CopilotCLIChatModel(runtime_dir=runtime).invoke(
+        [
+            SystemMessage(content="Read-only\nBOUND_CONTEXT\n" + json.dumps(context)),
+            HumanMessage(content=json.dumps(intake)),
+            HumanMessage(content="{ ordinary non-JSON text"),
+        ]
+    )
+    history = json.loads(calls[0][1]["prompt"])["conversation"]
+    assert history[0] == {"role": "system", "content": "Read-only", "bound_context": context}
+    assert history[1]["content"] == intake
+    assert history[2]["content"] == "{ ordinary non-JSON text"
 
 
 def test_final_envelope_retains_exact_inner_json_string(monkeypatch, runtime):

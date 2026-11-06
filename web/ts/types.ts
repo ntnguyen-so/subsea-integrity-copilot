@@ -33,7 +33,8 @@ export interface MonitoringEpisode { id: string; site_id: string; generation_id:
 export interface HistoryInvestigation { assessment: "operating_change_plausible" | "instrumentation_context" | "unresolved"; document_ids: string[]; rejected_document_ids: string[]; comparison_call_ids: string[]; next_action: string }
 export interface CitedExplanation { text: string; references: string[] }
 export interface CauseExplanation extends CitedExplanation { cause: "leak" | "operating_change" | "instrumentation_or_telemetry"; stance: "possible" | "not_established" | "not_testable" }
-export interface EngineerInterpretation { focus: string; answer: CitedExplanation; competing_causes: CauseExplanation[]; follow_up_questions: string[] }
+export interface RegionalAssessment extends CitedExplanation { sensor_ids: string[]; hypothesis: "leak_pattern" | "instrumentation_or_telemetry" | "operating_change" | "unresolved" }
+export interface EngineerInterpretation { focus: string; answer: CitedExplanation; competing_causes: CauseExplanation[]; follow_up_questions: string[]; regional_assessments?: RegionalAssessment[] }
 export interface InterpretationReview { protocol: "grounding-v1"; rounds: { candidate_hash: string; assessment: { decision: "accept" | "revise"; checks: { paragraph_id: string; verdict: string; reason: string; support: { reference: string; quote: string }[] }[] } }[] }
 export interface AgentResult { outcome: string; claim_refs: string[]; evidence_ids: string[]; limitations: string[]; hypothesis: string | null; recommendation_ids: string[]; summary: string; investigation: HistoryInvestigation | null; interpretation: EngineerInterpretation | null }
 export interface AgentTask { id: string; root_id: string; site_id: string; generation_id: string; snapshot_id: string; episode_id: string | null; parent_id: string | null; role: string; purpose: string; question: string; mode: Mode; state: string; created_at: string; updated_at: string; model_calls: number; tool_calls: number; plan: string[]; result: AgentResult | null; answer: string | null; error_code: string | null; error_message: string | null; automatic: boolean }
@@ -53,5 +54,17 @@ export interface InvestigationCase {
   provider_cost_usd: null; authority: string;
   report_target_seconds: number; report_target_met: boolean;
   interpretation_review: InterpretationReview | null;
+  knowledge_packet: KnowledgePacket | null;
+  knowledge_used_ids: string[];
 }
 export interface TaskDetail { task: AgentTask; children: AgentTask[]; receipts: Record<string, Json>[]; investigation_receipts: Record<string, Json>[]; casefile: InvestigationCase | null }
+export interface KnowledgeCard {
+  id: string; title: string; kind: "heuristic" | "procedure"; status: "draft" | "demo_curated" | "retired";
+  guidance: string; limitations: string[]; review_basis: string;
+  verification_steps?: string[]; counterexamples?: string[]; applies_when?: string;
+  sources: { reference: string; locator: string; boundary: string }[];
+}
+export interface KnowledgePacket {
+  version: string; selected_at: string; authority: "synthetic_advisory_only";
+  cards: KnowledgeCard[]; excluded: Record<string, string>;
+}

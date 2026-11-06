@@ -411,6 +411,11 @@ class Monitor:
             episode.dispatch_status = exc.code
             self.store.save_episode(episode)
         except AgentValidationError as exc:
+            if exc.code == "knowledge_unavailable":
+                logger.warning("Agent admission withheld: knowledge_unavailable")
+                episode.dispatch_status = "knowledge_unavailable"
+                self.store.save_episode(episode)
+                return
             if exc.code not in ("proxy_auth", "proxy_quota"):
                 raise
             episode.dispatch_status = "agent_unavailable"

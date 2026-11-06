@@ -44,6 +44,7 @@ let createRetry: { bodyKey: string; id: string } | null = null;
 let controlRetry: { bodyKey: string; id: string } | null = null;
 let activeTab = "live";
 let comparisonWindowId: string | null = null;
+let mapSegment = "";
 let comparisonToken = 0;
 const comparisonSensorIds = new Set<string>();
 const currentSource = "pressure-v3";
@@ -214,6 +215,7 @@ async function chooseReplay(id: string): Promise<void> {
   if (currentReplayId === id && projection) connectStream(id, generationToken);
 }
 function resetView(): void {
+  mapSegment = ""; select("map-focus").value = "";
   automaticDetail = null; automaticReadKey = null; automaticReadError = null;
   delete box("automatic-progress").dataset.renderKey; delete box("automatic-progress").dataset.task;
   box("agent-activity").hidden = true; box("agent-findings").replaceChildren();
@@ -536,9 +538,23 @@ function renderMap(): void {
   const focusedId = document.activeElement?.getAttribute("data-sensor");
   const { pack } = projection;
   const window = selectedWindow;
+  const extended = pack.sensors.length > 32;
+  box("map-focus-control").hidden = !extended;
+  box("network-scale").hidden = !extended;
+  const focus = select("map-focus");
+  if (focus.dataset.pack !== pack.version) {
+    focus.replaceChildren(new Option("Entire network", ""), ...pack.segments.map(segment => new Option(`${segment.id} · ${segment.name}`, segment.id)));
+    focus.dataset.pack = pack.version; focus.value = mapSegment;
+  }
+  const segments = pack.segments.filter(segment => !mapSegment || segment.id === mapSegment);
+  const sensors = pack.sensors.filter(sensor => !mapSegment || sensor.segment_id === mapSegment);
+  if (extended) {
+    const flags = pack.sensors.filter(sensor => sensorFlags(window, sensor.id).anomaly || sensorFlags(window, sensor.id).quality || sensorFlags(window, sensor.id).missing).length;
+    text("network-scale", `${(pack.segments.reduce((sum, segment) => sum + segment.length_m, 0) / 1000).toFixed(1)} km · ${pack.segments.length} segments · ${pack.sensors.length} instruments · ${flags} flagged in the inspected window. Compare timing and shared gateways; choose a branch for station labels.`);
+  }
   map.dataset.snapshot = window?.id || "";
   const evidence = selectedEvidenceId && window ? window.evidence[selectedEvidenceId] : null;
-  const points = [...pack.sensors.map(sensor => sensor.position), ...pack.segments.flatMap(segment => segment.points)];
+  const points = [...sensors.map(sensor => sensor.position), ...segments.flatMap(segment => segment.points)];
   if (!points.length) return;
   const xmin = Math.min(...points.map(point => point.x)), xmax = Math.max(...points.map(point => point.x));
   const ymin = Math.min(...points.map(point => point.y)), ymax = Math.max(...points.map(point => point.y));
@@ -547,15 +563,15 @@ function renderMap(): void {
   map.replaceChildren(svg("title", {}, "Synthetic pipeline network; sensor health and event support encoded separately"));
   for (let xx = 40; xx < 760; xx += 40) map.append(svg("line", { x1: xx, y1: 30, x2: xx, y2: 490, stroke: "var(--grid)", "stroke-width": 1 }));
   for (let yy = 30; yy < 510; yy += 40) map.append(svg("line", { x1: 30, y1: yy, x2: 730, y2: yy, stroke: "var(--grid)", "stroke-width": 1 }));
-  for (const segment of pack.segments) {
+  for (const segment of segments) {
     const coords = segment.points.map(project);
     map.append(svg("polyline", { points: coords.map(point => `${point.x},${point.y}`).join(" "), class: "pipe", "data-segment-id": segment.id }));
     const label = segment.id === "P1" ? coords[0] : coords[coords.length - 1];
-    if (label) map.append(svg("text", { x: label.x, y: label.y + (segment.id === "P1" ? 30 : -25), "text-anchor": "middle" }, `${segment.name} / ${segment.id} / ${segment.length_m}m`));
+    if (label) map.append(svg("text", { x: label.x, y: label.y + (segment.id === "P1" ? 30 : -25), "text-anchor": "middle" }, extended && !mapSegment ? segment.id : `${segment.name} / ${segment.id} / ${segment.length_m}m`));
   }
   const location = sensorAlertsOnly() ? null : window?.location;
   if (location?.status === "located" && location.best && location.inspection_start_m !== null && location.inspection_end_m !== null) {
-    const segment = pack.segments.find(item => item.id === location.best?.segment_id);
+    const segment = segments.find(item => item.id === location.best?.segment_id);
     if (segment) {
       const start = project(segment.points[0]), end = project(segment.points[segment.points.length - 1]);
       const at = (chainage: number): string => {
@@ -566,12 +582,13 @@ function renderMap(): void {
     }
   }
   for (const candidate of location?.compatible || []) {
+    if (mapSegment && candidate.segment_id !== mapSegment) continue;
     const pos = project(candidate.position);
     const ring = svg("rect", { x: pos.x - 8, y: pos.y - 8, width: 16, height: 16, transform: `rotate(45 ${pos.x} ${pos.y})`, class: "candidate" });
     ring.append(svg("title", {}, `Inspection interval boundary: ${candidate.segment_id}, ${candidate.chainage_m}m; not a leak coordinate`));
     map.append(ring);
   }
-  for (const [index, sensor] of pack.sensors.entries()) {
+  for (const [index, sensor] of sensors.entries()) {
     const position = project(sensor.position);
     let stationPosition = { ...position };
     const segment = pack.segments.find(item => item.id === sensor.segment_id);
@@ -595,8 +612,8 @@ function renderMap(): void {
     group.append(svg("circle", { cx: position.x, cy: position.y, r: 6, class: "sensor-dot" }));
     if (selected) group.append(svg("circle", { cx: position.x, cy: position.y, r: 10, class: "selection-ring" }));
     if (fault) group.append(svg("path", { d: `M${position.x - 3} ${position.y - 3}L${position.x + 3} ${position.y + 3}M${position.x - 3} ${position.y + 3}L${position.x + 3} ${position.y - 3}`, class: "quality-mark" }));
-    const labelOnLeft = sensor.segment_id === "P2";
-    if (sensor.id.endsWith(labelOnLeft ? "-B" : "-A")) {
+    const labelOnLeft = sensor.segment_id === "P2" || sensor.segment_id === "P4";
+    if ((!extended || mapSegment || selected || support) && sensor.id.endsWith(labelOnLeft ? "-B" : "-A")) {
       group.append(svg("text", { x: stationPosition.x + (labelOnLeft ? -27 : 27), y: stationPosition.y + 4,
         "text-anchor": labelOnLeft ? "end" : "start", class: "station-label" }, `${sensor.station_id} A/B`));
     }
@@ -606,7 +623,7 @@ function renderMap(): void {
       if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectSensor(sensor.id); }
       if (["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) {
         event.preventDefault();
-        const next = event.key === "Home" ? 0 : event.key === "End" ? pack.sensors.length - 1 : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + pack.sensors.length) % pack.sensors.length;
+        const next = event.key === "Home" ? 0 : event.key === "End" ? sensors.length - 1 : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + sensors.length) % sensors.length;
         const target = [...map.querySelectorAll<SVGGElement>("[data-sensor]")][next];
         target?.focus();
       }
@@ -845,6 +862,10 @@ async function compareSensors(): Promise<void> {
   }
 }
 function selectSensor(id: string): void {
+  const sensor = projection?.pack.sensors.find(item => item.id === id);
+  if (mapSegment && sensor && sensor.segment_id !== mapSegment) {
+    mapSegment = sensor.segment_id; select("map-focus").value = mapSegment;
+  }
   selectedSensorId = id; selectedEvidenceId = null;
   renderMap(); renderSensorList(); void loadSensor();
 }
@@ -1310,6 +1331,7 @@ controlButton("show-agent-work").addEventListener("click", () => {
 controlButton("compare-sensors").addEventListener("click", () => { void compareSensors(); });
 controlButton("clear-comparison").addEventListener("click", () => { comparisonSensorIds.clear(); renderSensorList(); });
 select("scenario").addEventListener("change", updateControls);
+select("map-focus").addEventListener("change", () => { mapSegment = select("map-focus").value; renderMap(); });
 select("replay-history").addEventListener("change", () => { const id = select("replay-history").value; if (id) void chooseReplay(id); });
 controlButton("play").addEventListener("click", () => { void command(projection?.replay.state === "PLAYING" ? "pause" : "play"); });
 controlButton("step").addEventListener("click", () => { void command("step"); });

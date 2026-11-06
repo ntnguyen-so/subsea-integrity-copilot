@@ -78,8 +78,11 @@ This tests interpreting operating records to prioritize numerically bracketed
 areas, not better leak coordinates or field accuracy. Deprioritized areas are
 not cleared of leaks.
 
-**Knowledge transfer.** The demo uses versioned fictional procedures and incident
-records, not automatically acquired tacit expertise. In a customer pilot, experts
+**Knowledge transfer.** Versioned research-curated guidance and an investigation
+program are pinned with their provenance; incident records are synthetic.
+Agents apply the guidance to joint sensor comparisons and competing regional
+hypotheses, separately from numerical screening. This is not SME-approved or
+automatically acquired tacit expertise. In a customer pilot, experts
 must elicit, review and approve procedures and examples before reuse. Compare
 newcomer and experienced-engineer decisions; onboarding benefit is a hypothesis,
 not a measured result.

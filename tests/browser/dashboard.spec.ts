@@ -2,28 +2,120 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import type { Projection } from "../../web/ts/types";
 
-async function prepare(page: Page, scenario: string, steps: number, mode = "scripted", workflow = "agent_assisted"): Promise<{ id: string; headers: Record<string, string> }> {
-  const password = process.env.SUBSEA_OPERATOR_PASSWORD;
-  if (!password) throw new Error("Load the owned environment before browser qualification");
-  const login = await page.request.post("/api/login", { data: { username: "operator", password } });
-  expect(login.status()).toBe(200);
-  const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
-  const created = await page.request.post("/api/replays", {
-    headers, data: { scenario, mode, workflow, seed: 2026, idempotency_key: `dashboard-${Date.now()}-${scenario}` },
-  });
-  expect(created.status()).toBe(200);
-  const { id } = await created.json();
-  for (let index = 0; index < steps; index++) {
-    const stepped = await page.request.post(`/api/replays/${id}/control`, {
-      headers, data: { action: "step", idempotency_key: `dashboard-step-${index}` },
-    });
-    expect(stepped.status()).toBe(200);
+test("extended network qualifies a fresh hosted investigation against matching sensor-only evidence", async ({ page }) => {
+  test.skip(process.env.SUBSEA_QUALIFY_DASHBOARD_LIVE !== "1", "Opt in explicitly; this consumes hosted inference.");
+  test.setTimeout(600_000);
+  const started = performance.now();
+  const frames: unknown[] = [];
+  let outcome = "failed";
+  let evidence: Record<string, unknown> = {};
+  try {
+    const baseline = await prepare(page, "S7", 23, "scripted", "sensor_alerts");
+    const baselineProjection: Projection = await (await page.request.get(`/api/replays/${baseline.id}/projection`, { maxRetries: 2 })).json();
+    expect(baselineProjection.tasks).toHaveLength(0);
+    expect(baselineProjection.episodes).toHaveLength(0);
+    evidence = { baseline: baselineProjection };
+    const agent = await prepare(page, "S7", 23, "live");
+    const initial: Projection = await (await page.request.get(`/api/replays/${agent.id}/projection`, { maxRetries: 2 })).json();
+    evidence.agent_replay_id = agent.id;
+    expect(initial.latest_window!.input_hash).toBe(baselineProjection.latest_window!.input_hash);
+    expect(initial.latest_window!.end_seconds).toBe(110);
+    await expect(page.locator("#agent-activity")).toBeVisible();
+    await expect(page.locator("#topology [data-sensor]")).toHaveCount(112);
+    await expect.poll(async () => {
+      const current: Projection = await (await page.request.get(`/api/replays/${agent.id}/projection`, { maxRetries: 2 })).json();
+      const root = current.tasks.find(task => task.automatic && !task.parent_id);
+      frames.push({
+        observed_after_seconds: (performance.now() - started) / 1000,
+        source_seconds: current.replay.clock_seconds,
+        tasks: current.tasks.map(task => ({
+          id: task.id, role: task.role, state: task.state, snapshot_id: task.snapshot_id,
+          model_calls: task.model_calls, tool_calls: task.tool_calls, error_code: task.error_code,
+        })),
+        pending_windows: current.episodes.map(episode => episode.pending_window_id),
+        activity: await page.locator("#agent-activity").textContent(),
+      });
+      if (root?.state === "FAILED") throw new Error(`Hosted S7 report withheld: ${root.error_code}`);
+      return root !== undefined && ["SUCCEEDED", "ABSTAINED"].includes(root.state)
+        && !current.episodes.some(episode => episode.pending_window_id);
+    }, { timeout: 300_000, intervals: [3000, 5000] }).toBe(true);
+    await expect(page.locator("#automatic-state")).toContainText(/COPILOT HOSTED · (REPORT AVAILABLE|ABSTENTION)/);
+    const taskId = await page.locator("#automatic-state").getAttribute("data-task");
+    const response = await page.request.get(`/api/tasks/${taskId}/casefile`, { maxRetries: 2 });
+    expect(response.status()).toBe(200);
+    const handoff = await response.json();
+    evidence.casefile = handoff;
+    expect(handoff.input_hash).toBe(baselineProjection.latest_window!.input_hash);
+    expect(handoff.inspection).toBeNull();
+    expect(handoff.knowledge_packet.authority).toBe("synthetic_advisory_only");
+    expect(handoff.knowledge_used_ids.length).toBeGreaterThan(0);
+    expect(handoff.interpretation.regional_assessments.length).toBeGreaterThan(0);
+    expect(handoff.steps.some((step: { tool: string; arguments: Record<string, unknown> }) =>
+      step.tool === "history.compare" && Array.isArray(step.arguments.knowledge_ids)
+      && step.arguments.knowledge_ids.length > 0 && typeof step.arguments.check_question === "string")).toBe(true);
+    expect(handoff.interpretation_review.rounds.at(-1).assessment.decision).toBe("accept");
+    expect(handoff.report_target_met).toBe(true);
+    expect(handoff.sources.length).toBeGreaterThan(0);
+    expect(handoff.comparisons.length).toBeGreaterThan(0);
+    const cited = new Set(handoff.sources.filter((source: { use: string }) => source.use === "cited")
+      .map((source: { document: { id: string } }) => source.document.id));
+    expect(cited.has("OP-P2-EXTENDED-001")).toBe(true);
+    expect(cited.has("MAINT-P7-GW-002")).toBe(true);
+    expect(handoff.comparisons.some((comparison: { sensors: { sensor_id: string; change_bar: number | null }[] }) =>
+      comparison.sensors.some(sensor => sensor.sensor_id.startsWith("P5-")
+        && sensor.change_bar !== null && Math.abs(sensor.change_bar) >= .2))).toBe(true);
+    await expect(page.locator("#agent-findings")).toContainText("P5");
+    await page.locator("#map-focus").selectOption("P5");
+    await expect(page.locator("#topology [data-sensor]")).toHaveCount(16);
+    await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
+    await expect(page.locator("#agent-findings")).toContainText("Why these checks");
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1);
+    await page.screenshot({ path: "runtime/extended-network-agent.png", fullPage: true });
+    outcome = "passed";
+  } catch (error) {
+    const message = error instanceof Error ? error.message.split("\nCall log:")[0] : "Qualification failed";
+    evidence.error = message;
+    throw new Error(message);
+  } finally {
+    await writeFile("runtime/extended-network-live.json", JSON.stringify({
+      outcome, elapsed_seconds: (performance.now() - started) / 1000,
+      observation_get_max_retries: 2, inference_retries: 0,
+      limitations: [
+        "Single synthetic workload, not field performance or measured engineering-time savings.",
+        "Numerical tools determine the inspection interval; the LLM investigates context.",
+        "Bounded, partial sensor-health review; one physical leak, not multi-leak localization.",
+      ],
+      ...evidence, frames,
+    }, null, 2) + "\n");
   }
-  await page.goto("/");
-  await expect(page.locator("#create-replay")).toBeEnabled();
-  await page.locator("#replay-history").selectOption(id);
-  await expect(page.locator("#channel-charts svg")).toHaveCount(1);
-  return { id, headers };
+});
+
+async function prepare(page: Page, scenario: string, steps: number, mode = "scripted", workflow = "agent_assisted"): Promise<{ id: string; headers: Record<string, string> }> {
+  try {
+    const password = process.env.SUBSEA_OPERATOR_PASSWORD;
+    if (!password) throw new Error("Load the owned environment before browser qualification");
+    const login = await page.request.post("/api/login", { data: { username: "operator", password } });
+    expect(login.status()).toBe(200);
+    const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
+    const created = await page.request.post("/api/replays", {
+      headers, data: { scenario, mode, workflow, seed: 2026, idempotency_key: `dashboard-${Date.now()}-${scenario}` },
+    });
+    expect(created.status()).toBe(200);
+    const { id } = await created.json();
+    for (let index = 0; index < steps; index++) {
+      const stepped = await page.request.post(`/api/replays/${id}/control`, {
+        headers, data: { action: "step", idempotency_key: `dashboard-step-${index}` },
+      });
+      expect(stepped.status()).toBe(200);
+    }
+    await page.goto("/");
+    await expect(page.locator("#create-replay")).toBeEnabled();
+    await page.locator("#replay-history").selectOption(id);
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1);
+    return { id, headers };
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message.split("\nCall log:")[0] : "Replay preparation failed");
+  }
 }
 
 test("brief geometry, correct wall sides and manual comparison agree with actual evidence", async ({ page }) => {
@@ -106,6 +198,51 @@ test("brief geometry, correct wall sides and manual comparison agree with actual
   await expect(page.locator("#compare-sensors")).toHaveText("Compare event / fault sensors");
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "runtime/dashboard-engineer-desktop.png", fullPage: true });
+});
+
+test("extended network supports readable branch focus without hiding manual cross-branch evidence", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message.split("\nCall log:")[0]));
+  const { id } = await prepare(page, "S7", 29, "scripted", "sensor_alerts");
+  const projection: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+  expect(projection.tasks).toHaveLength(0);
+  expect(projection.episodes).toHaveLength(0);
+  await expect(page.locator("#network-scale")).toContainText("11.2 km · 7 segments · 112 instruments");
+  await expect(page.locator("#topology [data-sensor]")).toHaveCount(112);
+  await expect(page.locator("#sensor-list tbody tr")).toHaveCount(112);
+  await expect(page.locator("#topology .station-label")).toHaveCount(1);
+  await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
+  await page.locator("#map-focus").selectOption("P5");
+  await expect(page.locator("#topology [data-sensor]")).toHaveCount(16);
+  await expect(page.locator("#topology .station-label")).toHaveCount(8);
+  const first = page.locator('#topology [data-sensor="P5-ST1-A"]');
+  await first.focus();
+  await first.press("End");
+  await expect(page.locator('#topology [data-sensor="P5-ST8-B"]')).toBeFocused();
+  await page.getByRole("button", { name: "Trend P7-ST3-A", exact: true }).click();
+  await expect(page.locator("#map-focus")).toHaveValue("P7");
+  await expect(page.locator("#sensor-title")).toContainText("P7-ST3-A");
+  await expect(page.locator("#channel-charts svg")).toHaveCount(1);
+  await page.locator("#map-focus").selectOption("");
+  for (const sensor of ["P5-ST4-A", "P5-ST5-A", "P7-ST1-A", "P7-ST2-A"]) {
+    await page.getByRole("checkbox", { name: `Compare ${sensor}`, exact: true }).check();
+  }
+  await page.locator("#compare-sensors").click();
+  await expect(page.locator("#comparison-charts svg")).toHaveCount(4);
+  await expect(page.locator("#comparison-charts article > h3")).toHaveText([
+    "P5-ST4-A / gateway-P5-1", "P5-ST5-A / gateway-P5-0",
+    "P7-ST1-A / gateway-P7-0", "P7-ST2-A / gateway-P7-1",
+  ]);
+  const snapshots = await page.evaluate(() => ["topology", "channel-charts"]
+    .map(id => document.getElementById(id)!.getAttribute("data-snapshot")));
+  expect(new Set(snapshots).size).toBe(1);
+  expect(snapshots[0]).toBe(projection.latest_window!.id);
+  await expect(page.locator("#window-history")).toHaveValue(projection.latest_window!.id);
+  await page.screenshot({ path: "runtime/extended-network-manual.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#map-focus").selectOption("P7");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
 });
 
 test("server-confirmed clock and selected trends stay live; only explicit review pins them", async ({ page }) => {
@@ -365,12 +502,40 @@ test("unassessed sensors are grey rather than apparently healthy during warm-up"
   expect(colors[0]).not.toBe(colors[2]);
 });
 
+test("knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links", async ({ page }) => {
+  await prepare(page, "S7", 23);
+  await expect(page.locator("#agent-activity-state")).toContainText("Agent investigation ready");
+  const taskId = await page.locator("#automatic-state").getAttribute("data-task");
+  const response = await page.request.get(`/api/tasks/${taskId}/casefile`);
+  expect(response.status()).toBe(200);
+  const handoff = await response.json();
+  expect(handoff.inspection).toBeNull();
+  expect(handoff.knowledge_packet.authority).toBe("synthetic_advisory_only");
+  expect(handoff.interpretation.regional_assessments.length).toBeGreaterThan(0);
+  await expect(page.locator("#agent-findings .agent-region")).toHaveCount(handoff.interpretation.regional_assessments.length);
+  const checks = page.locator("#agent-findings .agent-checks");
+  await checks.locator("summary").click();
+  await expect(checks.locator("li")).toHaveCount(handoff.steps.filter((step: { tool: string }) => step.tool.startsWith("history.")).length);
+  await expect(checks).toContainText("KN-");
+  for (const step of handoff.steps.filter((step: { tool: string }) => step.tool === "history.compare")) {
+    await expect(checks.locator(`[data-call-id="${step.call_id}"]`)).toContainText(step.arguments.check_question);
+  }
+  await page.locator("#agent-findings .agent-knowledge > summary").click();
+  await expect(page.locator("#agent-findings .knowledge-card")).toHaveCount(handoff.knowledge_used_ids.length);
+  await expect(page.locator("#agent-findings")).not.toContainText(/\bdemo\b/i);
+  await page.locator("#map-focus").selectOption("P5");
+  await expect(page.locator("#topology [data-sensor]")).toHaveCount(16);
+  await expect(page.locator("#channel-charts svg")).toHaveCount(1);
+  await page.screenshot({ path: "runtime/joint-pattern-knowledge-dashboard.png", fullPage: true });
+});
+
 test("two customer modes separate individual sensor alerts from agent investigation on matching S1 data", async ({ page }) => {
-  const baseline = await prepare(page, "S1", 37, "live", "sensor_alerts");
+  const baseline = await prepare(page, "S1", 23, "live", "sensor_alerts");
   await expect(page.locator("#workflow option")).toHaveText(["Sensor alerts only", "Agent-assisted investigation"]);
   await expect(page.locator("#mode")).toHaveCount(0);
   await expect(page.locator("#inference-mode")).toContainText("SENSOR ALERTS ONLY");
   await expect(page.locator("#manual-workflow")).toBeVisible();
+  await expect(page.locator("#monitoring-warning")).not.toContainText(/\bdemo\b/i);
   await expect(page.locator(".agent-status-panel")).toBeHidden();
   await expect(page.locator("#agent-activity")).toBeHidden();
   await expect(page.locator("#question-tools")).toBeHidden();
@@ -391,7 +556,7 @@ test("two customer modes separate individual sensor alerts from agent investigat
   await page.locator("#tab-evidence").focus();
   await page.keyboard.press("ArrowDown");
   await expect(page.locator("#tab-audit")).toHaveAttribute("aria-selected", "true");
-  const assisted = await prepare(page, "S1", 37);
+  const assisted = await prepare(page, "S1", 23);
   const after: Projection = await (await page.request.get(`/api/replays/${assisted.id}/projection`)).json();
   expect(after.latest_window!.input_hash).toBe(before.latest_window!.input_hash);
   await expect(page.locator("#manual-workflow")).toBeHidden();
@@ -400,8 +565,8 @@ test("two customer modes separate individual sensor alerts from agent investigat
   await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
   await expect(page.locator("#location-summary")).toContainText("200–600m");
   await expect(page.locator("#event-summary")).toContainText("not an LLM report");
-  await expect(page.locator("#agent-activity-state")).toContainText("Agent report ready");
-  await expect(page.locator("#agent-findings")).toContainText("historical records read");
+  await expect(page.locator("#agent-activity-state")).toContainText("Agent investigation ready");
+  await expect(page.locator("#agent-findings")).toContainText("operational records read");
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
   const detail = await (await page.request.get(`/api/tasks/${taskId}`)).json();
   const handoff = detail.casefile;
@@ -412,7 +577,7 @@ test("two customer modes separate individual sensor alerts from agent investigat
   await expect(page.locator("#workflow-comparison")).toHaveAttribute("data-snapshot", handoff.snapshot_id);
   await expect(page.locator("#workflow-comparison")).toHaveAttribute("data-input-hash", handoff.input_hash);
   await expect(page.locator(".workflow-existing")).toContainText("No combined leak/malfunction classification");
-  await expect(page.locator(".workflow-existing")).toContainText("10 minutes is a planning assumption");
+  await expect(page.locator(".workflow-existing")).toContainText("Not yet measured");
   await expect(page.locator('.workflow-added [data-value="classification"]')).toContainText("Possible leak, not confirmed");
   await expect(page.locator(".workflow-added")).toContainText(`${handoff.sources.length} documents read`);
   await expect(page.locator(".workflow-added")).toContainText("Not a live-model latency measurement");
@@ -444,7 +609,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   await expect(page.locator("#source-clock")).toContainText("PAUSED");
   pending = false;
   await page.locator("#reconnect").click();
-  await expect(page.locator("#agent-activity-state")).toContainText("Agent report ready");
+  await expect(page.locator("#agent-activity-state")).toContainText("Agent investigation ready");
   await expect(page.locator("#agent-findings")).toContainText("final decision accepted");
   const source = page.locator("#agent-findings .agent-source").first();
   await source.locator("summary").click();

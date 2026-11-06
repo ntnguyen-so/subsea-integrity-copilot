@@ -25,16 +25,22 @@ from .contracts import (
 from .localization import locate, pipeline_distances
 
 
-def _duration(times: Sequence[float], sample_seconds: int) -> float:
-    longest = 0.0
+def _longest_run(times: Sequence[float], sample_seconds: int) -> tuple[float, float] | None:
+    longest: tuple[float, float] | None = None
     previous = -math.inf
     run_start = 0.0
     for second in sorted(set(times)):
         if second - previous > sample_seconds * 1.01:
             run_start = second
-        longest = max(longest, second - run_start + sample_seconds)
+        if longest is None or second - run_start + sample_seconds > longest[1] - longest[0]:
+            longest = (run_start, second + sample_seconds)
         previous = second
     return longest
+
+
+def _duration(times: Sequence[float], sample_seconds: int) -> float:
+    longest = _longest_run(times, sample_seconds)
+    return longest[1] - longest[0] if longest else 0.0
 
 
 def analyze_window(
@@ -341,6 +347,28 @@ def analyze_window(
         finding.evidence_ids = [
             ledger("sensor_health", value, "sensor_health", finding.sensor_id),
         ]
+        periods: dict[str, Any] = {}
+        if len(pack.sensors) > 32:
+            recent = [
+                row.value
+                for row in groups[finding.sensor_id]
+                if row.validity == "usable"
+                and row.value is not None
+                and end - timedelta(seconds=20) <= row.observed_at < end
+            ]
+            reference = stats[finding.sensor_id]["median"]
+            periods.update(
+                recent_pressure_drop_bar=reference - float(np.median(recent))
+                if reference is not None and recent
+                else None,
+                recent_usable_samples=len(recent),
+                recent_period_seconds=[end_seconds - 20, end_seconds],
+            )
+            for direction, key in (("drop", "drops"), ("rise", "rises")):
+                run = _longest_run(stats[finding.sensor_id][key], pack.sample_seconds)
+                periods[f"pressure_{direction}_period_seconds"] = (
+                    list(run) if run and run[1] - run[0] >= pack.persistence_seconds else None
+                )
         ledger(
             "channel_summary",
             {
@@ -353,6 +381,7 @@ def analyze_window(
                 "anomaly_count": finding.anomaly_count,
                 "max_score": finding.max_score,
                 "pressure_drop_persistence_seconds": stats[finding.sensor_id]["duration"],
+                **periods,
             },
             sensor_id=finding.sensor_id,
         )

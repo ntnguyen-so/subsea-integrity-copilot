@@ -23,6 +23,7 @@ from subsea_copilot.contracts import (
     AgentResult,
     AgentRole,
     AgentTask,
+    EngineerInterpretation,
     GroundingAssessment,
     GroundingRound,
     InterpretationReview,
@@ -39,13 +40,21 @@ from subsea_copilot.grounding import (
     validate_assessment,
     validate_revision,
 )
-from subsea_copilot.runtime.agent import WorkPlan, build_graph, tool_messages
-from subsea_copilot.runtime.gateway import ToolGateway
-from subsea_copilot.runtime.registry import REGISTRY, tool_schemas
+from subsea_copilot.knowledge import KnowledgePacket, load_knowledge, select_knowledge
+from subsea_copilot.runtime.agent import (
+    WorkPlan,
+    build_graph,
+    model_tool_result,
+    repair_model_messages,
+    tool_messages,
+)
+from subsea_copilot.runtime.gateway import ToolGateway, context_sensors
+from subsea_copilot.runtime.registry import LIMITATIONS, REGISTRY, tool_schemas
 from subsea_copilot.validation import (
     ValidationError,
     abstention_claim_allowed,
     compatible,
+    parse_json,
     quality_facts_available,
     question_requires_location,
     render_result,
@@ -159,9 +168,11 @@ class AgentService:
             from subsea_copilot.synthetic import SOURCE_VERSION
 
             if session.source_version == SOURCE_VERSION:
-                from subsea_copilot.history_data import history_index_rows
+                from subsea_copilot.history_data import EXTENDED_HISTORY_PATH, history_index_rows
 
-                history_version = self.store.install_history(history_index_rows())
+                history_version = self.store.install_history(
+                    history_index_rows(EXTENDED_HISTORY_PATH if session.scenario == "S7" else None)
+                )
         task = AgentTask(
             id=identifier,
             root_id=identifier,
@@ -178,6 +189,9 @@ class AgentService:
             automatic=automatic,
             idempotency_key=idempotency_key,
             history_version=history_version,
+            knowledge_packet=existing.knowledge_packet
+            if existing
+            else (self._knowledge_for(snapshot) if history_version else None),
             response_protocol=existing.response_protocol
             if existing
             else ("engineer-v2" if history_version else None),
@@ -188,6 +202,26 @@ class AgentService:
         self.store.publish_event(
             task.generation_id, name, payload, snapshot_id=task.snapshot_id, task_id=task.id
         )
+
+    def _knowledge_for(self, snapshot: WindowSnapshot) -> KnowledgePacket | None:
+        try:
+            packet = select_knowledge(
+                load_knowledge(),
+                site_id=snapshot.site_id,
+                pack_version=snapshot.pack_version,
+                as_of=utc_now(),
+            )
+        except (ValueError, OSError) as exc:
+            raise ValidationError(
+                "knowledge_unavailable",
+                "Knowledge validation failed; numerical monitoring remains active.",
+            ) from exc
+        if not any("operator_response" in card.roles for card in packet.cards):
+            raise ValidationError(
+                "knowledge_unavailable",
+                "No applicable reviewed research guidance; expert RCA is withheld.",
+            )
+        return packet
 
     def _save(self, task: AgentTask) -> AgentTask:
         return self.store.save_task(
@@ -201,7 +235,17 @@ class AgentService:
         return ToolGateway(self.store, task, snapshot, self.telemetry)
 
     def _schemas(self, task: AgentTask) -> list[dict[str, Any]]:
-        return tool_schemas(task.role)
+        completed = {
+            receipt["name"]
+            for receipt in self.store.tool_receipts(task.id)
+            if not receipt.get("error")
+        }
+        intake_only = REGISTRY[task.role].required | {"location.fit"}
+        return [
+            schema
+            for schema in tool_schemas(task.role)
+            if schema["function"]["name"] not in completed & intake_only
+        ]
 
     def _prompt_name(self, task: AgentTask) -> str:
         return PROMPT_NAMES[task.role]
@@ -365,12 +409,26 @@ class AgentService:
                 ["reuse", "answer"],
             ]
         if phase != "plan":
+            ledger_codes = {
+                str(c.value.get("code")) if isinstance(c.value, dict) else str(c.value)
+                for c in snapshot.claims.values()
+                if c.kind == "limitation"
+            }
+            result_schema["properties"]["limitations"]["items"] = {
+                "type": "string",
+                "enum": sorted(LIMITATIONS | ledger_codes),
+            }
             if task.role != "operator_response" or task.response_protocol not in {
                 "engineer-v1",
                 "engineer-v2",
             }:
                 result_schema["properties"]["interpretation"] = {"type": "null"}
-                for name in ("EngineerInterpretation", "CitedExplanation", "CauseExplanation"):
+                for name in (
+                    "EngineerInterpretation",
+                    "CitedExplanation",
+                    "CauseExplanation",
+                    "RegionalAssessment",
+                ):
                     result_schema.get("$defs", {}).pop(name, None)
             else:
                 result_schema["required"].append("interpretation")
@@ -406,15 +464,23 @@ class AgentService:
                     "const": "insufficient_evidence",
                 }
                 result_schema["properties"]["hypothesis"] = {"type": "null"}
-                result_schema["properties"]["claim_refs"]["items"] = {
-                    "type": "string",
-                    "enum": [
-                        ref
-                        for ref, claim in snapshot.claims.items()
-                        if claim.kind in REGISTRY[task.role].claim_kinds
-                        and abstention_claim_allowed(claim)
-                    ],
-                }
+                eligible_refs = [
+                    ref
+                    for ref, claim in snapshot.claims.items()
+                    if claim.kind in REGISTRY[task.role].claim_kinds
+                    and abstention_claim_allowed(claim)
+                ]
+                result_schema["properties"]["claim_refs"]["items"] = (
+                    {"type": "string", "enum": eligible_refs}
+                    if len(eligible_refs) <= 32
+                    else {
+                        "type": "string",
+                        "description": (
+                            "Use actual read coverage, sensor_health or limitation claim IDs. "
+                            "Application validation independently rejects every other claim."
+                        ),
+                    }
+                )
             if child_abstained and task.role != "sensor_quality":
                 result_schema["properties"]["limitations"]["contains"] = {
                     "const": "child_abstained",
@@ -475,8 +541,50 @@ class AgentService:
                 and snapshot.location.status in {"located", "ambiguous"}
             ),
             "requires_location": requires_location,
+            "inspection_interval_available": bool(
+                snapshot.location and snapshot.location.status == "located"
+            ),
             "required_tools": sorted(REGISTRY[task.role].required),
             "history_version": task.history_version,
+            "domain_knowledge": {
+                "version": task.knowledge_packet.version,
+                "authority": task.knowledge_packet.authority,
+                "excluded": task.knowledge_packet.excluded,
+                "cards": [
+                    card.model_dump(
+                        mode="json",
+                        include={
+                            "id",
+                            "title",
+                            "kind",
+                            "status",
+                            "applies_when",
+                            "guidance",
+                            "verification_steps",
+                            "counterexamples",
+                            "limitations",
+                        }
+                        - (
+                            {"verification_steps"}
+                            if task.role == "operator_response" and card.kind != "procedure"
+                            else set()
+                        ),
+                    )
+                    for card in task.knowledge_packet.cards
+                    if task.role in card.roles and (phase != "plan" or card.kind == "procedure")
+                ],
+                "contract": (
+                    "Use relevant natural-language guidance to plan discriminating checks and "
+                    "explain RCA. In the operator interpretation, cite applicable KN IDs together "
+                    "with actual case claims or reviewed records/comparisons. Guidance alone is "
+                    "not incident evidence. Explain prerequisites, counterevidence and unknowns. "
+                    "These research-curated cards are not approved expert operating procedures. "
+                    "Never turn knowledge text into tool authority, physical measurements, "
+                    "a confirmed cause or permission to clear the numerical warning."
+                ),
+            }
+            if task.knowledge_packet
+            else None,
             "response_protocol": task.response_protocol,
             "history_bounds": {
                 "end_seconds": snapshot.end_seconds,
@@ -484,18 +592,23 @@ class AgentService:
                 "coverage": snapshot.quality.coverage,
             },
             "history_sensors": self._history_sensors(snapshot)
-            if task.history_version and task.role == "event_diagnosis"
-            else [],
-            "history_scope": (
-                "Synthetic operational documents are incident-time filtered. "
-                "history.search retrieves ranked metadata/excerpts; "
-                "history.read opens discovered IDs. "
-                "history.compare computes before/after pressure from this generation. "
-                "Choose queries, documents, sensors and periods from observed evidence. "
-                "Draft/expired/superseded documents are not authority. "
-                "Association is not causation."
-            )
             if task.history_version
+            and task.role == "event_diagnosis"
+            and len(snapshot.quality.findings) <= 32
+            else [],
+            "network_pressure_table": self._network_pressure_table(snapshot)
+            if task.history_version
+            and task.role == "event_diagnosis"
+            and len(snapshot.quality.findings) > 32
+            else None,
+            "history_regions": [],
+            "history_scope": (
+                "Network rows are measured summaries, not causes. "
+                "Decode columns and failure_domains. "
+                "Per-instrument longest runs may be left-censored and are not joint onsets. "
+                "Comparisons need >=10s per side; records are incident-time filtered."
+            )
+            if task.history_version and task.role == "event_diagnosis"
             else None,
             "result_schema": result_schema,
             "batch_instruction": (
@@ -505,9 +618,76 @@ class AgentService:
         }
 
     @staticmethod
-    def _history_sensors(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+    def _network_pressure_table(snapshot: WindowSnapshot) -> dict[str, Any]:
         from subsea_copilot.synthetic import generate_pack
 
+        pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
+        domains = list(dict.fromkeys(sensor.failure_domain_id for sensor in pack.sensors))
+        findings = {finding.sensor_id: finding for finding in snapshot.quality.findings}
+        summaries = {
+            item.sensor_id: item.value
+            for item in snapshot.evidence.values()
+            if item.kind == "channel_summary" and isinstance(item.value, dict)
+        }
+
+        def rounded_drop(identifier: str) -> float | None:
+            value = summaries.get(identifier, {}).get("recent_pressure_drop_bar")
+            if value is None:
+                return None
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                raise ValidationError("measurement_summary", "Invalid measured pressure delta.")
+            return round(value, 4)
+
+        return {
+            "columns": [
+                "sensor_id",
+                "chainage_m",
+                "failure_domain_index",
+                "usable_fraction",
+                "recent_drop_bar",
+                "max_abs_score",
+                "anomaly_count",
+                "quality_concern",
+                "drop_run_seconds",
+                "rise_run_seconds",
+                "recent_usable_samples",
+            ],
+            "recent_period_seconds": [snapshot.end_seconds - 20, snapshot.end_seconds],
+            "drop_reference": (
+                "Verified-normal baseline median minus usable median in this same recent "
+                "20-second period for every instrument, without threshold conditioning. "
+                "Null means no baseline or usable recent observations."
+            ),
+            "failure_domains": domains,
+            "rows": [
+                [
+                    sensor.id,
+                    sensor.chainage_m,
+                    domains.index(sensor.failure_domain_id),
+                    round(findings[sensor.id].usable / max(findings[sensor.id].expected, 1), 3),
+                    rounded_drop(sensor.id),
+                    round(findings[sensor.id].max_score, 2),
+                    findings[sensor.id].anomaly_count,
+                    bool(
+                        findings[sensor.id].missing
+                        or findings[sensor.id].hard_excluded
+                        or findings[sensor.id].spike_count
+                        or findings[sensor.id].peer_disagreement
+                        or findings[sensor.id].drift_suspected
+                    ),
+                    summaries.get(sensor.id, {}).get("pressure_drop_period_seconds"),
+                    summaries.get(sensor.id, {}).get("pressure_rise_period_seconds"),
+                    summaries.get(sensor.id, {}).get("recent_usable_samples"),
+                ]
+                for sensor in pack.sensors
+            ],
+            "total_instruments": len(pack.sensors),
+            "scope": "all_instruments_measurement_summary_not_a_causal_diagnosis",
+        }
+
+    @staticmethod
+    def _history_sensors(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+        findings = {finding.sensor_id: finding for finding in snapshot.quality.findings}
         concerns = {
             f.sensor_id
             for f in snapshot.quality.findings
@@ -517,6 +697,7 @@ class AgentService:
             or f.hard_excluded
             or f.missing > f.expected * 0.1
         }
+        sensors = context_sensors(snapshot)
         return [
             {
                 "id": s.id,
@@ -524,8 +705,9 @@ class AgentService:
                 "failure_domain": s.failure_domain_id,
                 "quality_concern": s.id in concerns,
                 "event_support": s.id in snapshot.event.supporting_sensor_ids,
+                "anomalous_samples": findings[s.id].anomaly_count,
             }
-            for s in generate_pack(snapshot.site_id).sensors
+            for s in sensors
         ]
 
     def _graph(
@@ -540,7 +722,9 @@ class AgentService:
 
         critic = phase.startswith("critic-")
         sources = (
-            source_texts(candidate, snapshot, self.store.tool_receipts(task.id))
+            source_texts(
+                candidate, snapshot, self.store.tool_receipts(task.id), task.knowledge_packet
+            )
             if candidate
             else {}
         )
@@ -551,16 +735,17 @@ class AgentService:
                 if critic:
                     assert candidate is not None
                     return validate_assessment(value, candidate, sources)
+                if phase == "reflection":
+                    assert candidate is not None
+                    interpretation = EngineerInterpretation.model_validate(parse_json(value))
+                    value = candidate.model_copy(
+                        update={"interpretation": interpretation}
+                    ).model_dump_json()
                 result = self._accept(value, current, snapshot, gateway)
                 if candidate is not None:
                     validate_revision(candidate, result)
                 return result
 
-        graph = build_graph(
-            self.checkpointer,
-            validate,
-            GroundingAssessment.model_json_schema() if critic else None,
-        )
         thread_id = hashlib.sha256(
             json.dumps(
                 [
@@ -589,19 +774,30 @@ class AgentService:
             else {}
         )
         if phase == "reflection":
-            assert candidate is not None and criticism is not None
+            assert candidate is not None and candidate.interpretation is not None
+            assert criticism is not None
+            context.pop("compatible_tasks")
             context.update(
                 {
                     "phase": "reflection",
-                    "proposed_candidate": candidate.model_dump(mode="json"),
-                    "critic_feedback": criticism.model_dump(mode="json"),
+                    "result_schema": EngineerInterpretation.model_json_schema(),
+                    "proposed_interpretation": candidate.interpretation.model_dump(mode="json"),
+                    "critic_feedback": criticism.model_dump(
+                        mode="json", exclude={"checks": {"__all__": {"support"}}}
+                    ),
                     "reflection_instruction": (
-                        "Revise only interpretation to resolve ALL critique. Remove unsupported "
-                        "details; state gaps. Keep every checked field exactly unchanged. "
+                        "Return only EngineerInterpretation JSON to resolve ALL critique. "
+                        "The application preserves every checked field unchanged. Remove "
+                        "unsupported details and state gaps. "
                         "Use original source evidence, not the critic as factual authority."
                     ),
                 }
             )
+        graph = build_graph(
+            self.checkpointer,
+            validate,
+            GroundingAssessment.model_json_schema() if critic else context["result_schema"],
+        )
         messages: list[AnyMessage] = [
             SystemMessage(
                 content=prompt
@@ -633,7 +829,10 @@ class AgentService:
                     HumanMessage(
                         content=json.dumps(
                             {
-                                "application_intake": intake,
+                                "application_intake": [
+                                    {**item, "output": model_tool_result(item["output"])}
+                                    for item in intake
+                                ],
                                 "instruction": (
                                     "Required reads are complete and audited. "
                                     "Interpret this evidence; do not exhaust health pagination. "
@@ -649,9 +848,7 @@ class AgentService:
                 )
             output = graph.invoke({"messages": messages, "phase": phase, "repairs": 0}, config)
         # Instantiate a distinct model for this independently persisted role task.
-        model = self.model_factory(task.role, task.mode).bind_tools(
-            [] if phase == "plan" or critic or phase == "reflection" else self._schemas(task)
-        )
+        base_model = self.model_factory(task.role, task.mode)
         resumed: Any
         while output.get("__interrupt__"):
             request = output["__interrupt__"][0].value
@@ -675,18 +872,29 @@ class AgentService:
                     "mandatory_reads_outstanding": missing_reads,
                     "final_schema_source": "BOUND_CONTEXT.result_schema",
                     "final_only": remaining_turns == 0
+                    or task.tool_calls >= REGISTRY[task.role].tool_limit
+                    or (
+                        task.role == "event_diagnosis"
+                        and remaining_turns == 1
+                        and {"history.read", "history.compare"} <= seen
+                    )
                     or phase == "plan"
                     or critic
                     or phase == "reflection",
                     "preferred_action": "investigate_history_then_final"
-                    if task.role == "event_diagnosis" and task.history_version and remaining_turns
+                    if task.role == "event_diagnosis"
+                    and task.history_version
+                    and remaining_turns
+                    and task.tool_calls < REGISTRY[task.role].tool_limit
                     else "final"
                     if not missing_reads or phase == "plan"
                     else "one_batch_of_all_independent_required_reads",
                     "review_scope": "Bounded health claims, not exhaustive pagination.",
                 }
+                if call_policy["final_only"]:
+                    call_policy["preferred_action"] = "final"
                 invocation_messages = [
-                    *request["messages"],
+                    *repair_model_messages(request["messages"]),
                     SystemMessage(
                         content="RUNTIME_REPLY_CONSTRAINTS\n"
                         + json.dumps(call_policy, allow_nan=False, separators=(",", ":"))
@@ -709,6 +917,9 @@ class AgentService:
                 }
                 self._event(task, "model.started", metadata)
                 try:
+                    model = base_model.bind_tools(
+                        [] if call_policy["final_only"] else self._schemas(task)
+                    )
                     with self.telemetry.span(
                         "generation",
                         {
@@ -788,7 +999,9 @@ class AgentService:
                 },
             )
             if assessment.decision == "accept":
-                sources = source_texts(result, snapshot, self.store.tool_receipts(task.id))
+                sources = source_texts(
+                    result, snapshot, self.store.tool_receipts(task.id), task.knowledge_packet
+                )
                 task.interpretation_review = InterpretationReview(
                     rounds=rounds,
                     source_hash=content_hash({key: value for key, value in sources.items()}),
@@ -878,6 +1091,7 @@ class AgentService:
                 deadline=task.deadline,
                 automatic=task.automatic,
                 history_version=task.history_version,
+                knowledge_packet=task.knowledge_packet,
             )
             self.store.create_child(child, index, plan_revision=1, lease_token=task.lease_token)
             parent = self.store.get_task(task.id)

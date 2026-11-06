@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites id="" name="" tests="4" failures="0" skipped="0" errors="1" time="518.2475459999999">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T09:30:20.842Z" hostname="" tests="4" failures="0" skipped="0" time="514.961" errors="1">
+<testcase name="brief geometry, correct wall sides and manual comparison agree with actual evidence" classname="dashboard.spec.ts" time="122.291">
+</testcase>
+<testcase name="extended network supports readable branch focus without hiding manual cross-branch evidence" classname="dashboard.spec.ts" time="136.862">
+</testcase>
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="180.1">
+<system-out>
+
+[[ATTACHMENT|..\test-results\dashboard-two-customer-mod-9e5bf-igation-on-matching-S1-data\error-context.md]]
+
+</system-out>
+<error message="Test timeout of 180000ms exceeded." type="Error">
+  dashboard.spec.ts:486:5 › two customer modes separate individual sensor alerts from agent investigation on matching S1 data 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: apiRequestContext.post: Test timeout of 180000ms exceeded.
+    
+[Authenticated request call log omitted.]</error>
+</testcase>
+<testcase name="agent work stays separate from a running detector and rejects mismatched automatic handoffs" classname="dashboard.spec.ts" time="75.708">
+</testcase>
+</testsuite>
+</testsuites>

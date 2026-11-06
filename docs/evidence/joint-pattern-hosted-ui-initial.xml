@@ -1,0 +1,28 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="1" time="321.59901">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T12:32:04.817Z" hostname="" tests="1" failures="0" skipped="0" time="319.705" errors="1">
+<testcase name="extended network qualifies a fresh hosted investigation against matching sensor-only evidence" classname="dashboard.spec.ts" time="319.705">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\test-results\dashboard-extended-network-4ecef-tching-sensor-only-evidence\error-context.md]]
+]]>
+</system-out>
+<error message="Hosted S7 report withheld: child_failed" type="Error">
+<![CDATA[  dashboard.spec.ts:5:5 › extended network qualifies a fresh hosted investigation against matching sensor-only evidence 
+
+    Error: Hosted S7 report withheld: child_failed
+
+      76 |     const message = error instanceof Error ? error.message.split("\nCall log:")[0] : "Qualification failed";
+      77 |     evidence.error = message;
+    > 78 |     throw new Error(message);
+         |           ^
+      79 |   } finally {
+      80 |     await writeFile("runtime/extended-network-live.json", JSON.stringify({
+      81 |       outcome, elapsed_seconds: (performance.now() - started) / 1000,
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:78:11
+
+    Error Context: ..\..\test-results\dashboard-extended-network-4ecef-tching-sensor-only-evidence\error-context.md
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

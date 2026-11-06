@@ -64,7 +64,7 @@ def monitoring_warning(
         title = f"{count} SENSOR ALERTS: engineer review required" if count else "No sensor alerts"
         message = (
             "Inspect individual histories and connect the timing and location manually. "
-            "This alert-only demo does not classify leaks versus malfunction; "
+            "This alert-only view does not classify leaks versus malfunction; "
             "follow existing response procedures. No safety clearance is implied."
         )
     elif snapshot.event.hypothesis == "suspected_leak":

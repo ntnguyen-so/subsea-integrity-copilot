@@ -13,6 +13,33 @@ console and Langfuse integration are specified in
 
 ## 1. The engagement and the decision we want
 
+### Current refinement milestones and completion criteria
+
+| Milestone | Completion criterion |
+|---|---|
+| Joint-pattern source | S1-S6 unchanged; S7 near/far pressure responses and scattered/infra faults verified across seeds; no forced location. |
+| Governed knowledge capture | Versioned guidance/program cards; provenance and synthetic-advisory status; scoped selection, conflicts and immutable child inheritance tested. |
+| Knowledge-driven RCA | All-instrument discovery; executed joint measurements; knowledge-to-check receipts; independent regional hypotheses and original-source grounding. |
+| Qualification | Matching-input knowledge ablation including failures; timing counterexamples; targeted/regression/UI checks; no invented accuracy or human-time claims. |
+| Independent challenge | Engineering and buyer reviews report remaining gaps explicitly; approval is not presumed or coerced. |
+| Customer shadow-pilot gate | Approved hosted-data path, scoped connectors, named SME review, blinded held-out strong-fixed comparator, measured total handling time and capped commercial terms. |
+
+### Indicative four-week shadow pilot, not an AITOMATIC quote
+
+One agreed pipeline network; read-only historian and maintenance/operations
+exports only. Week 1: data authorization, connector contract and SME knowledge
+capture. Week 2: shadow investigations and SME corrections. Week 3: blinded
+held-out incidents plus quiet/fault/operating cases. Week 4: quality, total
+engineer handling/review time, late/failed cases and cost decision.
+
+Before signing, name the customer integrity SME and instrumentation reviewer,
+agree a fixed services fee and hosted-usage cap, approve data residency and
+redaction, freeze cases/criteria and define exit/data-deletion terms.
+Deliver source-linked casefiles, a versioned knowledge register, the paired
+evaluation and a go/no-go recommendation. No automatic actuation or safety
+substitution. Human hours and monetary savings are not yet measured; if a
+cheaper fixed workflow matches quality and total handling time, recommend it.
+
 **Prospect:** NorthSea Integrity Operations, a fictional mid-sized offshore gas operator
 with an existing subsea sensor network and onshore integrity team. This is not a claim
 about an actual company, customer, deployment or commercial relationship.
@@ -461,27 +488,17 @@ Use an inspectable illustrative model, not a fabricated customer ROI:
 
 `annual_triage_value = alerts_per_month * minutes_saved_per_alert / 60 * hourly_cost * 12`
 
-Example assumptions: 120 alerts/month, 15 minutes saved/alert and USD 100/hour produce
-USD 36,000/year in engineer-capacity value. This is not guaranteed cash savings or
-headcount reduction. Exclude avoided leak losses and vessel mobilizations from base
-ROI until the customer supplies defensible frequency, cost and attribution evidence.
+Populate this model only with customer-agreed alert volumes, measured total
+handling/review time and actual loaded costs. It is capacity value, not guaranteed
+cash savings or headcount reduction. Exclude avoided leak losses and vessel
+mobilizations until frequency, cost and attribution are defensible.
 
-At that volume, a USD 20,000 annualized recurring cost needs about 8.3 minutes saved
-per alert to cover recurring cost alone; integration and pilot costs are additional.
-Show sensitivity rather than anchoring the sale on one optimistic number.
-
-**Proposed pilot:** four weeks after data-access approval, customer scheduling and
-security review. Week 1 maps instruments/topology, source authority, latency and
-failure domains; week 2 integrates read-only historical replay; week 3 runs shadow
-monitoring; week 4 reviews independently labeled outcomes and go/no-go criteria.
-This is a conditional delivery proposal, not a contractual production promise.
-
-Commercial discussion: an illustrative USD 15,000 fixed-scope pilot, subject to
-AITOMATIC approval and actual scope. Include engineer time, integration, infrastructure,
-support and Copilot account/usage policy; report monetary inference cost only with a
-verified tariff and measured usage. Local inference hardware would apply only to a
-separately approved production deployment. Do not represent illustrative pricing as
-an AITOMATIC quote.
+The four-week schedule and commercial gates in section 1 are the single current
+pilot proposal, conditional on data approval and scheduling. No fixed price,
+annual savings or minutes saved have been established. Agree a services fee,
+infrastructure/usage cap, integration responsibilities and exit terms before
+signing. Report monetary inference cost only with a verified tariff and measured
+usage. Any future local model hosting requires a separate production assessment.
 
 Pilot acceptance must be negotiated around operator-reviewed detection/abstention,
 false alarms per asset-day, data latency, triage effort and audit completeness.

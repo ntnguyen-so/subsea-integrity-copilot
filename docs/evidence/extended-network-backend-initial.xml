@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="148" time="150.229" timestamp="2026-11-06T16:23:06.618266+07:00" hostname="THANH"><testcase classname="tests.test_extended_network" name="test_extended_network_localizes_without_confusing_distributed_faults[2026]" time="2.131" /><testcase classname="tests.test_extended_network" name="test_shared_gateway_and_other_distractors_cannot_replace_leak_evidence[2026]" time="0.309" /><testcase classname="tests.test_extended_network" name="test_extended_agent_reads_are_bounded_and_cover_supported_observers[2026]" time="0.008" /><testcase classname="tests.test_extended_network" name="test_extended_network_localizes_without_confusing_distributed_faults[91000]" time="1.986" /><testcase classname="tests.test_extended_network" name="test_shared_gateway_and_other_distractors_cannot_replace_leak_evidence[91000]" time="0.303" /><testcase classname="tests.test_extended_network" name="test_extended_agent_reads_are_bounded_and_cover_supported_observers[91000]" time="0.010" /><testcase classname="tests.test_extended_network" name="test_extended_network_localizes_without_confusing_distributed_faults[91001]" time="1.817" /><testcase classname="tests.test_extended_network" name="test_shared_gateway_and_other_distractors_cannot_replace_leak_evidence[91001]" time="0.280" /><testcase classname="tests.test_extended_network" name="test_extended_agent_reads_are_bounded_and_cover_supported_observers[91001]" time="0.007" /><testcase classname="tests.test_extended_network" name="test_extended_history_and_original_brief_geometry_remain_distinct" time="0.031" /><testcase classname="tests.test_diagnostics" name="test_label_free_scenario_inference_and_quality[S1-suspected_leak]" time="1.822" /><testcase classname="tests.test_diagnostics" name="test_label_free_scenario_inference_and_quality[S2-sensor_or_telemetry_issue]" time="0.065" /><testcase classname="tests.test_diagnostics" name="test_label_free_scenario_inference_and_quality[S3-insufficient_evidence]" time="0.038" /><testcase classname="tests.test_diagnostics" name="test_label_free_scenario_inference_and_quality[S4-insufficient_evidence]" time="0.064" /><testcase classname="tests.test_diagnostics" name="test_label_free_scenario_inference_and_quality[S5-insufficient_evidence]" time="0.035" /><testcase classname="tests.test_diagnostics" name="test_label_free_scenario_inference_and_quality[S6-no_event]" time="0.082" /><testcase classname="tests.test_diagnostics" name="test_one_support_removed_rechecks_observers_and_independence" time="0.261" /><testcase classname="tests.test_diagnostics" name="test_shared_failure_domain_cannot_supply_independent_leak_evidence" time="0.122" /><testcase classname="tests.test_diagnostics" name="test_window_boundaries_arrival_cutoff_warmup_and_snapshot_lineage" time="0.548" /><testcase classname="tests.test_diagnostics" name="test_event_requires_raw_duration_not_count_or_simultaneous_spike" time="0.333" /><testcase classname="tests.test_diagnostics" name="test_inspection_bracket_does_not_invent_coordinates_for_uninstrumented_crossing" time="0.001" /><testcase classname="tests.test_diagnostics" name="test_pressure_taps_on_one_pipe_do_not_localize_an_unconnected_crossing" time="0.141" /><testcase classname="tests.test_diagnostics" name="test_dense_subsecond_samples_do_not_invent_persistence" time="0.071" /><testcase classname="tests.test_diagnostics" name="test_downward_usable_spike_is_health_evidence_not_hard_invalidity" time="0.063" /><testcase classname="tests.test_diagnostics" name="test_isolated_pressure_offset_with_healthy_paired_instrument_supports_fault_review" time="0.056" /><testcase classname="tests.test_diagnostics" name="test_one_and_ten_speed_have_equal_arrival_filtered_diagnostics" time="0.375" /><testcase classname="tests.test_diagnostics" name="test_lightweight_model_uses_normal_preroll_and_does_not_adapt_away_a_drop" time="0.001" /><testcase classname="tests.test_diagnostics" name="test_correlated_fault_in_one_gateway_is_not_independent_leak_evidence" time="0.066" /><testcase classname="tests.test_diagnostics" name="test_drops_at_different_times_do_not_form_a_spatial_event" time="0.070" /><testcase classname="tests.test_diagnostics" name="test_broad_operating_change_requires_context_not_a_forced_leak_diagnosis" time="0.064" /><testcase classname="tests.test_diagnostics" name="test_positive_pressure_changes_are_not_called_faults_or_brief_transients[True]" time="0.088" /><testcase classname="tests.test_diagnostics" name="test_positive_pressure_changes_are_not_called_faults_or_brief_transients[False]" time="0.069" /><testcase classname="tests.test_diagnostics" name="test_short_correlated_transient_is_not_called_scattered_sensor_faults" time="0.053" /><testcase classname="tests.test_diagnostics" name="test_opposite_paired_offsets_are_not_independent_pressure_drop_evidence" time="0.063" /><testcase classname="tests.test_diagnostics" name="test_no_healthy_reference_on_both_sides_withholds_the_inspection_interval" time="0.001" /><testcase classname="tests.test_diagnostics" name="test_sustained_pressure_rise_is_not_a_healthy_localization_reference" time="0.056" /><testcase classname="tests.test_diagnostics" name="test_single_drop_without_a_healthy_peer_abstains_instead_of_declaring_a_fault" time="0.057" /><testcase classname="tests.test_diagnostics" name="test_geometric_crossing_does_not_create_pipeline_connectivity" time="0.003" /><testcase classname="tests.test_diagnostics" name="test_brief_network_is_upright_y_with_pipe_wall_pressure_taps" time="0.001" /><testcase classname="tests.test_diagnostics" name="test_brief_examples_are_actual_demo_evidence_not_a_separate_story" time="0.355" /><testcase classname="tests.test_history_data" name="test_default_corpus_is_deterministic_versioned_and_matches_network" time="0.002" /><testcase classname="tests.test_history_data" name="test_custom_path_preserves_file_order_and_rejects_duplicate_ids" time="0.004" /><testcase classname="tests.test_history_data" name="test_backend_export_includes_private_scenarios_without_changing_model_serialization" time="0.002" /><testcase classname="tests.test_history_data" name="test_record_rejects_naive_timestamps[authored_at]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_naive_timestamps[available_at]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_naive_timestamps[effective_from]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_naive_timestamps[effective_to]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_normalizes_offsets_and_rejects_invalid_time_order" time="0.001" /><testcase classname="tests.test_history_data" name="test_corpus_rejects_incompatible_envelope[schema_version-unknown]" time="0.001" /><testcase classname="tests.test_history_data" name="test_corpus_rejects_incompatible_envelope[synthetic_epoch-2026-01-02T00:00:00Z]" time="0.001" /><testcase classname="tests.test_history_data" name="test_corpus_rejects_incompatible_envelope[synthetic_epoch-2026-01-01T00:00:00]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[asset_ids-value0]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[asset_ids-value1]" time="0.002" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[type-diagnostic_truth]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[status-confirmed]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[revision-0]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[scenarios-value5]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[scenarios-value6]" time="0.001" /><testcase classname="tests.test_history_data" name="test_record_rejects_invalid_metadata[asset_ids-value7]" time="0.001" /><testcase classname="tests.test_history_data" name="test_corpus_rejects_unknown_or_non_decreasing_supersession[missing-record]" time="0.001" /><testcase classname="tests.test_history_data" name="test_corpus_rejects_unknown_or_non_decreasing_supersession[MAINT-CAL-P1-DRAFT]" time="0.001" /><testcase classname="tests.test_history_data" name="test_scenario_evidence_preserves_temporal_and_revision_boundaries" time="0.001" /><testcase classname="tests.test_agents" name="test_reflection_receives_bounded_specific_criticism_and_cannot_retry_forever[Use only fully reviewed current sources.]" time="0.029" /><testcase classname="tests.test_agents" name="test_reflection_receives_bounded_specific_criticism_and_cannot_retry_forever[detail1]" time="0.013" /><testcase classname="tests.test_agents" name="test_fresh_children_are_real_separate_graph_tasks_and_preserve_anomalies" time="0.034"><failure message="AssertionError: assert {'operator_re...nsor_quality'} == {'event_diagn...nsor_quality'}&#10;  &#10;  Extra items in the right set:&#10;  'event_diagnosis'&#10;  Use -v to get more diff">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_fresh_children_are_real_separate_graph_tasks_and_preserve_anomalies(snapshot):
+        store, service = service_for(snapshot, checkpointer=InMemorySaver())
+        root = submit(service, snapshot, "What caused this leak?")
+        drain(service)
+        tasks = store.list_tasks("generation")
+&gt;       assert {t.role for t in tasks} == {
+            "operator_response",
+            "sensor_quality",
+            "event_diagnosis",
+        }
+E       AssertionError: assert {'operator_re...nsor_quality'} == {'event_diagn...nsor_quality'}
+E         
+E         Extra items in the right set:
+E         'event_diagnosis'
+E         Use -v to get more diff
+
+tests\test_agents.py:314: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_health_only_then_compatible_reuse_creates_no_extra_children" time="0.021"><failure message="AssertionError: assert 'FAILED' == 'SUCCEEDED'&#10;  &#10;  - SUCCEEDED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_health_only_then_compatible_reuse_creates_no_extra_children(snapshot):
+        store, service = service_for(snapshot)
+        health = submit(service, snapshot, "Which sensors need a health review?")
+        drain(service)
+&gt;       assert store.get_task(health.id).state == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+tests\test_agents.py:335: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_reuse_authorizes_original_quality_diagnosis_pair_without_new_children" time="0.038"><failure message="AssertionError: assert 'FAILED' == 'SUCCEEDED'&#10;  &#10;  - SUCCEEDED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_reuse_authorizes_original_quality_diagnosis_pair_without_new_children(snapshot):
+        store, service = service_for(snapshot, checkpointer=InMemorySaver())
+        original = submit(service, snapshot, "What happened and where is the leak?")
+        drain(service)
+        summary = submit(service, snapshot, "Summarize the saved investigation", "summary-pair")
+        drain(service)
+&gt;       assert store.get_task(summary.id).state == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+tests\test_agents.py:353: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_wait_resume_retains_budget_and_child_identity" time="0.024"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = AgentTask(id='502e0bd5-1173-55cd-ad26-4f92944f6f11', root_id='502e0bd5-1173-55cd-ad26-4f92944f6f11', tenant_id='demo',....', automatic=False, idempotency_key='first', history_version=None, response_protocol=None, interpretation_review=None).model_calls&#10;[+3 more lines; full report in element text]">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_wait_resume_retains_budget_and_child_identity(snapshot):
+        store, service = service_for(snapshot, checkpointer=InMemorySaver())
+        root = submit(service, snapshot, "What caused this event?")
+        service.run_once()
+        assert store.get_task(root.id).state == "WAITING_ON_CHILD"
+        assert store.get_task(root.id).model_calls == 1
+        child_ids = [t.id for t in store.tasks.values() if t.parent_id]
+        resumed_service = AgentService(
+            store, service.model_factory, service.checkpointer, FakeTelemetry()
+        )
+        drain(resumed_service)
+&gt;       assert store.get_task(root.id).model_calls == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = AgentTask(id='502e0bd5-1173-55cd-ad26-4f92944f6f11', root_id='502e0bd5-1173-55cd-ad26-4f92944f6f11', tenant_id='demo',....', automatic=False, idempotency_key='first', history_version=None, response_protocol=None, interpretation_review=None).model_calls
+E        +    where AgentTask(id='502e0bd5-1173-55cd-ad26-4f92944f6f11', root_id='502e0bd5-1173-55cd-ad26-4f92944f6f11', tenant_id='demo',....', automatic=False, idempotency_key='first', history_version=None, response_protocol=None, interpretation_review=None) = get_task('502e0bd5-1173-55cd-ad26-4f92944f6f11')
+E        +      where get_task = &lt;test_agents.MemoryStore object at 0x000002832B590890&gt;.get_task
+E        +      and   '502e0bd5-1173-55cd-ad26-4f92944f6f11' = AgentTask(id='502e0bd5-1173-55cd-ad26-4f92944f6f11', root_id='502e0bd5-1173-55cd-ad26-4f92944f6f11', tenant_id='demo',...ne, automatic=False, idempotency_key='first', history_version=None, response_protocol=None, interpretation_review=None).id
+
+tests\test_agents.py:376: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_failed_child_blocks_successful_response" time="0.028" /><testcase classname="tests.test_agents" name="test_exhausted_root_budget_is_not_reset_by_new_service" time="0.014" /><testcase classname="tests.test_agents" name="test_gateway_scope_authority_and_idempotent_receipt" time="0.018" /><testcase classname="tests.test_agents" name="test_scripted_contract_smoke_with_actual_numerical_ledger[S1]" time="0.547" /><testcase classname="tests.test_agents" name="test_scripted_contract_smoke_with_actual_numerical_ledger[S2]" time="0.474" /><testcase classname="tests.test_agents" name="test_scripted_contract_smoke_with_actual_numerical_ledger[S5]" time="0.398" /><testcase classname="tests.test_agents" name="test_provider_quota_is_durable_unavailability_without_retry" time="0.022" /><testcase classname="tests.test_agents" name="test_checkpoint_tool_interrupt_replays_receipts_without_dispatch_twice" time="0.016"><failure message="Failed: DID NOT RAISE KeyboardInterrupt">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_checkpoint_tool_interrupt_replays_receipts_without_dispatch_twice(snapshot):
+        store, service = service_for(snapshot, checkpointer=InMemorySaver())
+        root = submit(service, snapshot, "What caused this leak?")
+        service.run_once()
+        original = store.record_tool_call
+        crashed = False
+    
+        def crash_after_receipt(*args, **kwargs):
+            nonlocal crashed
+            original(*args, **kwargs)
+            if not crashed:
+                crashed = True
+                raise KeyboardInterrupt("Simulated termination after committing a receipt.")
+    
+        store.record_tool_call = crash_after_receipt
+&gt;       with pytest.raises(KeyboardInterrupt):
+E       Failed: DID NOT RAISE KeyboardInterrupt
+
+tests\test_agents.py:544: Failed</failure></testcase><testcase classname="tests.test_agents" name="test_child_commit_survives_crash_before_runtime_returns" time="0.019"><failure message="AssertionError: assert 'FAILED' == 'SUCCEEDED'&#10;  &#10;  - SUCCEEDED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_child_commit_survives_crash_before_runtime_returns(snapshot):
+        store, service = service_for(snapshot, checkpointer=InMemorySaver())
+        root = submit(service, snapshot, "What caused this leak?")
+        original = store.create_child
+    
+        def crash_after_atomic_child(*args, **kwargs):
+            original(*args, **kwargs)
+            raise KeyboardInterrupt("Termination after child/link/parent-wait commit.")
+    
+        store.create_child = crash_after_atomic_child
+        with pytest.raises(KeyboardInterrupt):
+            service.run_once()
+        assert store.get_task(root.id).state == "WAITING_ON_CHILD"
+        assert len(store.tasks) == 2
+        assert store.get_task(root.id).model_calls == 1
+        store.create_child = original
+        restarted = AgentService(store, service.model_factory, service.checkpointer, FakeTelemetry())
+        drain(restarted)
+&gt;       assert store.get_task(root.id).state == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+tests\test_agents.py:576: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_abstained_child_permits_only_explicit_unsupported_response" time="0.023"><failure message="AssertionError: assert 'FAILED' == 'ABSTAINED'&#10;  &#10;  - ABSTAINED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+
+    def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
+        contexts = []
+    
+        class InspectingAbstention(ScriptedChatModel):
+            def _generate(self, messages, *args, **kwargs):
+                import json
+    
+                from langchain_core.messages import SystemMessage
+    
+                context = json.loads(
+                    next(
+                        m.content.split("\nBOUND_CONTEXT\n", 1)[1]
+                        for m in messages
+                        if isinstance(m, SystemMessage) and "\nBOUND_CONTEXT\n" in m.content
+                    )
+                )
+                if context["phase"] == "answer":
+                    contexts.append(context)
+                return super()._generate(messages, *args, **kwargs)
+    
+        class AbstainedQuality(ScriptedChatModel):
+            def _generate(self, *args, **kwargs):
+                import json
+    
+                result = super()._generate(*args, **kwargs)
+                message = result.generations[0].message
+                if not message.tool_calls:
+                    payload = json.loads(message.content)
+                    payload["outcome"] = "insufficient_evidence"
+                    message.content = json.dumps(payload)
+                return result
+    
+        snapshot.claims = {
+            ref: claim
+            for ref, claim in snapshot.claims.items()
+            if claim.kind not in {"coverage", "sensor_health"}
+        }
+        store, service = service_for(
+            snapshot,
+            lambda role, mode: (
+                AbstainedQuality(role=role)
+                if role == "sensor_quality"
+                else InspectingAbstention(role=role)
+            ),
+        )
+        root = submit(service, snapshot, "What caused this leak?")
+        drain(service)
+        answer = store.get_task(root.id)
+&gt;       assert answer.state == "ABSTAINED"
+E       AssertionError: assert 'FAILED' == 'ABSTAINED'
+E         
+E         - ABSTAINED
+E         + FAILED
+
+tests\test_agents.py:629: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_real_postgres_saver_runs_fresh_scripted_root_and_reopens" time="4.435" /><testcase classname="tests.test_agents" name="test_checkpoint_default_fails_fast_for_unbootstrapped_owned_schema" time="0.096" /><testcase classname="tests.test_agents" name="test_single_agent_baseline_counts_real_requests_without_widening_production" time="0.021" /><testcase classname="tests.test_agents" name="test_single_agent_baseline_rejects_unsafe_output_and_nonqualification_store" time="0.037" /><testcase classname="tests.test_agents" name="test_unexpected_failure_finalization_is_not_silently_swallowed" time="0.016" /><testcase classname="tests.test_agents" name="test_section_question_cannot_reuse_diagnosis_that_omitted_location" time="0.022"><failure message="AssertionError: assert 'FAILED' == 'SUCCEEDED'&#10;  &#10;  - SUCCEEDED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...m': 0.0, 'inspection_start_m': None, 'inspection_end_m': None, 'station_bracket_m': []}, evidence_ids=['location-e'])})
+
+    def test_section_question_cannot_reuse_diagnosis_that_omitted_location(snapshot):
+        import json
+    
+        from langchain_core.messages import SystemMessage
+    
+        class EventOnlyDiagnosis(ScriptedChatModel):
+            def _generate(self, *args, **kwargs):
+                result = super()._generate(*args, **kwargs)
+                context = json.loads(
+                    next(
+                        m.content.split("\nBOUND_CONTEXT\n", 1)[1]
+                        for m in args[0]
+                        if isinstance(m, SystemMessage)
+                    )
+                )
+                message = result.generations[0].message
+                if not message.tool_calls and not context["requires_location"]:
+                    payload = json.loads(message.content)
+                    payload["claim_refs"] = [r for r in payload["claim_refs"] if r != "location"]
+                    payload["evidence_ids"] = [r for r in payload["evidence_ids"] if r != "location-e"]
+                    message.content = json.dumps(payload)
+                return result
+    
+        snapshot = located_snapshot(snapshot)
+        store, service = service_for(
+            snapshot,
+            lambda role, mode: (
+                EventOnlyDiagnosis(role=role)
+                if role == "event_diagnosis"
+                else ScriptedChatModel(role=role)
+            ),
+            checkpointer=InMemorySaver(),
+        )
+        cause = submit(service, snapshot, "What caused this leak?", "cause")
+        drain(service)
+&gt;       assert store.get_task(cause.id).state == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+tests\test_agents.py:952: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_prefetched_quality_handles_extra_round_and_repair_without_spending_final_turn[extra_read]" time="0.021"><failure message="AssertionError: assert 'FAILED' == 'SUCCEEDED'&#10;  &#10;  - SUCCEEDED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+behavior = 'extra_read'
+
+    @pytest.mark.parametrize("behavior", ["extra_read", "malformed_final", "never_final"])
+    def test_prefetched_quality_handles_extra_round_and_repair_without_spending_final_turn(
+        snapshot,
+        behavior,
+    ):
+        import json
+    
+        from langchain_core.messages import SystemMessage
+    
+        class MultiRoundQuality(ScriptedChatModel):
+            def _generate(self, *args, **kwargs):
+                result = super()._generate(*args, **kwargs)
+                context = json.loads(
+                    next(
+                        m.content.split("\nBOUND_CONTEXT\n", 1)[1]
+                        for m in args[0]
+                        if isinstance(m, SystemMessage) and "\nBOUND_CONTEXT\n" in m.content
+                    )
+                )
+                constraints = json.loads(
+                    next(
+                        m.content.split("RUNTIME_REPLY_CONSTRAINTS\n", 1)[1]
+                        for m in reversed(args[0])
+                        if isinstance(m, SystemMessage)
+                        and m.content.startswith("RUNTIME_REPLY_CONSTRAINTS\n")
+                    )
+                )
+                remaining = constraints["model_turns_after_this_reply"]
+                message = result.generations[0].message
+                if behavior in {"malformed_final", "never_final"} and remaining == 2:
+                    payload = json.loads(message.content)
+                    payload["status"] = payload.pop("outcome")
+                    message.content = json.dumps(payload)
+                elif (
+                    behavior == "extra_read"
+                    and remaining == 2
+                    or (behavior == "never_final" and remaining &lt; 2)
+                ):
+                    replacement = AIMessage(
+                        content="",
+                        tool_calls=[
+                            {
+                                "id": uuid4().hex,
+                                "name": "quality.sensor_patterns",
+                                "args": {**context["scope"], "offset": 0},
+                            }
+                        ],
+                    )
+                    replacement.response_metadata = message.response_metadata
+                    result.generations[0].message = replacement
+                return result
+    
+        store, service = service_for(
+            snapshot,
+            lambda role, mode: (
+                MultiRoundQuality(role=role)
+                if role == "sensor_quality"
+                else ScriptedChatModel(role=role)
+            ),
+            checkpointer=InMemorySaver(),
+        )
+        root = submit(service, snapshot, "What caused this leak?")
+        drain(service)
+        quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
+        if behavior == "never_final":
+            assert quality.error_code == "final_turn_reserved"
+            assert quality.model_calls == 3
+            assert quality.tool_calls == 5
+            assert store.get_task(root.id).state == "FAILED"
+        else:
+&gt;           assert store.get_task(root.id).state == "SUCCEEDED"
+E           AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E             
+E             - SUCCEEDED
+E             + FAILED
+
+tests\test_agents.py:1038: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_prefetched_quality_handles_extra_round_and_repair_without_spending_final_turn[malformed_final]" time="0.023"><failure message="AssertionError: assert 'FAILED' == 'SUCCEEDED'&#10;  &#10;  - SUCCEEDED&#10;  + FAILED">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+behavior = 'malformed_final'
+
+    @pytest.mark.parametrize("behavior", ["extra_read", "malformed_final", "never_final"])
+    def test_prefetched_quality_handles_extra_round_and_repair_without_spending_final_turn(
+        snapshot,
+        behavior,
+    ):
+        import json
+    
+        from langchain_core.messages import SystemMessage
+    
+        class MultiRoundQuality(ScriptedChatModel):
+            def _generate(self, *args, **kwargs):
+                result = super()._generate(*args, **kwargs)
+                context = json.loads(
+                    next(
+                        m.content.split("\nBOUND_CONTEXT\n", 1)[1]
+                        for m in args[0]
+                        if isinstance(m, SystemMessage) and "\nBOUND_CONTEXT\n" in m.content
+                    )
+                )
+                constraints = json.loads(
+                    next(
+                        m.content.split("RUNTIME_REPLY_CONSTRAINTS\n", 1)[1]
+                        for m in reversed(args[0])
+                        if isinstance(m, SystemMessage)
+                        and m.content.startswith("RUNTIME_REPLY_CONSTRAINTS\n")
+                    )
+                )
+                remaining = constraints["model_turns_after_this_reply"]
+                message = result.generations[0].message
+                if behavior in {"malformed_final", "never_final"} and remaining == 2:
+                    payload = json.loads(message.content)
+                    payload["status"] = payload.pop("outcome")
+                    message.content = json.dumps(payload)
+                elif (
+                    behavior == "extra_read"
+                    and remaining == 2
+                    or (behavior == "never_final" and remaining &lt; 2)
+                ):
+                    replacement = AIMessage(
+                        content="",
+                        tool_calls=[
+                            {
+                                "id": uuid4().hex,
+                                "name": "quality.sensor_patterns",
+                                "args": {**context["scope"], "offset": 0},
+                            }
+                        ],
+                    )
+                    replacement.response_metadata = message.response_metadata
+                    result.generations[0].message = replacement
+                return result
+    
+        store, service = service_for(
+            snapshot,
+            lambda role, mode: (
+                MultiRoundQuality(role=role)
+                if role == "sensor_quality"
+                else ScriptedChatModel(role=role)
+            ),
+            checkpointer=InMemorySaver(),
+        )
+        root = submit(service, snapshot, "What caused this leak?")
+        drain(service)
+        quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
+        if behavior == "never_final":
+            assert quality.error_code == "final_turn_reserved"
+            assert quality.model_calls == 3
+            assert quality.tool_calls == 5
+            assert store.get_task(root.id).state == "FAILED"
+        else:
+&gt;           assert store.get_task(root.id).state == "SUCCEEDED"
+E           AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E             
+E             - SUCCEEDED
+E             + FAILED
+
+tests\test_agents.py:1038: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_prefetched_quality_handles_extra_round_and_repair_without_spending_final_turn[never_final]" time="0.024"><failure message="AssertionError: assert 'runtime_failed' == 'final_turn_reserved'&#10;  &#10;  - final_turn_reserved&#10;  + runtime_failed">snapshot = WindowSnapshot(id='window', tenant_id='demo', site_id='northsea', generation_id='generation', window_start=datetime.da...event-e']), 'limit': Claim(id='limit', kind='limitation', value={'code': 'synthetic_data'}, evidence_ids=['limit-e'])})
+behavior = 'never_final'
+
+    @pytest.mark.parametrize("behavior", ["extra_read", "malformed_final", "never_final"])
+    def test_prefetched_quality_handles_extra_round_and_repair_without_spending_final_turn(
+        snapshot,
+        behavior,
+    ):
+        import json
+    
+        from langchain_core.messages import SystemMessage
+    
+        class MultiRoundQuality(ScriptedChatModel):
+            def _generate(self, *args, **kwargs):
+                result = super()._generate(*args, **kwargs)
+                context = json.loads(
+                    next(
+                        m.content.split("\nBOUND_CONTEXT\n", 1)[1]
+                        for m in args[0]
+                        if isinstance(m, SystemMessage) and "\nBOUND_CONTEXT\n" in m.content
+                    )
+                )
+                constraints = json.loads(
+                    next(
+                        m.content.split("RUNTIME_REPLY_CONSTRAINTS\n", 1)[1]
+                        for m in reversed(args[0])
+                        if isinstance(m, SystemMessage)
+                        and m.content.startswith("RUNTIME_REPLY_CONSTRAINTS\n")
+                    )
+                )
+                remaining = constraints["model_turns_after_this_reply"]
+                message = result.generations[0].message
+                if behavior in {"malformed_final", "never_final"} and remaining == 2:
+                    payload = json.loads(message.content)
+                    payload["status"] = payload.pop("outcome")
+                    message.content = json.dumps(payload)
+                elif (
+                    behavior == "extra_read"
+                    and remaining == 2
+                    or (behavior == "never_final" and remaining &lt; 2)
+                ):
+                    replacement = AIMessage(
+                        content="",
+                        tool_calls=[
+                            {
+                                "id": uuid4().hex,
+                                "name": "quality.sensor_patterns",
+                                "args": {**context["scope"], "offset": 0},
+                            }
+                        ],
+                    )
+                    replacement.response_metadata = message.response_metadata
+                    result.generations[0].message = replacement
+                return result
+    
+        store, service = service_for(
+            snapshot,
+            lambda role, mode: (
+                MultiRoundQuality(role=role)
+                if role == "sensor_quality"
+                else ScriptedChatModel(role=role)
+            ),
+            checkpointer=InMemorySaver(),
+        )
+        root = submit(service, snapshot, "What caused this leak?")
+        drain(service)
+        quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
+        if behavior == "never_final":
+&gt;           assert quality.error_code == "final_turn_reserved"
+E           AssertionError: assert 'runtime_failed' == 'final_turn_reserved'
+E             
+E             - final_turn_reserved
+E             + runtime_failed
+
+tests\test_agents.py:1033: AssertionError</failure></testcase><testcase classname="tests.test_agents" name="test_actual_s2_quality_decline_is_repaired_without_relaxing_event_abstention" time="0.547" /><testcase classname="tests.test_history_integration" name="test_context_changes_investigation_without_overriding_numerical_uncertainty" time="16.344" /><testcase classname="tests.test_history_integration" name="test_extended_network_uses_its_own_corpus_and_versioned_pressure_history" time="9.559" /><testcase classname="tests.test_history_integration" name="test_operations_audit_checks_actual_handoffs_review_and_provenance" time="0.335" /><testcase classname="tests.test_history_integration" name="test_matched_fixed_report_does_not_read_agent_answer" time="1.958" /><testcase classname="tests.test_history_integration" name="test_future_documents_and_other_tenants_never_enter_retrieval" time="0.106" /><testcase classname="tests.test_history_integration" name="test_stale_citations_fabricated_context_and_future_comparisons_are_rejected" time="0.042" /><testcase classname="tests.test_history_integration" name="test_future_arrivals_cannot_change_a_pinned_pressure_comparison" time="1.295" /><testcase classname="tests.test_history_integration" name="test_a_stronger_fixed_workflow_can_match_agents_and_must_not_be_hidden" time="1.944" /><testcase classname="tests.test_history_integration" name="test_natural_keyword_queries_find_operating_records_without_all_words_matching" time="0.028" /><testcase classname="tests.test_history_integration" name="test_segment_search_includes_maintenance_on_its_instruments" time="0.025" /><testcase classname="tests.test_history_integration" name="test_maintenance_context_cannot_borrow_quality_concerns_from_other_sensors" time="0.416" /><testcase classname="tests.test_history_integration" name="test_unresolved_review_cannot_ignore_current_search_hits" time="0.010" /><testcase classname="tests.test_history_integration" name="test_telemetry_context_is_not_a_physical_leak_clearance" time="0.001" /><testcase classname="tests.test_history_integration" name="test_engineer_interpretation_is_separate_cited_and_response_only" time="0.010" /><testcase classname="tests.test_history_integration" name="test_engineer_followups_are_questions_not_unbounded_commands" time="0.003" /><testcase classname="tests.test_history_integration" name="test_current_reports_require_exact_complete_grounding_attestation[missing]" time="0.010" /><testcase classname="tests.test_history_integration" name="test_current_reports_require_exact_complete_grounding_attestation[candidate]" time="0.010" /><testcase classname="tests.test_history_integration" name="test_current_reports_require_exact_complete_grounding_attestation[source]" time="0.009" /><testcase classname="tests.test_history_integration" name="test_current_reports_require_exact_complete_grounding_attestation[quote]" time="0.010" /><testcase classname="tests.test_history_integration" name="test_current_reports_require_exact_complete_grounding_attestation[coverage]" time="0.008" /><testcase classname="tests.test_history_integration" name="test_current_reports_require_exact_complete_grounding_attestation[decision]" time="0.009" /><testcase classname="tests.test_history_integration" name="test_uncertain_critic_withholds_report_after_one_revision" time="0.045" /><testcase classname="tests.test_history_integration" name="test_grounding_checkpoint_reopens_without_new_model_calls" time="0.072" /><testcase classname="tests.test_history_integration" name="test_reflection_cannot_rewrite_checked_physical_or_history_findings" time="0.001" /><testcase classname="tests.test_history_integration" name="test_response_receives_actual_reviewed_sources_not_just_identifiers" time="0.017" /><testcase classname="tests.test_history_integration" name="test_casefile_retains_the_accepted_decision_sources_and_physical_abstention" time="0.062" /><testcase classname="tests.test_history_integration" name="test_casefile_cannot_export_unread_sources_or_inherit_an_uncited_location" time="0.018" /><testcase classname="tests.test_history_integration" name="test_fabricated_assertion_is_revised_and_reviewed_with_persisted_budget[True]" time="1.574" /><testcase classname="tests.test_history_integration" name="test_fabricated_assertion_is_revised_and_reviewed_with_persisted_budget[False]" time="1.535" /><testcase classname="tests.test_monitoring_integration" name="test_outage_windows_progress_when_provider_is_unavailable[proxy_auth]" time="2.227" /><testcase classname="tests.test_monitoring_integration" name="test_outage_windows_progress_when_provider_is_unavailable[proxy_quota]" time="2.378" /><testcase classname="tests.test_monitoring_integration" name="test_repeated_control_does_not_advance_clock_twice" time="0.710" /><testcase classname="tests.test_monitoring_integration" name="test_sensor_alert_workflow_never_admits_agents[S1]" time="7.703" /><testcase classname="tests.test_monitoring_integration" name="test_sensor_alert_workflow_never_admits_agents[S2]" time="7.892" /><testcase classname="tests.test_monitoring_integration" name="test_api_alert_workflow_blocks_questions_without_inference" time="5.402" /><testcase classname="tests.test_monitoring_integration" name="test_maturing_leak_bypasses_unresolved_hold_without_an_obsolete_llm_job" time="5.044" /><testcase classname="tests.test_monitoring_integration" name="test_instrumentation_and_coverage_warnings_bypass_context_hold[S2]" time="3.061" /><testcase classname="tests.test_monitoring_integration" name="test_instrumentation_and_coverage_warnings_bypass_context_hold[S3]" time="4.735" /><testcase classname="tests.test_monitoring_integration" name="test_instrumentation_and_coverage_warnings_bypass_context_hold[S5]" time="4.277" /><testcase classname="tests.test_monitoring_integration" name="test_persistent_unresolved_pattern_is_admitted_on_its_latest_context" time="7.467" /><testcase classname="tests.test_monitoring_integration" name="test_resolved_transient_does_not_spend_an_llm_report" time="4.264" /><testcase classname="tests.test_monitoring_integration" name="test_possible_leak_warning_does_not_wait_for_a_working_llm" time="5.249" /><testcase classname="tests.test_monitoring_integration" name="test_archived_replay_is_never_reinterpreted_as_pressure[legacy-v1]" time="0.672" /><testcase classname="tests.test_monitoring_integration" name="test_archived_replay_is_never_reinterpreted_as_pressure[pressure-v2]" time="0.636" /><testcase classname="tests.test_monitoring_integration" name="test_idle_history_does_not_rehydrate_all_sensor_streams" time="0.736" /><testcase classname="tests.test_monitoring_integration" name="test_completed_source_drains_bounded_window_backlog" time="9.410" /><testcase classname="tests.test_monitoring_integration" name="test_explicit_scripted_mode_is_not_disabled_by_live_provider_failure" time="2.355" /><testcase classname="tests.test_monitoring_integration" name="test_api_provider_error_is_explicit_and_controls_remain_available" time="4.066" /><testcase classname="tests.test_replay" name="test_every_hop_at_accelerated_speed_and_clock_through_total_outage" time="0.001" /><testcase classname="tests.test_replay" name="test_pause_step_speed_continuity" time="0.001" /><testcase classname="tests.test_replay" name="test_half_open_late_revision_horizon" time="0.001" /><testcase classname="tests.test_replay" name="test_arrival_release_never_reads_future_or_baseline_as_replay" time="0.051" /><testcase classname="tests.test_warning" name="test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditions[S1-possible_leak-Do not wait]" time="0.398" /><testcase classname="tests.test_warning" name="test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditions[S2-sensor_telemetry-does not clear]" time="0.418" /><testcase classname="tests.test_warning" name="test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditions[S3-coverage_lost-Location withheld]" time="0.318" /><testcase classname="tests.test_warning" name="test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditions[S4-unresolved-Do not infer safety]" time="0.469" /><testcase classname="tests.test_warning" name="test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditions[S5-coverage_lost-Location withheld]" time="0.183" /><testcase classname="tests.test_warning" name="test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditions[S6-no_qualifying_event-not a safety clearance]" time="0.434" /><testcase classname="tests.test_warning" name="test_missing_assessment_is_not_a_healthy_pipeline_warning" time="0.001" /><testcase classname="tests.test_warning" name="test_sliding_warning_measurement_keeps_unobservable_leaks_in_the_denominator" time="12.131" /></testsuite></testsuites>

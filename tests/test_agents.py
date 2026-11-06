@@ -5,7 +5,7 @@ from datetime import timedelta
 from uuid import uuid4
 
 import pytest
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.checkpoint.memory import InMemorySaver
 
 from subsea_copilot.contracts import (
@@ -18,6 +18,7 @@ from subsea_copilot.contracts import (
     WindowSnapshot,
     utc_now,
 )
+from subsea_copilot.runtime.agent import repair_model_messages
 from subsea_copilot.runtime.gateway import ToolGateway
 from subsea_copilot.runtime.scripted import ScriptedChatModel
 from subsea_copilot.runtime.workflow import AgentService
@@ -27,6 +28,24 @@ from subsea_copilot.validation import ValidationError
 class FakeSpan:
     def set_attribute(self, *args):
         pass
+
+
+def test_repair_projection_retains_source_receipts_and_audited_invalid_draft():
+    source = SystemMessage(content="Complete scoped source context")
+    receipt = ToolMessage(content='{"pressure": [null, 79.5]}', tool_call_id="read-1")
+    draft = AIMessage(content="invalid result " * 1000)
+    repair = HumanMessage(
+        content='{"repair": "limitations", "validator_feedback": "Missing required limitation"}',
+        additional_kwargs={"validation_repair": True},
+    )
+    messages = [source, receipt, draft, repair]
+    assert repair_model_messages(messages) == [source, receipt, repair]
+    assert messages == [source, receipt, draft, repair]
+    assert repair_model_messages([source, draft, HumanMessage(content="Follow-up")]) == [
+        source,
+        draft,
+        HumanMessage(content="Follow-up"),
+    ]
 
 
 @pytest.mark.parametrize("detail", ["Use only fully reviewed current sources.", "x" * 1500])
@@ -437,6 +456,56 @@ def test_gateway_scope_authority_and_idempotent_receipt(snapshot):
     with pytest.raises(ValidationError):
         gateway.dispatch({**call, "id": "shell", "name": "shell"})
     assert store.get_task(root.id).state == "WAITING_ON_CHILD"
+
+
+def test_oversized_tool_result_is_recorded_as_error_not_success(snapshot, monkeypatch):
+    from subsea_copilot.contracts import TOOL_RESULT_MAX_BYTES
+
+    store, service = service_for(snapshot)
+    submit(service, snapshot, "Health?")
+    service.run_once()
+    child = store.claim_task("unit")
+    gateway = ToolGateway(store, child, snapshot, FakeTelemetry())
+    monkeypatch.setattr(gateway, "_read", lambda *_args: {"payload": "x" * TOOL_RESULT_MAX_BYTES})
+    arguments = {
+        key: getattr(snapshot, key)
+        for key in ("site_id", "pack_version", "baseline_version", "parameter_version")
+    }
+    arguments["snapshot_id"] = snapshot.id
+    call = {"id": "oversized", "name": "quality.coverage", "args": arguments}
+    assert gateway.dispatch(call) == {"result": None, "error": "payload_too_large"}
+    assert gateway.dispatch(call) == {"result": None, "error": "payload_too_large"}
+    assert store.get_task(child.id).tool_calls == 1
+    receipt = store.tool_receipts(child.id)[0]
+    assert receipt["result"] is None and receipt["error"] == "payload_too_large"
+
+
+def test_diagnosis_aggregate_read_budget_records_an_explicit_gap(snapshot, monkeypatch):
+    store, service = service_for(snapshot)
+    submit(service, snapshot, "What caused the event?")
+    for _ in range(5):
+        diagnosis = next(
+            (task for task in store.tasks.values() if task.role == "event_diagnosis"), None
+        )
+        if diagnosis:
+            break
+        service.run_once()
+    assert diagnosis is not None
+    task = store.claim_task("unit", task_id=diagnosis.id)
+    gateway = ToolGateway(store, task, snapshot, FakeTelemetry())
+    monkeypatch.setattr(gateway, "_read", lambda *_args: {"payload": "x" * (8 * 1024)})
+    scope = {
+        key: getattr(snapshot, key)
+        for key in ("site_id", "pack_version", "baseline_version", "parameter_version")
+    }
+    scope["snapshot_id"] = snapshot.id
+    for index in range(3):
+        result = gateway.dispatch({"id": f"bounded-{index}", "name": "evidence.get", "args": scope})
+        if index < 2:
+            assert result["error"] is None
+        else:
+            assert result == {"result": None, "error": "context_budget_exceeded"}
+    assert store.tool_receipts(task.id)[-1]["error"] == "context_budget_exceeded"
 
 
 @pytest.mark.parametrize("scenario", ["S1", "S2", "S5"])

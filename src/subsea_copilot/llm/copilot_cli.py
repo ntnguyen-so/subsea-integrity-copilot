@@ -623,6 +623,19 @@ class CopilotCLIChatModel(BaseChatModel):
             if not isinstance(message.content, str):
                 raise ProviderError("unsupported_request")
             item: dict[str, Any] = {"role": message.type, "content": message.content}
+            try:
+                if message.type == "system" and "\nBOUND_CONTEXT\n" in message.content:
+                    text, context = message.content.split("\nBOUND_CONTEXT\n", 1)
+                    item.update(content=text, bound_context=_json(context))
+                elif (
+                    message.type == "tool"
+                    and message.content.startswith("{")
+                    or message.type == "human"
+                    and message.content.startswith(('{"application_intake":', '{"repair":'))
+                ):
+                    item["content"] = _json(message.content)
+            except ValueError:
+                raise ProviderError("unsupported_request") from None
             if isinstance(message, ToolMessage):
                 item["tool_call_id"] = message.tool_call_id
             if isinstance(message, AIMessage) and message.tool_calls:
@@ -651,7 +664,13 @@ class CopilotCLIChatModel(BaseChatModel):
         except (ValueError, TypeError, UnicodeError):
             raise ProviderError("unsupported_request") from None
         if len(prompt) > self.max_prompt_chars:
-            raise ProviderError("input_too_large")
+            failure = ProviderError("input_too_large")
+            failure.metadata = {
+                "prompt_chars": len(prompt),
+                "message_chars": [len(message.content) for message in messages],
+                "tool_schema_chars": len(json.dumps(tools, separators=(",", ":"))),
+            }
+            raise failure
         request_id = str(uuid.uuid4())
         metadata: dict[str, Any] = {
             **_metadata([], self.model_id),

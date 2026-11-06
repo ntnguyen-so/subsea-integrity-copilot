@@ -64,7 +64,7 @@ numerical detector outputs. Pending, failed and unavailable work records do not
 become completed historical investigations. SCRIPTED recordings remain offline
 fixtures, not evidence of hosted performance.
 
-Choose between exactly two customer workflows under **Demo mode / new run**:
+Choose between exactly two customer workflows under **Workflow / new run**:
 
 - **Sensor alerts only:** the map and list flag individual instruments. Engineers
   examine histories one by one and connect timing/location manually. There is no
@@ -156,6 +156,96 @@ opening actual same-window histories on common pressure and UTC axes; S2 include
 Trunk, spikes on Branch A and missing readings on Branch B.
 Archived source generations are labeled and cannot be replayed as pressure-v3.
 No actuator or shutdown endpoint exists.
+
+### Larger manual-investigation workload: S7
+
+S7 is a separate **11.2 km, seven-segment network with 56 paired stations and
+112 pressure instruments**; S1-S6 retain the brief's original Y and their
+existing qualification cohort. At source +90s, a pressure footprint with a
+disruptive near-source core and weaker connected responses coincides with
+scattered drift, staggered spikes, gaps, flatlines and invalid readings, a shared
+gateway offset, and a positive operating-pressure transition on another branch.
+Operating records also contain superseded and unapproved material.
+
+Run S7 in each customer workflow with the same seed. In **Sensor alerts only**,
+inspect individual histories and compare up to four instruments across branches.
+**Map focus** zooms a branch to readable station labels; the alarm table keeps
+the whole network available, and selecting a different branch's instrument
+updates the map focus. The overview still represents every instrument.
+Network length, instrument count and actual current-window flags are displayed,
+without inventing a manual investigation duration.
+
+The numerical screening result and any qualified inspection interval are shown
+separately from **agent-authored regional causal assessments**. Agents can retain
+several competing causes or an unresolved pattern even when the numerical fit
+withholds a location. The wider S7 footprint can legitimately produce an
+ambiguous or withheld interval; it must not be forced into the earlier bracket.
+
+The diagnosis agent receives a compact measurement table for **all 112
+instruments**, including weak and quiet channels. It chooses up to eight
+instruments per joint before/after comparison: pressure profiles, actual usable
+sample overlap, paired correlations, graph distances, extrema and adjacent
+steps. Missing data are never imputed into physical evidence. These are
+measurements, not a causal classifier or pressure-wave localization model.
+Review remains bounded and partial, not an exhaustive expert assessment.
+Discovery magnitudes use the same explicitly timed final 20-second usable
+median against verified-normal baseline for every instrument, with sample
+counts; they do not mix threshold-conditioned and whole-window summaries.
+
+### Capturing and applying expert knowledge
+
+`fixtures\knowledge\pressure-investigation.json` stores versioned natural-language
+guidance, prerequisites, verification steps, counterexamples and limitations.
+The investigation-program card expresses a reusable procedure; the other cards
+express domain heuristics. This follows DANA's capture/apply distinction, **not**
+a claim of DanaOS/OpenSSA implementation. The current corpus is research-curated
+and synthetic-advisory-only, **not approved by a pipeline SME**.
+
+The service selects cards by site, pack, role, status and validity; withholds
+declared conflicts; pins a full immutable packet to the root and every child;
+and checks knowledge-plus-case citations in the final report. Selection uses
+actual processing time, separately from historical incident timestamps.
+Undeclared semantic contradictions still require human curation. The response
+view shows guidance excerpts; the full selected packet and provenance remain
+available in the casefile.
+
+**Why these checks** links actual recorded knowledge IDs and discriminating
+questions to executed history calls. Regional conclusions must cite real
+comparisons and applicable guidance; knowledge is not an observation or
+authority to confirm a leak. The separately prompted same-model critic checks
+grounding, not physical correctness or expert approval.
+
+Inspect the packet with `uv run subsea knowledge`. Run the paired synthetic
+ablation with `uv run subsea evaluate --suite knowledge --mode scripted`
+(contract checks) or `--mode live` (hosted inference, consumes quota).
+Matching input hashes and accepted contracts do not prove incremental knowledge
+benefit; see `docs\RESULTS.md`, including failed hosted attempts.
+`uv run python tools\qualify-joint-timing.py` runs two additional hosted
+counterexamples with identical individual before/after distributions but changed
+cross-sensor timing. It records full explanations for independent semantic
+review, not an automatic accuracy grade.
+
+Root bounds remain 300 seconds, ten model calls and eighteen tool calls; the
+provider prompt remains 48,000 characters. Joint comparison handoffs use lossless
+columnar encoding and a 16 KiB tool-result bound. Repeated claim values reference
+their identical evidence value without removing source data. Diagnosis delivery
+also has a cumulative 21 Ki-character normalized-JSON budget; additional reads
+fail explicitly with `context_budget_exceeded`, which must remain a report
+limitation. No numerical certainty or operating authority is increased.
+Schema repair regenerates from the same complete source messages and validator
+feedback; the rejected draft remains audited but is not replayed into the repair
+prompt. Raw source evidence is never discarded to make a report fit.
+
+The fresh automatic S7 worked example completed in **233.70 seconds, eight
+hosted calls and sixteen tools**, separating P5, P7 and P2 explanations while
+withholding an unsupported location. See the [actual dashboard](docs/assets/knowledge-guided-investigation.png)
+and [qualification results](docs/RESULTS.md), including the failed prior attempt.
+One accepted run is not a reliability, field-accuracy or labor-saving result.
+
+This workload contains **one physical leak**, not simultaneous multi-leak
+localization. The pressure footprint is synthetic, not a hydraulic simulator.
+More sensors demonstrate review complexity; they do not prove labor savings,
+field accuracy or superiority over a well-designed deterministic workflow.
 
 ### Show an adaptive investigation
 

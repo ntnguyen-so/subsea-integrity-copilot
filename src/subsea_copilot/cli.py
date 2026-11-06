@@ -56,17 +56,27 @@ def main() -> None:
     probe = subparsers.add_parser("provider-check", help="One explicit synthetic live call")
     probe.add_argument("--mode", choices=["live"], required=True)
     probe.add_argument("--model")
+    knowledge = subparsers.add_parser("knowledge", help="Validate and preview advisory knowledge")
+    knowledge.add_argument("--path", type=Path)
+    knowledge.add_argument("--site", default="northsea")
+    knowledge.add_argument("--pack-version", default="pressure-pack-v4-extended")
     generate = subparsers.add_parser("generate", help="Write original synthetic raw data")
     generate.add_argument("--seed", type=int, default=2026)
-    generate.add_argument("--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6"], default="S1")
+    generate.add_argument(
+        "--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6", "S7"], default="S1"
+    )
     generate.add_argument("--output", type=Path, default=Path("runtime") / "generated")
     ingest = subparsers.add_parser("ingest", help="Create a paused named synthetic replay")
     ingest.add_argument("--fixture-set", choices=["interview"], default="interview")
-    ingest.add_argument("--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6"], default="S1")
+    ingest.add_argument(
+        "--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6", "S7"], default="S1"
+    )
     ingest.add_argument("--mode", choices=["scripted", "live"], default="scripted")
     evaluate = subparsers.add_parser("evaluate", help="Run frozen synthetic qualification")
     evaluate.add_argument(
-        "--suite", choices=["diagnostics", "agents", "qualification"], default="diagnostics"
+        "--suite",
+        choices=["diagnostics", "agents", "qualification", "knowledge"],
+        default="diagnostics",
     )
     evaluate.add_argument("--mode", choices=["scripted", "live"], default="scripted")
     evaluate.add_argument("--repetitions", type=int, choices=[1, 2, 3], default=3)
@@ -74,7 +84,18 @@ def main() -> None:
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     try:
-        if args.command == "provider-check":
+        if args.command == "knowledge":
+            from .contracts import utc_now
+            from .knowledge import DEFAULT_KNOWLEDGE_PATH, load_knowledge, select_knowledge
+
+            packet = select_knowledge(
+                load_knowledge(args.path or DEFAULT_KNOWLEDGE_PATH),
+                site_id=args.site,
+                pack_version=args.pack_version,
+                as_of=utc_now(),
+            )
+            print(packet.model_dump_json(indent=2))
+        elif args.command == "provider-check":
             from .store import Store
 
             probe_result = provider_check(args.model)

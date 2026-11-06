@@ -21,22 +21,19 @@ SYNTHETIC_EPOCH = datetime(2026, 1, 1, tzinfo=UTC)
 DEFAULT_HISTORY_PATH = (
     Path(__file__).resolve().parents[2] / "fixtures" / "synthetic" / "operational-history.json"
 )
+EXTENDED_HISTORY_PATH = DEFAULT_HISTORY_PATH.with_name("extended-operational-history.json")
 
 HistoryType = Literal["procedure", "maintenance", "incident", "operation"]
 HistoryStatus = Literal["approved", "draft", "superseded"]
 
 _ASSET_IDS = {
     asset
-    for segment in ("P1", "P2", "P3")
+    for segment in ("P1", "P2", "P3", "P4", "P5", "P6", "P7")
     for asset in (
         segment,
         *(f"gateway-{segment}-{index}" for index in range(2)),
-        *(f"{segment}-ST{station}" for station in range(1, 5)),
-        *(
-            f"{segment}-ST{station}-{side}"
-            for station in range(1, 5)
-            for side in ("A", "B")
-        ),
+        *(f"{segment}-ST{station}" for station in range(1, 9)),
+        *(f"{segment}-ST{station}-{side}" for station in range(1, 9) for side in ("A", "B")),
     )
 } | {"northsea"}
 
@@ -64,9 +61,9 @@ class HistoryDocument(BaseModel):
     @classmethod
     def validate_scenarios(cls, value: list[str]) -> list[str]:
         if len(set(value)) != len(value) or any(
-            scenario not in {"S1", "S2", "S3", "S4", "S5", "S6"} for scenario in value
+            scenario not in {"S1", "S2", "S3", "S4", "S5", "S6", "S7"} for scenario in value
         ):
-            raise ValueError("scenarios must be unique S1 through S6 IDs; empty means all")
+            raise ValueError("scenarios must be unique S1 through S7 IDs; empty means all")
         return value
 
     @field_validator("authored_at", "available_at", "effective_from", "effective_to")
@@ -78,7 +75,7 @@ class HistoryDocument(BaseModel):
     @classmethod
     def validate_assets(cls, value: list[str]) -> list[str]:
         if len(set(value)) != len(value) or any(asset not in _ASSET_IDS for asset in value):
-            raise ValueError("asset_ids must be unique assets in the synthetic P1/P2/P3 network")
+            raise ValueError("asset_ids must be unique assets in the synthetic network")
         if "northsea" not in value:
             raise ValueError("asset_ids must include the northsea site")
         return value

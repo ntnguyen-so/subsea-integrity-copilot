@@ -1,0 +1,377 @@
+{
+  "created_at": "2026-11-06T10:45:57.655378+00:00",
+  "suite": "knowledge",
+  "mode": "live",
+  "knowledge": {
+    "passed": false,
+    "mode": "live",
+    "matching_input_hashes": true,
+    "arms": [
+      {
+        "knowledge_enabled": false,
+        "input_hash": "9cb2ffd2ed28941ba03ed49c12b520bf999ff03d7ed06edc15d0482dbf7ee9f6",
+        "numerical_hypothesis": "suspected_leak",
+        "state": "FAILED",
+        "error_code": "child_failed",
+        "contract_qualified": false,
+        "measured_elapsed_seconds": 105.32799999997951,
+        "model_calls": 6,
+        "tool_calls": 12,
+        "casefile": null,
+        "root": {
+          "id": "46c0870f-52ff-555a-b7c8-1c55a00db9f1",
+          "root_id": "46c0870f-52ff-555a-b7c8-1c55a00db9f1",
+          "tenant_id": "knowledge-eval-a1ce6bd04ecc",
+          "site_id": "northsea",
+          "generation_id": "knowledge-63ac19582b864c369af468319277e62a",
+          "snapshot_id": "window-80ce75f024ea37d21b214de335c9489bf40722892ccb61e41b1fd79633a0004c",
+          "episode_id": null,
+          "parent_id": null,
+          "role": "operator_response",
+          "purpose": "answer_incident_question",
+          "question": "Leak or faulty sensors? Explain the competing pressure regions, where to inspect and what remains unknown.",
+          "mode": "live",
+          "state": "FAILED",
+          "version": 11,
+          "lease_token": "2eb01c5e-0293-4dab-905b-8665bd146c69",
+          "lease_expires_at": "2026-11-06T10:51:01.761859Z",
+          "created_at": "2026-11-06T10:46:01.761859Z",
+          "updated_at": "2026-11-06T10:47:46.988789Z",
+          "deadline": "2026-11-06T10:51:01.761859Z",
+          "model_calls": 1,
+          "tool_calls": 0,
+          "plan": [
+            "quality",
+            "diagnosis",
+            "answer"
+          ],
+          "result": null,
+          "answer": null,
+          "error_code": "child_failed",
+          "error_message": "ValidationError: child_failed; no agent result accepted.",
+          "automatic": false,
+          "idempotency_key": "knowledge-ablation",
+          "history_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+          "knowledge_packet": null,
+          "response_protocol": "engineer-v2",
+          "interpretation_review": null
+        },
+        "context_utility_checks": {
+          "current_operating_record_cited": false,
+          "current_gateway_record_cited": false,
+          "meaningful_p5_comparison": false
+        }
+      },
+      {
+        "knowledge_enabled": true,
+        "input_hash": "9cb2ffd2ed28941ba03ed49c12b520bf999ff03d7ed06edc15d0482dbf7ee9f6",
+        "numerical_hypothesis": "suspected_leak",
+        "state": "FAILED",
+        "error_code": "child_failed",
+        "contract_qualified": false,
+        "measured_elapsed_seconds": 63.54700000002049,
+        "model_calls": 5,
+        "tool_calls": 12,
+        "casefile": null,
+        "root": {
+          "id": "146bf467-896f-5770-a1f7-61abcddc6262",
+          "root_id": "146bf467-896f-5770-a1f7-61abcddc6262",
+          "tenant_id": "knowledge-eval-a1ce6bd04ecc",
+          "site_id": "northsea",
+          "generation_id": "knowledge-c83f8632b8274e73b40c3bb0d1c34bca",
+          "snapshot_id": "window-4d596cf7c7de1ac15e8b953c427f07a626bbc3114b2378623e0343cb72d3a95e",
+          "episode_id": null,
+          "parent_id": null,
+          "role": "operator_response",
+          "purpose": "answer_incident_question",
+          "question": "Leak or faulty sensors? Explain the competing pressure regions, where to inspect and what remains unknown.",
+          "mode": "live",
+          "state": "FAILED",
+          "version": 11,
+          "lease_token": "1d2c6584-8530-42c1-ab2a-423ab6d4c5fc",
+          "lease_expires_at": "2026-11-06T10:52:48.696671Z",
+          "created_at": "2026-11-06T10:47:48.697734Z",
+          "updated_at": "2026-11-06T10:48:52.089045Z",
+          "deadline": "2026-11-06T10:52:48.696671Z",
+          "model_calls": 1,
+          "tool_calls": 0,
+          "plan": [
+            "quality",
+            "diagnosis",
+            "answer"
+          ],
+          "result": null,
+          "answer": null,
+          "error_code": "child_failed",
+          "error_message": "ValidationError: child_failed; no agent result accepted.",
+          "automatic": false,
+          "idempotency_key": "knowledge-ablation",
+          "history_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+          "knowledge_packet": {
+            "version": "knowledge-f4f382fb5e68070886bafc7e5b5f8d905c0b24bc795810fbcea09055358ea974",
+            "authority": "synthetic_advisory_only",
+            "selected_at": "2026-11-06T10:47:48.697205Z",
+            "site_id": "northsea",
+            "pack_version": "pressure-pack-v4-extended",
+            "cards": [
+              {
+                "id": "KN-QUALITY-R1",
+                "revision": 1,
+                "title": "Distinguish unreliable observations from physical process evidence",
+                "kind": "heuristic",
+                "roles": [
+                  "sensor_quality",
+                  "operator_response"
+                ],
+                "status": "demo_curated",
+                "site_ids": [
+                  "northsea"
+                ],
+                "pack_versions": [
+                  "pressure-pack-v3",
+                  "pressure-pack-v4-extended"
+                ],
+                "available_at": "2026-11-06T00:00:00Z",
+                "valid_until": null,
+                "supersedes": null,
+                "conflicts_with": [],
+                "applies_when": "Pressure alerts coexist with missing samples, spikes, drift or inconsistent instrument readings.",
+                "guidance": "An unusual reading is not itself a faulty sensor or a physical leak. Separate completeness, currentness, accuracy and provenance. Missing values and invalid sentinels are observation gaps, not measured pressure drops. Inspect persistence and paired disagreement, and seek an independent reference before attributing a hardware fault. A detector's attribution score identifies a contribution, not a physical root cause. Malfunction and a physical event can coexist.",
+                "verification_steps": [
+                  "Compare suspect instruments with independent observers and their actual received coverage.",
+                  "Check calibration, units, clock and maintenance context; preserve unobserved periods.",
+                  "State which sensor claims were reviewed and which remain unchecked."
+                ],
+                "counterexamples": [
+                  "A gap during a real leak does not establish a healthy pipeline.",
+                  "A genuine process transient can produce a large anomaly score on functioning instruments."
+                ],
+                "limitations": [
+                  "This is a research-derived demo heuristic, not a field-approved sensor diagnosis.",
+                  "No universal threshold or sensor-failure probability is established."
+                ],
+                "sources": [
+                  {
+                    "reference": "User-provided PhD thesis, not redistributed",
+                    "locator": "PDF pp. 28-29, 37-38, 207, 240",
+                    "boundary": "Marine data-quality and anomaly-attribution principles; not validation of gas-pipeline leak classification."
+                  }
+                ],
+                "review_basis": "FDE research synthesis for synthetic evaluation; no pipeline SME approval has been obtained."
+              },
+              {
+                "id": "KN-INDEPENDENCE-R1",
+                "revision": 1,
+                "title": "Check common causes before counting independent corroboration",
+                "kind": "heuristic",
+                "roles": [
+                  "sensor_quality",
+                  "event_diagnosis",
+                  "operator_response"
+                ],
+                "status": "demo_curated",
+                "site_ids": [
+                  "northsea"
+                ],
+                "pack_versions": [
+                  "pressure-pack-v3",
+                  "pressure-pack-v4-extended"
+                ],
+                "available_at": "2026-11-06T00:00:00Z",
+                "valid_until": null,
+                "supersedes": null,
+                "conflicts_with": [],
+                "applies_when": "Several instruments show simultaneous changes, particularly paired taps or instruments sharing infrastructure.",
+                "guidance": "Inspect groups, not isolated alert flags. In this synthetic pressure-monitoring setup, a leak hypothesis should be tested against a sustained connected pattern: disruptive changes near the affected region and weaker, related changes farther along the pipes, including below-threshold observations. Compare synchronized profiles, relative magnitudes, timing, recovery and missingness against independent and contrasting instruments. Attenuation is not necessarily monotonic in real branched gas networks; this is a working hypothesis, not a universal law. Scattered impulses, isolated drift or missing data motivate instrumentation checks but can coexist with a leak. Treat hydraulic connectivity and instrumentation dependency as different relationships. Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error. Correlation is not independence or a confirmed cause. Shared-failure explanations also need observed evidence; do not declare every sensor on a gateway faulty from metadata alone.",
+                "verification_steps": [
+                  "Compare near, farther and weak/quiet connected observers jointly, not only above-threshold supporters.",
+                  "Contrast a shared-path instrument with an independent observer; compare profiles, valid-sample overlap and graph distances.",
+                  "Inspect contradictory or asynchronous changes rather than merging branch-level earliest/latest timings into a common onset.",
+                  "Open applicable maintenance records and check effective revision and scope."
+                ],
+                "counterexamples": [
+                  "Eight taps on one shared conversion path are not eight independent witnesses.",
+                  "An operating transient can also produce a coherent pressure pattern; attenuation alone cannot identify a leak.",
+                  "Independent gateways do not exclude an unrecorded shared power or operating cause."
+                ],
+                "limitations": [
+                  "A/B gateway assignments are synthetic site assumptions requiring expert confirmation.",
+                  "This demo contains no validated common-cause reliability model."
+                ],
+                "sources": [
+                  {
+                    "reference": "User-provided public defense deck, not redistributed",
+                    "locator": "Slide 47; user's proposed pressure-monitoring scenario",
+                    "boundary": "Strong, possible, lower-threshold and noisy detections motivate multiscale inspection; not calibrated gas-pipeline attenuation."
+                  },
+                  {
+                    "reference": "User-provided PhD thesis, not redistributed",
+                    "locator": "PDF pp. 28-29, 240",
+                    "boundary": "Motivates prior knowledge and source-quality review; gateway independence is an explicit demo engineering assumption."
+                  }
+                ],
+                "review_basis": "FDE-authored dependency heuristic; requires site instrumentation expert review before field use."
+              },
+              {
+                "id": "KN-OPERATING-R1",
+                "revision": 1,
+                "title": "Test operating transients as competing explanations",
+                "kind": "heuristic",
+                "roles": [
+                  "event_diagnosis",
+                  "operator_response"
+                ],
+                "status": "demo_curated",
+                "site_ids": [
+                  "northsea"
+                ],
+                "pack_versions": [
+                  "pressure-pack-v3",
+                  "pressure-pack-v4-extended"
+                ],
+                "available_at": "2026-11-06T00:00:00Z",
+                "valid_until": null,
+                "supersedes": null,
+                "conflicts_with": [],
+                "applies_when": "Pressure changes could coincide with a valve, compressor, setpoint or calibration activity.",
+                "guidance": "Investigate operating changes rather than equating a pressure anomaly with a leak. Compare the observed sign, timing and affected assets with an approved, incident-time-available record. A proposal is not an executed operation, and a superseded record is not current authority. Read the underlying records referenced by a coverage statement. A plausible explanation for one branch does not automatically explain a different pattern elsewhere. Incomplete logs cannot prove that no operation or leak occurred.",
+                "verification_steps": [
+                  "Search affected and contrasting signal regions, not only the proposed inspection branch.",
+                  "Open current records and distinguish planned, approved and executed activities.",
+                  "Compare before/after periods near an observed change; note window censoring and retain missingness."
+                ],
+                "counterexamples": [
+                  "A broad positive operating shift does not by itself explain a separate localized negative region.",
+                  "A real operating change can coexist with a leak or instrumentation fault."
+                ],
+                "limitations": [
+                  "Temporal association is not a causal intervention.",
+                  "The cited review includes liquid-pipeline methods; its parameters cannot be transferred directly to subsea gas."
+                ],
+                "sources": [
+                  {
+                    "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                    "locator": "Sections 4.2, 4.3 and 4.5",
+                    "boundary": "Review of pressure methods, operating transients and model assumptions; not a site-specific operating procedure."
+                  }
+                ],
+                "review_basis": "Research-grounded demo guidance; no customer operating procedure has been approved."
+              },
+              {
+                "id": "KN-LOCALIZATION-R1",
+                "revision": 1,
+                "title": "Separate a numerical inspection bracket from physical leak localization",
+                "kind": "heuristic",
+                "roles": [
+                  "event_diagnosis",
+                  "operator_response"
+                ],
+                "status": "demo_curated",
+                "site_ids": [
+                  "northsea"
+                ],
+                "pack_versions": [
+                  "pressure-pack-v3",
+                  "pressure-pack-v4-extended"
+                ],
+                "available_at": "2026-11-06T00:00:00Z",
+                "valid_until": null,
+                "supersedes": null,
+                "conflicts_with": [],
+                "applies_when": "An engineer requests a leak location or an inspection recommendation from pressure observations.",
+                "guidance": "Use the qualified numerical tool for chainage and retain its assumptions. The demo brackets affected stations against unaffected neighbours; it does not solve a calibrated hydraulic inverse problem. Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions. Do not infer an exact coordinate, leak size or leak probability from anomaly magnitude or from a research formula without its inputs. Withhold a location when coverage or the single-region assumption is inadequate.",
+                "verification_steps": [
+                  "Check the numerical tool's eligibility, observer independence and unaffected brackets.",
+                  "State the interval and distinguish it from a confidence interval or physical leak point.",
+                  "Request expert-selected independent confirmation; do not clear alarms while waiting for an LLM."
+                ],
+                "counterexamples": [
+                  "A larger pressure residual is not necessarily the nearest sensor to a leak.",
+                  "Multiple disjoint pressure regions are not resolved by the demo's single-leak bracket."
+                ],
+                "limitations": [
+                  "The source review discusses methods with different fluid and deployment assumptions.",
+                  "Synthetic pressure footprints and inspection brackets are not field localization validation."
+                ],
+                "sources": [
+                  {
+                    "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                    "locator": "Sections 4.2-4.5",
+                    "boundary": "Explains method-dependent localization assumptions; does not validate this demo's bracket."
+                  }
+                ],
+                "review_basis": "Research-derived scope guard for this synthetic demo; not a field-approved localization procedure."
+              },
+              {
+                "id": "KN-INVESTIGATION-PROGRAM-R1",
+                "revision": 1,
+                "title": "Expert-guided differential investigation program",
+                "kind": "procedure",
+                "roles": [
+                  "operator_response"
+                ],
+                "status": "demo_curated",
+                "site_ids": [
+                  "northsea"
+                ],
+                "pack_versions": [
+                  "pressure-pack-v3",
+                  "pressure-pack-v4-extended"
+                ],
+                "available_at": "2026-11-06T00:00:00Z",
+                "valid_until": null,
+                "supersedes": null,
+                "conflicts_with": [],
+                "applies_when": "An anomaly episode requires a bounded, reviewable leak-versus-instrumentation RCA investigation.",
+                "guidance": "Use this natural-language program to guide the existing read-only specialist workflow, not to assert an answer. Preserve competing leak, instrumentation and operating explanations. Select measurements and contextual checks that could distinguish them, including counterevidence. Apply only relevant knowledge, explicitly connect it to observed case evidence, and retain contradictions and missing prerequisites. Domain guidance supplies reasoning, not incident facts or authority to clear the numerical warning.",
+                "verification_steps": [
+                  "Quality: establish what was measured reliably and what remains missing.",
+                  "Diagnosis: inspect connectivity, independent domains and competing signal regions.",
+                  "Diagnosis: choose relevant operational records and discriminating comparisons.",
+                  "Response: explain which guidance was applied, supporting and contradicting case evidence, and remaining gaps.",
+                  "Critic: check case facts and knowledge citations against their original pinned sources.",
+                  "Handoff: request qualified engineer verification; unresolved evidence remains unresolved."
+                ],
+                "counterexamples": [
+                  "Retrieving a relevant document without applying it is not RCA.",
+                  "A well-cited but consistently wrong explanation is not successful expert reasoning."
+                ],
+                "limitations": [
+                  "Inspired by DANA CAPTURE/APPLY and natural-language programs, not an OpenSSA or DanaOS implementation.",
+                  "The paper's FinanceBench results do not establish pipeline diagnostic accuracy."
+                ],
+                "sources": [
+                  {
+                    "reference": "https://arxiv.org/html/2410.02823v1",
+                    "locator": "Sections 3.1-3.4, 4.1, 5.2 and 6.4",
+                    "boundary": "Architecture, expertise capture and open uncertainty/contradiction challenges; no subsea benchmark."
+                  }
+                ],
+                "review_basis": "FDE-authored DANA-inspired demo program; expert elicitation and operational approval remain pilot gates."
+              }
+            ],
+            "excluded": {},
+            "selection_method": "exact_site_version_status_time_and_declared_conflicts"
+          },
+          "response_protocol": "engineer-v2",
+          "interpretation_review": null
+        },
+        "context_utility_checks": {
+          "current_operating_record_cited": false,
+          "current_gateway_record_cited": false,
+          "meaningful_p5_comparison": false
+        }
+      }
+    ],
+    "inference_retries": 0,
+    "limitations": [
+      "One synthetic seed/window and run per arm; no causal or accuracy estimate.",
+      "SCRIPTED checks contracts, not actual knowledge reasoning benefit.",
+      "Utility checks verify reads/comparisons, not complete RCA correctness.",
+      "Same-model critic acceptance is not independent pipeline-expert validation.",
+      "No measured engineer-time savings; monetary provider cost is unknown.",
+      "A strong numerical and contextual workflow may match either arm."
+    ]
+  },
+  "passed": false
+}

@@ -14,6 +14,7 @@ from .contracts import (
     WindowSnapshot,
 )
 from .investigation import ACTION_LABELS
+from .knowledge import KnowledgePacket
 from .validation import ValidationError
 
 
@@ -70,6 +71,8 @@ class InvestigationCase(Contract):
     report_target_seconds: int = 300
     report_target_met: bool
     interpretation_review: InterpretationReview | None = None
+    knowledge_packet: KnowledgePacket | None = None
+    knowledge_used_ids: list[str] = []
     provider_cost_usd: None = None
     authority: str = (
         "For engineer review, not engineer-approved. No leak clearance, dispatch or control. "
@@ -223,4 +226,15 @@ def build_casefile(
         recorded_elapsed_seconds=elapsed,
         report_target_met=elapsed <= 300,
         interpretation_review=task.interpretation_review,
+        knowledge_packet=task.knowledge_packet,
+        knowledge_used_ids=sorted(
+            {
+                reference
+                for paragraph in result.interpretation.cited_paragraphs()
+                for reference in paragraph.references
+            }
+            & {card.id for card in task.knowledge_packet.cards}
+        )
+        if task.knowledge_packet and result.interpretation
+        else [],
     )

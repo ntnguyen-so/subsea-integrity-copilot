@@ -8,7 +8,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.types import interrupt
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from subsea_copilot.contracts import AgentResult
 from subsea_copilot.validation import ValidationError, parse_json
@@ -83,14 +83,23 @@ def build_graph(checkpointer: Any = None, validator: Any = None, result_schema: 
                             {
                                 "repair": getattr(exc, "code", "structure"),
                                 "validator_feedback": str(exc)[:1000],
-                                "instruction": "Correct the structured result; no prose.",
-                                "expected_schema": (
-                                    WorkPlan.model_json_schema()
-                                    if state["phase"] == "plan"
-                                    else result_schema or AgentResult.model_json_schema()
+                                "instruction": (
+                                    "Regenerate a complete valid result from the supplied source "
+                                    "evidence and validator feedback; no prose. "
+                                    "The invalid draft is retained in the audit, not this request."
+                                ),
+                                **(
+                                    {"expected_schema_source": "BOUND_CONTEXT.result_schema"}
+                                    if result_schema is not None and state["phase"] != "plan"
+                                    else {
+                                        "expected_schema": WorkPlan.model_json_schema()
+                                        if state["phase"] == "plan"
+                                        else AgentResult.model_json_schema()
+                                    }
                                 ),
                             }
-                        )
+                        ),
+                        additional_kwargs={"validation_repair": True},
                     )
                 ],
             }
@@ -114,13 +123,41 @@ def build_graph(checkpointer: Any = None, validator: Any = None, result_schema: 
     return builder.compile(checkpointer=checkpointer or InMemorySaver())
 
 
+def model_tool_result(result: JsonValue) -> dict[str, Any]:
+    from subsea_copilot.profiles import compact_comparison, compact_documents, compact_evidence
+
+    if not isinstance(result, dict):
+        raise ValueError("A model tool result must be a scoped JSON object.")
+    value = result.get("result")
+    if isinstance(value, dict) and "joint_pattern" in value and "sensors" in value:
+        return {**result, "result": compact_comparison(value)}
+    if isinstance(value, dict) and value.get("documents"):
+        return {**result, "result": compact_documents(value)}
+    if isinstance(value, dict) and "evidence" in value and "claims" in value:
+        return {**result, "result": compact_evidence(value)}
+    return result
+
+
+def repair_model_messages(messages: list[AnyMessage]) -> list[AnyMessage]:
+    if (
+        len(messages) >= 2
+        and isinstance(messages[-1], HumanMessage)
+        and messages[-1].additional_kwargs.get("validation_repair") is True
+    ):
+        draft = messages[-2]
+        if not isinstance(draft, AIMessage) or draft.tool_calls:
+            raise ValidationError("repair_context", "Repair must follow an invalid final draft.")
+        return [*messages[:-2], messages[-1]]
+    return list(messages)
+
+
 def tool_messages(
     calls: list[dict[str, Any]],
     results: list[dict[str, Any]],
 ) -> list[ToolMessage]:
     return [
         ToolMessage(
-            content=json.dumps(result, allow_nan=False, separators=(",", ":")),
+            content=json.dumps(model_tool_result(result), allow_nan=False, separators=(",", ":")),
             tool_call_id=call["id"],
         )
         for call, result in zip(calls, results, strict=True)

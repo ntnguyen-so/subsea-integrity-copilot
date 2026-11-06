@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="336.193053">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T12:24:21.885Z" hostname="" tests="3" failures="0" skipped="0" time="334.328" errors="0">
+<testcase name="knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links" classname="dashboard.spec.ts" time="120.61">
+</testcase>
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="133.778">
+</testcase>
+<testcase name="agent work stays separate from a running detector and rejects mismatched automatic handoffs" classname="dashboard.spec.ts" time="79.94">
+</testcase>
+</testsuite>
+</testsuites>

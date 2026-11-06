@@ -37,8 +37,8 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
     "An engineer retrieves operating and maintenance records, checks their validity, compares histories and tests leak, operating-change and shared-failure explanations.", "manual-work");
   metric(baseline, "Knowledge and handover",
     "An experienced engineer applies procedures, records uncertainty and prepares a handover for the next engineer.", "handover");
-  metric(baseline, "Manual investigation time",
-    "10 minutes is a planning assumption, not a measured customer baseline.", "timing");
+  metric(baseline, "Investigation time",
+    "Not yet measured. Include evidence gathering, interpretation and handover.", "timing");
   baseline.append(button("Inspect this exact detector window", inspect));
   const assisted = node("article", "", "workflow-added");
   assisted.dataset.snapshot = snapshot.id;
@@ -86,7 +86,7 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
   if (scenario === "S1") section.append(node("p",
     "Same S1 readings: alerts alone leave the engineer to connect the dots. The product adds cross-sensor numerical correlation, leak-versus-instrumentation assessment, a supported inspection interval and a transferable handoff. A possible leak is not a confirmed leak.", "workflow-value-note"));
   section.append(node("p",
-    "Buying gate: fixed workflows can also automate these checks. Validate answer quality, engineer review effort, knowledge transfer, failures, latency and total cost in a read-only pilot. Savings and field accuracy are not demonstrated here.", "muted"));
+    "Validation scope: compare answer quality, engineer review effort, failures and latency against a fixed workflow. Field accuracy and time savings remain unmeasured.", "muted"));
   container.append(section);
 }
 export function renderCasefile(container: HTMLElement, file: InvestigationCase, actions: {

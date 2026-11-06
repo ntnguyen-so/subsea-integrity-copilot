@@ -6,41 +6,41 @@ gaps and drift. Missed leaks threaten the environment and operations; false
 alarms trigger costly inspections. Scarce expertise is difficult to encode and
 transfer to newcomers.
 
-![The demo's actual Y topology and synthetic pressure evidence: nearby related drops support inspection; scattered spikes, gaps and drift suggest sensor faults.](assets/pressure-leak-vs-sensor-faults.svg)
+![Original Y topology and synthetic pressure evidence: related drops support investigation; scattered spikes, gaps and drift suggest sensor faults.](assets/pressure-leak-vs-sensor-faults.svg)
 
 **Why this problem.** My PhD studied marine data quality, anomaly detection and
-translating expertise into smart systems. This applies that experience to reviewable investigation.
+translating expertise into reviewable smart systems.
 
 **The two customer roles.** The **Head of Subsea Operations** owns the budget:
 cost, workload, timeline and risk. The **Lead Subsea Integrity & Instrumentation
 Engineer** challenges calibration, shared failures, missing data and unsupported
-conclusions. Integrity/instrumentation engineers and newcomers use the copilot.
+conclusions. Engineers and newcomers use the copilot.
 
 **Why unsigned.** Doubts about effort savings, hallucinations, missed leaks,
 integration cost, privacy and accountability. Cheaper fixed workflows are credible alternatives.
 
-**Working demo.** An upright Y has three 800m pipes and 24 pressure instruments
-in 12 paired stations. Frozen median/MAD detection feeds sliding-window timing,
-topology and failure-domain analysis. Nearby sustained drops support inspection
-intervals; scattered faults trigger sensor review; inadequate evidence withholds
-conclusions. Questions: "Leak or faulty sensors?", "Where should we inspect,
+**Monitoring workloads.** Original Y: three 800m pipes, 24 instruments. Extended:
+seven branches, 11.2km, 112 instruments; overlapping near/far responses and faults.
+Median/MAD feeds sliding-window screening; agents compare joint patterns, records
+and failure dependencies. Ambiguous locations are withheld.
+Questions: "Leak or faulty sensors?", "Where should we inspect,
 and why?" and "What evidence supports this, and what remains unknown?"
 
 **Agent value.** Three scoped roles investigate quality, choose incident-time
 history searches/comparisons and explain competing causes. A separate same-model
-critic reviews original sources; code checks quotes, coverage and result identity.
-Revise once, then accept or withhold. Engineers inspect sources, ask follow-ups
-and download evidence. Reviewed procedures support knowledge reuse, not automatic expertise acquisition.
+critic reviews original sources; code checks quotes, coverage and identity.
+Revise once, then accept or withhold. Engineers inspect sources and download
+evidence. Versioned research-curated guidance is not SME-approved or automatically
+acquired expertise.
 
 **Limits and buying gate.** Fictional dirty/conflicting data; unvalidated hydraulics;
-intervals, not exact leak positions. Hosted reports: 15/18 first attempts passed,
-then 3/3 explicit retries. Fixed reports: 18/18 and faster. No field-accuracy or
-hallucination-free claim. Numerical warnings never wait for inference. Assume
-ten-minute manual analysis; target five-minute reports, counting failures and
-human review separately. Propose a four-week read-only shadow pilot with agreed
-accuracy, abstention, unsupported-claim, latency and cost gates. Pricing requires
-discovery; savings are unproven and connectors unbuilt. Hosted inference requires
-approval. Humans retain safety authority. Buy only if quality, effort and total
-cost beat manual/fixed baselines.
+intervals, not exact positions. Original cohort: hosted 15/18 first attempts,
+then 3/3 explicit retries; fixed 18/18 and faster. No field-accuracy guarantee.
+Warnings never wait for inference. Manual time is unmeasured; reports target five
+minutes, counting failures and human review separately. Propose a four-week
+read-only shadow pilot with agreed quality, abstention, latency and cost gates.
+Pricing requires discovery; savings are unproven, connectors unbuilt and hosted
+data requires approval. Humans retain safety authority. Buy only if quality,
+effort and total cost beat manual/fixed baselines.
 
 **Private GitHub and run instructions:** [github.com/ntnguyen-so/subsea-integrity-copilot](https://github.com/ntnguyen-so/subsea-integrity-copilot). Repository access must be granted before review.

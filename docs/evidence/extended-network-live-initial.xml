@@ -1,0 +1,8 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="527.4986240000001">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T09:40:26.654Z" hostname="" tests="2" failures="0" skipped="0" time="525.679" errors="0">
+<testcase name="extended network qualifies a fresh hosted investigation against matching sensor-only evidence" classname="dashboard.spec.ts" time="420.378">
+</testcase>
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="105.301">
+</testcase>
+</testsuite>
+</testsuites>

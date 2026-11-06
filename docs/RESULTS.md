@@ -1,5 +1,282 @@
 # Qualification results
 
+## Joint-pattern RCA and knowledge: current revision
+
+The current S7 source has a graded near/far pressure footprint, staggered
+impulses, intermittent offsets, plausible flatlines and shared gateway gaps.
+The old narrow-profile **P5 600-1000m** qualification below is historical and
+does not qualify this revised source. Numerical ambiguity or withheld location
+is a valid outcome, not a reason to tune data back to the old bracket.
+
+The diagnosis agent now receives measurements for all 112 instruments and
+chooses joint comparisons of up to eight instruments. Results retain bucketed
+pressure deltas, usable counts, paired-complete correlations/overlap, topology
+distances, extrema and largest adjacent steps. No missing-value interpolation,
+source coordinates, causal labels or wave-speed claims are provided.
+Agent-authored regional assessments are distinct from the numerical screening
+label and require actual comparison plus applicable knowledge references.
+
+Five versioned research-curated cards encode guidance, prerequisites,
+counterexamples and a reusable investigation procedure. Full immutable packets
+are pinned to root/children; scope, status, time, declared conflicts and lineage
+are checked. These are not SME-approved operating procedures. An undeclared
+semantic contradiction is not automatically detected. A grounded report is
+not independent proof of RCA correctness.
+
+The first hosted knowledge-on/off pair on this revision **failed in both arms**
+on oversized final diagnosis input: 62.77s off and 62.23s on, five reserved model
+attempts and twelve tools each. This is a transport qualification failure,
+not evidence of RCA accuracy. Original receipt:
+`evidence\knowledge-live-initial.json`.
+
+The second hosted pair, after initial handoff compaction, also failed:
+knowledge-off **105.33s, six model attempts, twelve tools** (an unknown limitation
+code required repair, then exceeded input size); knowledge-on **63.55s, five
+attempts, twelve tools** (final diagnosis input size). Receipt:
+`evidence\knowledge-live-second.json`. Subsequent corrections expose the allowed
+limitation vocabulary, reserve final-only replies when tools are exhausted,
+avoid repeating the supplied schema during repair, and encode structured context
+and tool data as JSON objects rather than doubly escaped JSON strings.
+
+The corrective transport work uses lossless columnar measurements, removes
+already-completed intake tools from offered schemas, binds no tools on final-only
+turns and uses phase/role-scoped knowledge excerpts. The complete pinned
+knowledge and raw tool audit remain intact. The shared tool-result bound is
+16 KiB rather than 12 KiB; the 48,000-character prompt, root 300-second deadline,
+ten model calls and eighteen tool calls remain unchanged. Oversized results
+produce explicit error receipts, not false successes or silently truncated data.
+Current hosted qualification and independent reviews must be read separately
+from older success receipts.
+
+The third pair reached accepted diagnosis tasks in both arms but withheld both
+operator reports: **178.88s off / 168.34s on, eight model attempts and sixteen
+tools each**. Reflection duplicated critic quotes; the knowledge critic's repair
+exceeded context size. Receipt: `evidence\knowledge-live-third.json`.
+The corrective views retain original guidance, applicability, verification,
+counterexamples, limitations and review basis while leaving capture metadata in
+the full pinned packet. Reflection receives every critique reason and verdict,
+not duplicated support quotes; original measured/source intake remains available.
+
+Independent engineering review also found that the discovery table mixed
+threshold-conditioned and whole-window magnitudes. It now uses **the same final
+20-second usable median relative to verified-normal baseline for every
+instrument**, with explicit period and sample counts. The old conditional
+statistic remains only in the unchanged numerical detector/locator. A regression
+checks all 112 values against source observations, including the weak P5 tail.
+
+The complete current backend regression passed **325 tests**, with Ruff, mypy,
+TypeScript and the UI build passing. This verifies implementation contracts,
+not live reasoning accuracy or measured customer value.
+
+The fourth pair accepted knowledge-off (**173.17s, seven model calls, sixteen
+tools**) with actual P2/P7 records and P5 comparison, but withheld knowledge-on
+(**163.97s, eight attempts, sixteen tools**) on reflection input size:
+`evidence\knowledge-live-fourth.json`. Failed-arm utility flags mean no accepted
+handoff was available; they do not prove that no source read occurred.
+
+Reflection now returns only a typed `EngineerInterpretation`; the application
+merges it into the original candidate and revalidates the entire result, preserving
+every checked field by construction. The reflection view omits duplicated routing
+metadata. **95 focused workflow/history/transport tests passed** after that
+refinement, including two eight-instrument comparisons, diagnosis schema repair,
+an initially fabricated assertion, one reflection and final critic acceptance,
+all within the original ten-call root ceiling.
+
+Independent engineering and buyer reviews initially rejected a purchase-ready
+claim: joint evidence, causal independence from the detector, matched
+counterexamples, a strong fixed comparator, SME approval and real total handling
+time were missing. The implementation addresses evidence/interpretation
+separation, but field accuracy, engineer-time savings and willingness to pay
+remain unmeasured. Reviews must not be relabeled as approval.
+
+The fifth knowledge pair produced one accepted knowledge-on worked example:
+**208.47s, eight model calls, sixteen tools**. The report actually read P2
+operating and P7 maintenance records, compared six graded P5 observers against
+quiet P4/P6 controls, and separated possible P5 physical disturbance, P7
+instrumentation context and P2 operating context. It withheld an inspection
+bracket. Knowledge-off on matching raw input was **grounding-rejected,
+245.91s, ten model calls, sixteen tools**, including unsupported contextual
+assertions after revision. The pair therefore **did not pass**:
+`evidence\knowledge-live-current.json`. This is not a controlled knowledge-benefit
+or accuracy result.
+
+The independent AI engineering role-play accepted the reasoning of that single
+synthetic run, with important limits: only three affected P7 taps were compared,
+the weak cross-junction P4-ST1 response was not directly tested, and repeatable
+completion and timing discrimination were not established. The buyer role-play
+supported a pilot-design meeting, not purchase authorization. These are neither
+pipeline-SME approval nor actual customer willingness to pay.
+
+The frozen joint-timing probe changes cross-instrument timing while preserving
+each instrument's before/after value distribution. Its first attempt failed
+transport in both arms (`evidence\joint-timing-live-initial.json`). A second
+implementation did not complete both arms
+(`evidence\joint-timing-live-second.json`). A third also failed both diagnosis
+prompts, at **49,096 and 49,195 characters** against the unchanged 48,000-character
+bound (`evidence\joint-timing-live-third.json`). These are failed qualifications,
+not evidence that the agent distinguished the timing patterns.
+
+Lossless reference encoding now avoids repeating a claim value when its sole
+evidence value is identical. The full source and persisted audit remain intact.
+Diagnosis additionally caps cumulative normalized successful tool-result JSON
+at **21 Ki characters**, rather than assuming per-result and call-count limits
+bound the whole context. Optional reads exceeding that cap return no result and
+an explicit `context_budget_exceeded` receipt. The limitation is mandatory in
+the report; an unread source cannot support a citation. This does not increase
+the root deadline, model/tool count or provider prompt size.
+
+The final aggregate-budget revision passed **328 backend tests**, including
+mandatory disclosure of denied reads, lossless transport and the bounded
+two-comparison/repair/reflection path. Ruff, mypy, strict TypeScript and the
+production UI build also passed. These checks do not grade live causal reasoning.
+
+The fourth frozen timing execution completed both arms, accepted as
+**ABSTAINED**, with matching individual before/after distributions:
+`evidence\joint-timing-live-current.json`.
+
+| Timing arm | Actual handoff | Wall time | Model / tool calls |
+|---|---|---|---|
+| Aligned | All eight instruments share the approximately -0.55 bar pulse at +70 to +90 and recovery; reported zero-lag Pearson correlations are 1.0. | 169.84s | 7 / 16 |
+| Staggered | Identical -0.2746 bar split-median changes conceal ST1/2's early recovering pulse and ST3/4's later decrease; between-group zero-lag Pearson correlation is -0.501. | 228.05s | 9 / 15 |
+
+Both reports challenged the maintenance record's timing and affected scope,
+retained competing causes and withheld an inspection interval. The aligned
+report retained the explicit context-budget limitation. The question supplied
+the eight instruments, window and split: this is scoped temporal interpretation,
+not autonomous discovery, hydraulic propagation measurement or superiority over
+strong fixed analysis. Two authored probes cannot establish repeatability,
+population accuracy or a causal knowledge benefit.
+
+The final independent AI engineering role-play found no remaining substantive
+blocker **for this synthetic investigation meeting**, after checking the actual
+profiles and citations. The AI buyer role-play supported **a buyer meeting and
+pilot-design discussion**, conditional on faithful dashboard qualification,
+repeatable completion with failures included, an SME-adjudicated strong-fixed
+and total-handling-time comparison, and agreed data/commercial/exit terms.
+Neither constitutes human SME approval or purchase authorization. Review
+summary: `evidence\joint-pattern-review.json`.
+
+The first current browser batch passed original-brief geometry, larger-network
+manual work, timestamp/failure handling and light-theme/legend checks, but three
+journeys still expected the old "Agent report ready" wording. After correcting
+that assertion, the knowledge-to-recorded-check journey passed; two further
+stale assertions exposed changed record terminology and a no-longer-visible
+critic decision. The dashboard now explicitly renders the **actual final
+source-grounding decision**, not an inferred approval. Initial receipts remain
+`evidence\joint-pattern-browser-initial.xml` and
+`evidence\joint-pattern-browser-label-correction.xml`.
+
+Operational copy no longer calls the workspace a demo or adds selling-process
+language. Research-derived guidance, synthetic telemetry, read-only authority and
+the absence of pipeline-SME approval remain explicit. Editorial guidance changes
+produce a different content-hashed packet; historical pinned sources and failed
+receipts are not rewritten.
+
+The corrected offline browser cohort passed all **seven distinct journeys**
+across the initial four passes and final three corrected checks
+(`evidence\joint-pattern-browser-final.xml`). This includes actual guidance
+links, regional findings, two customer workflows, faithful source-grounding
+status and withholding mismatched handoffs.
+
+A fresh **automatic hosted S7** dashboard attempt nevertheless withheld its
+report: diagnosis exceeded the input bound during its one schema repair,
+**48,321 characters** against 48,000. The eight reads themselves totalled about
+20,191 normalized characters; the rejected draft was unnecessarily replayed
+alongside all source evidence. This live failure is separate from the successful
+backend worked example and frozen probes. Receipts:
+`evidence\joint-pattern-hosted-ui-initial.json` and matching XML.
+
+Repair requests now regenerate a complete result from the original source
+messages and exact validator feedback, without replaying the invalid draft.
+The draft remains in the durable graph audit. Every source/tool receipt is
+preserved, as are the single-repair, model/tool-count, elapsed-time and prompt
+limits. A focused regression checks projection and audit preservation.
+Lossless value references also distinguish JSON booleans from Python-equal
+numbers, including nested values; four edge cases and the five larger-network/
+knowledge/bounded-reflection integration cases passed.
+
+The final repair-projection backend cohort had **331 passes and two
+wording-only failures**: alert-only integration cases expected "does not
+classify" while the revised banner used "do not classify." Restoring compatible
+operational wording made both unchanged cases pass. All **333 distinct backend
+cases** therefore passed across that cohort and the two-case corrective run,
+not a clean first attempt. Ruff and mypy passed. Receipts:
+`evidence\joint-pattern-backend-release-initial.xml` and
+`evidence\joint-pattern-alert-grammar.xml`.
+
+The publication scan removed an authenticated request call log from the older
+`extended-network-browser-initial.xml`; its failed test outcome and timing are
+preserved. Authentication material is not part of publishable evidence.
+
+The next fresh automatic hosted S7 dashboard qualification **passed**:
+**233.70 seconds from admission, eight hosted model calls and sixteen tools**.
+The complete browser journey took 454.08 seconds, including preparation of both
+matching alert-only and assisted replays; that is not model latency.
+The generic automatic question did not supply a sensor list. The agent selected
+graded P5 observers plus weak P4-ST1 and quiet P6 control, contrasted P7 odd/
+even stations against maintenance scope, and compared P2's positive operating
+response against P5's negative change. It read three operational records,
+executed two joint comparisons and cited four pinned guidance cards.
+
+The UI showed actual admission/report timestamps, 3:53 processing elapsed,
+specialist roles, P5/P7/P2 regional explanations, source-grounding acceptance,
+recorded guidance-to-check links and the unchanged manual map/trend workspace.
+It retained physical uncertainty and **withheld a qualified inspection interval**.
+The automated browser check also verified matching input hashes, actual
+maintenance/operating citations, no displayed inspection interval, and accepted
+grounding. Evidence: `evidence\joint-pattern-hosted-ui-current.json`, matching
+XML and `assets\knowledge-guided-investigation.png`.
+
+This is one fresh accepted automatic run after a recorded failure, not a
+repeatability or customer-value estimate. The frozen timing probes remain
+scoped reasoning examples; knowledge superiority, field accuracy, SME approval
+and total human handling-time savings remain unestablished.
+
+After inspecting the fresh receipt and screenshot, the independent AI
+engineering reviewer reconfirmed meeting-scope satisfaction with no new
+substantive blocker. The AI buyer reviewer marked the faithful-dashboard gate
+met and supported a buyer meeting/pilot-design discussion, with no new material
+objection. Repeatability, strong-fixed comparison, total human handling time,
+human SME review and actual data/commercial terms remain purchase gates.
+
+## Historical extended-network workload (earlier narrow-profile S7)
+
+S7 adds a separately versioned **11.2 km, seven-segment network, 56 paired
+stations and 112 pressure instruments**. The brief's original Y and S1-S6
+remain unchanged; the historical six-case evaluation cohorts explicitly retain
+their original membership.
+
+One localized physical pressure footprint coincides with three distributed
+drifts, three spike sources, three intermittent streams, an invalid-value
+source, an eight-tap shared-gateway offset and a positive operating-pressure
+transition. A separate fictional corpus retains approved operations,
+superseded calibration instructions, a revised shared-gateway record, a draft
+valve proposal and an incomplete-log coverage statement. Source positions are
+not exposed as diagnostic evidence.
+
+At source +140s, three tested seeds supported **P5, 600-1000m**; the numerical
+tools, not the LLM, compute this inspection bracket. Removing its four
+supporting observers did not turn the remaining gateway/operating disturbances
+into a suspected leak. This is a counterfactual check on the synthetic workload,
+not a multi-leak or hydraulic-validation result.
+
+All **148 targeted backend cases passed**. An initial run exposed a regression
+where the new metadata helper incorrectly required generated geometry for
+small test fixtures (11 failures). Restricting that path to larger networks
+restored existing behavior; both receipts are retained. The larger-network
+tests also check separate corpus admission, pinned history geometry, bounded
+tool outputs and representative context that includes every branch. Agent
+budgets remain unchanged; health review is partial, contextual metadata is
+limited to 24 instruments, and all 112 computed findings remain available.
+
+The initial browser batch passed original-brief geometry, extended-network
+branch focus/manual comparison, and scoped agent-work journeys. Its two-mode
+case exceeded its 180s total test timeout while preparing two 185s replays.
+That comparison now stops both sources at the sufficient, identical +115s
+point (window +110s), without changing the report deadline. Preparation errors
+redact authenticated request logs. The original sanitized failure is retained,
+not relabeled as a pass.
+
 ## Buyer-visible agent work
 
 The buyer audit reproduced the problem: an inspection interval appeared before
@@ -39,7 +316,7 @@ browser-error checks passed. Evidence: `evidence\buyer-agent-live.json`;
 screenshots: `assets\agent-work-live-running.png` and
 `assets\agent-work-live-findings.png`.
 
-Buyer decision: this supports an instrumented **read-only pilot**, not a
+Historical S4 assessment: this supports investigating an instrumented **read-only pilot**, not a
 production-safety purchase or proven labor-saving claim. Partial health review,
 incomplete operating records, synthetic physics and same-model criticism remain
 explicit limitations. A larger topology is a separate workload demonstration,

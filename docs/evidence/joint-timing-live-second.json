@@ -1,0 +1,3566 @@
+{
+  "matching_individual_before_after_distributions": true,
+  "arms": [
+    {
+      "staggered": false,
+      "marginal_hash": "fec0c84d69c60afbfaeeae621e24126eff61999a6fc623455393ea8892cf2c64",
+      "input_hash": "bf9fd5db1b03471a45a77d34df3c056a9fa35890ac8fa62655eccbf6d9672077",
+      "numerical_hypothesis": "insufficient_evidence",
+      "root": {
+        "id": "06082a94-787d-5d2a-8268-f3d01e805208",
+        "root_id": "06082a94-787d-5d2a-8268-f3d01e805208",
+        "tenant_id": "joint-timing-a19cb4a5c201",
+        "site_id": "northsea",
+        "generation_id": "joint-9998c576c57a4fb294c520190eac6af5",
+        "snapshot_id": "window-aed7a5fcb5b3e17bfb058fdd168c439e80c0ab93163d1b7e8de81d3f111c0dc3",
+        "episode_id": null,
+        "parent_id": null,
+        "role": "operator_response",
+        "purpose": "answer_incident_question",
+        "question": "Investigate P7-ST1-A/B through P7-ST4-A/B jointly over source +50 to +110 seconds, split at +70. Do these eight instruments support one shared pressure transition or competing explanations? Inspect temporal profiles, dependence and counterevidence, not only individual magnitudes. Keep other regional warnings separate.",
+        "mode": "live",
+        "state": "FAILED",
+        "version": 11,
+        "lease_token": "33da93d6-9797-4dc8-8822-460e7a1b957e",
+        "lease_expires_at": "2026-11-06T11:40:16.651280Z",
+        "created_at": "2026-11-06T11:35:16.652355Z",
+        "updated_at": "2026-11-06T11:36:27.002270Z",
+        "deadline": "2026-11-06T11:40:16.651280Z",
+        "model_calls": 1,
+        "tool_calls": 0,
+        "plan": [
+          "quality",
+          "diagnosis",
+          "answer"
+        ],
+        "result": null,
+        "answer": null,
+        "error_code": "child_failed",
+        "error_message": "ValidationError: child_failed; no agent result accepted.",
+        "automatic": false,
+        "idempotency_key": "frozen-joint-timing",
+        "history_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+        "knowledge_packet": {
+          "version": "knowledge-f4f382fb5e68070886bafc7e5b5f8d905c0b24bc795810fbcea09055358ea974",
+          "authority": "synthetic_advisory_only",
+          "selected_at": "2026-11-06T11:35:16.651827Z",
+          "site_id": "northsea",
+          "pack_version": "pressure-pack-v4-extended",
+          "cards": [
+            {
+              "id": "KN-QUALITY-R1",
+              "revision": 1,
+              "title": "Distinguish unreliable observations from physical process evidence",
+              "kind": "heuristic",
+              "roles": [
+                "sensor_quality",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Pressure alerts coexist with missing samples, spikes, drift or inconsistent instrument readings.",
+              "guidance": "An unusual reading is not itself a faulty sensor or a physical leak. Separate completeness, currentness, accuracy and provenance. Missing values and invalid sentinels are observation gaps, not measured pressure drops. Inspect persistence and paired disagreement, and seek an independent reference before attributing a hardware fault. A detector's attribution score identifies a contribution, not a physical root cause. Malfunction and a physical event can coexist.",
+              "verification_steps": [
+                "Compare suspect instruments with independent observers and their actual received coverage.",
+                "Check calibration, units, clock and maintenance context; preserve unobserved periods.",
+                "State which sensor claims were reviewed and which remain unchecked."
+              ],
+              "counterexamples": [
+                "A gap during a real leak does not establish a healthy pipeline.",
+                "A genuine process transient can produce a large anomaly score on functioning instruments."
+              ],
+              "limitations": [
+                "This is a research-derived demo heuristic, not a field-approved sensor diagnosis.",
+                "No universal threshold or sensor-failure probability is established."
+              ],
+              "sources": [
+                {
+                  "reference": "User-provided PhD thesis, not redistributed",
+                  "locator": "PDF pp. 28-29, 37-38, 207, 240",
+                  "boundary": "Marine data-quality and anomaly-attribution principles; not validation of gas-pipeline leak classification."
+                }
+              ],
+              "review_basis": "FDE research synthesis for synthetic evaluation; no pipeline SME approval has been obtained."
+            },
+            {
+              "id": "KN-INDEPENDENCE-R1",
+              "revision": 1,
+              "title": "Check common causes before counting independent corroboration",
+              "kind": "heuristic",
+              "roles": [
+                "sensor_quality",
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Several instruments show simultaneous changes, particularly paired taps or instruments sharing infrastructure.",
+              "guidance": "Inspect groups, not isolated alert flags. In this synthetic pressure-monitoring setup, a leak hypothesis should be tested against a sustained connected pattern: disruptive changes near the affected region and weaker, related changes farther along the pipes, including below-threshold observations. Compare synchronized profiles, relative magnitudes, timing, recovery and missingness against independent and contrasting instruments. Attenuation is not necessarily monotonic in real branched gas networks; this is a working hypothesis, not a universal law. Scattered impulses, isolated drift or missing data motivate instrumentation checks but can coexist with a leak. Treat hydraulic connectivity and instrumentation dependency as different relationships. Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error. Correlation is not independence or a confirmed cause. Shared-failure explanations also need observed evidence; do not declare every sensor on a gateway faulty from metadata alone.",
+              "verification_steps": [
+                "Compare near, farther and weak/quiet connected observers jointly, not only above-threshold supporters.",
+                "Contrast a shared-path instrument with an independent observer; compare profiles, valid-sample overlap and graph distances.",
+                "Inspect contradictory or asynchronous changes rather than merging branch-level earliest/latest timings into a common onset.",
+                "Open applicable maintenance records and check effective revision and scope."
+              ],
+              "counterexamples": [
+                "Eight taps on one shared conversion path are not eight independent witnesses.",
+                "An operating transient can also produce a coherent pressure pattern; attenuation alone cannot identify a leak.",
+                "Independent gateways do not exclude an unrecorded shared power or operating cause."
+              ],
+              "limitations": [
+                "A/B gateway assignments are synthetic site assumptions requiring expert confirmation.",
+                "This demo contains no validated common-cause reliability model."
+              ],
+              "sources": [
+                {
+                  "reference": "User-provided public defense deck, not redistributed",
+                  "locator": "Slide 47; user's proposed pressure-monitoring scenario",
+                  "boundary": "Strong, possible, lower-threshold and noisy detections motivate multiscale inspection; not calibrated gas-pipeline attenuation."
+                },
+                {
+                  "reference": "User-provided PhD thesis, not redistributed",
+                  "locator": "PDF pp. 28-29, 240",
+                  "boundary": "Motivates prior knowledge and source-quality review; gateway independence is an explicit demo engineering assumption."
+                }
+              ],
+              "review_basis": "FDE-authored dependency heuristic; requires site instrumentation expert review before field use."
+            },
+            {
+              "id": "KN-OPERATING-R1",
+              "revision": 1,
+              "title": "Test operating transients as competing explanations",
+              "kind": "heuristic",
+              "roles": [
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Pressure changes could coincide with a valve, compressor, setpoint or calibration activity.",
+              "guidance": "Investigate operating changes rather than equating a pressure anomaly with a leak. Compare the observed sign, timing and affected assets with an approved, incident-time-available record. A proposal is not an executed operation, and a superseded record is not current authority. Read the underlying records referenced by a coverage statement. A plausible explanation for one branch does not automatically explain a different pattern elsewhere. Incomplete logs cannot prove that no operation or leak occurred.",
+              "verification_steps": [
+                "Search affected and contrasting signal regions, not only the proposed inspection branch.",
+                "Open current records and distinguish planned, approved and executed activities.",
+                "Compare before/after periods near an observed change; note window censoring and retain missingness."
+              ],
+              "counterexamples": [
+                "A broad positive operating shift does not by itself explain a separate localized negative region.",
+                "A real operating change can coexist with a leak or instrumentation fault."
+              ],
+              "limitations": [
+                "Temporal association is not a causal intervention.",
+                "The cited review includes liquid-pipeline methods; its parameters cannot be transferred directly to subsea gas."
+              ],
+              "sources": [
+                {
+                  "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                  "locator": "Sections 4.2, 4.3 and 4.5",
+                  "boundary": "Review of pressure methods, operating transients and model assumptions; not a site-specific operating procedure."
+                }
+              ],
+              "review_basis": "Research-grounded demo guidance; no customer operating procedure has been approved."
+            },
+            {
+              "id": "KN-LOCALIZATION-R1",
+              "revision": 1,
+              "title": "Separate a numerical inspection bracket from physical leak localization",
+              "kind": "heuristic",
+              "roles": [
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "An engineer requests a leak location or an inspection recommendation from pressure observations.",
+              "guidance": "Use the qualified numerical tool for chainage and retain its assumptions. The demo brackets affected stations against unaffected neighbours; it does not solve a calibrated hydraulic inverse problem. Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions. Do not infer an exact coordinate, leak size or leak probability from anomaly magnitude or from a research formula without its inputs. Withhold a location when coverage or the single-region assumption is inadequate.",
+              "verification_steps": [
+                "Check the numerical tool's eligibility, observer independence and unaffected brackets.",
+                "State the interval and distinguish it from a confidence interval or physical leak point.",
+                "Request expert-selected independent confirmation; do not clear alarms while waiting for an LLM."
+              ],
+              "counterexamples": [
+                "A larger pressure residual is not necessarily the nearest sensor to a leak.",
+                "Multiple disjoint pressure regions are not resolved by the demo's single-leak bracket."
+              ],
+              "limitations": [
+                "The source review discusses methods with different fluid and deployment assumptions.",
+                "Synthetic pressure footprints and inspection brackets are not field localization validation."
+              ],
+              "sources": [
+                {
+                  "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                  "locator": "Sections 4.2-4.5",
+                  "boundary": "Explains method-dependent localization assumptions; does not validate this demo's bracket."
+                }
+              ],
+              "review_basis": "Research-derived scope guard for this synthetic demo; not a field-approved localization procedure."
+            },
+            {
+              "id": "KN-INVESTIGATION-PROGRAM-R1",
+              "revision": 1,
+              "title": "Expert-guided differential investigation program",
+              "kind": "procedure",
+              "roles": [
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "An anomaly episode requires a bounded, reviewable leak-versus-instrumentation RCA investigation.",
+              "guidance": "Use this natural-language program to guide the existing read-only specialist workflow, not to assert an answer. Preserve competing leak, instrumentation and operating explanations. Select measurements and contextual checks that could distinguish them, including counterevidence. Apply only relevant knowledge, explicitly connect it to observed case evidence, and retain contradictions and missing prerequisites. Domain guidance supplies reasoning, not incident facts or authority to clear the numerical warning.",
+              "verification_steps": [
+                "Quality: establish what was measured reliably and what remains missing.",
+                "Diagnosis: inspect connectivity, independent domains and competing signal regions.",
+                "Diagnosis: choose relevant operational records and discriminating comparisons.",
+                "Response: explain which guidance was applied, supporting and contradicting case evidence, and remaining gaps.",
+                "Critic: check case facts and knowledge citations against their original pinned sources.",
+                "Handoff: request qualified engineer verification; unresolved evidence remains unresolved."
+              ],
+              "counterexamples": [
+                "Retrieving a relevant document without applying it is not RCA.",
+                "A well-cited but consistently wrong explanation is not successful expert reasoning."
+              ],
+              "limitations": [
+                "Inspired by DANA CAPTURE/APPLY and natural-language programs, not an OpenSSA or DanaOS implementation.",
+                "The paper's FinanceBench results do not establish pipeline diagnostic accuracy."
+              ],
+              "sources": [
+                {
+                  "reference": "https://arxiv.org/html/2410.02823v1",
+                  "locator": "Sections 3.1-3.4, 4.1, 5.2 and 6.4",
+                  "boundary": "Architecture, expertise capture and open uncertainty/contradiction challenges; no subsea benchmark."
+                }
+              ],
+              "review_basis": "FDE-authored DANA-inspired demo program; expert elicitation and operational approval remain pilot gates."
+            }
+          ],
+          "excluded": {},
+          "selection_method": "exact_site_version_status_time_and_declared_conflicts"
+        },
+        "response_protocol": "engineer-v2",
+        "interpretation_review": null
+      },
+      "casefile": null,
+      "elapsed_seconds": 70.51500000001397,
+      "model_calls": 5,
+      "tool_calls": 12
+    },
+    {
+      "staggered": true,
+      "marginal_hash": "fec0c84d69c60afbfaeeae621e24126eff61999a6fc623455393ea8892cf2c64",
+      "input_hash": "827e358a223162cb937b3581a1bc994db359e187e4386a80d4dd7a76448d2392",
+      "numerical_hypothesis": "insufficient_evidence",
+      "root": {
+        "id": "1689ae92-6c99-5c4c-8b87-fd702a8d99a7",
+        "root_id": "1689ae92-6c99-5c4c-8b87-fd702a8d99a7",
+        "tenant_id": "joint-timing-a19cb4a5c201",
+        "site_id": "northsea",
+        "generation_id": "joint-72a793254487435a8ad7556c494be313",
+        "snapshot_id": "window-2e6903ef510f8d9c8d8119ede5ca4e828431a2c1a8df8a72fc61164190ad746c",
+        "episode_id": null,
+        "parent_id": null,
+        "role": "operator_response",
+        "purpose": "answer_incident_question",
+        "question": "Investigate P7-ST1-A/B through P7-ST4-A/B jointly over source +50 to +110 seconds, split at +70. Do these eight instruments support one shared pressure transition or competing explanations? Inspect temporal profiles, dependence and counterevidence, not only individual magnitudes. Keep other regional warnings separate.",
+        "mode": "live",
+        "state": "ABSTAINED",
+        "version": 19,
+        "lease_token": "53156d5a-1c90-42b4-9084-6320e35304f1",
+        "lease_expires_at": "2026-11-06T11:41:31.386643Z",
+        "created_at": "2026-11-06T11:36:31.388236Z",
+        "updated_at": "2026-11-06T11:40:24.812888Z",
+        "deadline": "2026-11-06T11:41:31.386643Z",
+        "model_calls": 5,
+        "tool_calls": 4,
+        "plan": [
+          "quality",
+          "diagnosis",
+          "answer"
+        ],
+        "result": {
+          "outcome": "insufficient_evidence",
+          "claim_refs": [
+            "claim-112",
+            "claim-066",
+            "claim-067",
+            "claim-070",
+            "claim-071",
+            "claim-072",
+            "claim-073",
+            "claim-074",
+            "claim-075",
+            "claim-114",
+            "claim-115",
+            "claim-116",
+            "claim-117"
+          ],
+          "evidence_ids": [
+            "ev-225",
+            "ev-133",
+            "ev-135",
+            "ev-141",
+            "ev-143",
+            "ev-145",
+            "ev-147",
+            "ev-149",
+            "ev-151",
+            "ev-227",
+            "ev-228",
+            "ev-229",
+            "ev-230"
+          ],
+          "limitations": [
+            "SYNTHETIC_UNCALIBRATED",
+            "PRESSURE_PATTERNS_NOT_PROOF",
+            "OPERATING_CONTEXT_REQUIRED",
+            "MULTIPLE_PRESSURE_REGIONS",
+            "degraded_coverage",
+            "missing_data",
+            "partial_health_review",
+            "child_abstained",
+            "insufficient_evidence",
+            "location_withheld",
+            "read_only"
+          ],
+          "hypothesis": null,
+          "recommendation_ids": [],
+          "summary": "",
+          "investigation": {
+            "assessment": "unresolved",
+            "document_ids": [
+              "MAINT-P7-GW-002",
+              "LOG-EXTENDED-COVERAGE-001",
+              "PROC-EXTENDED-001"
+            ],
+            "rejected_document_ids": [],
+            "comparison_call_ids": [
+              "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+              "subsea_d38bcbf41eab433cae580d413a2e070d"
+            ],
+            "next_action": "human_review"
+          },
+          "interpretation": {
+            "focus": "root_cause",
+            "answer": {
+              "text": "These eight instruments do not establish one shared pressure transition. All show the same -0.2746 bar before/after median change at +70, but ST1/2 fall then recover near +90 while ST3/4 fall near +90 and remain low through +110. Within-group correlation is 1.0; between groups it is -0.501 over +50 to +110 and -1.0 over +70 to +110. Equal magnitudes conceal competing temporal patterns, not a confirmed cause. Diagnosis abstained; no qualified interval is available. Other regional warnings remain separate.",
+              "references": [
+                "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                "subsea_d38bcbf41eab433cae580d413a2e070d",
+                "KN-INDEPENDENCE-R1",
+                "claim-117"
+              ]
+            },
+            "competing_causes": [
+              {
+                "text": "Measured negative excursions warrant verification, but the early group's recovery as the later group falls contradicts a simple sustained, jointly declining footprint. Transitions are resolved near +70 and +90; justified propagation timing, flow and an independent pressure reference remain unavailable. Hydraulic adjacency alone does not establish propagation or a leak. Coexisting physical and instrumentation effects remain possible. No leak location or clearance follows.",
+                "references": [
+                  "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                  "subsea_d38bcbf41eab433cae580d413a2e070d",
+                  "KN-INDEPENDENCE-R1",
+                  "KN-LOCALIZATION-R1",
+                  "claim-115"
+                ],
+                "cause": "leak",
+                "stance": "not_established"
+              },
+              {
+                "text": "The approved calibration record starts at +90 and describes an approximately -0.75 bar offset on odd stations sharing gateway-P7-0. That supports checking instrumentation, but does not explain the whole pattern: ST1 recovers, ST3 falls, and even ST2/4 mirror their neighbouring odd stations across gateway assignments. Observed steps are about 0.55 bar, not the documented offset. Engineer verification of conversion paths and raw references is needed; maintenance association is not fault proof.",
+                "references": [
+                  "MAINT-P7-GW-002",
+                  "PROC-EXTENDED-001",
+                  "subsea_d38bcbf41eab433cae580d413a2e070d",
+                  "KN-INDEPENDENCE-R1",
+                  "KN-QUALITY-R1"
+                ],
+                "cause": "instrumentation_or_telemetry",
+                "stance": "possible"
+              },
+              {
+                "text": "A physical operating transient could produce coordinated pressure changes across gateways, but no reviewed P7 operating execution record explains the opposite +90 transitions. The coverage statement explicitly permits absent upstream actions, delayed entries and manual work. Engineer review of incident-time operating records is needed; neither incomplete logs nor temporal coincidence can confirm or exclude this explanation.",
+                "references": [
+                  "subsea_d38bcbf41eab433cae580d413a2e070d",
+                  "LOG-EXTENDED-COVERAGE-001",
+                  "KN-OPERATING-R1"
+                ],
+                "cause": "operating_change",
+                "stance": "possible"
+              }
+            ],
+            "regional_assessments": [
+              {
+                "text": "Across chainages 100/300 m, all four have 20/20 usable pre-split and 40/40 post-split samples. Profiles are near baseline before +70, about -0.55 bar during +70 to +90, then recover; the +90 median step is +0.55 bar. Correlation is 1.0 across both gateways, so an odd-gateway-only offset cannot explain this group. Agreement is not four independent witnesses, and recovery does not exclude a physical event. Engineer comparison with independent raw pressure and operating timestamps would distinguish shared conversion from process change.",
+                "references": [
+                  "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                  "subsea_d38bcbf41eab433cae580d413a2e070d",
+                  "PROC-EXTENDED-001",
+                  "MAINT-P7-GW-002",
+                  "KN-INDEPENDENCE-R1",
+                  "KN-QUALITY-R1"
+                ],
+                "sensor_ids": [
+                  "P7-ST1-A",
+                  "P7-ST1-B",
+                  "P7-ST2-A",
+                  "P7-ST2-B"
+                ],
+                "hypothesis": "unresolved"
+              },
+              {
+                "text": "Across chainages 500/700 m, all four have complete 20/40 pre/post samples. They remain near baseline until +90, then fall about 0.55 bar through +110; within-group correlation is 1.0. Their opposite timing versus ST1/2 weakens one common transition. Calibration timing fits ST3, but ST4 is on the other gateway and the documented offset is about -0.75 bar. A later pressure event and shared instrumentation remain competing possibilities; engineer verification needs independent pressure and calibration-path records, not magnitude alone.",
+                "references": [
+                  "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                  "subsea_d38bcbf41eab433cae580d413a2e070d",
+                  "MAINT-P7-GW-002",
+                  "PROC-EXTENDED-001",
+                  "KN-INDEPENDENCE-R1",
+                  "KN-QUALITY-R1"
+                ],
+                "sensor_ids": [
+                  "P7-ST3-A",
+                  "P7-ST3-B",
+                  "P7-ST4-A",
+                  "P7-ST4-B"
+                ],
+                "hypothesis": "unresolved"
+              }
+            ],
+            "follow_up_questions": [
+              "Can an engineer compare independent raw pressure references at ST1-4 across +70 and +90 to distinguish process changes from conversion-path effects?",
+              "Can an engineer verify the actual +90 calibration scope and offset, including why ST1 recovers while ST3 falls and even stations follow neighbouring odd stations?",
+              "Can an engineer review upstream and manual operating records for +50 to +110, including delayed entries, against both groups' transition times?"
+            ]
+          }
+        },
+        "answer": "ENGINEER QUESTION\nInvestigate P7-ST1-A/B through P7-ST4-A/B jointly over source +50 to +110 seconds, split at +70. Do these eight instruments support one shared pressure transition or competing explanations? Inspect temporal profiles, dependence and counterevidence, not only individual magnitudes. Keep other regional warnings separate.\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nThese eight instruments do not establish one shared pressure transition. All show the same -0.2746 bar before/after median change at +70, but ST1/2 fall then recover near +90 while ST3/4 fall near +90 and remain low through +110. Within-group correlation is 1.0; between groups it is -0.501 over +50 to +110 and -1.0 over +70 to +110. Equal magnitudes conceal competing temporal patterns, not a confirmed cause. Diagnosis abstained; no qualified interval is available. Other regional warnings remain separate.\nSources: subsea_aba2f0b8a0864ef4afef6404f72b86f5, subsea_d38bcbf41eab433cae580d413a2e070d, KN-INDEPENDENCE-R1, claim-117\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\nleak (not established): Measured negative excursions warrant verification, but the early group's recovery as the later group falls contradicts a simple sustained, jointly declining footprint. Transitions are resolved near +70 and +90; justified propagation timing, flow and an independent pressure reference remain unavailable. Hydraulic adjacency alone does not establish propagation or a leak. Coexisting physical and instrumentation effects remain possible. No leak location or clearance follows.\nSources: subsea_aba2f0b8a0864ef4afef6404f72b86f5, subsea_d38bcbf41eab433cae580d413a2e070d, KN-INDEPENDENCE-R1, KN-LOCALIZATION-R1, claim-115\ninstrumentation or telemetry (possible): The approved calibration record starts at +90 and describes an approximately -0.75 bar offset on odd stations sharing gateway-P7-0. That supports checking instrumentation, but does not explain the whole pattern: ST1 recovers, ST3 falls, and even ST2/4 mirror their neighbouring odd stations across gateway assignments. Observed steps are about 0.55 bar, not the documented offset. Engineer verification of conversion paths and raw references is needed; maintenance association is not fault proof.\nSources: MAINT-P7-GW-002, PROC-EXTENDED-001, subsea_d38bcbf41eab433cae580d413a2e070d, KN-INDEPENDENCE-R1, KN-QUALITY-R1\noperating change (possible): A physical operating transient could produce coordinated pressure changes across gateways, but no reviewed P7 operating execution record explains the opposite +90 transitions. The coverage statement explicitly permits absent upstream actions, delayed entries and manual work. Engineer review of incident-time operating records is needed; neither incomplete logs nor temporal coincidence can confirm or exclude this explanation.\nSources: subsea_d38bcbf41eab433cae580d413a2e070d, LOG-EXTENDED-COVERAGE-001, KN-OPERATING-R1\nJoint sensor assessment (unresolved): P7-ST1-A, P7-ST1-B, P7-ST2-A, P7-ST2-B\nAcross chainages 100/300 m, all four have 20/20 usable pre-split and 40/40 post-split samples. Profiles are near baseline before +70, about -0.55 bar during +70 to +90, then recover; the +90 median step is +0.55 bar. Correlation is 1.0 across both gateways, so an odd-gateway-only offset cannot explain this group. Agreement is not four independent witnesses, and recovery does not exclude a physical event. Engineer comparison with independent raw pressure and operating timestamps would distinguish shared conversion from process change.\nSources: subsea_aba2f0b8a0864ef4afef6404f72b86f5, subsea_d38bcbf41eab433cae580d413a2e070d, PROC-EXTENDED-001, MAINT-P7-GW-002, KN-INDEPENDENCE-R1, KN-QUALITY-R1\nJoint sensor assessment (unresolved): P7-ST3-A, P7-ST3-B, P7-ST4-A, P7-ST4-B\nAcross chainages 500/700 m, all four have complete 20/40 pre/post samples. They remain near baseline until +90, then fall about 0.55 bar through +110; within-group correlation is 1.0. Their opposite timing versus ST1/2 weakens one common transition. Calibration timing fits ST3, but ST4 is on the other gateway and the documented offset is about -0.75 bar. A later pressure event and shared instrumentation remain competing possibilities; engineer verification needs independent pressure and calibration-path records, not magnitude alone.\nSources: subsea_aba2f0b8a0864ef4afef6404f72b86f5, subsea_d38bcbf41eab433cae580d413a2e070d, MAINT-P7-GW-002, PROC-EXTENDED-001, KN-INDEPENDENCE-R1, KN-QUALITY-R1\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nCan an engineer compare independent raw pressure references at ST1-4 across +70 and +90 to distinguish process changes from conversion-path effects?\nCan an engineer verify the actual +90 calibration scope and offset, including why ST1 recovers while ST3 falls and even stations follow neighbouring odd stations?\nCan an engineer review upstream and manual operating records for +50 to +110, including delayed entries, against both groups' transition times?\n\nCHECKED EVIDENCE\nLIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:01:50+00:00\nInsufficient evidence.\nUsable coverage: 99.1% (6658/6720 observations).\nP5-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST4-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST5-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST5-B pressure: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST6-A pressure: 59/60 usable; 1 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP5-ST6-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nLimitations: MULTIPLE_PRESSURE_REGIONS, OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, child_abstained, degraded_coverage, insufficient_evidence, location_withheld, missing_data, partial_health_review, read_only.\nSynthetic evidence; instruments and model are uncalibrated.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/112; additional findings remain in the pinned quality report.\n\nHISTORY-GROUNDED INVESTIGATION\nHistorical context does not resolve the cause; absence of a log is not absence of an event.\n[MAINT-P7-GW-002 / revision 2] Revised P7 shared-gateway calibration window: Fictional, nonconfidential revised maintenance record. A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7. These eight ta\n[LOG-EXTENDED-COVERAGE-001 / revision 1] Extended-network operating and maintenance log coverage: Fictional, nonconfidential coverage statement. This excerpt contains the P2 setpoint record OP-P2-EXTENDED-001 and revised P7 calibration record MAINT-P7-GW-002 when they become incident-time available. It is not a complete plant historian; upstream actions, d\n[PROC-EXTENDED-001 / revision 1] Extended-network pressure desk assessment: Fictional, nonconfidential procedure. Seven 1600m pipeline segments carry eight stations each, with paired A/B pressure taps at 100m then every 200m. Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1. Multiple an\nMeasured comparison [subsea_aba2f0b8a0864ef4afef6404f72b86f5]: 50\u2013110s; split 70s.\nP7-ST1-A: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST1-B: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST2-A: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST2-B: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST3-A: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST3-B: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST4-A: median change -0.2746 bar; usable before 20/20, after 40/40.\nP7-ST4-B: median change -0.2746 bar; usable before 20/20, after 40/40.\nMeasured comparison [subsea_d38bcbf41eab433cae580d413a2e070d]: 70\u2013110s; split 90s.\nP7-ST1-A: median change 0.55 bar; usable before 20/20, after 20/20.\nP7-ST1-B: median change 0.55 bar; usable before 20/20, after 20/20.\nP7-ST2-A: median change 0.55 bar; usable before 20/20, after 20/20.\nP7-ST2-B: median change 0.55 bar; usable before 20/20, after 20/20.\nP7-ST3-A: median change -0.55 bar; usable before 20/20, after 20/20.\nP7-ST3-B: median change -0.55 bar; usable before 20/20, after 20/20.\nP7-ST4-A: median change -0.55 bar; usable before 20/20, after 20/20.\nP7-ST4-B: median change -0.55 bar; usable before 20/20, after 20/20.\nEscalate the competing explanations for human review.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+        "error_code": null,
+        "error_message": null,
+        "automatic": false,
+        "idempotency_key": "frozen-joint-timing",
+        "history_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+        "knowledge_packet": {
+          "version": "knowledge-f4f382fb5e68070886bafc7e5b5f8d905c0b24bc795810fbcea09055358ea974",
+          "authority": "synthetic_advisory_only",
+          "selected_at": "2026-11-06T11:36:31.387173Z",
+          "site_id": "northsea",
+          "pack_version": "pressure-pack-v4-extended",
+          "cards": [
+            {
+              "id": "KN-QUALITY-R1",
+              "revision": 1,
+              "title": "Distinguish unreliable observations from physical process evidence",
+              "kind": "heuristic",
+              "roles": [
+                "sensor_quality",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Pressure alerts coexist with missing samples, spikes, drift or inconsistent instrument readings.",
+              "guidance": "An unusual reading is not itself a faulty sensor or a physical leak. Separate completeness, currentness, accuracy and provenance. Missing values and invalid sentinels are observation gaps, not measured pressure drops. Inspect persistence and paired disagreement, and seek an independent reference before attributing a hardware fault. A detector's attribution score identifies a contribution, not a physical root cause. Malfunction and a physical event can coexist.",
+              "verification_steps": [
+                "Compare suspect instruments with independent observers and their actual received coverage.",
+                "Check calibration, units, clock and maintenance context; preserve unobserved periods.",
+                "State which sensor claims were reviewed and which remain unchecked."
+              ],
+              "counterexamples": [
+                "A gap during a real leak does not establish a healthy pipeline.",
+                "A genuine process transient can produce a large anomaly score on functioning instruments."
+              ],
+              "limitations": [
+                "This is a research-derived demo heuristic, not a field-approved sensor diagnosis.",
+                "No universal threshold or sensor-failure probability is established."
+              ],
+              "sources": [
+                {
+                  "reference": "User-provided PhD thesis, not redistributed",
+                  "locator": "PDF pp. 28-29, 37-38, 207, 240",
+                  "boundary": "Marine data-quality and anomaly-attribution principles; not validation of gas-pipeline leak classification."
+                }
+              ],
+              "review_basis": "FDE research synthesis for synthetic evaluation; no pipeline SME approval has been obtained."
+            },
+            {
+              "id": "KN-INDEPENDENCE-R1",
+              "revision": 1,
+              "title": "Check common causes before counting independent corroboration",
+              "kind": "heuristic",
+              "roles": [
+                "sensor_quality",
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Several instruments show simultaneous changes, particularly paired taps or instruments sharing infrastructure.",
+              "guidance": "Inspect groups, not isolated alert flags. In this synthetic pressure-monitoring setup, a leak hypothesis should be tested against a sustained connected pattern: disruptive changes near the affected region and weaker, related changes farther along the pipes, including below-threshold observations. Compare synchronized profiles, relative magnitudes, timing, recovery and missingness against independent and contrasting instruments. Attenuation is not necessarily monotonic in real branched gas networks; this is a working hypothesis, not a universal law. Scattered impulses, isolated drift or missing data motivate instrumentation checks but can coexist with a leak. Treat hydraulic connectivity and instrumentation dependency as different relationships. Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error. Correlation is not independence or a confirmed cause. Shared-failure explanations also need observed evidence; do not declare every sensor on a gateway faulty from metadata alone.",
+              "verification_steps": [
+                "Compare near, farther and weak/quiet connected observers jointly, not only above-threshold supporters.",
+                "Contrast a shared-path instrument with an independent observer; compare profiles, valid-sample overlap and graph distances.",
+                "Inspect contradictory or asynchronous changes rather than merging branch-level earliest/latest timings into a common onset.",
+                "Open applicable maintenance records and check effective revision and scope."
+              ],
+              "counterexamples": [
+                "Eight taps on one shared conversion path are not eight independent witnesses.",
+                "An operating transient can also produce a coherent pressure pattern; attenuation alone cannot identify a leak.",
+                "Independent gateways do not exclude an unrecorded shared power or operating cause."
+              ],
+              "limitations": [
+                "A/B gateway assignments are synthetic site assumptions requiring expert confirmation.",
+                "This demo contains no validated common-cause reliability model."
+              ],
+              "sources": [
+                {
+                  "reference": "User-provided public defense deck, not redistributed",
+                  "locator": "Slide 47; user's proposed pressure-monitoring scenario",
+                  "boundary": "Strong, possible, lower-threshold and noisy detections motivate multiscale inspection; not calibrated gas-pipeline attenuation."
+                },
+                {
+                  "reference": "User-provided PhD thesis, not redistributed",
+                  "locator": "PDF pp. 28-29, 240",
+                  "boundary": "Motivates prior knowledge and source-quality review; gateway independence is an explicit demo engineering assumption."
+                }
+              ],
+              "review_basis": "FDE-authored dependency heuristic; requires site instrumentation expert review before field use."
+            },
+            {
+              "id": "KN-OPERATING-R1",
+              "revision": 1,
+              "title": "Test operating transients as competing explanations",
+              "kind": "heuristic",
+              "roles": [
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Pressure changes could coincide with a valve, compressor, setpoint or calibration activity.",
+              "guidance": "Investigate operating changes rather than equating a pressure anomaly with a leak. Compare the observed sign, timing and affected assets with an approved, incident-time-available record. A proposal is not an executed operation, and a superseded record is not current authority. Read the underlying records referenced by a coverage statement. A plausible explanation for one branch does not automatically explain a different pattern elsewhere. Incomplete logs cannot prove that no operation or leak occurred.",
+              "verification_steps": [
+                "Search affected and contrasting signal regions, not only the proposed inspection branch.",
+                "Open current records and distinguish planned, approved and executed activities.",
+                "Compare before/after periods near an observed change; note window censoring and retain missingness."
+              ],
+              "counterexamples": [
+                "A broad positive operating shift does not by itself explain a separate localized negative region.",
+                "A real operating change can coexist with a leak or instrumentation fault."
+              ],
+              "limitations": [
+                "Temporal association is not a causal intervention.",
+                "The cited review includes liquid-pipeline methods; its parameters cannot be transferred directly to subsea gas."
+              ],
+              "sources": [
+                {
+                  "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                  "locator": "Sections 4.2, 4.3 and 4.5",
+                  "boundary": "Review of pressure methods, operating transients and model assumptions; not a site-specific operating procedure."
+                }
+              ],
+              "review_basis": "Research-grounded demo guidance; no customer operating procedure has been approved."
+            },
+            {
+              "id": "KN-LOCALIZATION-R1",
+              "revision": 1,
+              "title": "Separate a numerical inspection bracket from physical leak localization",
+              "kind": "heuristic",
+              "roles": [
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "An engineer requests a leak location or an inspection recommendation from pressure observations.",
+              "guidance": "Use the qualified numerical tool for chainage and retain its assumptions. The demo brackets affected stations against unaffected neighbours; it does not solve a calibrated hydraulic inverse problem. Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions. Do not infer an exact coordinate, leak size or leak probability from anomaly magnitude or from a research formula without its inputs. Withhold a location when coverage or the single-region assumption is inadequate.",
+              "verification_steps": [
+                "Check the numerical tool's eligibility, observer independence and unaffected brackets.",
+                "State the interval and distinguish it from a confidence interval or physical leak point.",
+                "Request expert-selected independent confirmation; do not clear alarms while waiting for an LLM."
+              ],
+              "counterexamples": [
+                "A larger pressure residual is not necessarily the nearest sensor to a leak.",
+                "Multiple disjoint pressure regions are not resolved by the demo's single-leak bracket."
+              ],
+              "limitations": [
+                "The source review discusses methods with different fluid and deployment assumptions.",
+                "Synthetic pressure footprints and inspection brackets are not field localization validation."
+              ],
+              "sources": [
+                {
+                  "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                  "locator": "Sections 4.2-4.5",
+                  "boundary": "Explains method-dependent localization assumptions; does not validate this demo's bracket."
+                }
+              ],
+              "review_basis": "Research-derived scope guard for this synthetic demo; not a field-approved localization procedure."
+            },
+            {
+              "id": "KN-INVESTIGATION-PROGRAM-R1",
+              "revision": 1,
+              "title": "Expert-guided differential investigation program",
+              "kind": "procedure",
+              "roles": [
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "An anomaly episode requires a bounded, reviewable leak-versus-instrumentation RCA investigation.",
+              "guidance": "Use this natural-language program to guide the existing read-only specialist workflow, not to assert an answer. Preserve competing leak, instrumentation and operating explanations. Select measurements and contextual checks that could distinguish them, including counterevidence. Apply only relevant knowledge, explicitly connect it to observed case evidence, and retain contradictions and missing prerequisites. Domain guidance supplies reasoning, not incident facts or authority to clear the numerical warning.",
+              "verification_steps": [
+                "Quality: establish what was measured reliably and what remains missing.",
+                "Diagnosis: inspect connectivity, independent domains and competing signal regions.",
+                "Diagnosis: choose relevant operational records and discriminating comparisons.",
+                "Response: explain which guidance was applied, supporting and contradicting case evidence, and remaining gaps.",
+                "Critic: check case facts and knowledge citations against their original pinned sources.",
+                "Handoff: request qualified engineer verification; unresolved evidence remains unresolved."
+              ],
+              "counterexamples": [
+                "Retrieving a relevant document without applying it is not RCA.",
+                "A well-cited but consistently wrong explanation is not successful expert reasoning."
+              ],
+              "limitations": [
+                "Inspired by DANA CAPTURE/APPLY and natural-language programs, not an OpenSSA or DanaOS implementation.",
+                "The paper's FinanceBench results do not establish pipeline diagnostic accuracy."
+              ],
+              "sources": [
+                {
+                  "reference": "https://arxiv.org/html/2410.02823v1",
+                  "locator": "Sections 3.1-3.4, 4.1, 5.2 and 6.4",
+                  "boundary": "Architecture, expertise capture and open uncertainty/contradiction challenges; no subsea benchmark."
+                }
+              ],
+              "review_basis": "FDE-authored DANA-inspired demo program; expert elicitation and operational approval remain pilot gates."
+            }
+          ],
+          "excluded": {},
+          "selection_method": "exact_site_version_status_time_and_declared_conflicts"
+        },
+        "response_protocol": "engineer-v2",
+        "interpretation_review": {
+          "protocol": "grounding-v1",
+          "source_hash": "d9124eb5907e351a11f4308bd20a7215a2fecac8705890d1a24b8bc54fa10e8d",
+          "rounds": [
+            {
+              "candidate_hash": "2e2499cb86d0974de548175e024e91f924f1923743595943c3e1af2b450d0582",
+              "assessment": {
+                "decision": "revise",
+                "checks": [
+                  {
+                    "paragraph_id": "answer",
+                    "verdict": "supported",
+                    "reason": "The comparisons support equal aggregate changes but opposing temporal profiles, not a common causal diagnosis; abstention and separation of regional warnings preserve the supplied limits.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "1.0, 1.0, 1.0, 1.0, -0.501, -0.501, -0.501, -0.501"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0"
+                      },
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.0019, 0.0007, 0.0024, -0.5476, -0.5493, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Correlation is not independence or a confirmed cause."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:leak",
+                    "verdict": "uncertain",
+                    "reason": "The competing-pattern and no-clearance conclusions are supported, but saying timing is missing conflates available transition timing with unavailable, justified propagation timing. The comparisons explicitly resolve transitions around +70 and +90.",
+                    "support": [
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "KN-LOCALIZATION-R1",
+                        "quote": "Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:instrumentation_or_telemetry",
+                    "verdict": "supported",
+                    "reason": "The documented calibration activity motivates investigation, while its scope, sign and magnitude do not explain both observed groups. No hardware fault is asserted as established.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "seek an independent reference before attributing a hardware fault."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:operating_change",
+                    "verdict": "supported",
+                    "reason": "Operating change remains a qualified alternative, not a claimed execution or cause. The coverage statement supports the stated limits on absent records.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "Missing entries cannot establish that no operation occurred, nor confirm or exclude a leak."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "A proposal is not an executed operation, and a superseded record is not current authority."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:0",
+                    "verdict": "supported",
+                    "reason": "The first four rows support the stated coverage, chainages, recovery and dependence. The paragraph correctly limits the odd-gateway explanation and does not treat agreement or recovery as leak exclusion.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.2745, -0.5517, -0.5488, 0.0016, -0.0017, 0.0029]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:1",
+                    "verdict": "supported",
+                    "reason": "The later group's coverage, location, persistent negative profile and correlation match the comparisons. Calibration timing is treated as association, with gateway and magnitude counterevidence retained.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.0019, 0.0007, 0.0024, -0.5476, -0.5493, -0.5516]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Inspect contradictory or asynchronous changes rather than merging branch-level earliest/latest timings into a common onset."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:0",
+                    "verdict": "supported",
+                    "reason": "This is a relevant read-only request for independent verification, not a claim that raw references were already obtained.",
+                    "support": [
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "Compare suspect instruments with independent observers and their actual received coverage."
+                      },
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:1",
+                    "verdict": "supported",
+                    "reason": "The requested calibration verification addresses documented scope and observed opposing responses without asserting that calibration caused them.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:2",
+                    "verdict": "supported",
+                    "reason": "The question requests relevant read-only evidence expressly identified as potentially absent; it does not invent an operating action.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Compare the observed sign, timing and affected assets with an approved, incident-time-available record."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "candidate_hash": "a1b6fcae28ac9e5c1e18d8885486777ee42f83bbeb82a44ffa4b6c8a77f9d1a3",
+              "assessment": {
+                "decision": "accept",
+                "checks": [
+                  {
+                    "paragraph_id": "answer",
+                    "verdict": "supported",
+                    "reason": "The comparison results support identical aggregate changes but opposing temporal groups and the stated correlations. Abstention and withheld localization match the supplied outcome; no cause or regional clearance is asserted.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[1.0, 1.0, 1.0, 1.0, -0.501, -0.501, -0.501, -0.501]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0]"
+                      },
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.0019, 0.0007, 0.0024, -0.5476, -0.5493, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Correlation is not independence or a confirmed cause."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:leak",
+                    "verdict": "supported",
+                    "reason": "Opposite recovery and decline challenge a simple sustained shared footprint without excluding a leak. Required propagation inputs and independent confirmation are not supplied, and localization is appropriately withheld.",
+                    "support": [
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-LOCALIZATION-R1",
+                        "quote": "Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Treat hydraulic connectivity and instrumentation dependency as different relationships."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:instrumentation_or_telemetry",
+                    "verdict": "supported",
+                    "reason": "The approved record supports a possible calibration effect, not proven faulty instruments. Cross-gateway matching, opposite odd-station responses and the measured/documented offset mismatch are faithful counterevidence.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "An unusual reading is not itself a faulty sensor or a physical leak."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:operating_change",
+                    "verdict": "supported",
+                    "reason": "Operating change remains explicitly hypothetical. The paragraph correctly limits its negative claim to reviewed records and preserves the coverage statement's upstream, delayed-entry and manual-work gaps.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Incomplete logs cannot prove that no operation or leak occurred."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Temporal association is not a causal intervention."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:0",
+                    "verdict": "supported",
+                    "reason": "ST1/2 chainages, complete sample counts, recovery profiles and +0.55-bar median changes match the tables. The narrow rejection of an odd-gateway-only explanation does not dismiss broader instrumentation or physical causes.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.2745, -0.5517, -0.5488, 0.0016, -0.0017, 0.0029]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:1",
+                    "verdict": "supported",
+                    "reason": "ST3/4 chainages, coverage, late declines and within-group correlation match the results. Calibration timing is treated only as a fit, with gateway and magnitude counterevidence retained and competing explanations unresolved.",
+                    "support": [
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "Inspect persistence and paired disagreement, and seek an independent reference before attributing a hardware fault."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:0",
+                    "verdict": "supported",
+                    "reason": "This is a relevant read-only request for independent confirmation, not a claim that raw references have already been obtained or inspected.",
+                    "support": [
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "Compare suspect instruments with independent observers and their actual received coverage."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:1",
+                    "verdict": "supported",
+                    "reason": "The request appropriately distinguishes documented calibration scope from actual implementation. Its recovery, decline and even/odd matching premises are supported by the comparison tables.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:2",
+                    "verdict": "supported",
+                    "reason": "The question targets explicit log-coverage gaps and requests temporal verification only; it neither invents an operation nor instructs physical intervention.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Compare the observed sign, timing and affected assets with an approved, incident-time-available record."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "casefile": {
+        "schema_version": "investigation-v1",
+        "task_id": "1689ae92-6c99-5c4c-8b87-fd702a8d99a7",
+        "generation_id": "joint-72a793254487435a8ad7556c494be313",
+        "snapshot_id": "window-2e6903ef510f8d9c8d8119ede5ca4e828431a2c1a8df8a72fc61164190ad746c",
+        "question": "Investigate P7-ST1-A/B through P7-ST4-A/B jointly over source +50 to +110 seconds, split at +70. Do these eight instruments support one shared pressure transition or competing explanations? Inspect temporal profiles, dependence and counterevidence, not only individual magnitudes. Keep other regional warnings separate.",
+        "mode": "live",
+        "state": "ABSTAINED",
+        "window_start": "2026-01-01T00:00:50+00:00",
+        "window_end": "2026-01-01T00:01:50+00:00",
+        "input_hash": "827e358a223162cb937b3581a1bc994db359e187e4386a80d4dd7a76448d2392",
+        "pack_version": "pressure-pack-v4-extended",
+        "baseline_version": "pressure-median-mad-v2",
+        "parameter_version": "pressure-window-v2",
+        "history_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+        "disposition": "Resolve evidence gaps; location withheld",
+        "hypothesis": null,
+        "inspection": null,
+        "next_action": "Escalate the competing explanations for human review.",
+        "interpretation": {
+          "focus": "root_cause",
+          "answer": {
+            "text": "These eight instruments do not establish one shared pressure transition. All show the same -0.2746 bar before/after median change at +70, but ST1/2 fall then recover near +90 while ST3/4 fall near +90 and remain low through +110. Within-group correlation is 1.0; between groups it is -0.501 over +50 to +110 and -1.0 over +70 to +110. Equal magnitudes conceal competing temporal patterns, not a confirmed cause. Diagnosis abstained; no qualified interval is available. Other regional warnings remain separate.",
+            "references": [
+              "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+              "subsea_d38bcbf41eab433cae580d413a2e070d",
+              "KN-INDEPENDENCE-R1",
+              "claim-117"
+            ]
+          },
+          "competing_causes": [
+            {
+              "text": "Measured negative excursions warrant verification, but the early group's recovery as the later group falls contradicts a simple sustained, jointly declining footprint. Transitions are resolved near +70 and +90; justified propagation timing, flow and an independent pressure reference remain unavailable. Hydraulic adjacency alone does not establish propagation or a leak. Coexisting physical and instrumentation effects remain possible. No leak location or clearance follows.",
+              "references": [
+                "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                "subsea_d38bcbf41eab433cae580d413a2e070d",
+                "KN-INDEPENDENCE-R1",
+                "KN-LOCALIZATION-R1",
+                "claim-115"
+              ],
+              "cause": "leak",
+              "stance": "not_established"
+            },
+            {
+              "text": "The approved calibration record starts at +90 and describes an approximately -0.75 bar offset on odd stations sharing gateway-P7-0. That supports checking instrumentation, but does not explain the whole pattern: ST1 recovers, ST3 falls, and even ST2/4 mirror their neighbouring odd stations across gateway assignments. Observed steps are about 0.55 bar, not the documented offset. Engineer verification of conversion paths and raw references is needed; maintenance association is not fault proof.",
+              "references": [
+                "MAINT-P7-GW-002",
+                "PROC-EXTENDED-001",
+                "subsea_d38bcbf41eab433cae580d413a2e070d",
+                "KN-INDEPENDENCE-R1",
+                "KN-QUALITY-R1"
+              ],
+              "cause": "instrumentation_or_telemetry",
+              "stance": "possible"
+            },
+            {
+              "text": "A physical operating transient could produce coordinated pressure changes across gateways, but no reviewed P7 operating execution record explains the opposite +90 transitions. The coverage statement explicitly permits absent upstream actions, delayed entries and manual work. Engineer review of incident-time operating records is needed; neither incomplete logs nor temporal coincidence can confirm or exclude this explanation.",
+              "references": [
+                "subsea_d38bcbf41eab433cae580d413a2e070d",
+                "LOG-EXTENDED-COVERAGE-001",
+                "KN-OPERATING-R1"
+              ],
+              "cause": "operating_change",
+              "stance": "possible"
+            }
+          ],
+          "regional_assessments": [
+            {
+              "text": "Across chainages 100/300 m, all four have 20/20 usable pre-split and 40/40 post-split samples. Profiles are near baseline before +70, about -0.55 bar during +70 to +90, then recover; the +90 median step is +0.55 bar. Correlation is 1.0 across both gateways, so an odd-gateway-only offset cannot explain this group. Agreement is not four independent witnesses, and recovery does not exclude a physical event. Engineer comparison with independent raw pressure and operating timestamps would distinguish shared conversion from process change.",
+              "references": [
+                "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                "subsea_d38bcbf41eab433cae580d413a2e070d",
+                "PROC-EXTENDED-001",
+                "MAINT-P7-GW-002",
+                "KN-INDEPENDENCE-R1",
+                "KN-QUALITY-R1"
+              ],
+              "sensor_ids": [
+                "P7-ST1-A",
+                "P7-ST1-B",
+                "P7-ST2-A",
+                "P7-ST2-B"
+              ],
+              "hypothesis": "unresolved"
+            },
+            {
+              "text": "Across chainages 500/700 m, all four have complete 20/40 pre/post samples. They remain near baseline until +90, then fall about 0.55 bar through +110; within-group correlation is 1.0. Their opposite timing versus ST1/2 weakens one common transition. Calibration timing fits ST3, but ST4 is on the other gateway and the documented offset is about -0.75 bar. A later pressure event and shared instrumentation remain competing possibilities; engineer verification needs independent pressure and calibration-path records, not magnitude alone.",
+              "references": [
+                "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                "subsea_d38bcbf41eab433cae580d413a2e070d",
+                "MAINT-P7-GW-002",
+                "PROC-EXTENDED-001",
+                "KN-INDEPENDENCE-R1",
+                "KN-QUALITY-R1"
+              ],
+              "sensor_ids": [
+                "P7-ST3-A",
+                "P7-ST3-B",
+                "P7-ST4-A",
+                "P7-ST4-B"
+              ],
+              "hypothesis": "unresolved"
+            }
+          ],
+          "follow_up_questions": [
+            "Can an engineer compare independent raw pressure references at ST1-4 across +70 and +90 to distinguish process changes from conversion-path effects?",
+            "Can an engineer verify the actual +90 calibration scope and offset, including why ST1 recovers while ST3 falls and even stations follow neighbouring odd stations?",
+            "Can an engineer review upstream and manual operating records for +50 to +110, including delayed entries, against both groups' transition times?"
+          ]
+        },
+        "checked_claims": [
+          {
+            "id": "claim-112",
+            "kind": "coverage",
+            "value": {
+              "coverage": 0.9907738095238096,
+              "usable_samples": 6658,
+              "received_samples": 6695,
+              "expected_samples": 6720,
+              "failure_domains_available": 14,
+              "unit": "fraction"
+            },
+            "evidence_ids": [
+              "ev-225"
+            ]
+          },
+          {
+            "id": "claim-066",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST2-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 17,
+              "max_score": 14.095629475606586,
+              "persistence_seconds": 17.0
+            },
+            "evidence_ids": [
+              "ev-133"
+            ]
+          },
+          {
+            "id": "claim-067",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST2-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 16,
+              "max_score": 12.303134832011724,
+              "persistence_seconds": 16.0
+            },
+            "evidence_ids": [
+              "ev-135"
+            ]
+          },
+          {
+            "id": "claim-070",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST4-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 19,
+              "max_score": 31.866415279658256,
+              "persistence_seconds": 19.0
+            },
+            "evidence_ids": [
+              "ev-141"
+            ]
+          },
+          {
+            "id": "claim-071",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST4-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 18,
+              "max_score": 33.22218995934563,
+              "persistence_seconds": 18.0
+            },
+            "evidence_ids": [
+              "ev-143"
+            ]
+          },
+          {
+            "id": "claim-072",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST5-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 18,
+              "max_score": 32.98469546262481,
+              "persistence_seconds": 18.0
+            },
+            "evidence_ids": [
+              "ev-145"
+            ]
+          },
+          {
+            "id": "claim-073",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST5-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 18,
+              "max_score": 25.92616183247673,
+              "persistence_seconds": 18.0
+            },
+            "evidence_ids": [
+              "ev-147"
+            ]
+          },
+          {
+            "id": "claim-074",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST6-A",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 59,
+              "missing": 1,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 18,
+              "max_score": 24.138672095191893,
+              "persistence_seconds": 18.0
+            },
+            "evidence_ids": [
+              "ev-149"
+            ]
+          },
+          {
+            "id": "claim-075",
+            "kind": "sensor_health",
+            "value": {
+              "sensor_id": "P5-ST6-B",
+              "channel": "pressure",
+              "expected": 60,
+              "received": 60,
+              "usable": 60,
+              "missing": 0,
+              "hard_excluded": 0,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "anomaly_count": 18,
+              "max_score": 19.958116580117814,
+              "persistence_seconds": 18.0
+            },
+            "evidence_ids": [
+              "ev-151"
+            ]
+          },
+          {
+            "id": "claim-114",
+            "kind": "limitation",
+            "value": {
+              "code": "SYNTHETIC_UNCALIBRATED"
+            },
+            "evidence_ids": [
+              "ev-227"
+            ]
+          },
+          {
+            "id": "claim-115",
+            "kind": "limitation",
+            "value": {
+              "code": "PRESSURE_PATTERNS_NOT_PROOF"
+            },
+            "evidence_ids": [
+              "ev-228"
+            ]
+          },
+          {
+            "id": "claim-116",
+            "kind": "limitation",
+            "value": {
+              "code": "OPERATING_CONTEXT_REQUIRED"
+            },
+            "evidence_ids": [
+              "ev-229"
+            ]
+          },
+          {
+            "id": "claim-117",
+            "kind": "limitation",
+            "value": {
+              "code": "MULTIPLE_PRESSURE_REGIONS"
+            },
+            "evidence_ids": [
+              "ev-230"
+            ]
+          }
+        ],
+        "limitations": [
+          "SYNTHETIC_UNCALIBRATED",
+          "PRESSURE_PATTERNS_NOT_PROOF",
+          "OPERATING_CONTEXT_REQUIRED",
+          "MULTIPLE_PRESSURE_REGIONS",
+          "degraded_coverage",
+          "missing_data",
+          "partial_health_review",
+          "child_abstained",
+          "insufficient_evidence",
+          "location_withheld",
+          "read_only"
+        ],
+        "sources": [
+          {
+            "document": {
+              "id": "MAINT-P7-GW-002",
+              "body": "Fictional, nonconfidential revised maintenance record. A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7. These eight taps share one failure domain and are not eight independent witnesses. Compare unaffected P7 even-numbered stations and independent branches before attributing the pattern. This record supports a shared-instrumentation explanation, but does not establish that every flagged instrument is faulty or exclude a concurrent physical leak.",
+              "type": "maintenance",
+              "title": "Revised P7 shared-gateway calibration window",
+              "status": "approved",
+              "revision": 2,
+              "asset_ids": [
+                "northsea",
+                "P7",
+                "gateway-P7-0"
+              ],
+              "admissible": true,
+              "supersedes": "MAINT-P7-GW-001",
+              "authored_at": "2026-01-01T00:01:15Z",
+              "available_at": "2026-01-01T00:01:20Z",
+              "content_hash": "ae85fd35be13b83c9976e4906e09b8e570727964a3148c139ce67211a032d230",
+              "effective_to": null,
+              "effective_from": "2026-01-01T00:01:20Z"
+            },
+            "use": "cited"
+          },
+          {
+            "document": {
+              "id": "LOG-EXTENDED-COVERAGE-001",
+              "body": "Fictional, nonconfidential coverage statement. This excerpt contains the P2 setpoint record OP-P2-EXTENDED-001 and revised P7 calibration record MAINT-P7-GW-002 when they become incident-time available. It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent. No verified P5 operating action is supplied here. Missing entries cannot establish that no operation occurred, nor confirm or exclude a leak. Keep source validity and partial health-review limits explicit.",
+              "type": "procedure",
+              "title": "Extended-network operating and maintenance log coverage",
+              "status": "approved",
+              "revision": 1,
+              "asset_ids": [
+                "northsea",
+                "P1",
+                "P2",
+                "P3",
+                "P4",
+                "P5",
+                "P6",
+                "P7"
+              ],
+              "admissible": true,
+              "supersedes": null,
+              "authored_at": "2025-12-31T23:00:00Z",
+              "available_at": "2025-12-31T23:05:00Z",
+              "content_hash": "5f46aeb0e8a396b46cd3e6599fea4a33715b90ed99a953d622ef107a57415bc0",
+              "effective_to": null,
+              "effective_from": "2026-01-01T00:00:00Z"
+            },
+            "use": "cited"
+          },
+          {
+            "document": {
+              "id": "PROC-EXTENDED-001",
+              "body": "Fictional, nonconfidential procedure. Seven 1600m pipeline segments carry eight stations each, with paired A/B pressure taps at 100m then every 200m. Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1. Multiple anomalous taps on a single shared gateway do not establish independent corroboration. Compare persistent negative pressure changes across distinct stations and gateways, check operating and maintenance context, and retain missing observers. Numerical brackets are inspection areas, not exact leak coordinates. A partial sensor review cannot establish that all other instruments are reliable. Operator authorization is required for physical intervention.",
+              "type": "procedure",
+              "title": "Extended-network pressure desk assessment",
+              "status": "approved",
+              "revision": 1,
+              "asset_ids": [
+                "northsea",
+                "P1",
+                "P2",
+                "P3",
+                "P4",
+                "P5",
+                "P6",
+                "P7"
+              ],
+              "admissible": true,
+              "supersedes": null,
+              "authored_at": "2025-12-20T09:00:00Z",
+              "available_at": "2025-12-20T10:00:00Z",
+              "content_hash": "5c8544fcaa065d537b73509025b9619ff0b5dcbc489fc31dc82fa6cd844f83dd",
+              "effective_to": null,
+              "effective_from": "2025-12-21T00:00:00Z"
+            },
+            "use": "cited"
+          }
+        ],
+        "comparisons": [
+          {
+            "as_of": "2026-01-01T00:01:55+00:00",
+            "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+            "intent": "seek_counterevidence",
+            "sensors": [
+              {
+                "sensor_id": "P7-ST1-A",
+                "chainage_m": 100.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.8072,
+                "invalid_received": 0,
+                "pressure_max_bar": 79.0872,
+                "pressure_min_bar": 78.5273,
+                "before_median_bar": 79.0819,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.2745,
+                  -0.5517,
+                  -0.5488,
+                  0.0016,
+                  -0.0017,
+                  0.0029
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST1-B",
+                "chainage_m": 100.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.8099,
+                "invalid_received": 0,
+                "pressure_max_bar": 79.0899,
+                "pressure_min_bar": 78.5299,
+                "before_median_bar": 79.0845,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.2745,
+                  -0.5517,
+                  -0.5488,
+                  0.0016,
+                  -0.0017,
+                  0.0029
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST2-A",
+                "chainage_m": 300.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.617,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.897,
+                "pressure_min_bar": 78.337,
+                "before_median_bar": 78.8916,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.2745,
+                  -0.5517,
+                  -0.5488,
+                  0.0016,
+                  -0.0017,
+                  0.0029
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST2-B",
+                "chainage_m": 300.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.6072,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.8872,
+                "pressure_min_bar": 78.3272,
+                "before_median_bar": 78.8819,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.2745,
+                  -0.5517,
+                  -0.5488,
+                  0.0016,
+                  -0.0017,
+                  0.0029
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST3-A",
+                "chainage_m": 500.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.4142,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.6942,
+                "pressure_min_bar": 78.1342,
+                "before_median_bar": 78.6889,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.0019,
+                  0.0007,
+                  0.0024,
+                  -0.5476,
+                  -0.5493,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST3-B",
+                "chainage_m": 500.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.4048,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.6848,
+                "pressure_min_bar": 78.1248,
+                "before_median_bar": 78.6794,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.0019,
+                  0.0007,
+                  0.0024,
+                  -0.5476,
+                  -0.5493,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST4-A",
+                "chainage_m": 700.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.2082,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.4882,
+                "pressure_min_bar": 77.9282,
+                "before_median_bar": 78.4828,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.0019,
+                  0.0007,
+                  0.0024,
+                  -0.5476,
+                  -0.5493,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST4-B",
+                "chainage_m": 700.0,
+                "change_bar": -0.2746,
+                "segment_id": "P7",
+                "after_usable": 40,
+                "before_usable": 20,
+                "after_expected": 40,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  8,
+                  4
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.2207,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.5006,
+                "pressure_min_bar": 77.9407,
+                "before_median_bar": 78.4953,
+                "delta_profile_bar": [
+                  0.0007,
+                  0.0024,
+                  -0.0019,
+                  0.0007,
+                  0.0024,
+                  -0.5476,
+                  -0.5493,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              }
+            ],
+            "input_hash": "4f1b2840e902e9707a386c429fd812df77889c11fdc28333959ecfd5d3454b26",
+            "end_seconds": 110,
+            "joint_pattern": {
+              "method": "paired_complete_pressure_pearson_and_graph_distance_v1",
+              "caveats": [
+                "Correlation is not independence or causation; inspect failure domains and operations.",
+                "Profiles use each instrument's pre-split median, not a presumed source distance.",
+                "Buckets can hide impulses; extrema and adjacent steps add context.",
+                "Missing values stay unknown; null correlations include inadequate or constant data."
+              ],
+              "sensor_order": [
+                "P7-ST1-A",
+                "P7-ST1-B",
+                "P7-ST2-A",
+                "P7-ST2-B",
+                "P7-ST3-A",
+                "P7-ST3-B",
+                "P7-ST4-A",
+                "P7-ST4-B"
+              ],
+              "pipeline_distance_m": [
+                [
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0,
+                  600.0,
+                  600.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0,
+                  600.0,
+                  600.0
+                ],
+                [
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0
+                ],
+                [
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0
+                ],
+                [
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0
+                ],
+                [
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0
+                ],
+                [
+                  600.0,
+                  600.0,
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  600.0,
+                  600.0,
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "joint_usable_samples": [
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ],
+                [
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60,
+                  60
+                ]
+              ],
+              "pressure_correlation": [
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501
+                ],
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501
+                ],
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501
+                ],
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501
+                ],
+                [
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                [
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                [
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                [
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  -0.501,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              ],
+              "bucket_ranges_seconds": [
+                [
+                  50,
+                  58
+                ],
+                [
+                  58,
+                  66
+                ],
+                [
+                  66,
+                  74
+                ],
+                [
+                  74,
+                  82
+                ],
+                [
+                  82,
+                  90
+                ],
+                [
+                  90,
+                  98
+                ],
+                [
+                  98,
+                  106
+                ],
+                [
+                  106,
+                  110
+                ]
+              ]
+            },
+            "split_seconds": 70,
+            "start_seconds": 50,
+            "corpus_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+            "investigation_step": 6,
+            "call_id": "subsea_aba2f0b8a0864ef4afef6404f72b86f5"
+          },
+          {
+            "as_of": "2026-01-01T00:01:55+00:00",
+            "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+            "intent": "test_instrumentation",
+            "sensors": [
+              {
+                "sensor_id": "P7-ST1-A",
+                "chainage_m": 100.0,
+                "change_bar": 0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 79.083,
+                "invalid_received": 0,
+                "pressure_max_bar": 79.0872,
+                "pressure_min_bar": 78.5273,
+                "before_median_bar": 78.5329,
+                "delta_profile_bar": [
+                  0.0005,
+                  0.0018,
+                  0.0008,
+                  -0.0016,
+                  0.5481,
+                  0.5512,
+                  0.5515,
+                  0.5502
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST1-B",
+                "chainage_m": 100.0,
+                "change_bar": 0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 79.0856,
+                "invalid_received": 0,
+                "pressure_max_bar": 79.0899,
+                "pressure_min_bar": 78.5299,
+                "before_median_bar": 78.5356,
+                "delta_profile_bar": [
+                  0.0005,
+                  0.0018,
+                  0.0008,
+                  -0.0016,
+                  0.5481,
+                  0.5512,
+                  0.5515,
+                  0.5502
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST2-A",
+                "chainage_m": 300.0,
+                "change_bar": 0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.8927,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.897,
+                "pressure_min_bar": 78.337,
+                "before_median_bar": 78.3427,
+                "delta_profile_bar": [
+                  0.0005,
+                  0.0018,
+                  0.0008,
+                  -0.0016,
+                  0.5481,
+                  0.5512,
+                  0.5515,
+                  0.5502
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST2-B",
+                "chainage_m": 300.0,
+                "change_bar": 0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.8829,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.8872,
+                "pressure_min_bar": 78.3272,
+                "before_median_bar": 78.3329,
+                "delta_profile_bar": [
+                  0.0005,
+                  0.0018,
+                  0.0008,
+                  -0.0016,
+                  0.5481,
+                  0.5512,
+                  0.5515,
+                  0.5502
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST3-A",
+                "chainage_m": 500.0,
+                "change_bar": -0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.1399,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.6942,
+                "pressure_min_bar": 78.1342,
+                "before_median_bar": 78.6899,
+                "delta_profile_bar": [
+                  -0.002,
+                  0.0012,
+                  0.0015,
+                  0.0002,
+                  -0.5495,
+                  -0.5482,
+                  -0.5492,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST3-B",
+                "chainage_m": 500.0,
+                "change_bar": -0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-0",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 78.1305,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.6848,
+                "pressure_min_bar": 78.1248,
+                "before_median_bar": 78.6805,
+                "delta_profile_bar": [
+                  -0.002,
+                  0.0012,
+                  0.0015,
+                  0.0002,
+                  -0.5495,
+                  -0.5482,
+                  -0.5492,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST4-A",
+                "chainage_m": 700.0,
+                "change_bar": -0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 77.9339,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.4882,
+                "pressure_min_bar": 77.9282,
+                "before_median_bar": 78.4839,
+                "delta_profile_bar": [
+                  -0.002,
+                  0.0012,
+                  0.0015,
+                  0.0002,
+                  -0.5495,
+                  -0.5482,
+                  -0.5492,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              },
+              {
+                "sensor_id": "P7-ST4-B",
+                "chainage_m": 700.0,
+                "change_bar": -0.55,
+                "segment_id": "P7",
+                "after_usable": 20,
+                "before_usable": 20,
+                "after_expected": 20,
+                "failure_domain": "gateway-P7-1",
+                "profile_usable": [
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                "before_expected": 20,
+                "after_median_bar": 77.9464,
+                "invalid_received": 0,
+                "pressure_max_bar": 78.5006,
+                "pressure_min_bar": 77.9407,
+                "before_median_bar": 78.4964,
+                "delta_profile_bar": [
+                  -0.002,
+                  0.0012,
+                  0.0015,
+                  0.0002,
+                  -0.5495,
+                  -0.5482,
+                  -0.5492,
+                  -0.5516
+                ],
+                "largest_adjacent_step_bar": 0.5502
+              }
+            ],
+            "input_hash": "42381f29ee9137b490ed9dd7a30cb191b105f52144eb6c0feb44d827cb8bc6b4",
+            "end_seconds": 110,
+            "joint_pattern": {
+              "method": "paired_complete_pressure_pearson_and_graph_distance_v1",
+              "caveats": [
+                "Correlation is not independence or causation; inspect failure domains and operations.",
+                "Profiles use each instrument's pre-split median, not a presumed source distance.",
+                "Buckets can hide impulses; extrema and adjacent steps add context.",
+                "Missing values stay unknown; null correlations include inadequate or constant data."
+              ],
+              "sensor_order": [
+                "P7-ST1-A",
+                "P7-ST1-B",
+                "P7-ST2-A",
+                "P7-ST2-B",
+                "P7-ST3-A",
+                "P7-ST3-B",
+                "P7-ST4-A",
+                "P7-ST4-B"
+              ],
+              "pipeline_distance_m": [
+                [
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0,
+                  600.0,
+                  600.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0,
+                  600.0,
+                  600.0
+                ],
+                [
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0
+                ],
+                [
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0,
+                  400.0,
+                  400.0
+                ],
+                [
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0
+                ],
+                [
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0,
+                  200.0,
+                  200.0
+                ],
+                [
+                  600.0,
+                  600.0,
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  600.0,
+                  600.0,
+                  400.0,
+                  400.0,
+                  200.0,
+                  200.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "joint_usable_samples": [
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ],
+                [
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40,
+                  40
+                ]
+              ],
+              "pressure_correlation": [
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0
+                ],
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0
+                ],
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0
+                ],
+                [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0
+                ],
+                [
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                [
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                [
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                [
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  -1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              ],
+              "bucket_ranges_seconds": [
+                [
+                  70,
+                  75
+                ],
+                [
+                  75,
+                  80
+                ],
+                [
+                  80,
+                  85
+                ],
+                [
+                  85,
+                  90
+                ],
+                [
+                  90,
+                  95
+                ],
+                [
+                  95,
+                  100
+                ],
+                [
+                  100,
+                  105
+                ],
+                [
+                  105,
+                  110
+                ]
+              ]
+            },
+            "split_seconds": 90,
+            "start_seconds": 70,
+            "corpus_version": "0c30c1d1691366682aec533cb01913c8ab2a0b194b1dabea8d53fe1d984ca8b0",
+            "investigation_step": 7,
+            "call_id": "subsea_d38bcbf41eab433cae580d413a2e070d"
+          }
+        ],
+        "steps": [
+          {
+            "task_id": "f7c5cdf5-d35c-5e8b-a6d0-cc1f1829ea3b",
+            "call_id": "subsea_e3eaf8ae0c4644c38acda70e5f1c5b54",
+            "tool": "history.search",
+            "intent": "seek_counterevidence",
+            "arguments": {
+              "query": "operation maintenance gateway calibration pressure",
+              "intent": "seek_counterevidence",
+              "site_id": "northsea",
+              "asset_ids": [
+                "P7"
+              ],
+              "snapshot_id": "window-2e6903ef510f8d9c8d8119ede5ca4e828431a2c1a8df8a72fc61164190ad746c",
+              "pack_version": "pressure-pack-v4-extended",
+              "knowledge_ids": [
+                "KN-INDEPENDENCE-R1",
+                "KN-OPERATING-R1"
+              ],
+              "check_question": "Do incident-time P7 operating or maintenance records distinguish a shared hydraulic transition from asynchronous pressure changes or shared instrumentation dependencies?",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null,
+            "sequence": 4
+          },
+          {
+            "task_id": "f7c5cdf5-d35c-5e8b-a6d0-cc1f1829ea3b",
+            "call_id": "subsea_45093544bdca4ee8ab3bdf75a6ebfd28",
+            "tool": "history.read",
+            "intent": "test_instrumentation",
+            "arguments": {
+              "intent": "test_instrumentation",
+              "site_id": "northsea",
+              "snapshot_id": "window-2e6903ef510f8d9c8d8119ede5ca4e828431a2c1a8df8a72fc61164190ad746c",
+              "document_ids": [
+                "MAINT-P7-GW-002",
+                "LOG-EXTENDED-COVERAGE-001",
+                "PROC-EXTENDED-001"
+              ],
+              "pack_version": "pressure-pack-v4-extended",
+              "knowledge_ids": [
+                "KN-INDEPENDENCE-R1",
+                "KN-OPERATING-R1"
+              ],
+              "check_question": "Does current P7 maintenance match the timing and gateway scope of the observed changes, or leave contrasting instruments and earlier transitions unexplained?",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null,
+            "sequence": 5
+          },
+          {
+            "task_id": "f7c5cdf5-d35c-5e8b-a6d0-cc1f1829ea3b",
+            "call_id": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+            "tool": "history.compare",
+            "intent": "seek_counterevidence",
+            "arguments": {
+              "intent": "seek_counterevidence",
+              "site_id": "northsea",
+              "sensor_ids": [
+                "P7-ST1-A",
+                "P7-ST1-B",
+                "P7-ST2-A",
+                "P7-ST2-B",
+                "P7-ST3-A",
+                "P7-ST3-B",
+                "P7-ST4-A",
+                "P7-ST4-B"
+              ],
+              "end_seconds": 110,
+              "snapshot_id": "window-2e6903ef510f8d9c8d8119ede5ca4e828431a2c1a8df8a72fc61164190ad746c",
+              "pack_version": "pressure-pack-v4-extended",
+              "knowledge_ids": [
+                "KN-INDEPENDENCE-R1",
+                "KN-OPERATING-R1"
+              ],
+              "split_seconds": 70,
+              "start_seconds": 50,
+              "check_question": "Do all eight requested instruments share a sustained transition, or do synchronized profiles, dependence and overlap reveal different timing or recovery across stations and gateways?",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null,
+            "sequence": 6
+          },
+          {
+            "task_id": "f7c5cdf5-d35c-5e8b-a6d0-cc1f1829ea3b",
+            "call_id": "subsea_d38bcbf41eab433cae580d413a2e070d",
+            "tool": "history.compare",
+            "intent": "test_instrumentation",
+            "arguments": {
+              "intent": "test_instrumentation",
+              "site_id": "northsea",
+              "sensor_ids": [
+                "P7-ST1-A",
+                "P7-ST1-B",
+                "P7-ST2-A",
+                "P7-ST2-B",
+                "P7-ST3-A",
+                "P7-ST3-B",
+                "P7-ST4-A",
+                "P7-ST4-B"
+              ],
+              "end_seconds": 110,
+              "snapshot_id": "window-2e6903ef510f8d9c8d8119ede5ca4e828431a2c1a8df8a72fc61164190ad746c",
+              "pack_version": "pressure-pack-v4-extended",
+              "knowledge_ids": [
+                "KN-INDEPENDENCE-R1",
+                "KN-OPERATING-R1"
+              ],
+              "split_seconds": 90,
+              "start_seconds": 70,
+              "check_question": "At the recorded +90 calibration start, do ST1/ST2 recover while ST3/ST4 decline across both gateways, contradicting one shared sustained transition or a gateway-0-only explanation?",
+              "baseline_version": "pressure-median-mad-v2",
+              "parameter_version": "pressure-window-v2"
+            },
+            "error": null,
+            "sequence": 7
+          }
+        ],
+        "reused_task_ids": [],
+        "fresh_model_calls": 9,
+        "fresh_tool_calls": 15,
+        "recorded_elapsed_seconds": 233.424652,
+        "report_target_seconds": 300,
+        "report_target_met": true,
+        "interpretation_review": {
+          "protocol": "grounding-v1",
+          "source_hash": "d9124eb5907e351a11f4308bd20a7215a2fecac8705890d1a24b8bc54fa10e8d",
+          "rounds": [
+            {
+              "candidate_hash": "2e2499cb86d0974de548175e024e91f924f1923743595943c3e1af2b450d0582",
+              "assessment": {
+                "decision": "revise",
+                "checks": [
+                  {
+                    "paragraph_id": "answer",
+                    "verdict": "supported",
+                    "reason": "The comparisons support equal aggregate changes but opposing temporal profiles, not a common causal diagnosis; abstention and separation of regional warnings preserve the supplied limits.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "1.0, 1.0, 1.0, 1.0, -0.501, -0.501, -0.501, -0.501"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0"
+                      },
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.0019, 0.0007, 0.0024, -0.5476, -0.5493, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Correlation is not independence or a confirmed cause."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:leak",
+                    "verdict": "uncertain",
+                    "reason": "The competing-pattern and no-clearance conclusions are supported, but saying timing is missing conflates available transition timing with unavailable, justified propagation timing. The comparisons explicitly resolve transitions around +70 and +90.",
+                    "support": [
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "KN-LOCALIZATION-R1",
+                        "quote": "Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:instrumentation_or_telemetry",
+                    "verdict": "supported",
+                    "reason": "The documented calibration activity motivates investigation, while its scope, sign and magnitude do not explain both observed groups. No hardware fault is asserted as established.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "seek an independent reference before attributing a hardware fault."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:operating_change",
+                    "verdict": "supported",
+                    "reason": "Operating change remains a qualified alternative, not a claimed execution or cause. The coverage statement supports the stated limits on absent records.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "Missing entries cannot establish that no operation occurred, nor confirm or exclude a leak."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "A proposal is not an executed operation, and a superseded record is not current authority."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:0",
+                    "verdict": "supported",
+                    "reason": "The first four rows support the stated coverage, chainages, recovery and dependence. The paragraph correctly limits the odd-gateway explanation and does not treat agreement or recovery as leak exclusion.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.2745, -0.5517, -0.5488, 0.0016, -0.0017, 0.0029]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:1",
+                    "verdict": "supported",
+                    "reason": "The later group's coverage, location, persistent negative profile and correlation match the comparisons. Calibration timing is treated as association, with gateway and magnitude counterevidence retained.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.0019, 0.0007, 0.0024, -0.5476, -0.5493, -0.5516]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Inspect contradictory or asynchronous changes rather than merging branch-level earliest/latest timings into a common onset."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:0",
+                    "verdict": "supported",
+                    "reason": "This is a relevant read-only request for independent verification, not a claim that raw references were already obtained.",
+                    "support": [
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "Compare suspect instruments with independent observers and their actual received coverage."
+                      },
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:1",
+                    "verdict": "supported",
+                    "reason": "The requested calibration verification addresses documented scope and observed opposing responses without asserting that calibration caused them.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:2",
+                    "verdict": "supported",
+                    "reason": "The question requests relevant read-only evidence expressly identified as potentially absent; it does not invent an operating action.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Compare the observed sign, timing and affected assets with an approved, incident-time-available record."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "candidate_hash": "a1b6fcae28ac9e5c1e18d8885486777ee42f83bbeb82a44ffa4b6c8a77f9d1a3",
+              "assessment": {
+                "decision": "accept",
+                "checks": [
+                  {
+                    "paragraph_id": "answer",
+                    "verdict": "supported",
+                    "reason": "The comparison results support identical aggregate changes but opposing temporal groups and the stated correlations. Abstention and withheld localization match the supplied outcome; no cause or regional clearance is asserted.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[1.0, 1.0, 1.0, 1.0, -0.501, -0.501, -0.501, -0.501]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0]"
+                      },
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.0019, 0.0007, 0.0024, -0.5476, -0.5493, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Correlation is not independence or a confirmed cause."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:leak",
+                    "verdict": "supported",
+                    "reason": "Opposite recovery and decline challenge a simple sustained shared footprint without excluding a leak. Required propagation inputs and independent confirmation are not supplied, and localization is appropriately withheld.",
+                    "support": [
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "KN-LOCALIZATION-R1",
+                        "quote": "Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Treat hydraulic connectivity and instrumentation dependency as different relationships."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:instrumentation_or_telemetry",
+                    "verdict": "supported",
+                    "reason": "The approved record supports a possible calibration effect, not proven faulty instruments. Cross-gateway matching, opposite odd-station responses and the measured/documented offset mismatch are faithful counterevidence.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "An unusual reading is not itself a faulty sensor or a physical leak."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "cause:operating_change",
+                    "verdict": "supported",
+                    "reason": "Operating change remains explicitly hypothetical. The paragraph correctly limits its negative claim to reviewed records and preserves the coverage statement's upstream, delayed-entry and manual-work gaps.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Incomplete logs cannot prove that no operation or leak occurred."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Temporal association is not a causal intervention."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:0",
+                    "verdict": "supported",
+                    "reason": "ST1/2 chainages, complete sample counts, recovery profiles and +0.55-bar median changes match the tables. The narrow rejection of an odd-gateway-only explanation does not dismiss broader instrumentation or physical causes.",
+                    "support": [
+                      {
+                        "reference": "subsea_aba2f0b8a0864ef4afef6404f72b86f5",
+                        "quote": "[0.0007, 0.0024, -0.2745, -0.5517, -0.5488, 0.0016, -0.0017, 0.0029]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "KN-INDEPENDENCE-R1",
+                        "quote": "Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "region:1",
+                    "verdict": "supported",
+                    "reason": "ST3/4 chainages, coverage, late declines and within-group correlation match the results. Calibration timing is treated only as a fit, with gateway and magnitude counterevidence retained and competing explanations unresolved.",
+                    "support": [
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      },
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7."
+                      },
+                      {
+                        "reference": "PROC-EXTENDED-001",
+                        "quote": "Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1."
+                      },
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "Inspect persistence and paired disagreement, and seek an independent reference before attributing a hardware fault."
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:0",
+                    "verdict": "supported",
+                    "reason": "This is a relevant read-only request for independent confirmation, not a claim that raw references have already been obtained or inspected.",
+                    "support": [
+                      {
+                        "reference": "KN-QUALITY-R1",
+                        "quote": "Compare suspect instruments with independent observers and their actual received coverage."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:1",
+                    "verdict": "supported",
+                    "reason": "The request appropriately distinguishes documented calibration scope from actual implementation. Its recovery, decline and even/odd matching premises are supported by the comparison tables.",
+                    "support": [
+                      {
+                        "reference": "MAINT-P7-GW-002",
+                        "quote": "A calibration test on gateway-P7-0 begins at source +90s."
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[0.0005, 0.0018, 0.0008, -0.0016, 0.5481, 0.5512, 0.5515, 0.5502]"
+                      },
+                      {
+                        "reference": "subsea_d38bcbf41eab433cae580d413a2e070d",
+                        "quote": "[-0.002, 0.0012, 0.0015, 0.0002, -0.5495, -0.5482, -0.5492, -0.5516]"
+                      }
+                    ]
+                  },
+                  {
+                    "paragraph_id": "question:2",
+                    "verdict": "supported",
+                    "reason": "The question targets explicit log-coverage gaps and requests temporal verification only; it neither invents an operation nor instructs physical intervention.",
+                    "support": [
+                      {
+                        "reference": "LOG-EXTENDED-COVERAGE-001",
+                        "quote": "It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent."
+                      },
+                      {
+                        "reference": "KN-OPERATING-R1",
+                        "quote": "Compare the observed sign, timing and affected assets with an approved, incident-time-available record."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "knowledge_packet": {
+          "version": "knowledge-f4f382fb5e68070886bafc7e5b5f8d905c0b24bc795810fbcea09055358ea974",
+          "authority": "synthetic_advisory_only",
+          "selected_at": "2026-11-06T11:36:31.387173Z",
+          "site_id": "northsea",
+          "pack_version": "pressure-pack-v4-extended",
+          "cards": [
+            {
+              "id": "KN-QUALITY-R1",
+              "revision": 1,
+              "title": "Distinguish unreliable observations from physical process evidence",
+              "kind": "heuristic",
+              "roles": [
+                "sensor_quality",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Pressure alerts coexist with missing samples, spikes, drift or inconsistent instrument readings.",
+              "guidance": "An unusual reading is not itself a faulty sensor or a physical leak. Separate completeness, currentness, accuracy and provenance. Missing values and invalid sentinels are observation gaps, not measured pressure drops. Inspect persistence and paired disagreement, and seek an independent reference before attributing a hardware fault. A detector's attribution score identifies a contribution, not a physical root cause. Malfunction and a physical event can coexist.",
+              "verification_steps": [
+                "Compare suspect instruments with independent observers and their actual received coverage.",
+                "Check calibration, units, clock and maintenance context; preserve unobserved periods.",
+                "State which sensor claims were reviewed and which remain unchecked."
+              ],
+              "counterexamples": [
+                "A gap during a real leak does not establish a healthy pipeline.",
+                "A genuine process transient can produce a large anomaly score on functioning instruments."
+              ],
+              "limitations": [
+                "This is a research-derived demo heuristic, not a field-approved sensor diagnosis.",
+                "No universal threshold or sensor-failure probability is established."
+              ],
+              "sources": [
+                {
+                  "reference": "User-provided PhD thesis, not redistributed",
+                  "locator": "PDF pp. 28-29, 37-38, 207, 240",
+                  "boundary": "Marine data-quality and anomaly-attribution principles; not validation of gas-pipeline leak classification."
+                }
+              ],
+              "review_basis": "FDE research synthesis for synthetic evaluation; no pipeline SME approval has been obtained."
+            },
+            {
+              "id": "KN-INDEPENDENCE-R1",
+              "revision": 1,
+              "title": "Check common causes before counting independent corroboration",
+              "kind": "heuristic",
+              "roles": [
+                "sensor_quality",
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Several instruments show simultaneous changes, particularly paired taps or instruments sharing infrastructure.",
+              "guidance": "Inspect groups, not isolated alert flags. In this synthetic pressure-monitoring setup, a leak hypothesis should be tested against a sustained connected pattern: disruptive changes near the affected region and weaker, related changes farther along the pipes, including below-threshold observations. Compare synchronized profiles, relative magnitudes, timing, recovery and missingness against independent and contrasting instruments. Attenuation is not necessarily monotonic in real branched gas networks; this is a working hypothesis, not a universal law. Scattered impulses, isolated drift or missing data motivate instrumentation checks but can coexist with a leak. Treat hydraulic connectivity and instrumentation dependency as different relationships. Multiple agreeing instruments sharing a gateway, power supply or calibration path may share an error. Correlation is not independence or a confirmed cause. Shared-failure explanations also need observed evidence; do not declare every sensor on a gateway faulty from metadata alone.",
+              "verification_steps": [
+                "Compare near, farther and weak/quiet connected observers jointly, not only above-threshold supporters.",
+                "Contrast a shared-path instrument with an independent observer; compare profiles, valid-sample overlap and graph distances.",
+                "Inspect contradictory or asynchronous changes rather than merging branch-level earliest/latest timings into a common onset.",
+                "Open applicable maintenance records and check effective revision and scope."
+              ],
+              "counterexamples": [
+                "Eight taps on one shared conversion path are not eight independent witnesses.",
+                "An operating transient can also produce a coherent pressure pattern; attenuation alone cannot identify a leak.",
+                "Independent gateways do not exclude an unrecorded shared power or operating cause."
+              ],
+              "limitations": [
+                "A/B gateway assignments are synthetic site assumptions requiring expert confirmation.",
+                "This demo contains no validated common-cause reliability model."
+              ],
+              "sources": [
+                {
+                  "reference": "User-provided public defense deck, not redistributed",
+                  "locator": "Slide 47; user's proposed pressure-monitoring scenario",
+                  "boundary": "Strong, possible, lower-threshold and noisy detections motivate multiscale inspection; not calibrated gas-pipeline attenuation."
+                },
+                {
+                  "reference": "User-provided PhD thesis, not redistributed",
+                  "locator": "PDF pp. 28-29, 240",
+                  "boundary": "Motivates prior knowledge and source-quality review; gateway independence is an explicit demo engineering assumption."
+                }
+              ],
+              "review_basis": "FDE-authored dependency heuristic; requires site instrumentation expert review before field use."
+            },
+            {
+              "id": "KN-OPERATING-R1",
+              "revision": 1,
+              "title": "Test operating transients as competing explanations",
+              "kind": "heuristic",
+              "roles": [
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "Pressure changes could coincide with a valve, compressor, setpoint or calibration activity.",
+              "guidance": "Investigate operating changes rather than equating a pressure anomaly with a leak. Compare the observed sign, timing and affected assets with an approved, incident-time-available record. A proposal is not an executed operation, and a superseded record is not current authority. Read the underlying records referenced by a coverage statement. A plausible explanation for one branch does not automatically explain a different pattern elsewhere. Incomplete logs cannot prove that no operation or leak occurred.",
+              "verification_steps": [
+                "Search affected and contrasting signal regions, not only the proposed inspection branch.",
+                "Open current records and distinguish planned, approved and executed activities.",
+                "Compare before/after periods near an observed change; note window censoring and retain missingness."
+              ],
+              "counterexamples": [
+                "A broad positive operating shift does not by itself explain a separate localized negative region.",
+                "A real operating change can coexist with a leak or instrumentation fault."
+              ],
+              "limitations": [
+                "Temporal association is not a causal intervention.",
+                "The cited review includes liquid-pipeline methods; its parameters cannot be transferred directly to subsea gas."
+              ],
+              "sources": [
+                {
+                  "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                  "locator": "Sections 4.2, 4.3 and 4.5",
+                  "boundary": "Review of pressure methods, operating transients and model assumptions; not a site-specific operating procedure."
+                }
+              ],
+              "review_basis": "Research-grounded demo guidance; no customer operating procedure has been approved."
+            },
+            {
+              "id": "KN-LOCALIZATION-R1",
+              "revision": 1,
+              "title": "Separate a numerical inspection bracket from physical leak localization",
+              "kind": "heuristic",
+              "roles": [
+                "event_diagnosis",
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "An engineer requests a leak location or an inspection recommendation from pressure observations.",
+              "guidance": "Use the qualified numerical tool for chainage and retain its assumptions. The demo brackets affected stations against unaffected neighbours; it does not solve a calibrated hydraulic inverse problem. Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions. Do not infer an exact coordinate, leak size or leak probability from anomaly magnitude or from a research formula without its inputs. Withhold a location when coverage or the single-region assumption is inadequate.",
+              "verification_steps": [
+                "Check the numerical tool's eligibility, observer independence and unaffected brackets.",
+                "State the interval and distinguish it from a confidence interval or physical leak point.",
+                "Request expert-selected independent confirmation; do not clear alarms while waiting for an LLM."
+              ],
+              "counterexamples": [
+                "A larger pressure residual is not necessarily the nearest sensor to a leak.",
+                "Multiple disjoint pressure regions are not resolved by the demo's single-leak bracket."
+              ],
+              "limitations": [
+                "The source review discusses methods with different fluid and deployment assumptions.",
+                "Synthetic pressure footprints and inspection brackets are not field localization validation."
+              ],
+              "sources": [
+                {
+                  "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6603558/",
+                  "locator": "Sections 4.2-4.5",
+                  "boundary": "Explains method-dependent localization assumptions; does not validate this demo's bracket."
+                }
+              ],
+              "review_basis": "Research-derived scope guard for this synthetic demo; not a field-approved localization procedure."
+            },
+            {
+              "id": "KN-INVESTIGATION-PROGRAM-R1",
+              "revision": 1,
+              "title": "Expert-guided differential investigation program",
+              "kind": "procedure",
+              "roles": [
+                "operator_response"
+              ],
+              "status": "demo_curated",
+              "site_ids": [
+                "northsea"
+              ],
+              "pack_versions": [
+                "pressure-pack-v3",
+                "pressure-pack-v4-extended"
+              ],
+              "available_at": "2026-11-06T00:00:00Z",
+              "valid_until": null,
+              "supersedes": null,
+              "conflicts_with": [],
+              "applies_when": "An anomaly episode requires a bounded, reviewable leak-versus-instrumentation RCA investigation.",
+              "guidance": "Use this natural-language program to guide the existing read-only specialist workflow, not to assert an answer. Preserve competing leak, instrumentation and operating explanations. Select measurements and contextual checks that could distinguish them, including counterevidence. Apply only relevant knowledge, explicitly connect it to observed case evidence, and retain contradictions and missing prerequisites. Domain guidance supplies reasoning, not incident facts or authority to clear the numerical warning.",
+              "verification_steps": [
+                "Quality: establish what was measured reliably and what remains missing.",
+                "Diagnosis: inspect connectivity, independent domains and competing signal regions.",
+                "Diagnosis: choose relevant operational records and discriminating comparisons.",
+                "Response: explain which guidance was applied, supporting and contradicting case evidence, and remaining gaps.",
+                "Critic: check case facts and knowledge citations against their original pinned sources.",
+                "Handoff: request qualified engineer verification; unresolved evidence remains unresolved."
+              ],
+              "counterexamples": [
+                "Retrieving a relevant document without applying it is not RCA.",
+                "A well-cited but consistently wrong explanation is not successful expert reasoning."
+              ],
+              "limitations": [
+                "Inspired by DANA CAPTURE/APPLY and natural-language programs, not an OpenSSA or DanaOS implementation.",
+                "The paper's FinanceBench results do not establish pipeline diagnostic accuracy."
+              ],
+              "sources": [
+                {
+                  "reference": "https://arxiv.org/html/2410.02823v1",
+                  "locator": "Sections 3.1-3.4, 4.1, 5.2 and 6.4",
+                  "boundary": "Architecture, expertise capture and open uncertainty/contradiction challenges; no subsea benchmark."
+                }
+              ],
+              "review_basis": "FDE-authored DANA-inspired demo program; expert elicitation and operational approval remain pilot gates."
+            }
+          ],
+          "excluded": {},
+          "selection_method": "exact_site_version_status_time_and_declared_conflicts"
+        },
+        "knowledge_used_ids": [
+          "KN-INDEPENDENCE-R1",
+          "KN-LOCALIZATION-R1",
+          "KN-OPERATING-R1",
+          "KN-QUALITY-R1"
+        ],
+        "provider_cost_usd": null,
+        "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+      },
+      "elapsed_seconds": 233.625,
+      "model_calls": 9,
+      "tool_calls": 15
+    }
+  ],
+  "inference_retries": 0,
+  "limitations": [
+    "Two synthetic held-out timing probes, not a population accuracy estimate.",
+    "Only the controlled P7 within-period temporal order changes.",
+    "The eight P7 streams are complete authored probe fixtures, not gap imputation.",
+    "The full network and common gateway dependence remain visible.",
+    "Accepted contracts do not grade causal correctness; independent review required.",
+    "No waveform propagation, hydraulic validation or human time-saving claim."
+  ]
+}

@@ -78,9 +78,7 @@ def test_backend_export_includes_private_scenarios_without_changing_model_serial
     assert json.loads(json.dumps(rows)) == rows
 
 
-@pytest.mark.parametrize(
-    "field", ["authored_at", "available_at", "effective_from", "effective_to"]
-)
+@pytest.mark.parametrize("field", ["authored_at", "available_at", "effective_from", "effective_to"])
 def test_record_rejects_naive_timestamps(field):
     payload = load_history_corpus()[0].model_dump()
     payload[field] = "2025-12-20T09:00:00"
@@ -126,7 +124,7 @@ def test_corpus_rejects_incompatible_envelope(field, value):
         ("type", "diagnostic_truth"),
         ("status", "confirmed"),
         ("revision", 0),
-        ("scenarios", ["S7"]),
+        ("scenarios", ["S8"]),
         ("scenarios", ["S1", "S1"]),
         ("asset_ids", ["P1"]),
     ],

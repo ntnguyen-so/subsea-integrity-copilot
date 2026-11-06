@@ -52,6 +52,22 @@ def receipts():
     ]
 
 
+def test_context_budget_denial_must_remain_an_explicit_report_limitation(snapshot):
+    observed = [
+        *receipts(),
+        {
+            "name": "evidence.get",
+            "error": "context_budget_exceeded",
+            "result": None,
+        },
+    ]
+    result = valid_result()
+    with pytest.raises(ValidationError, match="limitations"):
+        validate_result(result, quality_task(snapshot), snapshot, observed)
+    result.limitations.append("context_budget_exceeded")
+    validate_result(result, quality_task(snapshot), snapshot, observed)
+
+
 @pytest.mark.parametrize(
     "change,code",
     [

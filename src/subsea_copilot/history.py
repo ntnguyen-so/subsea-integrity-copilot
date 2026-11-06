@@ -7,6 +7,7 @@ from typing import Any
 
 from subsea_copilot.contracts import AgentTask, WindowSnapshot, content_hash
 from subsea_copilot.ingest import normalize_records
+from subsea_copilot.profiles import joint_profiles
 from subsea_copilot.store import history_search_query
 from subsea_copilot.synthetic import generate_pack
 from subsea_copilot.validation import ValidationError
@@ -40,7 +41,7 @@ def read_history(
     replay = store.get_replay(task.generation_id)
     as_of = replay.epoch + timedelta(seconds=snapshot.clock_seconds)
     receipts = [row for row in store.tool_receipts(task.id) if not row.get("error")]
-    pack = generate_pack(snapshot.site_id)
+    pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
     assets = (
         {pack.id, "northsea"}
         | {s.id for s in pack.segments}
@@ -157,7 +158,7 @@ def read_history(
     )
     if (
         not isinstance(ids, list)
-        or not 2 <= len(ids) <= 4
+        or not 2 <= len(ids) <= 8
         or any(not isinstance(i, str) or i not in sensors for i in ids)
         or len(set(ids)) != len(ids)
         or type(start) is not int
@@ -170,7 +171,7 @@ def read_history(
     ):
         raise ValidationError(
             "history_range",
-            "Compare two to four sensors in a bounded past range with two >=10s periods.",
+            "Compare two to eight sensors in a bounded past range with two >=10s periods.",
         )
     originals = [
         row.original
@@ -182,6 +183,8 @@ def read_history(
         if row.received_at <= as_of
     ]
     rows = normalize_records(originals, pack)
+    rows = [row for row in rows if row.channel == "pressure"]
+    profiles, joint = joint_profiles(pack, rows, ids, replay.epoch, start, split, end)
     summaries = []
     for identifier in ids:
         selected_rows = [row for row in rows if row.sensor_id == identifier]
@@ -214,6 +217,7 @@ def read_history(
                 if before and after
                 else None,
                 "invalid_received": sum(row.validity != "usable" for row in selected_rows),
+                **profiles[identifier],
             }
         )
     return {
@@ -224,5 +228,6 @@ def read_history(
         "as_of": as_of.isoformat(),
         "input_hash": content_hash([row.model_dump(mode="json") for row in rows]),
         "sensors": summaries,
+        "joint_pattern": joint,
         "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
     }

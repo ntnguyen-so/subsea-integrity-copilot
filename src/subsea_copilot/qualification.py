@@ -290,7 +290,7 @@ def qualify_agents(mode: Mode, repetitions: int = 3) -> dict[str, JsonValue]:
 
 
 def run_qualification(
-    suite: Literal["diagnostics", "agents", "qualification"],
+    suite: Literal["diagnostics", "agents", "qualification", "knowledge"],
     mode: Mode,
     output: Path,
     repetitions: int = 3,
@@ -306,7 +306,11 @@ def run_qualification(
         report["diagnostics"] = evaluate_diagnostics(seed_count=20)
     if suite in ("agents", "qualification"):
         report["agents"] = qualify_agents(mode, repetitions)
-    sections = [report[key] for key in ("diagnostics", "agents") if key in report]
+    if suite == "knowledge":
+        from .knowledge_evaluation import qualify_knowledge
+
+        report["knowledge"] = qualify_knowledge(mode)
+    sections = [report[key] for key in ("diagnostics", "agents", "knowledge") if key in report]
     report["passed"] = all(
         isinstance(section, dict) and section.get("passed") is True for section in sections
     )
