@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="115.409571">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T09:05:50.294Z" hostname="" tests="1" failures="0" skipped="0" time="113.936" errors="0">
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="113.936">
+</testcase>
+</testsuite>
+</testsuites>

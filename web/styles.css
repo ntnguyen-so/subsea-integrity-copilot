@@ -161,3 +161,22 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 @media(max-width:900px){.workflow-columns{grid-template-columns:1fr}.automatic-action-buttons{flex-shrink:1}.run-settings-fields{flex-wrap:wrap;width:min(650px,calc(100vw - 28px))}}
 .manual-workflow{margin-top:12px}.manual-workflow p{font-size:15px;margin-top:8px}
 .manual-workflow .muted{font-size:13px}
+.agent-activity{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:10px 13px;margin:0 0 12px;border:1px solid #93b4ee;border-left:4px solid var(--accent);border-radius:5px;background:#eef4ff}
+.agent-activity>div{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;min-width:0}
+.agent-activity strong{font-size:15px}.agent-activity span,.agent-activity p{font-size:13px;color:var(--muted)}
+.agent-activity p{grid-column:1;overflow-wrap:anywhere}.agent-activity button{grid-column:2;grid-row:1/3;align-self:center;font-size:13px}
+.agent-roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.agent-role{min-width:0;border-left:3px solid var(--accent);background:#f3f6fa;padding:9px 11px;font-size:13px}
+.agent-role strong,.agent-role span{display:block}.agent-role span{margin-top:4px;color:var(--muted)}
+.agent-role details{margin-top:5px}.agent-role summary,.agent-source summary,.agent-causes summary{cursor:pointer;color:var(--accent)}
+.agent-role details p{font-size:14px;margin:8px 0}.agent-role button{font-size:12px}
+.agent-conclusion-label{font-size:13px;font-weight:600;color:var(--accent)}
+.agent-findings{margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-size:14px}
+.agent-findings h3{font-size:16px;margin-bottom:8px}.agent-findings p{margin:6px 0}
+.agent-findings .agent-search,.agent-findings .muted{font-size:13px}
+.agent-source{margin:7px 0}.agent-source p{white-space:pre-wrap}
+.agent-source-finding{margin:9px 0;padding:9px 12px;border-left:3px solid var(--accent);background:#eef4ff;font-size:14px;line-height:1.6}
+.agent-causes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.agent-causes>details{border:1px solid var(--line);border-radius:4px;padding:9px;min-width:0}
+.agent-next-question{font-weight:600}.agent-diagnostics .automatic-timeline{margin-top:12px}
+@media(max-width:900px){.agent-activity{grid-template-columns:1fr}.agent-activity button{grid-column:1;grid-row:auto;justify-self:start}.agent-roles,.agent-causes{grid-template-columns:1fr}}

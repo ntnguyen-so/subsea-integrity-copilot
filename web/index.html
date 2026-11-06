@@ -45,6 +45,11 @@
       <section id="monitoring-warning" class="monitoring-warning info" role="alert" aria-atomic="true">No current monitoring assessment. Warnings do not wait for an AI report.</section>
       <div id="evidence-selection" class="selection-strip"><div class="selection-text"><strong id="selected-basis">No window selected</strong><span id="basis-warning">Questions require a visible, pinned snapshot.</span></div><div class="control"><label for="window-history">View a past window</label><select id="window-history"><option value="">Follow current window</option></select></div><button id="follow-live" type="button">Follow current</button></div>
       <section id="panel-live" role="tabpanel" aria-labelledby="tab-live">
+        <section id="agent-activity" class="agent-activity" aria-label="Actual agent processing" hidden>
+          <div><strong id="agent-activity-state">Detectors monitoring</strong><span id="agent-elapsed">No LLM investigation admitted yet</span></div>
+          <p id="agent-last-action">Detector results are separate from agent investigation.</p>
+          <button id="show-agent-work" type="button">See agent work ↓</button>
+        </section>
         <div class="live-grid">
           <section class="panel topology-panel"><div class="panel-heading"><h2>Pipeline map</h2><span class="muted">Select a sensor to inspect</span></div><div class="map-wrap"><svg id="topology" viewBox="0 0 760 520" role="group" aria-label="The brief's Y-shaped pressure network: Trunk, Branch A and Branch B; select a pipe-mounted instrument"><text x="380" y="260" text-anchor="middle">Awaiting site geometry</text></svg></div><div id="map-legend" class="map-legend" aria-label="Pipeline marker legend">
             <span data-legend="normal"><svg viewBox="0 0 32 32" aria-hidden="true"><g class="sensor"><circle class="sensor-dot" cx="16" cy="16" r="6"/></g></svg>No flags</span>
@@ -67,7 +72,15 @@
           </section>
         </div>
         <section id="manual-workflow" class="panel manual-workflow" hidden><div class="panel-heading"><h2>Sensor alerts only · engineer investigation required</h2></div><p>The detectors flag individual instruments. Your engineer must inspect their histories, connect when and where the anomalies occur, check operating records, and decide whether to investigate a leak or malfunction.</p><p class="muted">No combined diagnosis, inspection interval or agent report in this mode. This illustrates the customer workflow assumed in the brief, not a measured customer installation. No LLM is called.</p></section>
-        <section class="panel agent-status-panel" aria-labelledby="automatic-title"><div class="panel-heading"><h2 id="automatic-title">Agent-assisted investigation</h2><span id="automatic-state" class="badge">Waiting for telemetry</span></div><p id="automatic-conclusion" class="automatic-conclusion">Anomalies start analysis automatically. Monitoring and manual analysis do not wait for an agent.</p><div id="automatic-timeline" class="automatic-timeline"></div><div id="automatic-actions" class="automatic-actions"></div><details class="agent-diagnostics"><summary>Analysis details</summary><div id="automatic-progress" class="chips"></div><p class="muted">The product combines numerical correlation and localization with source-reviewed agent interpretation. It distinguishes possible leaks, sensor/telemetry concerns and insufficient evidence; it does not force a diagnosis or invent leak coordinates. Sensor timestamps use simulated source UTC; agent timestamps use actual processing UTC.</p></details></section>
+        <section class="panel agent-status-panel" aria-labelledby="automatic-title">
+          <div class="panel-heading"><h2 id="automatic-title">Agents · investigation beyond the detector</h2><span id="automatic-state" class="badge">Waiting for telemetry</span></div>
+          <div id="automatic-progress" class="agent-roles"></div>
+          <p class="agent-conclusion-label">Agent conclusion · separate from the numerical alarm</p>
+          <p id="automatic-conclusion" class="automatic-conclusion">Anomalies start analysis automatically. Monitoring and manual analysis do not wait for an agent.</p>
+          <div id="agent-findings" class="agent-findings"></div>
+          <div id="automatic-actions" class="automatic-actions"></div>
+          <details class="agent-diagnostics"><summary>Processing timestamps and limitations</summary><div id="automatic-timeline" class="automatic-timeline"></div><p class="muted">The map diagnosis and initial interval are numerical detector outputs. Agents choose evidence reads and comparisons, investigate competing explanations, and produce a separately reviewed handoff. Sensor timestamps use simulated source UTC; agent timestamps and elapsed time use real processing time. No automatic actuation or correctness guarantee.</p></details>
+        </section>
         <section id="comparison-panel" class="panel channels-panel" hidden><div class="panel-heading"><h2>Sensor comparison</h2></div><p id="comparison-basis" class="muted">Pins the visible window. Up to four histories share UTC time and a common pressure scale.</p><div id="comparison-charts" class="comparison-grid"></div></section>
         <details class="panel engineer-details"><summary>Detection criteria, asset context and evidence provenance</summary>
           <section class="investigation-panel" aria-labelledby="investigation-title"><h2 id="investigation-title">Computed evidence intake · not an agent answer</h2><div id="investigation-summary" class="investigation-grid"><p class="empty">Create a pressure generation to investigate the brief's network.</p></div></section>

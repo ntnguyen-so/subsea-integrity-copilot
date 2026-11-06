@@ -1,6 +1,7 @@
 import { box, bounds, button, element, friendly, node, svg, text, time } from "./dom";
 import { renderCharts } from "./charts";
 import { renderCasefile, renderWorkflowComparison } from "./casefile";
+import { renderAgentActivity, renderAgentWork } from "./agentwork";
 import type { AgentTask, CanonicalObservation, ConsoleEvent, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
@@ -17,6 +18,10 @@ let selectedEpisodeId: string | null = null;
 let selectedEvidenceId: string | null = null;
 let selectedTaskId: string | null = null;
 let taskDetail: TaskDetail | null = null;
+let automaticDetail: TaskDetail | null = null;
+let automaticReadKey: string | null = null;
+let automaticReading = false;
+let automaticReadError: string | null = null;
 let observations: CanonicalObservation[] = [];
 let sensorLoadingKey: string | null = null;
 let sensorLoadedKey: string | null = null;
@@ -43,7 +48,7 @@ let comparisonToken = 0;
 const comparisonSensorIds = new Set<string>();
 const currentSource = "pressure-v3";
 
-const eventTypes = ["replay.state", "window.completed", "window.revised", "episode.changed", "task.started", "task.updated", "tool.completed", "answer.critique", "answer.checked", "task.finished", "health.changed"];
+const eventTypes = ["replay.state", "window.completed", "window.revised", "episode.changed", "task.started", "task.updated", "model.started", "model.completed", "tool.completed", "answer.critique", "answer.checked", "task.finished", "health.changed"];
 const publicReceiptFields = ["id", "call_id", "name", "task_id", "tool", "tool_name", "action", "status", "summary", "validation", "outcome", "evidence_ids", "claim_refs", "duration_ms", "error", "error_code", "snapshot_id", "created_at"];
 const publicTraceFields = ["trace_id", "span_id", "attempt_id", "session_id", "task_id", "status", "mode", "model", "model_calls", "tool_calls", "usage", "duration_ms", "export_status", "stored", "langfuse_url", "url"];
 
@@ -57,6 +62,19 @@ function short(id: string): string { return id.length > 22 ? `${id.slice(0, 10)}
 function enc(id: string): string { return encodeURIComponent(id); }
 function modeName(mode: Mode): string { return mode === "live" ? "COPILOT HOSTED" : "SCRIPTED"; }
 function sensorAlertsOnly(): boolean { return projection?.replay.workflow === "sensor_alerts"; }
+function automaticRoot(): AgentTask | null {
+  return [...projection?.tasks || []].filter(task => task.automatic && task.role === "operator_response" && !task.parent_id)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))[0] || null;
+}
+function renderActivity(): void {
+  box("agent-activity").hidden = !projection || sensorAlertsOnly();
+  if (!projection || sensorAlertsOnly()) return;
+  const root = automaticRoot();
+  renderAgentActivity(root, projection.tasks, events,
+    Date.parse(projection.server_time) + Math.max(0, Date.now() - projectionReceivedAt),
+    navigator.onLine && connectionState.startsWith("Connected"),
+    projection.episodes.some(episode => episode.dispatch_status === "gathering_context"));
+}
 function jsonText(value: Json | undefined): string {
   return value === undefined ? "not reported" : typeof value === "string" ? value : JSON.stringify(value);
 }
@@ -93,7 +111,7 @@ function updateSession(): void {
   text("operator", session.authenticated ? session.username || "Operator" : "Signed out");
   updateControls();
 }
-function setConnection(value: string): void { connectionState = value; text("connection-state", value); renderMonitoringWarning(); }
+function setConnection(value: string): void { connectionState = value; text("connection-state", value); renderMonitoringWarning(); renderActivity(); }
 function updateControls(): void {
   const replay = projection?.replay;
   const allowed = session.authenticated && !commandBusy;
@@ -196,6 +214,9 @@ async function chooseReplay(id: string): Promise<void> {
   if (currentReplayId === id && projection) connectStream(id, generationToken);
 }
 function resetView(): void {
+  automaticDetail = null; automaticReadKey = null; automaticReadError = null;
+  delete box("automatic-progress").dataset.renderKey; delete box("automatic-progress").dataset.task;
+  box("agent-activity").hidden = true; box("agent-findings").replaceChildren();
   renderMonitoringWarning();
   text("source-clock", "Not reported"); text("server-clock", "Not reported");
   text("clock-basis", "No received telemetry"); text("trend-basis", "No received telemetry");
@@ -595,12 +616,14 @@ function renderMap(): void {
   if (focusedId) [...map.querySelectorAll<SVGGElement>("[data-sensor]")].find(item => item.dataset.sensor === focusedId)?.focus();
   text("event-summary", window ? `${friendly(window.event.hypothesis)} · ${window.event.supporting_sensor_ids.length} supporting instruments · ${window.event.persistence_seconds}s qualifying persistence. A pattern is not proof of cause.` : "No completed assessment. Warm-up is not a normal-pipeline verdict.");
   text("location-summary", location?.status === "located"
-    ? `Priority inspection: ${location.best?.segment_id || "unresolved"} ${location.inspection_start_m}–${location.inspection_end_m}m. Not an exact leak point.`
+    ? `Priority inspection (numerical detector): ${location.best?.segment_id || "unresolved"} ${location.inspection_start_m}–${location.inspection_end_m}m. Not an exact leak point.`
     : location ? `Inspection interval withheld: ${location.reason}` : "Location not computed / not eligible. No confirmed leak location is claimed.");
   if (sensorAlertsOnly()) {
     const count = pack.sensors.filter(sensor => sensorFlags(window, sensor.id).anomaly).length;
     text("event-summary", `${count} instruments with individual alerts in this window. Inspect each history; no combined leak/malfunction diagnosis is provided.`);
     text("location-summary", "Inspection area: engineer to determine by connecting the sensor alerts.");
+  } else {
+    text("event-summary", `Detector result · not an LLM report: ${box("event-summary").textContent}`);
   }
   text("deployment-summary", `${pack.sensors.length} pipe-mounted pressure instruments at ${new Set(pack.sensors.map(sensor => sensor.station_id)).size} paired stations. A/B taps are on opposite pipe walls and share a gateway; wall offsets enlarged for display. Chainage follows each pipe, not screen distance.`);
 }
@@ -659,6 +682,7 @@ function renderSensorList(): void {
 }
 function renderAutomaticInvestigation(): void {
   if (!projection) return;
+  renderActivity();
   const { replay, latest_window: latest, pack } = projection;
   text("stream-stage", `${replay.state} · received through +${replay.clock_seconds.toFixed(1)}s · ${pack.sensors.length} instruments`);
   if (sensorAlertsOnly()) {
@@ -667,16 +691,17 @@ function renderAutomaticInvestigation(): void {
     return;
   }
   text("detector-stage", latest ? `${friendly(latest.event.hypothesis)} · window ends +${latest.end_seconds}s` : `Warming up · ${pack.window_seconds}s window / ${pack.hop_seconds}s hop`);
-  const root = [...projection.tasks].filter(task => task.automatic && task.role === "operator_response" && !task.parent_id)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  const root = automaticRoot();
   const timeline = box("automatic-timeline"), progress = box("automatic-progress"), actions = box("automatic-actions");
   const focusedAction = actions.contains(document.activeElement) && document.activeElement instanceof HTMLButtonElement
     ? document.activeElement.dataset.action : undefined;
-  timeline.replaceChildren(); progress.replaceChildren(); actions.replaceChildren();
+  timeline.replaceChildren(); actions.replaceChildren();
   const incident = root ? projection.episodes.find(item => item.id === root.episode_id) : projection.episodes[0];
   const unavailable = incident?.pending_window_id && incident.dispatch_status && incident.dispatch_status !== "queued"
     ? friendly(incident.dispatch_status) : null;
   if (!root) {
+    progress.replaceChildren(); delete progress.dataset.renderKey; delete progress.dataset.task;
+    box("agent-findings").replaceChildren();
     if (incident?.dispatch_status === "gathering_context") {
       text("agent-stage", "Evidence triage · collecting unresolved context");
       text("automatic-state", "TRIAGE · NOT AN LLM REPORT");
@@ -712,10 +737,10 @@ function renderAutomaticInvestigation(): void {
   stamp("ALERT EVIDENCE / SOURCE UTC", basis ? `${time(basis.window_end)} · +${basis.end_seconds}s` : `Snapshot ${short(root.snapshot_id)}`);
   stamp("ANALYSIS QUEUED / PROCESSING UTC", time(root.created_at));
   stamp(accepted ? "REPORT RECORDED / PROCESSING UTC" : failed ? "FAILURE RECORDED / PROCESSING UTC" : "LAST TASK UPDATE / PROCESSING UTC", time(root.updated_at));
-  for (const [role, label] of [["sensor_quality", "Sensor quality"], ["event_diagnosis", "Event diagnosis"], ["operator_response", "Interpretation / source review"]]) {
-    const task = role === "operator_response" ? root : projection.tasks.find(item => item.root_id === root.id && item.role === role);
-    progress.append(node("span", `${label}: ${task ? friendly(task.state) : "not yet started / see reuse receipts"}`, "badge"));
-  }
+  const detail = automaticDetail?.task.id === root.id ? automaticDetail : null;
+  renderAgentWork(progress, box("agent-findings"), root, projection.tasks, detail, basis,
+    automaticReadError, id => { void loadTask(id); });
+  refreshAutomaticDetail(root);
   const conclusion = accepted ? root.result?.interpretation?.answer.text || root.result?.summary || root.answer || ""
     : failed ? `No accepted report: ${root.error_message || root.error_code || friendly(root.state)}. Do not wait for AI to act under existing response procedures.`
       : "Investigating the pinned alert evidence. Sensor ingestion, numerical warnings and manual trends continue independently.";
@@ -1012,6 +1037,42 @@ function renderTasks(): void {
   if (!tasks.length) container.append(node("p", "No persisted task yet. Monitoring continues without inference.", "empty"));
   if (focusedId) [...container.querySelectorAll<HTMLButtonElement>("[data-task]")].find(item => item.dataset.task === focusedId)?.focus();
 }
+async function readTaskDetail(id: string, generation: number): Promise<TaskDetail | null> {
+  const detail = await request<TaskDetail>(`/api/tasks/${enc(id)}`);
+  if (generation !== generationToken) return null;
+  if (detail.task.generation_id !== currentReplayId || detail.task.id !== id
+    || detail.children.some(child => child.generation_id !== currentReplayId || child.site_id !== detail.task.site_id || child.parent_id !== id)) throw new Error("Task response scope mismatch.");
+  if (detail.casefile && (detail.casefile.task_id !== id || detail.casefile.snapshot_id !== detail.task.snapshot_id)) throw new Error("Investigation handoff scope mismatch.");
+  if (detail.task.role === "operator_response") {
+    const basis = windows.find(window => window.id === detail.task.snapshot_id)
+      || await request<WindowSnapshot>(`/api/windows/${enc(detail.task.snapshot_id)}`);
+    if (generation !== generationToken) return null;
+    if (basis.id !== detail.task.snapshot_id || basis.generation_id !== currentReplayId || basis.site_id !== detail.task.site_id) throw new Error("Workflow comparison snapshot scope mismatch.");
+    const file = detail.casefile;
+    if (file && (file.generation_id !== basis.generation_id || file.input_hash !== basis.input_hash
+      || file.pack_version !== basis.pack_version || file.baseline_version !== basis.baseline_version
+      || file.parameter_version !== basis.parameter_version || file.mode !== detail.task.mode
+      || file.state !== detail.task.state)) throw new Error("Workflow comparison evidence mismatch; refusing an unmatched comparison.");
+    if (!windows.some(window => window.id === basis.id)) windows.push(basis);
+  }
+  return detail;
+}
+function refreshAutomaticDetail(root: AgentTask): void {
+  if (!projection) return;
+  const generation = generationToken;
+  const key = `${generation}|${root.id}|${projection.tasks.filter(task => task.id === root.id || task.root_id === root.id)
+    .map(task => `${task.id}:${task.updated_at}:${task.state}:${task.model_calls}:${task.tool_calls}`).join("|")}`;
+  if (automaticReading || automaticReadKey === key) return;
+  automaticReadKey = key; automaticReading = true; automaticReadError = null;
+  void readTaskDetail(root.id, generation).then(detail => {
+    if (generation === generationToken && detail) automaticDetail = detail;
+  }).catch((error: unknown) => {
+    if (generation === generationToken) { automaticDetail = null; automaticReadError = errorMessage(error); }
+  }).finally(() => {
+    automaticReading = false;
+    if (projection) renderAutomaticInvestigation();
+  });
+}
 async function loadTask(id: string, focus = true): Promise<void> {
   const changed = selectedTaskId !== id;
   selectedTaskId = id;
@@ -1019,22 +1080,8 @@ async function loadTask(id: string, focus = true): Promise<void> {
   const token = ++taskToken, generation = generationToken;
   if (focus) switchTab("agents");
   try {
-    const detail = await request<TaskDetail>(`/api/tasks/${enc(id)}`);
-    if (token !== taskToken || generation !== generationToken) return;
-    if (detail.task.generation_id !== currentReplayId || detail.task.id !== id || detail.children.some(child => child.generation_id !== currentReplayId)) throw new Error("Task response scope mismatch.");
-    if (detail.casefile && (detail.casefile.task_id !== id || detail.casefile.snapshot_id !== detail.task.snapshot_id)) throw new Error("Investigation handoff scope mismatch.");
-    if (detail.task.role === "operator_response") {
-      const basis = windows.find(window => window.id === detail.task.snapshot_id)
-        || await request<WindowSnapshot>(`/api/windows/${enc(detail.task.snapshot_id)}`);
-      if (token !== taskToken || generation !== generationToken) return;
-      if (basis.id !== detail.task.snapshot_id || basis.generation_id !== currentReplayId || basis.site_id !== detail.task.site_id) throw new Error("Workflow comparison snapshot scope mismatch.");
-      const file = detail.casefile;
-      if (file && (file.generation_id !== basis.generation_id || file.input_hash !== basis.input_hash
-        || file.pack_version !== basis.pack_version || file.baseline_version !== basis.baseline_version
-        || file.parameter_version !== basis.parameter_version || file.mode !== detail.task.mode
-        || file.state !== detail.task.state)) throw new Error("Workflow comparison evidence mismatch; refusing an unmatched comparison.");
-      if (!windows.some(window => window.id === basis.id)) windows.push(basis);
-    }
+    const detail = await readTaskDetail(id, generation);
+    if (!detail || token !== taskToken || generation !== generationToken) return;
     taskDetail = detail;
     renderTaskDetail();
     renderAnswer();
@@ -1257,6 +1304,9 @@ element("login-form", HTMLFormElement).addEventListener("submit", event => {
   }).catch(showError).finally(() => { if (submit) submit.disabled = false; });
 });
 controlButton("create-replay").addEventListener("click", () => { void createReplay(); });
+controlButton("show-agent-work").addEventListener("click", () => {
+  document.querySelector<HTMLElement>(".agent-status-panel")?.scrollIntoView({ block: "start" });
+});
 controlButton("compare-sensors").addEventListener("click", () => { void compareSensors(); });
 controlButton("clear-comparison").addEventListener("click", () => { comparisonSensorIds.clear(); renderSensorList(); });
 select("scenario").addEventListener("change", updateControls);
@@ -1279,6 +1329,7 @@ select("event-filter").addEventListener("change", renderFeed);
 element("ask-form", HTMLFormElement).addEventListener("submit", event => { event.preventDefault(); void ask(); });
 element("question", HTMLTextAreaElement).addEventListener("focus", () => { pinVisibleWindow(); });
 controlButton("reconnect").addEventListener("click", () => {
+  automaticReadKey = null; automaticReadError = null;
   if (!session.authenticated) { void initialize(); return; }
   if (currentReplayId) {
     closeStream();
@@ -1292,6 +1343,7 @@ window.addEventListener("beforeunload", closeStream);
 setInterval(() => {
   renderMonitoringWarning();
   renderClocks();
+  renderActivity();
 }, 250);
 updateControls();
 void initialize();

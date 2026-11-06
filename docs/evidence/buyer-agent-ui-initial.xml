@@ -1,0 +1,54 @@
+<testsuites id="" name="" tests="7" failures="1" skipped="0" errors="0" time="403.373712">
+<testsuite name="console.spec.ts" timestamp="2026-11-06T08:58:38.505Z" hostname="" tests="2" failures="0" skipped="0" time="104.154" errors="0">
+<testcase name="real replay, sensor evidence, pinned questions and keyboard navigation" classname="console.spec.ts" time="82.309">
+</testcase>
+<testcase name="asking a question opens Agents before its task detail read completes" classname="console.spec.ts" time="21.845">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T08:58:38.505Z" hostname="" tests="5" failures="1" skipped="0" time="296.395" errors="0">
+<testcase name="automatic report timestamps are explicit and failed analysis cannot clear a numerical warning" classname="dashboard.spec.ts" time="43.099">
+</testcase>
+<testcase name="default view prioritizes map, trend and assessment while optional tools stay collapsed" classname="dashboard.spec.ts" time="39.683">
+</testcase>
+<testcase name="light theme has readable contrast and the map, chart and legend agree on pressure anomalies" classname="dashboard.spec.ts" time="54.023">
+</testcase>
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="114.94">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\runtime\buyer-agent-ui\dashboard-two-customer-mod-9e5bf-igation-on-matching-S1-data\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  dashboard.spec.ts:368:5 › two customer modes separate individual sensor alerts from agent investigation on matching S1 data
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('#agent-findings .agent-causes details')
+    Expected: 3
+    Received: 1
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('#agent-findings .agent-causes details') with timeout 15000ms
+      - waiting for locator('#agent-findings .agent-causes details')
+        33 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      403 |   await expect(page.locator("#agent-activity-state")).toContainText("Agent report ready");
+      404 |   await expect(page.locator("#agent-findings")).toContainText("historical records read");
+    > 405 |   await expect(page.locator("#agent-findings .agent-causes details")).toHaveCount(3);
+          |                                                                       ^
+      406 |   await page.getByRole("button", { name: "Compare with existing workflow", exact: true }).click();
+      407 |   await expect(page.locator("#workflow-comparison")).toBeVisible();
+      408 |   const taskId = await page.locator("#investigation-case").getAttribute("data-task");
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:405:71
+
+    Error Context: ..\..\runtime\buyer-agent-ui\dashboard-two-customer-mod-9e5bf-igation-on-matching-S1-data\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="agent work stays separate from a running detector and rejects mismatched automatic handoffs" classname="dashboard.spec.ts" time="44.65">
+</testcase>
+</testsuite>
+</testsuites>

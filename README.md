@@ -52,6 +52,18 @@ Stopping Compose without `-v` preserves evidence.
 
 ### Five-minute operator walkthrough
 
+The blue **agent activity** strip separates detector output from actual agent
+work. Its elapsed clock is real processing time, even while simulated telemetry
+is paused. **See agent work** scrolls to the quality, investigation and reporting
+handoffs, executed record searches/comparisons, source quotes, critic outcome
+and engineer verification question. These findings load automatically on Live;
+opening the Agents tab or asking a question is not required.
+
+The map explicitly labels its initial assessment and inspection interval as
+numerical detector outputs. Pending, failed and unavailable work records do not
+become completed historical investigations. SCRIPTED recordings remain offline
+fixtures, not evidence of hosted performance.
+
 Choose between exactly two customer workflows under **Demo mode / new run**:
 
 - **Sensor alerts only:** the map and list flag individual instruments. Engineers

@@ -1,0 +1,950 @@
+{
+  "started_at": "2026-11-06T09:08:16.195Z",
+  "scenario": "S4",
+  "status": "passed",
+  "method": "Fresh real hosted automatic investigation. Source stepped then paused; no manual question or inference retry.",
+  "frames": [
+    {
+      "observed_at": "2026-11-06T09:09:14.121Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:08 real processing since admission · 1 hosted calls · 0 tool calls\n\nAutomatically admitted 2026-11-06 09:09:05.168 UTC. The detector's initial diagnosis is not a completed LLM investigation.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "RUNNING",
+          "model_calls": 1,
+          "tool_calls": 0
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:09:24.058Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:18 real processing since admission · 1 hosted calls · 0 tool calls\n\nLast recorded action: operator response · 2026-11-06 09:09:21.960 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "RUNNING",
+          "model_calls": 1,
+          "tool_calls": 0
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:09:28.079Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:22 real processing since admission · 2 hosted calls · 4 tool calls\n\nLast recorded action: sensor quality · 2026-11-06 09:09:22.498 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "RUNNING",
+          "model_calls": 1,
+          "tool_calls": 4
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:09:37.769Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:32 real processing since admission · 2 hosted calls · 4 tool calls\n\nLast recorded action: sensor quality · 2026-11-06 09:09:35.798 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "RUNNING",
+          "model_calls": 1,
+          "tool_calls": 4
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:09:40.833Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:35 real processing since admission · 3 hosted calls · 7 tool calls\n\nLast recorded action: event diagnosis · 2026-11-06 09:09:36.550 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "RUNNING",
+          "model_calls": 1,
+          "tool_calls": 3
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:09:52.257Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:47 real processing since admission · 3 hosted calls · 8 tool calls\n\nLast recorded action: event diagnosis · 2026-11-06 09:09:49.210 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "RUNNING",
+          "model_calls": 2,
+          "tool_calls": 4
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:09:55.314Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n0:50 real processing since admission · 4 hosted calls · 8 tool calls\n\nLast recorded action: event diagnosis · 2026-11-06 09:09:49.210 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "RUNNING",
+          "model_calls": 2,
+          "tool_calls": 4
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:10:08.743Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n1:03 real processing since admission · 4 hosted calls · 10 tool calls\n\nLast recorded action: event diagnosis · 2026-11-06 09:10:06.779 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "RUNNING",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:10:13.612Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n1:08 real processing since admission · 5 hosted calls · 11 tool calls\n\nLast recorded action: event diagnosis · 2026-11-06 09:10:06.779 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "WAITING_ON_CHILD",
+          "model_calls": 1,
+          "tool_calls": 0
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "RUNNING",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:10:23.907Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n1:18 real processing since admission · 5 hosted calls · 11 tool calls\n\nLast recorded action: operator response · 2026-11-06 09:10:21.824 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "RUNNING",
+          "model_calls": 2,
+          "tool_calls": 4
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "ABSTAINED",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:10:26.967Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n1:21 real processing since admission · 6 hosted calls · 15 tool calls\n\nLast recorded action: operator response · 2026-11-06 09:10:21.824 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "RUNNING",
+          "model_calls": 2,
+          "tool_calls": 4
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "ABSTAINED",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:10:47.221Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n1:41 real processing since admission · 6 hosted calls · 15 tool calls\n\nLast recorded action: separate grounding critic · 2026-11-06 09:10:45.077 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "RUNNING",
+          "model_calls": 2,
+          "tool_calls": 4
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "ABSTAINED",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:10:50.325Z",
+      "source_seconds": 160,
+      "activity": "Agents investigating · no reviewed report yet\n1:45 real processing since admission · 7 hosted calls · 15 tool calls\n\nLast recorded action: separate grounding critic · 2026-11-06 09:10:45.077 UTC. Only executed public actions are shown.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "RUNNING",
+          "model_calls": 3,
+          "tool_calls": 4
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "ABSTAINED",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-06T09:11:24.694Z",
+      "source_seconds": 160,
+      "activity": "Agent report ready · review findings beyond the detector\n2:14 real processing elapsed · 7 hosted calls · 15 tool calls\n\nAutomatically admitted 2026-11-06 09:09:05.168 UTC · report recorded 2026-11-06 09:11:19.753 UTC. Simulation speed does not accelerate the LLM.\n\nSee agent work ↓",
+      "roles": [
+        {
+          "role": "operator_response",
+          "state": "ABSTAINED",
+          "model_calls": 3,
+          "tool_calls": 4
+        },
+        {
+          "role": "sensor_quality",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "role": "event_diagnosis",
+          "state": "ABSTAINED",
+          "model_calls": 3,
+          "tool_calls": 7
+        }
+      ]
+    }
+  ],
+  "replay_id": "replay-020d4e780ed6af2654b7151c",
+  "root_id": "7e75cffe-860f-569c-ba09-329d1730fea3",
+  "source_seconds": 160,
+  "numerical_hypothesis": "insufficient_evidence",
+  "root_created_at": "2026-11-06T09:09:05.168495Z",
+  "final_state": "ABSTAINED",
+  "error_code": null,
+  "casefile": {
+    "schema_version": "investigation-v1",
+    "task_id": "7e75cffe-860f-569c-ba09-329d1730fea3",
+    "generation_id": "replay-020d4e780ed6af2654b7151c",
+    "snapshot_id": "window-59290e15f1d98f430f2fb9cb9d2921bfc0a7cfb76035d6e5482d23338fe8a402",
+    "question": "Is this a possible leak or an instrumentation issue? Which pipeline section should an integrity engineer inspect first, and which sensors are unreliable?",
+    "mode": "live",
+    "state": "ABSTAINED",
+    "window_start": "2026-01-01T00:01:35+00:00",
+    "window_end": "2026-01-01T00:02:35+00:00",
+    "input_hash": "3453718ec85348fb1251f3f6039395a4ed79e091ef8168030c36dc0b67e99bef",
+    "pack_version": "pressure-pack-v3",
+    "baseline_version": "pressure-median-mad-v2",
+    "parameter_version": "pressure-window-v2",
+    "history_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+    "disposition": "Resolve evidence gaps; location withheld",
+    "hypothesis": null,
+    "inspection": null,
+    "next_action": "Ask the operator to verify operating records.",
+    "interpretation": {
+      "focus": "inspection_rationale",
+      "answer": {
+        "text": "The evidence does not establish a leak or instrumentation fault, and no pipeline section can be prioritized from an accepted location fit. The logged operating change and broad measured pressure reductions make operating context important, but do not exclude a coincident leak. Reviewed P1 sensors show no missing samples, exclusions, spikes, suspected drift or peer disagreement; none is identified as unreliable within this partial review. This does not establish reliability for unreviewed sensors.",
+        "references": [
+          "OP-VALVE-001",
+          "subsea_3139f7994d864d7283df693907dc6afa",
+          "claim-000",
+          "claim-007",
+          "claim-027",
+          "claim-029"
+        ]
+      },
+      "competing_causes": [
+        {
+          "text": "A leak is not established. The pressure pattern alone is not proof, and the operating log explicitly leaves coincident localized behavior possible. Distinguishing a leak requires evidence beyond the broad before/after association; no accepted location is available.",
+          "references": [
+            "claim-027",
+            "OP-VALVE-001",
+            "subsea_3139f7994d864d7283df693907dc6afa"
+          ],
+          "cause": "leak",
+          "stance": "not_established"
+        },
+        {
+          "text": "An operating change is plausible: the executed log records an upstream pressure-control setpoint reduction, and the reviewed comparison shows pressure reductions on different segments and gateways. The log describes a command, not tap measurements, and the comparison explicitly does not establish causation. See the checked numerical evidence rather than treating the association as proof.",
+          "references": [
+            "OP-VALVE-001",
+            "subsea_3139f7994d864d7283df693907dc6afa"
+          ],
+          "cause": "operating_change",
+          "stance": "possible"
+        },
+        {
+          "text": "An instrumentation or telemetry cause is not established. Reviewed P1 health claims lack the listed fault flags, while pressure reductions also appear in the comparison across independent gateways. However, the health review is partial and the evidence is synthetic and uncalibrated; these checks cannot rule out every measurement problem.",
+          "references": [
+            "claim-000",
+            "claim-001",
+            "claim-002",
+            "claim-003",
+            "claim-026",
+            "subsea_3139f7994d864d7283df693907dc6afa"
+          ],
+          "cause": "instrumentation_or_telemetry",
+          "stance": "not_established"
+        }
+      ],
+      "follow_up_questions": [
+        "Can the logged command be verified against actual valve response, rather than acknowledgement alone (OP-VALVE-001)?",
+        "Do the compared pressure histories show localized behavior beyond the broad reduction (subsea_3139f7994d864d7283df693907dc6afa)?",
+        "What sensor-health evidence is available outside the reviewed P1 channels (claim-000, claim-007)?"
+      ]
+    },
+    "checked_claims": [
+      {
+        "id": "claim-000",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 20.307099157452768,
+          "sensor_id": "P1-ST1-A",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-001"
+        ]
+      },
+      {
+        "id": "claim-001",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 20.48037239041456,
+          "sensor_id": "P1-ST1-B",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-003"
+        ]
+      },
+      {
+        "id": "claim-002",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 18.79465359139685,
+          "sensor_id": "P1-ST2-A",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-005"
+        ]
+      },
+      {
+        "id": "claim-003",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 20.279451102032198,
+          "sensor_id": "P1-ST2-B",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-007"
+        ]
+      },
+      {
+        "id": "claim-004",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 18.881305404845364,
+          "sensor_id": "P1-ST3-A",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-009"
+        ]
+      },
+      {
+        "id": "claim-005",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 20.165561421558564,
+          "sensor_id": "P1-ST3-B",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-011"
+        ]
+      },
+      {
+        "id": "claim-006",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 20.47999504795115,
+          "sensor_id": "P1-ST4-A",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-013"
+        ]
+      },
+      {
+        "id": "claim-007",
+        "kind": "sensor_health",
+        "value": {
+          "usable": 60,
+          "channel": "pressure",
+          "missing": 0,
+          "expected": 60,
+          "received": 60,
+          "max_score": 20.99667476039464,
+          "sensor_id": "P1-ST4-B",
+          "spike_count": 0,
+          "anomaly_count": 60,
+          "hard_excluded": 0,
+          "drift_suspected": false,
+          "peer_disagreement": false,
+          "persistence_seconds": 60
+        },
+        "evidence_ids": [
+          "ev-015"
+        ]
+      },
+      {
+        "id": "claim-024",
+        "kind": "coverage",
+        "value": {
+          "unit": "fraction",
+          "coverage": 0.9965277777777778,
+          "usable_samples": 1435,
+          "expected_samples": 1440,
+          "received_samples": 1440,
+          "failure_domains_available": 6
+        },
+        "evidence_ids": [
+          "ev-049"
+        ]
+      },
+      {
+        "id": "claim-026",
+        "kind": "limitation",
+        "value": {
+          "code": "SYNTHETIC_UNCALIBRATED"
+        },
+        "evidence_ids": [
+          "ev-051"
+        ]
+      },
+      {
+        "id": "claim-027",
+        "kind": "limitation",
+        "value": {
+          "code": "PRESSURE_PATTERNS_NOT_PROOF"
+        },
+        "evidence_ids": [
+          "ev-052"
+        ]
+      },
+      {
+        "id": "claim-028",
+        "kind": "limitation",
+        "value": {
+          "code": "OPERATING_CONTEXT_REQUIRED"
+        },
+        "evidence_ids": [
+          "ev-053"
+        ]
+      },
+      {
+        "id": "claim-029",
+        "kind": "limitation",
+        "value": {
+          "code": "COMMON_MODE_PRESSURE_CHANGE"
+        },
+        "evidence_ids": [
+          "ev-054"
+        ]
+      }
+    ],
+    "limitations": [
+      "SYNTHETIC_UNCALIBRATED",
+      "PRESSURE_PATTERNS_NOT_PROOF",
+      "OPERATING_CONTEXT_REQUIRED",
+      "COMMON_MODE_PRESSURE_CHANGE",
+      "partial_health_review",
+      "location_withheld",
+      "child_abstained"
+    ],
+    "sources": [
+      {
+        "document": {
+          "id": "OP-VALVE-001",
+          "body": "Fictional, nonconfidential executed operating log. At 2026-01-01T00:01:30Z (synthetic second 90), the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar. Execution was acknowledged at second 100 and the log became available at second 110. Hydraulic scope is Trunk P1 and downstream Branch A P2 and Branch B P3, all four stations on each segment. This entry records a commanded change, not measured pressure at the taps. Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded.",
+          "type": "operation",
+          "title": "Executed upstream valve pressure-setpoint change at second 90",
+          "status": "approved",
+          "revision": 1,
+          "asset_ids": [
+            "northsea",
+            "P1",
+            "P2",
+            "P3"
+          ],
+          "admissible": true,
+          "supersedes": null,
+          "authored_at": "2026-01-01T00:01:40Z",
+          "available_at": "2026-01-01T00:01:50Z",
+          "content_hash": "e7354ee885649f39c1876c925b9c75dbef234e9a92fe15fed7e367da20308e46",
+          "effective_to": null,
+          "effective_from": "2026-01-01T00:01:30Z"
+        },
+        "use": "cited"
+      }
+    ],
+    "comparisons": [
+      {
+        "as_of": "2026-01-01T00:02:40+00:00",
+        "caveat": "Before/after association is not a causal test; missing periods stay unknown.",
+        "intent": "test_operating_change",
+        "sensors": [
+          {
+            "sensor_id": "P1-ST1-A",
+            "change_bar": -0.7244,
+            "segment_id": "P1",
+            "after_usable": 65,
+            "before_usable": 30,
+            "after_expected": 65,
+            "failure_domain": "gateway-P1-0",
+            "before_expected": 30,
+            "after_median_bar": 79.161,
+            "invalid_received": 0,
+            "before_median_bar": 79.8854
+          },
+          {
+            "sensor_id": "P2-ST2-A",
+            "change_bar": -0.7191,
+            "segment_id": "P2",
+            "after_usable": 65,
+            "before_usable": 30,
+            "after_expected": 65,
+            "failure_domain": "gateway-P2-1",
+            "before_expected": 30,
+            "after_median_bar": 78.1584,
+            "invalid_received": 0,
+            "before_median_bar": 78.8775
+          },
+          {
+            "sensor_id": "P3-ST3-A",
+            "change_bar": -0.7522,
+            "segment_id": "P3",
+            "after_usable": 65,
+            "before_usable": 30,
+            "after_expected": 65,
+            "failure_domain": "gateway-P3-0",
+            "before_expected": 30,
+            "after_median_bar": 77.9503,
+            "invalid_received": 0,
+            "before_median_bar": 78.7026
+          }
+        ],
+        "input_hash": "156eca56a4faee888a496f610f98660f19341cb4afa46dac97f77017271fa31f",
+        "end_seconds": 155,
+        "split_seconds": 90,
+        "start_seconds": 60,
+        "corpus_version": "2169b891e69d287e42b57183085db3c8bf099c6402bd955b4fa7d5acf8ba0331",
+        "investigation_step": 6,
+        "call_id": "subsea_3139f7994d864d7283df693907dc6afa"
+      }
+    ],
+    "steps": [
+      {
+        "task_id": "6cd86390-dfb2-57f4-9b20-c512ce3fff06",
+        "call_id": "subsea_0000bf5f5e2946619719ed73ca8ed886",
+        "tool": "history.search",
+        "intent": "test_operating_change",
+        "arguments": {
+          "query": "pressure compressor valve operation maintenance",
+          "intent": "test_operating_change",
+          "site_id": "northsea",
+          "asset_ids": [
+            "P1",
+            "P2",
+            "P3"
+          ],
+          "snapshot_id": "window-59290e15f1d98f430f2fb9cb9d2921bfc0a7cfb76035d6e5482d23338fe8a402",
+          "pack_version": "pressure-pack-v3",
+          "baseline_version": "pressure-median-mad-v2",
+          "parameter_version": "pressure-window-v2"
+        },
+        "error": null,
+        "sequence": 4
+      },
+      {
+        "task_id": "6cd86390-dfb2-57f4-9b20-c512ce3fff06",
+        "call_id": "subsea_2b63b945b3a54287bd8363e81fa63e2e",
+        "tool": "history.read",
+        "intent": "test_operating_change",
+        "arguments": {
+          "intent": "test_operating_change",
+          "site_id": "northsea",
+          "snapshot_id": "window-59290e15f1d98f430f2fb9cb9d2921bfc0a7cfb76035d6e5482d23338fe8a402",
+          "document_ids": [
+            "OP-VALVE-001"
+          ],
+          "pack_version": "pressure-pack-v3",
+          "baseline_version": "pressure-median-mad-v2",
+          "parameter_version": "pressure-window-v2"
+        },
+        "error": null,
+        "sequence": 5
+      },
+      {
+        "task_id": "6cd86390-dfb2-57f4-9b20-c512ce3fff06",
+        "call_id": "subsea_3139f7994d864d7283df693907dc6afa",
+        "tool": "history.compare",
+        "intent": "test_operating_change",
+        "arguments": {
+          "intent": "test_operating_change",
+          "site_id": "northsea",
+          "sensor_ids": [
+            "P1-ST1-A",
+            "P2-ST2-A",
+            "P3-ST3-A"
+          ],
+          "end_seconds": 155,
+          "snapshot_id": "window-59290e15f1d98f430f2fb9cb9d2921bfc0a7cfb76035d6e5482d23338fe8a402",
+          "pack_version": "pressure-pack-v3",
+          "split_seconds": 90,
+          "start_seconds": 60,
+          "baseline_version": "pressure-median-mad-v2",
+          "parameter_version": "pressure-window-v2"
+        },
+        "error": null,
+        "sequence": 6
+      }
+    ],
+    "reused_task_ids": [],
+    "fresh_model_calls": 7,
+    "fresh_tool_calls": 15,
+    "recorded_elapsed_seconds": 134.585431,
+    "report_target_seconds": 300,
+    "report_target_met": true,
+    "interpretation_review": {
+      "protocol": "grounding-v1",
+      "source_hash": "7cb50b5a130924ca9cf0971028d555aaaf375a1f7063037ebe94869056c85e07",
+      "rounds": [
+        {
+          "candidate_hash": "ac0dd718ee227412433e610ca4b8591a17b31ab0b8487c99c147c18b38315816",
+          "assessment": {
+            "decision": "accept",
+            "checks": [
+              {
+                "paragraph_id": "answer",
+                "verdict": "supported",
+                "reason": "Preserves the insufficient-evidence outcome and withheld location, accurately summarizes the bounded P1 health findings, and does not exclude a coincident leak or generalize reliability to unreviewed sensors.",
+                "support": [
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "coincident localized behavior is not excluded."
+                  },
+                  {
+                    "reference": "claim-000",
+                    "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0, \"max_score\": 20.307099157452768, \"missing\": 0, \"peer_disagreement\": false"
+                  },
+                  {
+                    "reference": "claim-007",
+                    "quote": "\"missing\": 0, \"peer_disagreement\": false, \"persistence_seconds\": 60.0, \"received\": 60, \"sensor_id\": \"P1-ST4-B\", \"spike_count\": 0, \"usable\": 60"
+                  },
+                  {
+                    "reference": "subsea_3139f7994d864d7283df693907dc6afa",
+                    "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                  }
+                ]
+              },
+              {
+                "paragraph_id": "cause:leak",
+                "verdict": "supported",
+                "reason": "Correctly treats pressure patterns as insufficient proof, retains the possibility of localized behavior, and respects the withheld location.",
+                "support": [
+                  {
+                    "reference": "claim-027",
+                    "quote": "PRESSURE_PATTERNS_NOT_PROOF"
+                  },
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "coincident localized behavior is not excluded."
+                  },
+                  {
+                    "reference": "subsea_3139f7994d864d7283df693907dc6afa",
+                    "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                  }
+                ]
+              },
+              {
+                "paragraph_id": "cause:operating_change",
+                "verdict": "supported",
+                "reason": "The log records a setpoint command, and the comparison shows reductions on three segments with distinct gateway domains. The paragraph appropriately avoids claiming actual valve movement or proven causation.",
+                "support": [
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "the upstream pressure-control valve setpoint was reduced from 80.0 to 79.25 bar."
+                  },
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "This entry records a commanded change, not measured pressure at the taps."
+                  },
+                  {
+                    "reference": "subsea_3139f7994d864d7283df693907dc6afa",
+                    "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                  }
+                ]
+              },
+              {
+                "paragraph_id": "cause:instrumentation_or_telemetry",
+                "verdict": "supported",
+                "reason": "Accurately distinguishes absent listed health flags from established sensor reliability. Distinct gateway comparison results do not eliminate instrumentation problems, and the synthetic, uncalibrated limitation is retained.",
+                "support": [
+                  {
+                    "reference": "claim-000",
+                    "quote": "\"missing\": 0, \"peer_disagreement\": false"
+                  },
+                  {
+                    "reference": "claim-003",
+                    "quote": "\"drift_suspected\": false, \"expected\": 60, \"hard_excluded\": 0"
+                  },
+                  {
+                    "reference": "claim-026",
+                    "quote": "SYNTHETIC_UNCALIBRATED"
+                  },
+                  {
+                    "reference": "subsea_3139f7994d864d7283df693907dc6afa",
+                    "quote": "Before/after association is not a causal test; missing periods stay unknown."
+                  }
+                ]
+              },
+              {
+                "paragraph_id": "question:0",
+                "verdict": "supported",
+                "reason": "Relevant read-only verification request that distinguishes command acknowledgement from actual valve response without inventing measured movement.",
+                "support": [
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "Execution was acknowledged at second 100"
+                  },
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "This entry records a commanded change, not measured pressure at the taps."
+                  }
+                ]
+              },
+              {
+                "paragraph_id": "question:1",
+                "verdict": "supported",
+                "reason": "Requests examination of localized behavior without presuming it exists; this directly addresses the operating log's unresolved alternative.",
+                "support": [
+                  {
+                    "reference": "OP-VALVE-001",
+                    "quote": "Expected broad pressure response remains a hypothesis to compare against actual pre/post pressure histories from independent gateways; coincident localized behavior is not excluded."
+                  }
+                ]
+              },
+              {
+                "paragraph_id": "question:2",
+                "verdict": "supported",
+                "reason": "Appropriate request for additional health evidence beyond the explicitly partial P1 review; it does not assert faults in unreviewed channels.",
+                "support": [
+                  {
+                    "reference": "claim-000",
+                    "quote": "\"sensor_id\": \"P1-ST1-A\""
+                  },
+                  {
+                    "reference": "claim-007",
+                    "quote": "\"sensor_id\": \"P1-ST4-B\""
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provider_cost_usd": null,
+    "authority": "For engineer review, not engineer-approved. No leak clearance, dispatch or control. Model-written explanations require source review; citations do not prove entailment."
+  },
+  "checks": {
+    "automatic_live": true,
+    "elapsed_moves_while_source_paused": true,
+    "source_held_constant": true,
+    "inline_receipts_without_agents_tab": true,
+    "accepted_exact_grounding": true,
+    "mobile_no_overflow": true,
+    "no_page_errors": true,
+    "critic_phase_visible": true
+  },
+  "completed_at": "2026-11-06T09:11:25.055Z"
+}

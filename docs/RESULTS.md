@@ -1,5 +1,50 @@
 # Qualification results
 
+## Buyer-visible agent work
+
+The buyer audit reproduced the problem: an inspection interval appeared before
+the LLM completed, while actual source checks and specialist handoffs were hidden
+in the Agents workspace. The default Live view now separates numerical results
+from an automatically triggered investigation with a real elapsed clock,
+three specialist status/handoff cards, actual search intent and keywords,
+opened records, measured comparisons, source-backed quotes, competing causes,
+critic outcome and an engineer verification question. A stable activity strip
+above the map links directly to the work; raw processing timestamps remain
+available without expanding all diagnostics by default.
+
+Automatic receipt reads are generation/task/basis scoped and coalesced. A
+mismatched input hash withholds the displayed source findings without clearing
+the detector warning. Browsing a source stays open across unchanged projections.
+No inference, simulation time, source review or findings are manufactured by
+the UI.
+
+The initial focused browser run passed six of seven journeys; its failure
+incorrectly assumed the scripted fixture supplied three competing causes.
+The UI correctly showed the one actually recorded. The assertion now compares
+with the exact handoff, and that journey passed on rerun. Receipts:
+`evidence\buyer-agent-ui-initial.xml` and `evidence\buyer-agent-ui.xml`.
+TypeScript and the production build passed.
+
+A **fresh automatic hosted S4** investigation then completed in **134.59s,
+seven model calls**, with accepted grounding. The numerical result remained
+`insufficient_evidence`, with physical abstention and no inspection location.
+The investigation agent independently searched, read and cited **OP-VALVE-001**
+and executed a measured pressure comparison. It assessed an operating change
+as plausible, requested operating-record verification, and did not exclude a
+coincident leak. This contextual finding is not supplied by the detector alone.
+The live UI showed elapsed processing while source time remained paused,
+actual specialist progress and the separate grounding-critic phase, then the
+inline source-backed findings without visiting Agents. Mobile overflow and
+browser-error checks passed. Evidence: `evidence\buyer-agent-live.json`;
+screenshots: `assets\agent-work-live-running.png` and
+`assets\agent-work-live-findings.png`.
+
+Buyer decision: this supports an instrumented **read-only pilot**, not a
+production-safety purchase or proven labor-saving claim. Partial health review,
+incomplete operating records, synthetic physics and same-model criticism remain
+explicit limitations. A larger topology is a separate workload demonstration,
+not evidence that LLMs outperform numerical detection.
+
 ## Two customer workflows, not two inference settings
 
 The customer-facing selector now has exactly two choices:
