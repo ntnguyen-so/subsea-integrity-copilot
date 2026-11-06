@@ -1,5 +1,39 @@
 # Qualification results
 
+## Light theme and consistent sensor meanings
+
+The readability review replaced the dark palette with white panels, dark text
+and larger labels. Matching SVG legend symbols now use the map's actual marker
+classes rather than a triangle that the map never drew. Individual threshold
+excursions appear amber on both map and trend, even without a qualifying event.
+Quality concerns have a red cross, selection an independent blue ring,
+missing/excluded readings a dashed outline, and unassessed instruments a grey
+fill rather than an apparently usable green marker. The instrument table keeps
+pressure anomalies alongside missing/quality conditions. These are evidence
+flags, not confirmed physical diagnoses.
+
+The three-area default remains; chart headings and keys share a row when space
+permits, and the instrument list scrolls rather than reducing text size. A long
+hosted conclusion can extend below the first viewport: the preserved report's
+assessment starts at 868.25px and ends at 1145.20px at 1600x1100. This deliberately
+preserves readable, untruncated uncertainty instead of promising all report
+lengths fit one screen.
+
+The preserved genuine hosted S1 result was reviewed read-only across Live,
+Agents, raw Evidence and Audit. Its original P1 200-600m handoff and accepted
+critic record remained accessible, with no browser errors. Evidence:
+`evidence\dashboard-light-hosted-review.json`. No new inference was requested;
+this is not a new model-performance evaluation or a human-usability study.
+
+All **22 offline browser journeys passed** in 11.9 minutes. Focused additions
+check real S1 map/chart/legend color correspondence and representative text
+contrast of at least 4.5:1, real S2 quality-cross correspondence, and all 24 grey
+unassessed markers during warm-up. Existing geometry, comparison, live/pinned
+evidence, timestamps, failure withholding, keyboard, mobile, report-review and
+warning workflows also passed. TypeScript and the production UI build passed.
+Evidence: `evidence\dashboard-light-browser.xml`. The contrast checks cover the
+named rendered elements, not a complete accessibility certification.
+
 ## Simplified default overview
 
 The default dashboard now prioritizes three areas: **pipeline map, selected sensor
@@ -13,8 +47,10 @@ The compact-overview browser check requires the primary areas to fit a
 historical evidence. A separate read-only check opened the previously qualified
 hosted S1 result, inspected the actual anomaly trend and reviewed the exact
 original handoff and accepted critic record. Its assessment panel ended at
-1090.22px. Evidence: `evidence\dashboard-simplified-hosted-review.json` and the
-updated [actual dashboard screenshot](assets/engineer-dashboard-live.png).
+1090.22px in that earlier compact theme. Evidence:
+`evidence\dashboard-simplified-hosted-review.json`. The
+[actual dashboard screenshot](assets/engineer-dashboard-live.png) now shows the
+subsequent light-theme review described above.
 This did not generate new inference or change the detection/agent pipeline.
 Screen-fit checks are not a human-usability study.
 

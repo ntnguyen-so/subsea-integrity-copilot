@@ -476,6 +476,17 @@ function renderEpisodes(): void {
   }
   if (!projection.episodes.length) list.append(node("p", "No episode recorded in this generation.", "empty"));
 }
+function sensorFlags(window: WindowSnapshot | null, id: string): { assessed: boolean; missing: boolean; quality: boolean; anomaly: boolean; support: boolean } {
+  const findings = window?.quality.findings.filter(finding => finding.sensor_id === id) || [];
+  const assessed = Boolean(window && window.quality.status !== "WARMING_UP" && findings.length);
+  return {
+    assessed,
+    missing: assessed && findings.some(finding => finding.missing > 0 || finding.hard_excluded > 0),
+    quality: assessed && findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement),
+    anomaly: assessed && findings.some(finding => finding.anomaly_count > 0),
+    support: assessed && Boolean(window?.event.supporting_sensor_ids.includes(id)),
+  };
+}
 function renderMap(): void {
   if (!projection) return;
   const map = document.getElementById("topology");
@@ -492,8 +503,8 @@ function renderMap(): void {
   const scale = Math.min(650 / Math.max(xmax - xmin, 1), 390 / Math.max(ymax - ymin, 1));
   const project = (point: Point): Point => ({ x: 55 + (point.x - xmin) * scale + (650 - (xmax - xmin) * scale) / 2, y: 65 + (ymax - point.y) * scale + (390 - (ymax - ymin) * scale) / 2 });
   map.replaceChildren(svg("title", {}, "Synthetic pipeline network; sensor health and event support encoded separately"));
-  for (let xx = 40; xx < 760; xx += 40) map.append(svg("line", { x1: xx, y1: 30, x2: xx, y2: 490, stroke: "#242a22", "stroke-width": 1 }));
-  for (let yy = 30; yy < 510; yy += 40) map.append(svg("line", { x1: 30, y1: yy, x2: 730, y2: yy, stroke: "#242a22", "stroke-width": 1 }));
+  for (let xx = 40; xx < 760; xx += 40) map.append(svg("line", { x1: xx, y1: 30, x2: xx, y2: 490, stroke: "var(--grid)", "stroke-width": 1 }));
+  for (let yy = 30; yy < 510; yy += 40) map.append(svg("line", { x1: 30, y1: yy, x2: 730, y2: yy, stroke: "var(--grid)", "stroke-width": 1 }));
   for (const segment of pack.segments) {
     const coords = segment.points.map(project);
     map.append(svg("polyline", { points: coords.map(point => `${point.x},${point.y}`).join(" "), class: "pipe", "data-segment-id": segment.id }));
@@ -533,15 +544,15 @@ function renderMap(): void {
         position.y = stationPosition.y + side * (b.x - a.x) / length * 11;
       }
     }
-    const findings = window?.quality.findings.filter(finding => finding.sensor_id === sensor.id) || [];
-    const missing = findings.some(finding => finding.missing > 0 || finding.hard_excluded > 0);
-    const fault = findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement);
-    const support = window?.event.supporting_sensor_ids.includes(sensor.id) || false;
+    const flags = sensorFlags(window, sensor.id);
+    const { missing, quality: fault, support } = flags;
     const selected = selectedSensorId === sensor.id || evidence?.sensor_id === sensor.id;
-    const health = !window ? "Health not yet reported" : !findings.length ? "No quality findings reported" : `${missing ? "Missing or excluded channel readings" : "Usable coverage"}${fault ? "; spikes or drift suspected" : ""}`;
-    const group = svg("g", { class: `sensor${missing ? " missing" : ""}${fault ? " fault" : ""}${support ? " support" : ""}${selected ? " selected" : ""}`, role: "button", tabindex: 0, "aria-label": `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Event supporting sensor." : "No event support recorded."}`, "aria-pressed": String(selectedSensorId === sensor.id), "data-sensor": sensor.id });
+    const health = !flags.assessed ? "Not assessed" : `${missing ? "Missing or excluded readings" : "Usable coverage"}${flags.anomaly ? "; pressure threshold excursions" : ""}${fault ? "; quality concern: spikes, drift or paired disagreement" : ""}`;
+    const group = svg("g", { class: `sensor${!flags.assessed ? " unknown" : ""}${flags.anomaly ? " anomalous" : ""}${missing ? " missing" : ""}${fault ? " fault" : ""}${support ? " support" : ""}${selected ? " selected" : ""}`, role: "button", tabindex: 0, "aria-label": `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Event supporting sensor." : "No event support recorded."}`, "aria-pressed": String(selectedSensorId === sensor.id), "data-sensor": sensor.id });
     if (support) group.append(svg("rect", { x: position.x - 11, y: position.y - 11, width: 22, height: 22, transform: `rotate(45 ${position.x} ${position.y})`, class: "support-ring" }));
-    group.append(svg("circle", { cx: position.x, cy: position.y, r: 6 }));
+    group.append(svg("circle", { cx: position.x, cy: position.y, r: 6, class: "sensor-dot" }));
+    if (selected) group.append(svg("circle", { cx: position.x, cy: position.y, r: 10, class: "selection-ring" }));
+    if (fault) group.append(svg("path", { d: `M${position.x - 3} ${position.y - 3}L${position.x + 3} ${position.y + 3}M${position.x - 3} ${position.y + 3}L${position.x + 3} ${position.y - 3}`, class: "quality-mark" }));
     const labelOnLeft = sensor.segment_id === "P2";
     if (sensor.id.endsWith(labelOnLeft ? "-B" : "-A")) {
       group.append(svg("text", { x: stationPosition.x + (labelOnLeft ? -27 : 27), y: stationPosition.y + 4,
@@ -583,6 +594,7 @@ function renderSensorList(): void {
   head.append(headings); table.append(head, body);
   for (const sensor of [...projection.pack.sensors].sort((a, b) => rank(b.id) - rank(a.id) || a.id.localeCompare(b.id))) {
     const finding = findings.get(sensor.id), row = node("tr", "", selectedSensorId === sensor.id ? "highlight" : "");
+    const flags = sensorFlags(window, sensor.id);
     const compareCell = node("td"), checkbox = node("input");
     checkbox.type = "checkbox"; checkbox.checked = comparisonSensorIds.has(sensor.id);
     checkbox.disabled = !checkbox.checked && comparisonSensorIds.size >= 4;
@@ -596,14 +608,14 @@ function renderSensorList(): void {
     open.setAttribute("aria-label", `Trend ${sensor.id}`); open.setAttribute("aria-pressed", String(selectedSensorId === sensor.id));
     sensorCell.append(open);
     const conditions = [
-      supporting.has(sensor.id) ? "Overlapping pressure drop" : "",
+      flags.support ? "Overlapping pressure drop" : flags.anomaly ? "Pressure anomaly" : "",
       finding?.spike_count ? "Spikes" : "",
       finding?.drift_suspected ? "Drift suspected" : "",
       finding?.peer_disagreement ? "Paired disagreement" : "",
       finding?.missing ? `${finding.missing} missing` : "",
       finding?.hard_excluded ? `${finding.hard_excluded} excluded` : "",
     ].filter(Boolean);
-    const condition = !window || window.quality.status === "WARMING_UP" ? "Warming up / not assessed"
+    const condition = !flags.assessed ? "Warming up / not assessed"
       : conditions.join("; ") || (finding?.anomaly_count ? "Pressure anomaly" : "No flagged anomaly");
     row.append(compareCell, sensorCell, node("td", condition), node("td", finding ? String(finding.anomaly_count) : "—"), node("td", finding ? `${finding.usable} / ${finding.expected}` : "—"));
     body.append(row);

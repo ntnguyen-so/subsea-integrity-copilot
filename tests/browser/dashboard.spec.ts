@@ -273,6 +273,93 @@ test("default view prioritizes map, trend and assessment while optional tools st
   await page.screenshot({ path: "runtime/dashboard-simplified-desktop.png", fullPage: true });
 });
 
+test("light theme has readable contrast and the map, chart and legend agree on pressure anomalies", async ({ page }) => {
+  const { id } = await prepare(page, "S1", 37);
+  const projection: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+  await page.getByRole("button", { name: "Trend P1-ST2-A", exact: true }).click();
+  await expect(page.locator("#channel-charts [data-anomaly=true]")).not.toHaveCount(0);
+  await expect(page.locator("#topology .sensor.selected")).toHaveCount(1);
+  const selected = page.locator('#topology [data-sensor="P1-ST2-A"]');
+  await expect(selected).toHaveClass(/anomalous/);
+  await expect(selected.locator(".selection-ring")).toBeVisible();
+  const styles = await page.evaluate(() => {
+    const color = (selector: string, property: string): string => getComputedStyle(document.querySelector(selector)!).getPropertyValue(property);
+    return {
+      dot: color('#topology [data-sensor="P1-ST2-A"] .sensor-dot', "fill"),
+      legend: color('#map-legend [data-legend="anomaly"] .sensor-dot', "fill"),
+      sample: color('#channel-charts circle[data-anomaly="true"]', "fill"),
+      plotLegend: color('#channel-charts [data-legend="anomaly"] .legend-mark', "background-color"),
+      selected: color('#topology [data-sensor="P1-ST2-A"] .selection-ring', "stroke"),
+      selectedLegend: color('#map-legend [data-legend="selected"] .selection-ring', "stroke"),
+    };
+  });
+  expect(new Set([styles.dot, styles.legend, styles.sample, styles.plotLegend]).size).toBe(1);
+  expect(styles.selected).toBe(styles.selectedLegend);
+  expect(styles.selected).not.toBe(styles.dot);
+  for (const finding of projection.latest_window!.quality.findings) {
+    const marker = page.locator(`#topology [data-sensor="${finding.sensor_id}"]`);
+    if (finding.anomaly_count > 0) await expect(marker).toHaveClass(/anomalous/);
+    if (finding.missing || finding.hard_excluded) await expect(marker).toHaveClass(/missing/);
+  }
+  const contrast = await page.evaluate(() => {
+    const rgb = (value: string): number[] => value.match(/[\d.]+/g)!.map(Number);
+    const luminance = (channels: number[]): number => channels.slice(0, 3).map(v => {
+      const s = v / 255; return s <= .04045 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4;
+    }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+    const selectors = ["#automatic-conclusion", "#trend-basis", ".sensor-list button", ".sensor-list td",
+      "#source-clock", "#automatic-state", "#map-legend span", ".chart-legend span", "#topology .station-label", ".chart svg text"];
+    return selectors.map(selector => {
+      const element = document.querySelector(selector)!;
+      const style = getComputedStyle(element);
+      let background = [255, 255, 255];
+      for (let ancestor: Element | null = element; ancestor; ancestor = ancestor.parentElement) {
+        const candidate = rgb(getComputedStyle(ancestor).backgroundColor);
+        if (candidate.length === 3 || candidate[3] === 1) { background = candidate; break; }
+      }
+      const foreground = rgb(element instanceof SVGElement ? style.fill : style.color);
+      const a = luminance(foreground), b = luminance(background);
+      return { selector, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) };
+    });
+  });
+  for (const item of contrast) expect(item.ratio, item.selector).toBeGreaterThanOrEqual(4.5);
+  await page.screenshot({ path: "runtime/dashboard-light-desktop.png", fullPage: true });
+});
+
+test("quality concerns use the same red cross in the legend and map, not the pressure-anomaly symbol", async ({ page }) => {
+  const { id } = await prepare(page, "S2", 37);
+  const projection: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+  const quality = projection.latest_window!.quality.findings.filter(f => f.spike_count || f.drift_suspected || f.peer_disagreement);
+  expect(quality.length).toBeGreaterThan(0);
+  await expect(page.locator("#topology .sensor.fault .quality-mark")).toHaveCount(quality.length);
+  const sensor = quality[0].sensor_id;
+  await page.getByRole("button", { name: `Trend ${sensor}`, exact: true }).click();
+  await expect(page.locator(`#topology [data-sensor="${sensor}"] .quality-mark`)).toBeVisible();
+  const colors = await page.evaluate(id => {
+    const stroke = (selector: string): string => getComputedStyle(document.querySelector(selector)!).stroke;
+    return [
+      stroke(`#topology [data-sensor="${id}"] .quality-mark`),
+      stroke('#map-legend [data-legend="quality"] .quality-mark'),
+      getComputedStyle(document.querySelector('#map-legend [data-legend="anomaly"] .sensor-dot')!).fill,
+    ];
+  }, sensor);
+  expect(colors[0]).toBe(colors[1]);
+  expect(colors[0]).not.toBe(colors[2]);
+});
+
+test("unassessed sensors are grey rather than apparently healthy during warm-up", async ({ page }) => {
+  await prepare(page, "S6", 2);
+  await expect(page.locator("#topology .sensor.unknown")).toHaveCount(24);
+  await expect(page.locator("#topology .sensor.anomalous, #topology .sensor.fault, #topology .sensor.support")).toHaveCount(0);
+  await expect(page.locator("#sensor-list")).toContainText("not assessed");
+  const colors = await page.evaluate(() => [
+    getComputedStyle(document.querySelector('#topology .sensor-dot')!).stroke,
+    getComputedStyle(document.querySelector('#map-legend [data-legend="unknown"] .sensor-dot')!).stroke,
+    getComputedStyle(document.querySelector('#map-legend [data-legend="normal"] .sensor-dot')!).stroke,
+  ]);
+  expect(colors[0]).toBe(colors[1]);
+  expect(colors[0]).not.toBe(colors[2]);
+});
+
 test("LIVE automatic investigation completes while independent monitoring and manual review continue", async ({ page }) => {
   test.skip(process.env.SUBSEA_QUALIFY_DASHBOARD_LIVE !== "1", "Opt in explicitly; this consumes hosted inference.");
   test.setTimeout(420_000);

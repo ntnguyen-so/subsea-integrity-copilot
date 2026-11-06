@@ -57,6 +57,14 @@ engineer questions, detection criteria and system diagnostics expand only when
 needed. Comparisons appear after selecting them; full reports open in Agents,
 not as a second answer beneath the live dashboard.
 
+The light theme uses matching map and chart meanings: **amber** marks individual
+pressure anomalies, a **red cross** marks a quality concern, a **blue ring**
+selects the graphed instrument, and grey-filled markers are **not assessed**.
+Dashed sensor outlines show missing/excluded readings; amber diamonds show
+correlated-drop support. These flags can coexist and are not confirmed leak or
+hardware-failure diagnoses. Chart keys separately identify pressure, baseline
+thresholds and missing-data bands; map, table and trend retain the same window.
+
 1. Choose **S1**, open **Run settings** and select **COPILOT HOSTED** for a genuine LLM demonstration
    (**SCRIPTED** is explicitly an offline contract example). Create a generation,
    select 10x speed and Play. The continuously updated UTC clock comes from the

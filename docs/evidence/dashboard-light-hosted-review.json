@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "mode": "recorded LIVE; no new inference",
+  "replay_id": "replay-d3b3f17e96acb18f2b411af0",
+  "task_id": "85b3621e-786a-56d6-a4bf-aeabd284d1f4",
+  "viewport": {
+    "width": 1600,
+    "height": 1100
+  },
+  "assessment_bounds": {
+    "top": 868.25,
+    "bottom": 1145.203125
+  },
+  "checks": {
+    "manual_anomaly_trend": true,
+    "optional_tools_collapsed": true,
+    "exact_original_handoff": true,
+    "accepted_grounding_review": true,
+    "raw_evidence": true,
+    "audit_view": true,
+    "no_browser_errors": true
+  },
+  "limitations": [
+    "Read-only review of the previously qualified hosted report; not a new inference attempt or a human usability study."
+  ]
+}

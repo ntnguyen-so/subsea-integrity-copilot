@@ -9,7 +9,8 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
   const end = Date.parse(window.window_end);
   for (const channel of sensor.channels) {
     const section = node("section", "", "chart");
-    section.append(node("h3", labels[channel]));
+    const heading = node("div", "", "chart-heading");
+    heading.append(node("h3", labels[channel]));
     const records = observations.filter(o => o.channel === channel && Date.parse(o.observed_at) >= start && Date.parse(o.observed_at) < end)
       .sort((a, b) => Date.parse(a.observed_at) - Date.parse(b.observed_at));
     const usable = records.filter(o => o.validity === "usable" && o.value !== null);
@@ -29,7 +30,7 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
     const min = low - padding, max = high + padding;
     const x = (timestamp: number): number => 48 + (timestamp - start) / (end - start) * 296;
     const y = (value: number): number => 128 - (value - min) / (max - min) * 108;
-    for (const value of band) chart.append(svg("line", { x1: 48, x2: 344, y1: y(value), y2: y(value), stroke: "#d5a74a", "stroke-dasharray": "4 3" }));
+    for (const value of band) chart.append(svg("line", { x1: 48, x2: 344, y1: y(value), y2: y(value), class: "threshold", stroke: "var(--sample-alert)", "stroke-dasharray": "4 3" }));
     for (let index = 0; index < 3; index++) {
       const yy = 20 + index * 54;
       chart.append(svg("line", { x1: 48, x2: 344, y1: yy, y2: yy, class: "grid" }));
@@ -56,7 +57,7 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
       const connected = previousUsable && previous !== null && ts > previous && ts - previous <= step * 1.5;
       path += `${connected ? "L" : "M"}${x(ts).toFixed(2)},${y(record.value).toFixed(2)} `;
       const anomalous = band.length === 2 && (record.value < band[0] || record.value > band[1]);
-      chart.append(svg("circle", { cx: x(ts), cy: y(record.value), r: anomalous ? 2.5 : 1.7, fill: anomalous ? "#f47a69" : "var(--cyan)", "data-anomaly": String(anomalous) }));
+      chart.append(svg("circle", { cx: x(ts), cy: y(record.value), r: anomalous ? 2.5 : 1.7, fill: anomalous ? "var(--sample-alert)" : "var(--cyan)", "data-anomaly": String(anomalous) }));
       previous = ts;
       previousUsable = true;
     }
@@ -64,8 +65,24 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
     chart.append(svg("text", { x: 48, y: 149 }, new Date(start).toISOString().slice(11, 19)));
     chart.append(svg("text", { x: 344, y: 149, "text-anchor": "end" }, `${new Date(end).toISOString().slice(11, 19)} UTC`));
     if (!values.length) chart.append(svg("text", { x: 196, y: 78, "text-anchor": "middle" }, "No usable measurements"));
-    section.append(chart, node("p", `${unit} · ${usable.length} usable / ${records.length} received · ${gaps} gap interval${gaps === 1 ? "" : "s"}. Full values and original source timestamps in Evidence.`));
-    if (band.length) section.append(node("p", "Lightweight median/MAD detector: amber dashed normal-band thresholds; red points are per-sensor anomaly alerts, not leak diagnoses."));
+    const legend = node("div", "", "chart-legend");
+    legend.setAttribute("aria-label", "Pressure chart legend");
+    const entry = (key: string, label: string): void => {
+      const item = node("span");
+      item.dataset.legend = key;
+      const icon = node("i", "", `legend-mark ${key}`);
+      icon.setAttribute("aria-hidden", "true");
+      item.append(icon, document.createTextNode(label)); legend.append(item);
+    };
+    entry("pressure", "Pressure");
+    if (band.length) {
+      entry("anomaly", "Outside baseline");
+      entry("baseline", "Baseline limits");
+    }
+    entry("missing", "Missing data");
+    heading.append(legend);
+    section.append(heading, chart, node("p", `${unit} · ${usable.length} usable / ${records.length} received · ${gaps} gap interval${gaps === 1 ? "" : "s"}. Original samples in Evidence.`));
+    if (band.length) section.append(node("p", "Amber points are individual pressure anomalies, not leak diagnoses or sensor-fault classifications."));
     container.append(section);
   }
 }
