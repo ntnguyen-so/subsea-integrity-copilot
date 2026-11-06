@@ -58,17 +58,19 @@ def fixed_history_baseline(
     reader = FixedReader(store)
 
     def read(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        arguments = {"intent": "seek_counterevidence", **arguments}
         result = read_history(
             reader,
             diagnosis,
             snapshot,
             name,
-            {"intent": "seek_counterevidence", **arguments},
+            arguments,
         )
         reader.reads.append(
             {
                 "call_id": f"fixed-policy-{len(reader.reads) + 1}",
                 "name": name,
+                "arguments": arguments,
                 "result": result,
                 "error": None,
             }
@@ -154,6 +156,7 @@ def fixed_history_baseline(
         "comparison": comparison,
         "guard_error": guard_error,
         "tool_reads": len(reader.reads),
+        "receipts": reader.reads,
         "model_calls": 0,
         "document_types": [document["type"] for document in documents],
         "limitation": (

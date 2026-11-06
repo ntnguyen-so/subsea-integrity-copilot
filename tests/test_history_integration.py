@@ -160,6 +160,35 @@ def test_context_changes_investigation_without_overriding_numerical_uncertainty(
     assert "concurrent leak is not ruled out" in cases["S4"][2].answer
 
 
+def test_operations_audit_checks_actual_handoffs_review_and_provenance(investigated):
+    from subsea_copilot.operations_evaluation import audit_operations
+
+    store, cases, _ = investigated
+    for _, snapshot, root, _ in cases.values():
+        audit = audit_operations(store, root, snapshot)
+        assert all(audit["checks"].values()), audit["checks"]
+        assert audit["fresh_model_calls"] == len(audit["model_receipts"])
+        assert audit["critic_decisions"] == ["accept"]
+        assert any(
+            step["origin"] == "application_required_intake" for step in audit["tool_receipts"]
+        )
+        history = [step for step in audit["tool_receipts"] if step["name"].startswith("history.")]
+        assert history
+        assert all(step["origin"] == "model_requested" for step in history)
+
+
+def test_matched_fixed_report_does_not_read_agent_answer(investigated):
+    from subsea_copilot.operations_evaluation import deterministic_report, report_rubric
+
+    store, cases, _ = investigated
+    for scenario, (_, snapshot, root, _) in cases.items():
+        candidate = root.model_copy(update={"result": None, "answer": None})
+        baseline = deterministic_report(store, candidate, snapshot, 2)
+        assert baseline["model_calls"] == 0
+        assert all(report_rubric(scenario, 2, baseline["report"]).values())
+        assert baseline["report"]["physical_decision"] == snapshot.event.hypothesis
+
+
 def test_future_documents_and_other_tenants_never_enter_retrieval(investigated, settings):
     store, cases, _ = investigated
     replay, snapshot, _, diagnosis = cases["S1"]

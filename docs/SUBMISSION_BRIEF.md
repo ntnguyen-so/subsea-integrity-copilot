@@ -32,15 +32,15 @@ critic reviews original sources; code checks quotes, coverage and result identit
 Revise once, then accept or withhold. Engineers inspect sources, ask follow-ups
 and download evidence. Reviewed procedures support knowledge reuse, not automatic expertise acquisition.
 
-**Limits and buying gate.** Data is fictional, including dirty formats and
-conflicting/expired records. Pressure profiles are not validated hydraulics;
-intervals are not exact leak positions. No field-accuracy or hallucination-free
-claim. Numerical warnings never wait for inference. Assume ten-minute manual
-analysis; target five-minute reports, counting failures and human review
-separately. Propose a conditional four-week, read-only shadow pilot: agree
-accuracy, abstention, unsupported-claim, latency and cost gates first. Pricing
-depends on discovery; savings are unproven. Hosted inference needs approval;
-connectors are unbuilt. Humans retain safety authority. Buy only if evidence
-quality, effort and total cost beat manual/fixed baselines.
+**Limits and buying gate.** Fictional dirty/conflicting data; unvalidated hydraulics;
+intervals, not exact leak positions. Hosted reports: 15/18 first attempts passed,
+then 3/3 explicit retries. Fixed reports: 18/18 and faster. No field-accuracy or
+hallucination-free claim. Numerical warnings never wait for inference. Assume
+ten-minute manual analysis; target five-minute reports, counting failures and
+human review separately. Propose a four-week read-only shadow pilot with agreed
+accuracy, abstention, unsupported-claim, latency and cost gates. Pricing requires
+discovery; savings are unproven and connectors unbuilt. Hosted inference requires
+approval. Humans retain safety authority. Buy only if quality, effort and total
+cost beat manual/fixed baselines.
 
 **Private GitHub and run instructions:** [github.com/ntnguyen-so/subsea-integrity-copilot](https://github.com/ntnguyen-so/subsea-integrity-copilot). Repository access must be granted before review.

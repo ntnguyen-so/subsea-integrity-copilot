@@ -1,5 +1,18 @@
 # Engineering report: Subsea Integrity Copilot
 
+## Evaluating the agent workflow itself
+
+The [agent operations evaluation](AGENT_EVALUATION.md) defines a matched
+six-scenario, three-question benchmark against an actual quality-aware fixed
+retrieval/comparison/report workflow. It audits persisted role dependencies,
+tool arguments/results, incident-time sources, grounded handoffs, scoped reuse,
+critic/reflection phases, attestation, call accounting, budgets and idempotence.
+Every planned case, failed attempt and raw receipt is retained. Structured
+report correctness, operational correctness and end-to-end report latency are
+separate measures; numerical warning latency and human review time are separate
+clocks. This does not equate self-review with independently measured prose
+accuracy or assume that agents are faster than a zero-LLM report template.
+
 ## Current implementation: pressure-alert investigation
 
 The customer's detectors already identify unusual pressure readings. The demo

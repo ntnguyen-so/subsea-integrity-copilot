@@ -314,6 +314,72 @@ def test_sanitized_provider_errors_no_retry(monkeypatch, runtime, stderr, code):
     assert len(calls) == 1
 
 
+def test_transient_directory_lock_retries_cleanup_not_inference(monkeypatch, runtime):
+    calls = stub(monkeypatch, [event(final())])
+    remove = cli.shutil.rmtree
+    attempts = []
+
+    def locked_once(path):
+        attempts.append(path)
+        if len(attempts) == 1:
+            raise PermissionError("synthetic-private-path")
+        remove(path)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(cli.shutil, "rmtree", locked_once)
+        response = cli.CopilotCLIChatModel(runtime_dir=runtime).invoke("synthetic")
+    assert response.content == '{"outcome":"supported"}'
+    assert response.response_metadata["capture_cleanup_attempts"] == 2
+    assert len(calls) == 1
+    assert len(attempts) == 2
+    assert not list((runtime / "captures").iterdir())
+
+
+@pytest.mark.parametrize("provider_code", [0, 1])
+def test_persistent_cleanup_lock_fails_closed_preserves_metadata_and_auth(
+    monkeypatch, runtime, provider_code, caplog
+):
+    calls = stub(
+        monkeypatch,
+        [event(final())],
+        code=provider_code,
+        stderr=b"Unauthorized synthetic-private-token" if provider_code else b"",
+    )
+    attempts = []
+
+    def always_locked(path):
+        attempts.append(path)
+        raise PermissionError("synthetic-private-path")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(cli.shutil, "rmtree", always_locked)
+        with pytest.raises(cli.ProviderError) as failure:
+            cli.CopilotCLIChatModel(runtime_dir=runtime).invoke("synthetic")
+    assert failure.value.code == ("proxy_auth" if provider_code else "capture_cleanup_failed")
+    assert failure.value.metadata["capture_cleanup_attempts"] == 4
+    assert failure.value.metadata["request_id"]
+    if provider_code:
+        assert failure.value.metadata["capture_cleanup_error"] == "capture_cleanup_failed"
+    assert len(calls) == 1
+    assert len(attempts) == 4
+    assert "synthetic-private" not in str(failure.value) + caplog.text
+
+
+def test_cleanup_lock_does_not_extend_expired_deadline(monkeypatch, runtime):
+    attempts = []
+
+    def locked(path):
+        attempts.append(path)
+        raise PermissionError
+
+    with monkeypatch.context() as patch:
+        patch.setattr(cli.shutil, "rmtree", locked)
+        with pytest.raises(cli.ProviderError) as failure:
+            cli._cleanup_capture(runtime, deadline=0)
+    assert failure.value.code == "capture_cleanup_failed"
+    assert len(attempts) == 1
+
+
 def test_prompt_and_response_bounds_missing_empty(monkeypatch, runtime):
     calls = stub(monkeypatch, [])
     with pytest.raises(cli.ProviderError, match="Prompt"):

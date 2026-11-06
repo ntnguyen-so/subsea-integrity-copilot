@@ -229,7 +229,37 @@ uv run python scripts\evaluate-warning-timeliness.py --seeds 3 `
   --output runtime\warning-timeliness.json
 ```
 
-This releases raw arrivals before normalization and scans every 5s hop. It
+### Evaluate the agent operations, not just detector accuracy
+
+The matched operations benchmark runs **all six scenarios x all three customer
+questions** against a quality-aware, zero-LLM report workflow. Both methods use
+identical arrival-gated data, numerical snapshots and history. It audits actual
+specialist handoffs, model-selected history actions, source authority/timing,
+scoped reuse, critic/reflection phases, review attestations, budgets, call
+accounting and idempotent resubmission. Raw reports retain every attempted case,
+full tool/model receipts, the baseline reports and all-attempt report latency.
+
+```powershell
+uv run python scripts\evaluate-agent-operations.py --mode scripted `
+  --output runtime\agent-operations-scripted-new.json
+# Genuine hosted inference; 18 reports, potentially several minutes each:
+uv run python scripts\evaluate-agent-operations.py --mode live `
+  --seeds 91000 --output runtime\agent-operations-live-new.json
+```
+
+Outputs must be new paths: the evaluator refuses to overwrite an earlier run.
+First questions are cold; later questions may reuse validated specialists.
+Read [the evaluation protocol](docs/AGENT_EVALUATION.md) for the frozen rubric,
+failure denominators and fair latency boundaries. Structured rubric correctness
+is not independent prose accuracy. Rules-generated reports may be faster;
+agent-assisted savings over human investigation require a timed human study.
+The actual hosted first run delivered **15/18** correct reviewed reports
+(p50/p95 **129s/170s**), versus **18/18** fixed reports (p50/p95
+**0.562s/0.881s**). Three explicit retries passed separately; failures were not
+erased. These results do not prove an agent speed or reliability advantage.
+
+The separate warning-timing script releases arrivals before normalization and
+scans every 5s hop. It
 measures synthetic source-time delay, not sensor-to-human delivery. The browser
 suite separately runs a local 1x warning-delivery journey and writes
 `docs\evidence\warning-browser-timing.json`. The report-processing target is

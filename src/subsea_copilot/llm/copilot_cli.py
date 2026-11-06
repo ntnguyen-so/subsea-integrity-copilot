@@ -5,6 +5,7 @@ from __future__ import annotations
 import ctypes
 import hashlib
 import json
+import logging
 import math
 import os
 import re
@@ -46,7 +47,9 @@ _ERROR_MESSAGES = {
     "invalid_structured_output": "Response does not match the structured envelope.",
     "invalid_tool_call": "Response contains an invalid application tool request.",
     "unsupported_request": "Unsupported model invocation option.",
+    "capture_cleanup_failed": "Owned Copilot capture cleanup failed; no response accepted.",
 }
+LOGGER = logging.getLogger(__name__)
 _VERSION_CACHE: dict[tuple[str, int, int], str | None] = {}
 _VERSION_LOCK = threading.Lock()
 
@@ -310,6 +313,28 @@ def _run_transport(
     if failed.is_set() and process.returncode == 0:
         raise ProviderError("proxy_error")
     return process.returncode or 0, bytes(buffers[0]), bytes(buffers[1])
+
+
+def _cleanup_capture(capture: Path, *, deadline: float) -> int:
+    """Windows can release a terminated CLI's directory handles asynchronously."""
+    for attempt in range(1, 5):
+        try:
+            shutil.rmtree(capture)
+            return attempt
+        except FileNotFoundError:
+            if not capture.exists():
+                return attempt
+            break
+        except PermissionError:
+            remaining = deadline - time.monotonic()
+            if attempt == 4 or remaining <= 0:
+                break
+            time.sleep(min(0.05 * 2 ** (attempt - 1), remaining))
+        except OSError:
+            break
+    error = ProviderError("capture_cleanup_failed")
+    error.metadata["capture_cleanup_attempts"] = attempt
+    raise error
 
 
 def _events(raw: bytes) -> list[dict[str, Any]]:
@@ -634,6 +659,7 @@ class CopilotCLIChatModel(BaseChatModel):
             "prompt_hash": hashlib.sha256(prompt_bytes).hexdigest(),
         }
         capture = self.runtime_dir / "captures" / request_id
+        primary_error: ProviderError | None = None
         try:
             executable = shutil.which("copilot")
             if not executable or Path(executable).suffix.lower() in {".bat", ".cmd"}:
@@ -730,10 +756,38 @@ class CopilotCLIChatModel(BaseChatModel):
             response.response_metadata = metadata
             return ChatResult(generations=[ChatGeneration(message=response)], llm_output=metadata)
         except ProviderError as exc:
+            primary_error = exc
             exc.metadata.update(metadata, duration_ms=round((time.monotonic() - started) * 1000, 3))
             raise
         except OSError:
-            raise ProviderError("cli_start_failed") from None
+            primary_error = ProviderError("cli_start_failed")
+            primary_error.metadata.update(
+                metadata, duration_ms=round((time.monotonic() - started) * 1000, 3)
+            )
+            raise primary_error from None
         finally:
             if capture.exists():
-                shutil.rmtree(capture)
+                try:
+                    metadata["capture_cleanup_attempts"] = _cleanup_capture(
+                        capture, deadline=deadline
+                    )
+                    if primary_error is not None:
+                        primary_error.metadata["capture_cleanup_attempts"] = metadata[
+                            "capture_cleanup_attempts"
+                        ]
+                except ProviderError as cleanup:
+                    LOGGER.error(
+                        "Owned capture cleanup failed request_id=%s attempts=%s",
+                        request_id,
+                        cleanup.metadata["capture_cleanup_attempts"],
+                    )
+                    if primary_error is not None:
+                        primary_error.metadata.update(
+                            cleanup.metadata, capture_cleanup_error=cleanup.code
+                        )
+                    else:
+                        cleanup.metadata.update(
+                            metadata,
+                            duration_ms=round((time.monotonic() - started) * 1000, 3),
+                        )
+                        raise

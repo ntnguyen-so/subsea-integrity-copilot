@@ -1,5 +1,45 @@
 # Qualification results
 
+## Current matched agent-operations evaluation
+
+The new [operations evaluation](AGENT_EVALUATION.md) runs all six scenarios and
+all three customer questions against a real quality-aware, zero-LLM report
+workflow, using the same arrival-gated data and history. It audits actual
+delegation, specialist handoffs, model-selected history actions, scoped reuse,
+source timing, critic/reflection phases, attestation, resource counters,
+idempotence and failure withholding, not just numerical detector accuracy.
+
+**First attempts: agents 15/18 correct, reviewed reports within 300s; fixed
+reports 18/18.** All-attempt agent p50/p95 were **129.42s/170.03s**, versus
+**0.562s/0.881s** for the fixed workflow. The agent was faster on **0/15**
+matched correct pairs. These structured-task results do **not** support
+"same accuracy, agents are faster than rules." Independent prose accuracy,
+timed human effort and monetary cost remain unmeasured.
+
+Three failures withheld their reports: one Windows capture-cleanup
+`PermissionError`, two provider-call timeouts. Cleanup is now bounded,
+deadline-aware and categorized without retrying inference or masking primary
+authentication/quota errors. On the user's explicit request, **3/3 new retries
+passed in 118.79-125.77s**; the original failed cohort remains `passed:false`.
+This is **18 accepted reports in 21 attempts**, not 18/18 first-pass reliability.
+The 60s provider-call timeout was not raised. Retry processing excludes manual
+waiting and does not prove a five-minute recovery SLO.
+
+Five first-run reports underwent actual criticism, revision and re-review.
+All 13 operational checks passed for the fifteen accepted reports and all three
+retries. Raw source/measurement packets and receipts are in
+`evidence\agent-operations-live.json` and
+`evidence\agent-operations-live-retry.json`; the evaluation report includes the
+18-case table, detailed failure analysis and exact negative-test references.
+The pre-fix full regression passed 265 tests; 45 targeted tests passed after
+the transport repair. An offline 18-case run qualifies contracts only.
+
+**Buying implication:** keep the fixed path as a credible baseline. The agent
+shows bounded, reviewable interpretation and real corrections, not demonstrated
+superiority on these standard tasks. Prove incremental value with a timed,
+quality-matched engineer study and question-specific adjudication before claiming
+investigation savings or recommending rollout.
+
 ## Current release: fail-closed interpretation review
 
 New `engineer-v2` reports require a separately prompted, tool-free critic on
