@@ -1,0 +1,50 @@
+<testsuites id="" name="" tests="19" failures="0" skipped="0" errors="0" time="647.3632019999999">
+<testsuite name="console.spec.ts" timestamp="2026-11-06T03:55:00.314Z" hostname="" tests="5" failures="0" skipped="0" time="266.461" errors="0">
+<testcase name="real replay, sensor evidence, pinned questions and keyboard navigation" classname="console.spec.ts" time="58.322">
+</testcase>
+<testcase name="pressure S2 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="68.116">
+</testcase>
+<testcase name="pressure S4 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="53.206">
+</testcase>
+<testcase name="pressure S5 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="63.537">
+</testcase>
+<testcase name="asking a question opens Agents before its task detail read completes" classname="console.spec.ts" time="23.28">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T03:55:00.314Z" hostname="" tests="7" failures="0" skipped="0" time="272.079" errors="0">
+<testcase name="brief geometry, correct wall sides and manual comparison agree with actual evidence" classname="dashboard.spec.ts" time="67.197">
+</testcase>
+<testcase name="server-confirmed clock and selected trends stay live; only explicit review pins them" classname="dashboard.spec.ts" time="36.172">
+</testcase>
+<testcase name="pinning a pending live read never presents the previous window as the new evidence" classname="dashboard.spec.ts" time="29.351">
+</testcase>
+<testcase name="automatic report timestamps are explicit and failed analysis cannot clear a numerical warning" classname="dashboard.spec.ts" time="34.622">
+</testcase>
+<testcase name="unresolved-only triage exposes its source-time boundary without pretending an agent report exists" classname="dashboard.spec.ts" time="27.825">
+</testcase>
+<testcase name="monitoring controls and manual instruments fit a narrow viewport" classname="dashboard.spec.ts" time="18.779">
+</testcase>
+<testcase name="default view prioritizes map, trend and assessment while optional tools stay collapsed" classname="dashboard.spec.ts" time="58.133">
+</testcase>
+</testsuite>
+<testsuite name="deck.spec.ts" timestamp="2026-11-06T03:55:00.314Z" hostname="" tests="4" failures="0" skipped="0" time="6.047" errors="0">
+<testcase name="topology depicts the source pack&apos;s connectivity, station distribution and sensor identities" classname="deck.spec.ts" time="1.051">
+</testcase>
+<testcase name="deck follows the interview schedule and supports chapter, keyboard and notes navigation" classname="deck.spec.ts" time="0.844">
+</testcase>
+<testcase name="interview clock survives navigation, pauses and resets without real waiting" classname="deck.spec.ts" time="0.715">
+</testcase>
+<testcase name="all slides fit desktop presentation and print pages, with readable mobile scrolling" classname="deck.spec.ts" time="3.437">
+</testcase>
+</testsuite>
+<testsuite name="sensor.spec.ts" timestamp="2026-11-06T03:55:00.314Z" hostname="" tests="2" failures="0" skipped="0" time="9.392" errors="0">
+<testcase name="actual projection counters and every pipeline chip are explicit" classname="sensor.spec.ts" time="1.696">
+</testcase>
+<testcase name="real sensor charts survive projection refreshes on a pinned window" classname="sensor.spec.ts" time="7.696">
+</testcase>
+</testsuite>
+<testsuite name="warning.spec.ts" timestamp="2026-11-06T03:55:00.314Z" hostname="" tests="1" failures="0" skipped="0" time="91.678" errors="0">
+<testcase name="1x replay delivers a clear warning independently of the pinned investigation" classname="warning.spec.ts" time="91.678">
+</testcase>
+</testsuite>
+</testsuites>

@@ -86,14 +86,17 @@ test("brief geometry, correct wall sides and manual comparison agree with actual
   expect(intervalFractions[1]).toBeCloseTo(.75, 4);
   expect((await page.locator("#topology").boundingBox())!.y).toBeLessThan(700);
   expect((await page.locator("#channel-charts svg").boundingBox())!.y).toBeLessThan(800);
+  await expect(page.locator("#comparison-panel")).toBeHidden();
   await page.getByRole("checkbox", { name: "Compare P2-ST4-A", exact: true }).check();
   await page.getByRole("checkbox", { name: "Compare P3-ST1-B", exact: true }).check();
   await page.locator("#compare-sensors").click();
+  await expect(page.locator("#comparison-panel")).toBeVisible();
   await expect(page.locator("#comparison-charts svg")).toHaveCount(2);
   await expect(page.locator("#comparison-charts article > h3")).toHaveText([
     "P2-ST4-A / gateway-P2-1", "P3-ST1-B / gateway-P3-0",
   ]);
   await expect(page.locator("#window-history")).toHaveValue(projection.latest_window!.id);
+  await expect(page.locator("#selected-basis")).toBeVisible();
   await expect(page.locator("#sensor-list-basis")).toContainText("pinned review");
   await page.getByRole("button", { name: "Trend P1-ST2-A", exact: true }).click();
   await expect(page.locator("#channel-charts [data-anomaly=true]")).not.toHaveCount(0);
@@ -198,7 +201,7 @@ test("automatic report timestamps are explicit and failed analysis cannot clear 
   await expect(page.locator("#automatic-timeline")).toContainText("ALERT EVIDENCE / SOURCE UTC");
   await expect(page.locator("#automatic-timeline")).toContainText("REPORT RECORDED / PROCESSING UTC");
   await expect(page.locator("#automatic-timeline")).toContainText(new Date(root.created_at).toISOString().slice(0, 19).replace("T", " "));
-  await page.getByRole("button", { name: "Review report, sources and timestamps" }).click();
+  await page.getByRole("button", { name: "Review evidence", exact: true }).click();
   await expect(page.locator("#investigation-case")).toHaveAttribute("data-task", root.id);
   await expect(page.locator(".answer-timestamps")).toContainText("actual processing timestamps");
   await page.locator("#tab-live").click();
@@ -249,6 +252,27 @@ test("monitoring controls and manual instruments fit a narrow viewport", async (
   await page.screenshot({ path: "runtime/dashboard-engineer-mobile.png", fullPage: true });
 });
 
+test("default view prioritizes map, trend and assessment while optional tools stay collapsed", async ({ page }) => {
+  await prepare(page, "S1", 24);
+  await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/, { timeout: 30_000 });
+  await expect(page.locator("#selected-basis")).toBeHidden();
+  await expect(page.locator("#comparison-panel")).toBeHidden();
+  await expect(page.locator("#answer-preview")).toBeHidden();
+  for (const selector of [".run-settings", "#question-tools", "#system-details", ".agent-diagnostics"]) {
+    await expect(page.locator(selector)).not.toHaveAttribute("open");
+  }
+  const positions = await page.locator(".live-grid, .agent-status-panel").evaluateAll(elements =>
+    elements.map(element => ({ top: element.getBoundingClientRect().top, bottom: element.getBoundingClientRect().bottom })));
+  expect(positions[0].top).toBeLessThan(450);
+  expect(positions[1].bottom).toBeLessThanOrEqual(1100);
+  await page.locator("#question-tools > summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#question")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#question")).toBeHidden();
+  await page.screenshot({ path: "runtime/dashboard-simplified-desktop.png", fullPage: true });
+});
+
 test("LIVE automatic investigation completes while independent monitoring and manual review continue", async ({ page }) => {
   test.skip(process.env.SUBSEA_QUALIFY_DASHBOARD_LIVE !== "1", "Opt in explicitly; this consumes hosted inference.");
   test.setTimeout(420_000);
@@ -291,7 +315,7 @@ test("LIVE automatic investigation completes while independent monitoring and ma
     expect(handoff.inspection).toEqual({ segment_id: "P1", start_m: 200, end_m: 600 });
     expect(handoff.interpretation_review.rounds.at(-1).assessment.decision).toBe("accept");
     expect(handoff.report_target_met).toBe(true);
-    await page.getByRole("button", { name: "Review report, sources and timestamps" }).click();
+    await page.getByRole("button", { name: "Review evidence", exact: true }).click();
     await expect(page.locator("#investigation-case")).toHaveAttribute("data-task", taskId!);
     await expect(page.locator(".case-interval")).toContainText("P1: 200-600 m");
     await page.screenshot({ path: `runtime/dashboard-live-${id}.png`, fullPage: true });

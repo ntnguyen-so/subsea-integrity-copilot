@@ -1,5 +1,31 @@
 # Qualification results
 
+## Simplified default overview
+
+The default dashboard now prioritizes three areas: **pipeline map, selected sensor
+trend and agent assessment**. One source clock and the current numerical warning
+remain visible. Run settings, engineer questions, analysis progress and system
+counters expand on demand. Empty comparisons are absent until requested, and full
+reports open in Agents instead of duplicating the live dashboard.
+
+The compact-overview browser check requires the primary areas to fit a
+1600x1100 viewport, verifies keyboard disclosure and preserves visibly pinned
+historical evidence. A separate read-only check opened the previously qualified
+hosted S1 result, inspected the actual anomaly trend and reviewed the exact
+original handoff and accepted critic record. Its assessment panel ended at
+1090.22px. Evidence: `evidence\dashboard-simplified-hosted-review.json` and the
+updated [actual dashboard screenshot](assets/engineer-dashboard-live.png).
+This did not generate new inference or change the detection/agent pipeline.
+Screen-fit checks are not a human-usability study.
+
+All **19 offline browser journeys passed**, including the new compact overview,
+keyboard disclosure, on-demand comparison and original manual investigation,
+grounding review, follow-up, pinned-window and mobile workflows. TypeScript and
+the production UI build passed. Evidence:
+`evidence\dashboard-simplified-browser.xml`. The manual replay journey now pauses
+on the independent numerical warning before reviewing the scoped inspector,
+rather than racing the end of an accelerated replay.
+
 ## Monitoring-first engineer dashboard
 
 The Live workspace now puts the approved brief's Y topology beside a continuously

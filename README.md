@@ -51,12 +51,13 @@ Stopping Compose without `-v` preserves evidence.
 
 ### Five-minute operator walkthrough
 
-The Live workspace starts with the familiar pipeline map, instrument/alarm list
-and pressure trend. The four-step strip connects **sensor stream → numerical
-detectors → automatic agent analysis → engineer review**, without making chat a
-prerequisite for investigating an alarm.
+The default view has three areas: **pipeline map, sensor trend and agent
+assessment**. Source time and the current warning stay visible. Run settings,
+engineer questions, detection criteria and system diagnostics expand only when
+needed. Comparisons appear after selecting them; full reports open in Agents,
+not as a second answer beneath the live dashboard.
 
-1. Choose **S1** and **COPILOT HOSTED** for a genuine LLM demonstration
+1. Choose **S1**, open **Run settings** and select **COPILOT HOSTED** for a genuine LLM demonstration
    (**SCRIPTED** is explicitly an offline contract example). Create a generation,
    select 10x speed and Play. The continuously updated UTC clock comes from the
    server, never browser-extrapolated measurements. Samples arrive every simulated

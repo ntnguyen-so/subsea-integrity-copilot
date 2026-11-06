@@ -160,9 +160,9 @@ function renderReplayHistory(): void {
   const history = select("replay-history");
   history.replaceChildren(new Option("Choose preserved generation", ""), ...replays.map(replay => {
     const archived = replay.source_version !== currentSource;
-    const option = new Option(`${archived ? "ARCHIVED · " : "BRIEF PRESSURE · "}${replay.scenario} · ${short(replay.id)} · ${replay.state} · ${modeName(replay.mode)}`, replay.id);
+    const option = new Option(`${archived ? "Archived" : "Saved"} ${replay.scenario} · ${modeName(replay.mode)} · ${time(replay.updated_at)}`, replay.id);
     option.disabled = archived;
-    option.title = archived ? "Previous topology/source version; snapshots and audit receipts remain retained." : replay.source_version;
+    option.title = archived ? "Previous topology/source version; snapshots and audit receipts remain retained." : `${replay.id} · ${replay.source_version}`;
     return option;
   }));
   history.value = currentReplayId || "";
@@ -188,6 +188,7 @@ async function chooseReplay(id: string): Promise<void> {
   setConnection("Loading coherent projection");
   resetView();
   renderReplayHistory();
+  notify("");
   await refreshProjection();
   if (currentReplayId === id && projection) connectStream(id, generationToken);
 }
@@ -290,7 +291,6 @@ function connectStream(id: string, token: number): void {
       if (seenEvents.size > 1000) seenEvents = new Set(events.map(item => item.id));
       if (feedPaused) { newEvents++; text("new-events", `${newEvents} new`); }
       else renderFeed();
-      if (decoded.type === "episode.changed") notify("Monitoring episode changed. Review current evidence separately from any older agent answer.");
       void refreshProjection();
     } catch (error) { showError(error); void refreshProjection(); }
   };
@@ -356,7 +356,7 @@ function renderClocks(): void {
   const current = connectionState.startsWith("Connected") && (replay.state !== "PLAYING" || age <= 15000) && projection.health.monitor === "running";
   const seconds = replay.clock_seconds;
   const sourceTime = new Date(Date.parse(replay.epoch) + seconds * 1000).toISOString();
-  text("source-clock", `${time(sourceTime)} · ${seconds.toFixed(1)} / ${replay.duration_seconds}s · ${replay.state} · ${replay.speed}×`);
+  text("source-clock", `${time(sourceTime)} · +${seconds.toFixed(1)}s · ${friendly(replay.state)} · ${replay.speed}×`);
   box("source-clock").dataset.seconds = String(seconds);
   box("source-clock").dataset.confirmedSeconds = String(replay.clock_seconds);
   text("clock-basis", `${current ? "Server-confirmed source time" : "NOT CURRENT; last confirmed source time"} · ${pack.sample_seconds}s samples / ${pack.hop_seconds}s window hop. No browser-generated telemetry.`);
@@ -369,13 +369,14 @@ function renderMonitoringWarning(): void {
   if (!current || !warning || current.health.monitor !== "running" || (current.replay.state === "PLAYING" && Date.now() - projectionReceivedAt > 15000) || !connectionState.startsWith("Connected")) {
     message = `MONITORING NOT CURRENT: verify the monitoring connection. ${warning ? `Last recorded assessment: ${warning.title}. ${warning.message}` : "No current assessment."} Do not treat unavailable monitoring as safety clearance.`;
   } else {
-    message = `${warning.title}. ${warning.message} ${current.replay.state} synthetic replay; latest monitoring basis: ${current.latest_window?.window_end || "warming up"}. Independent of the selected historical window and AI investigation.`;
+    message = `${warning.title}. ${warning.message}`;
     severity = warning.severity; kind = warning.kind;
   }
   if (banner.textContent !== message) banner.textContent = message;
   banner.className = `monitoring-warning ${severity}`;
   banner.dataset.kind = kind;
   banner.dataset.snapshot = warning?.snapshot_id || "";
+  banner.title = `Latest numerical monitoring window: ${current?.latest_window?.window_end || "warming up"}. Independent of selected historical evidence and AI analysis.`;
 }
 function renderOntology(): void {
   if (!projection) return;
@@ -403,14 +404,16 @@ function showCriteria(): void {
 }
 function renderWindowHistory(): void {
   const dropdown = select("window-history");
-  dropdown.replaceChildren(new Option("Follow current window", ""), ...windows.map(window => new Option(`${time(window.window_end)} · r${window.revision} · ${window.quality.status} · ${short(window.id)}`, window.id)));
+  dropdown.replaceChildren(new Option("Follow current window", ""), ...windows.map(window => new Option(`${time(window.window_end)} · r${window.revision} · ${window.quality.status}`, window.id)));
   if (!followCurrent && selectedWindow && !windows.some(window => window.id === selectedWindow?.id)) dropdown.add(new Option(`${time(selectedWindow.window_end)} · r${selectedWindow.revision} · pinned`, selectedWindow.id));
   dropdown.value = followCurrent ? "" : selectedWindow?.id || "";
 }
 function renderBasis(): void {
   const window = selectedWindow, latest = projection?.latest_window;
   const newer = window && latest && window.id !== latest.id;
-  text("selected-basis", window ? `${followCurrent ? "CURRENT VIEW" : "PINNED"} · ${bounds(window.window_start, window.window_end)} · revision ${window.revision} · ${short(window.id)}` : "No completed window selected");
+  box("evidence-selection").dataset.following = String(followCurrent);
+  box("evidence-selection").dataset.updating = String(Boolean(newer));
+  text("selected-basis", window ? `${followCurrent ? "CURRENT VIEW" : "PINNED"} · ${bounds(window.window_start, window.window_end)} · revision ${window.revision}` : "No completed window selected");
   text("basis-warning", newer ? followCurrent
     ? "Live inspector updating. Map and trend retain one coherent received window; the latest warning remains independent."
     : "Historical evidence pinned. Newer monitoring telemetry is available; this inspector will not change."
@@ -419,7 +422,7 @@ function renderBasis(): void {
   text("ask-basis", window ? `AS OF ${time(window.window_end)} / R${window.revision}` : "PINNED SNAPSHOT REQUIRED");
   text("question-scope", window ? `${modeName(projection?.replay.mode || "scripted")} · ${short(window.id)} · questions never use a hidden later snapshot` : "No visible snapshot");
   if (window && sensorLoadedKey === JSON.stringify([window.id, selectedSensorId])) {
-    text("trend-basis", `${followCurrent ? "LIVE TREND" : "PINNED TREND"} · ${bounds(window.window_start, window.window_end)} · received measurements only`);
+    text("trend-basis", `${followCurrent ? "LIVE TREND" : "PINNED TREND"} · window ending ${time(window.window_end)}`);
   }
   updateControls();
 }
@@ -670,7 +673,7 @@ function renderAutomaticInvestigation(): void {
   text("automatic-conclusion", conclusion);
   const freshness = node("p", `${latest?.id !== root.snapshot_id ? "Historical analysis: newer monitoring evidence exists; this report is not rebased." : "Analysis uses the latest completed monitoring snapshot."}${pending ? ` New material warning is pending${unavailable ? `: ${unavailable}` : " until the active investigation finishes and admission permits"}.` : ""}`, "muted");
   freshness.id = "automatic-freshness"; actions.append(freshness);
-  const open = button(accepted ? "Review report, sources and timestamps" : "Inspect investigation progress / failure", () => {
+  const open = button(accepted ? "Review evidence" : "View investigation", () => {
     void loadTask(root.id).then(() => box("answer-preview").scrollIntoView({ block: "start" }));
   });
   actions.append(open);
@@ -681,6 +684,7 @@ function renderInvestigation(): void {
   container.replaceChildren();
   if (comparisonWindowId !== window?.id) {
     comparisonWindowId = null;
+    box("comparison-panel").hidden = true;
     box("comparison-charts").replaceChildren();
     text("comparison-basis", "Pins the visible window. Up to four histories share UTC time and a common pressure scale.");
   }
@@ -710,6 +714,7 @@ async function compareSensors(): Promise<void> {
   if (!projection || !selectedWindow || !pinVisibleWindow()) return;
   const window = selectedWindow, generation = generationToken;
   comparisonWindowId = window.id;
+  box("comparison-panel").hidden = false;
   const concerns = window.quality.findings.filter(f => f.spike_count || f.peer_disagreement || f.missing > f.expected * .1);
   const examples: string[] = [];
   const segmentOf = (id: string): string | undefined => projection?.pack.sensors.find(sensor => sensor.id === id)?.segment_id;
@@ -1061,6 +1066,7 @@ function renderAnswer(): void {
       void chooseWindow(task.snapshot_id).then(() => {
         if (selectedWindow?.id !== task.snapshot_id) { notify("Follow-up basis could not be pinned.", true); return; }
         element("question", HTMLTextAreaElement).value = question;
+        element("question-tools", HTMLDetailsElement).open = true;
         element("question", HTMLTextAreaElement).focus();
         notify("Follow-up drafted against the original evidence. Review and submit to run a new investigation.");
       });

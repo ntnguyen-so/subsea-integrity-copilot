@@ -26,14 +26,17 @@ test("real replay, sensor evidence, pinned questions and keyboard navigation", a
   await expect(page.locator("#window-state")).toContainText(/WARMING[ _]UP/i);
   await page.locator("#speed").selectOption("10");
   await page.locator("#play").click();
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak", {
+    timeout: 120_000,
+  });
+  await page.locator("#play").click();
+  await expect(page.locator("#play")).toHaveText("Play");
   await expect(page.locator("#event-summary")).toContainText(/suspected[ _]leak/i, {
     timeout: 120_000,
   });
   await expect(page.locator("#location-summary")).toContainText("Priority inspection", {
     timeout: 30_000,
   });
-  await page.locator("#play").click();
-  await expect(page.locator("#play")).toHaveText("Play");
   await expect(page.locator("#ask-submit")).toBeEnabled();
   await expect(page.locator("#deployment-summary")).toContainText("opposite pipe walls");
   await expect(page.locator("#topology [data-sensor]")).toHaveCount(24);
@@ -58,6 +61,7 @@ test("real replay, sensor evidence, pinned questions and keyboard navigation", a
   await expect(page.locator("#tab-evidence")).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#raw-table table")).toBeVisible();
   await page.locator("#tab-live").click();
+  await page.locator("#question-tools > summary").click();
   await page.locator("#questions button").first().click();
   await page.locator("#ask-submit").click();
   await expect(page.locator("#answer-preview")).toContainText(/suspected[ _]leak/i, {
@@ -150,6 +154,7 @@ for (const [scenario, expected, counterevidence] of [
     await page.locator("#replay-history").selectOption(replay.id);
     await expect(page.locator("#event-summary")).toContainText(expected.replaceAll("_", " "));
     await expect(page.locator("#location-summary")).toContainText("No confirmed leak location");
+    await page.locator("#question-tools > summary").click();
     if (scenario === "S2") {
       await page.locator("#compare-sensors").click();
       await expect(page.locator("#comparison-charts")).toContainText("P1-ST2-A");
@@ -227,6 +232,7 @@ test("asking a question opens Agents before its task detail read completes", asy
   await expect(page.locator("#create-replay")).toBeEnabled();
   await page.locator("#replay-history").selectOption(replay.id);
   await expect(page.locator("#ask-submit")).toBeEnabled();
+  await page.locator("#question-tools > summary").click();
   await page.locator("#questions button").first().click();
 
   let releaseRead = () => {};
@@ -278,6 +284,7 @@ test("LIVE engineer question, source review, follow-up and downloaded handoff", 
   expect(projection.latest_window.end_seconds).toBe(180);
   expect(projection.tasks).toHaveLength(0);
   const artifacts = [];
+  await page.locator("#question-tools > summary").click();
   await page.locator("#question").fill(
     "Could a valve change explain this pressure pattern? What should the engineer verify before accepting that root cause?",
   );
