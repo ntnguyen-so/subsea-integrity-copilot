@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="202.542348">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T06:49:00.505Z" hostname="" tests="1" failures="0" skipped="0" time="127.971" errors="0">
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="127.971">
+</testcase>
+</testsuite>
+<testsuite name="warning.spec.ts" timestamp="2026-11-06T06:49:00.505Z" hostname="" tests="1" failures="0" skipped="0" time="72.892" errors="0">
+<testcase name="1x replay delivers a clear warning independently of the pinned investigation" classname="warning.spec.ts" time="72.892">
+</testcase>
+</testsuite>
+</testsuites>

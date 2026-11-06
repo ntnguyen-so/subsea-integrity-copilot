@@ -1,0 +1,22 @@
+{
+  "mode": "scripted",
+  "passed": true,
+  "replay_id": "replay-df79bdf424cc70b71bdad2c6",
+  "replay_speed": 1,
+  "known_source_onset_seconds": 90,
+  "play_start_source_seconds": 80,
+  "warning_snapshot_id": "window-142ff68cd8fa2d435684e862c8aa0f77628760798b2d04414615430bbf1de4de",
+  "source_onset_to_warning_basis_seconds": 25.07799999997951,
+  "wall_play_request_to_observed_warning_seconds": 40.93814549999998,
+  "estimated_wall_onset_to_observed_warning_bounds_seconds": [
+    26.477151499999977,
+    30.938145499999983
+  ],
+  "target_seconds": 120,
+  "limitations": [
+    "One local 1x synthetic replay; warm-up preloaded through second 80.",
+    "Onset wall time bounded by the play request interval; DOM assertion includes observation overhead.",
+    "SCRIPTED agents, not hosted report latency; no physical sensor, external notification or human acknowledgement.",
+    "Not a load test or field latency SLO."
+  ]
+}

@@ -35,12 +35,16 @@ def test_numerical_warning_distinguishes_physical_risk_and_unobservable_conditio
     assert warning.kind == kind
     assert message in warning.message
     assert warning.snapshot_id == snapshot.id
+    alert_only = monitoring_warning(snapshot, sensor_alerts_only=True)
+    assert alert_only.kind == ("coverage_lost" if scenario in {"S3", "S5"} else "sensor_alerts")
+    assert alert_only.kind not in {"possible_leak", "sensor_telemetry", "unresolved"}
 
 
 def test_missing_assessment_is_not_a_healthy_pipeline_warning():
     warning = monitoring_warning(None)
     assert warning.kind == "waiting"
     assert "not a healthy" in warning.message
+    assert monitoring_warning(None, sensor_alerts_only=True) == warning
 
 
 def test_sliding_warning_measurement_keeps_unobservable_leaks_in_the_denominator():

@@ -1,0 +1,15 @@
+{
+  "outcome": "failed",
+  "test": "real replay, sensor evidence, pinned questions and keyboard navigation",
+  "observed_failure": "The finite 10x replay was COMPLETED at source +365s. The manual handoff journey later attempted to step that terminal replay and timed out because the Step control was correctly disabled.",
+  "classification": "Manual browser journey raced the end of accelerated playback, not an accepted agent report or a new inference-performance result.",
+  "correction": "Use 5x for the manual review journey and explicitly require server-confirmed PAUSED state before continuing. Dedicated accelerated-inspector tests retain their original speed. No timeout or inference retry was increased.",
+  "subsequent_cohort": {
+    "passed": 22,
+    "failed": 1,
+    "test": "1x replay delivers a clear warning independently of the pinned investigation",
+    "observed_failure": "After browser offline emulation, the paused replay retained a possible-leak warning rather than reporting monitoring unavailable. EventSource disconnection alone did not reliably reflect the known browser-offline state.",
+    "correction": "Warning and source-clock freshness now also require navigator.onLine, independently of EventSource callbacks. The original disconnect assertion and its timeout are unchanged.",
+    "receipt": "customer-modes-browser-initial.xml"
+  }
+}

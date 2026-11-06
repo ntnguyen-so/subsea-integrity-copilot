@@ -1,7 +1,7 @@
 import { box, bounds, button, element, friendly, node, svg, text, time } from "./dom";
 import { renderCharts } from "./charts";
-import { renderCasefile } from "./casefile";
-import type { AgentTask, CanonicalObservation, ConsoleEvent, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot } from "./types";
+import { renderCasefile, renderWorkflowComparison } from "./casefile";
+import type { AgentTask, CanonicalObservation, ConsoleEvent, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
 const input = (id: string): HTMLInputElement => element(id, HTMLInputElement);
@@ -56,6 +56,7 @@ function showError(error: unknown): void { notify(errorMessage(error), true); }
 function short(id: string): string { return id.length > 22 ? `${id.slice(0, 10)}…${id.slice(-8)}` : id; }
 function enc(id: string): string { return encodeURIComponent(id); }
 function modeName(mode: Mode): string { return mode === "live" ? "COPILOT HOSTED" : "SCRIPTED"; }
+function sensorAlertsOnly(): boolean { return projection?.replay.workflow === "sensor_alerts"; }
 function jsonText(value: Json | undefined): string {
   return value === undefined ? "not reported" : typeof value === "string" ? value : JSON.stringify(value);
 }
@@ -101,7 +102,7 @@ function updateControls(): void {
   controlButton("play").textContent = replay?.state === "PLAYING" ? "Pause" : "Play";
   controlButton("step").disabled = !allowed || replay?.state !== "PAUSED";
   select("speed").disabled = !allowed || !replay || replay.state === "COMPLETED" || replay.state === "FAILED";
-  controlButton("ask-submit").disabled = !session.authenticated || !selectedWindow || asking;
+  controlButton("ask-submit").disabled = !session.authenticated || !selectedWindow || asking || sensorAlertsOnly();
   controlButton("ask-submit").textContent = asking ? "Submitting…" : "Investigate pinned window ↗";
   controlButton("compare-sensors").disabled = !session.authenticated || !selectedWindow;
 }
@@ -118,15 +119,16 @@ function switchTab(name: string, focus = false): void {
 }
 function bindTabs(): void {
   const tabs = [...document.querySelectorAll<HTMLButtonElement>("[role=tab]")];
-  tabs.forEach((tab, index) => {
+  tabs.forEach(tab => {
     tab.addEventListener("click", () => switchTab(tab.dataset.tab || "live"));
     tab.addEventListener("keydown", event => {
+      const visible = tabs.filter(item => !item.hidden), current = visible.indexOf(tab);
       let next: number | null = null;
-      if (event.key === "ArrowDown" || event.key === "ArrowRight") next = (index + 1) % tabs.length;
-      if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = (index + tabs.length - 1) % tabs.length;
+      if (event.key === "ArrowDown" || event.key === "ArrowRight") next = (current + 1) % visible.length;
+      if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = (current + visible.length - 1) % visible.length;
       if (event.key === "Home") next = 0;
-      if (event.key === "End") next = tabs.length - 1;
-      if (next !== null) { event.preventDefault(); switchTab(tabs[next].dataset.tab || "live", true); }
+      if (event.key === "End") next = visible.length - 1;
+      if (next !== null) { event.preventDefault(); switchTab(visible[next].dataset.tab || "live", true); }
     });
   });
 }
@@ -158,9 +160,10 @@ async function loadCatalog(): Promise<void> {
 }
 function renderReplayHistory(): void {
   const history = select("replay-history");
-  history.replaceChildren(new Option("Choose preserved generation", ""), ...replays.map(replay => {
+  history.replaceChildren(new Option("Choose preserved generation", ""), ...[...replays].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).map(replay => {
     const archived = replay.source_version !== currentSource;
-    const option = new Option(`${archived ? "Archived" : "Saved"} ${replay.scenario} · ${modeName(replay.mode)} · ${time(replay.updated_at)}`, replay.id);
+    const label = replay.workflow === "sensor_alerts" ? "SENSOR ALERTS ONLY" : `AGENT-ASSISTED · ${modeName(replay.mode)}`;
+    const option = new Option(`${archived ? "Archived" : "Saved"} ${replay.scenario} · ${label} · ${time(replay.updated_at)}`, replay.id);
     option.disabled = archived;
     option.title = archived ? "Previous topology/source version; snapshots and audit receipts remain retained." : `${replay.id} · ${replay.source_version}`;
     return option;
@@ -237,7 +240,13 @@ async function runProjection(): Promise<void> {
         if (token !== generationToken || id !== currentReplayId) { projectionDirty = true; continue; }
         if (data.replay.id !== id || data.latest_window && data.latest_window.generation_id !== id) throw new Error("Projection scope mismatch; refusing cross-generation evidence.");
         if (projection && data.replay.version < projection.replay.version) { projectionDirty = true; continue; }
+        const newReplay = projection === null;
         projection = data;
+        if (newReplay) {
+          select("workflow").value = data.replay.workflow;
+          select("scenario").value = data.replay.scenario;
+          input("seed").value = String(data.replay.seed);
+        }
         selectedSensorId ||= data.pack.sensors[0]?.id || null;
         if (!cursorInitialized) { cursor = data.cursor; cursorInitialized = true; }
         projectionReceivedAt = Date.now();
@@ -338,7 +347,18 @@ function isConsoleEvent(value: unknown): value is ConsoleEvent {
 function renderProjection(): void {
   if (!projection) return;
   const { replay, pack, latest_window: latest, health } = projection;
-  text("inference-mode", modeName(replay.mode));
+  const alertsOnly = sensorAlertsOnly();
+  text("inference-mode", alertsOnly ? "SENSOR ALERTS ONLY · NO LLM" : `AGENT-ASSISTED · ${modeName(replay.mode)}`);
+  box("manual-workflow").hidden = !alertsOnly;
+  document.querySelector<HTMLElement>(".agent-status-panel")!.hidden = alertsOnly;
+  document.querySelector<HTMLElement>(".engineer-details")!.hidden = alertsOnly;
+  box("question-tools").hidden = alertsOnly;
+  box("tab-agents").hidden = alertsOnly;
+  if (alertsOnly && activeTab === "agents") switchTab("live");
+  for (const key of ["quality", "support", "inspection"]) {
+    document.querySelector<HTMLElement>(`#map-legend [data-legend="${key}"]`)!.hidden = alertsOnly;
+  }
+  document.querySelector('#map-legend [data-legend="anomaly"]')!.lastChild!.textContent = alertsOnly ? "Sensor alert" : "Pressure anomaly";
   text("site-name", pack.name);
   renderClocks();
   text("live-bounds", latest ? `${bounds(latest.window_start, latest.window_end)} · ${latest.quality.status}` : `WARMING_UP / no completed window · width ${pack.window_seconds}s + lateness ${pack.lateness_seconds}s`);
@@ -353,7 +373,7 @@ function renderClocks(): void {
   if (!projection || !projectionReceivedAt) return;
   const { replay, pack } = projection;
   const age = Math.max(0, Date.now() - projectionReceivedAt);
-  const current = connectionState.startsWith("Connected") && (replay.state !== "PLAYING" || age <= 15000) && projection.health.monitor === "running";
+  const current = navigator.onLine && connectionState.startsWith("Connected") && (replay.state !== "PLAYING" || age <= 15000) && projection.health.monitor === "running";
   const seconds = replay.clock_seconds;
   const sourceTime = new Date(Date.parse(replay.epoch) + seconds * 1000).toISOString();
   text("source-clock", `${time(sourceTime)} · +${seconds.toFixed(1)}s · ${friendly(replay.state)} · ${replay.speed}×`);
@@ -366,7 +386,7 @@ function renderMonitoringWarning(): void {
   const banner = box("monitoring-warning");
   const current = projection, warning = current?.warning;
   let message: string, severity = "warning", kind = "unavailable";
-  if (!current || !warning || current.health.monitor !== "running" || (current.replay.state === "PLAYING" && Date.now() - projectionReceivedAt > 15000) || !connectionState.startsWith("Connected")) {
+  if (!navigator.onLine || !current || !warning || current.health.monitor !== "running" || (current.replay.state === "PLAYING" && Date.now() - projectionReceivedAt > 15000) || !connectionState.startsWith("Connected")) {
     message = `MONITORING NOT CURRENT: verify the monitoring connection. ${warning ? `Last recorded assessment: ${warning.title}. ${warning.message}` : "No current assessment."} Do not treat unavailable monitoring as safety clearance.`;
   } else {
     message = `${warning.title}. ${warning.message}`;
@@ -482,9 +502,10 @@ function sensorFlags(window: WindowSnapshot | null, id: string): { assessed: boo
   return {
     assessed,
     missing: assessed && findings.some(finding => finding.missing > 0 || finding.hard_excluded > 0),
-    quality: assessed && findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement),
-    anomaly: assessed && findings.some(finding => finding.anomaly_count > 0),
-    support: assessed && Boolean(window?.event.supporting_sensor_ids.includes(id)),
+    quality: !sensorAlertsOnly() && assessed && findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement),
+    anomaly: assessed && findings.some(finding => finding.anomaly_count > 0 || sensorAlertsOnly()
+      && (finding.missing > 0 || finding.hard_excluded > 0 || finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement)),
+    support: !sensorAlertsOnly() && assessed && Boolean(window?.event.supporting_sensor_ids.includes(id)),
   };
 }
 function renderMap(): void {
@@ -511,7 +532,7 @@ function renderMap(): void {
     const label = segment.id === "P1" ? coords[0] : coords[coords.length - 1];
     if (label) map.append(svg("text", { x: label.x, y: label.y + (segment.id === "P1" ? 30 : -25), "text-anchor": "middle" }, `${segment.name} / ${segment.id} / ${segment.length_m}m`));
   }
-  const location = window?.location;
+  const location = sensorAlertsOnly() ? null : window?.location;
   if (location?.status === "located" && location.best && location.inspection_start_m !== null && location.inspection_end_m !== null) {
     const segment = pack.segments.find(item => item.id === location.best?.segment_id);
     if (segment) {
@@ -523,7 +544,7 @@ function renderMap(): void {
       map.append(svg("polyline", { points: `${at(location.inspection_start_m)} ${at(location.inspection_end_m)}`, class: "inspection-interval", "data-segment-id": segment.id, "data-start-m": location.inspection_start_m, "data-end-m": location.inspection_end_m }));
     }
   }
-  for (const candidate of window?.location?.compatible || []) {
+  for (const candidate of location?.compatible || []) {
     const pos = project(candidate.position);
     const ring = svg("rect", { x: pos.x - 8, y: pos.y - 8, width: 16, height: 16, transform: `rotate(45 ${pos.x} ${pos.y})`, class: "candidate" });
     ring.append(svg("title", {}, `Inspection interval boundary: ${candidate.segment_id}, ${candidate.chainage_m}m; not a leak coordinate`));
@@ -547,7 +568,7 @@ function renderMap(): void {
     const flags = sensorFlags(window, sensor.id);
     const { missing, quality: fault, support } = flags;
     const selected = selectedSensorId === sensor.id || evidence?.sensor_id === sensor.id;
-    const health = !flags.assessed ? "Not assessed" : `${missing ? "Missing or excluded readings" : "Usable coverage"}${flags.anomaly ? "; pressure threshold excursions" : ""}${fault ? "; quality concern: spikes, drift or paired disagreement" : ""}`;
+    const health = !flags.assessed ? "Not assessed" : `${missing ? "Missing or excluded readings" : "Usable coverage"}${flags.anomaly ? "; flagged sensor readings" : ""}${fault ? "; quality concern: spikes, drift or paired disagreement" : ""}`;
     const group = svg("g", { class: `sensor${!flags.assessed ? " unknown" : ""}${flags.anomaly ? " anomalous" : ""}${missing ? " missing" : ""}${fault ? " fault" : ""}${support ? " support" : ""}${selected ? " selected" : ""}`, role: "button", tabindex: 0, "aria-label": `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Event supporting sensor." : "No event support recorded."}`, "aria-pressed": String(selectedSensorId === sensor.id), "data-sensor": sensor.id });
     if (support) group.append(svg("rect", { x: position.x - 11, y: position.y - 11, width: 22, height: 22, transform: `rotate(45 ${position.x} ${position.y})`, class: "support-ring" }));
     group.append(svg("circle", { cx: position.x, cy: position.y, r: 6, class: "sensor-dot" }));
@@ -576,6 +597,11 @@ function renderMap(): void {
   text("location-summary", location?.status === "located"
     ? `Priority inspection: ${location.best?.segment_id || "unresolved"} ${location.inspection_start_m}–${location.inspection_end_m}m. Not an exact leak point.`
     : location ? `Inspection interval withheld: ${location.reason}` : "Location not computed / not eligible. No confirmed leak location is claimed.");
+  if (sensorAlertsOnly()) {
+    const count = pack.sensors.filter(sensor => sensorFlags(window, sensor.id).anomaly).length;
+    text("event-summary", `${count} instruments with individual alerts in this window. Inspect each history; no combined leak/malfunction diagnosis is provided.`);
+    text("location-summary", "Inspection area: engineer to determine by connecting the sensor alerts.");
+  }
   text("deployment-summary", `${pack.sensors.length} pipe-mounted pressure instruments at ${new Set(pack.sensors.map(sensor => sensor.station_id)).size} paired stations. A/B taps are on opposite pipe walls and share a gateway; wall offsets enlarged for display. Chainage follows each pipe, not screen distance.`);
 }
 function renderSensorList(): void {
@@ -584,7 +610,7 @@ function renderSensorList(): void {
   const scroll = container.scrollTop;
   const focused = container.contains(document.activeElement) ? document.activeElement?.getAttribute("aria-label") : null;
   const findings = new Map(window?.quality.findings.map(item => [item.sensor_id, item]) || []);
-  const supporting = new Set(window?.event.supporting_sensor_ids || []);
+  const supporting = new Set(sensorAlertsOnly() ? [] : window?.event.supporting_sensor_ids || []);
   const rank = (id: string): number => {
     const finding = findings.get(id);
     return supporting.has(id) ? 3 : finding && (finding.spike_count || finding.drift_suspected || finding.peer_disagreement) ? 2 : finding && (finding.anomaly_count || finding.missing || finding.hard_excluded) ? 1 : 0;
@@ -607,7 +633,11 @@ function renderSensorList(): void {
     const sensorCell = node("td"), open = button(sensor.id, () => selectSensor(sensor.id));
     open.setAttribute("aria-label", `Trend ${sensor.id}`); open.setAttribute("aria-pressed", String(selectedSensorId === sensor.id));
     sensorCell.append(open);
-    const conditions = [
+    const conditions = sensorAlertsOnly() ? [
+      flags.anomaly ? "Sensor alert" : "",
+      finding?.missing ? `${finding.missing} missing` : "",
+      finding?.hard_excluded ? `${finding.hard_excluded} excluded` : "",
+    ].filter(Boolean) : [
       flags.support ? "Overlapping pressure drop" : flags.anomaly ? "Pressure anomaly" : "",
       finding?.spike_count ? "Spikes" : "",
       finding?.drift_suspected ? "Drift suspected" : "",
@@ -623,18 +653,25 @@ function renderSensorList(): void {
   container.replaceChildren(table);
   if (focused) [...container.querySelectorAll<HTMLElement>("[aria-label]")].find(item => item.getAttribute("aria-label") === focused)?.focus({ preventScroll: true });
   container.scrollTop = scroll;
-  controlButton("compare-sensors").textContent = comparisonSensorIds.size ? `Compare selected (${comparisonSensorIds.size})` : "Compare event / fault sensors";
+  controlButton("compare-sensors").textContent = comparisonSensorIds.size ? `Compare selected (${comparisonSensorIds.size})`
+    : sensorAlertsOnly() ? "Compare flagged sensors manually" : "Compare event / fault sensors";
   controlButton("clear-comparison").disabled = comparisonSensorIds.size === 0;
 }
 function renderAutomaticInvestigation(): void {
   if (!projection) return;
   const { replay, latest_window: latest, pack } = projection;
   text("stream-stage", `${replay.state} · received through +${replay.clock_seconds.toFixed(1)}s · ${pack.sensors.length} instruments`);
+  if (sensorAlertsOnly()) {
+    text("detector-stage", "Individual sensor alerts · engineer connects the dots");
+    text("agent-stage", "Disabled in sensor-alert-only workflow · no LLM calls");
+    return;
+  }
   text("detector-stage", latest ? `${friendly(latest.event.hypothesis)} · window ends +${latest.end_seconds}s` : `Warming up · ${pack.window_seconds}s window / ${pack.hop_seconds}s hop`);
   const root = [...projection.tasks].filter(task => task.automatic && task.role === "operator_response" && !task.parent_id)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
   const timeline = box("automatic-timeline"), progress = box("automatic-progress"), actions = box("automatic-actions");
-  const actionFocused = actions.contains(document.activeElement) && document.activeElement instanceof HTMLButtonElement;
+  const focusedAction = actions.contains(document.activeElement) && document.activeElement instanceof HTMLButtonElement
+    ? document.activeElement.dataset.action : undefined;
   timeline.replaceChildren(); progress.replaceChildren(); actions.replaceChildren();
   const incident = root ? projection.episodes.find(item => item.id === root.episode_id) : projection.episodes[0];
   const unavailable = incident?.pending_window_id && incident.dispatch_status && incident.dispatch_status !== "queued"
@@ -688,8 +725,14 @@ function renderAutomaticInvestigation(): void {
   const open = button(accepted ? "Review evidence" : "View investigation", () => {
     void loadTask(root.id).then(() => box("answer-preview").scrollIntoView({ block: "start" }));
   });
-  actions.append(open);
-  if (actionFocused) open.focus({ preventScroll: true });
+  open.dataset.action = "review";
+  const compare = button("Compare with existing workflow", () => {
+    void loadTask(root.id).then(() => document.getElementById("workflow-comparison")?.scrollIntoView({ block: "start" }));
+  });
+  compare.dataset.action = "compare";
+  const buttons = node("div", "", "automatic-action-buttons");
+  buttons.append(compare, open); actions.append(buttons);
+  if (focusedAction) [compare, open].find(item => item.dataset.action === focusedAction)?.focus({ preventScroll: true });
 }
 function renderInvestigation(): void {
   const container = box("investigation-summary"), window = selectedWindow;
@@ -736,7 +779,9 @@ async function compareSensors(): Promise<void> {
     const finding = options.find(f => !used.has(segmentOf(f.sensor_id))) || options[0];
     if (finding) examples.push(finding.sensor_id);
   }
-  const candidates = window.event.supporting_sensor_ids.length ? window.event.supporting_sensor_ids : [...examples, ...concerns.map(f => f.sensor_id)];
+  const candidates = sensorAlertsOnly()
+    ? window.quality.findings.filter(f => sensorFlags(window, f.sensor_id).anomaly).map(f => f.sensor_id)
+    : window.event.supporting_sensor_ids.length ? window.event.supporting_sensor_ids : [...examples, ...concerns.map(f => f.sensor_id)];
   const ids = comparisonSensorIds.size ? [...comparisonSensorIds] : [...new Set(candidates)].slice(0, 4);
   const token = ++comparisonToken;
   const container = box("comparison-charts");
@@ -900,9 +945,12 @@ function renderEvidenceChips(): void {
   const container = box("evidence-chips");
   container.replaceChildren();
   if (!selectedWindow) return;
-  const claims = Object.values(selectedWindow.claims);
+  const claims = sensorAlertsOnly() ? [] : Object.values(selectedWindow.claims);
   for (const claim of claims) container.append(evidenceChip(claim.id, `CLAIM ${claim.kind} / ${claim.id}`));
-  for (const item of Object.values(selectedWindow.evidence)) container.append(evidenceChip(item.id, `${item.kind} / ${item.sensor_id || "network"} / ${item.channel || "all"} / ${item.id}`));
+  for (const item of Object.values(selectedWindow.evidence)) {
+    if (sensorAlertsOnly() && !item.sensor_id) continue;
+    container.append(evidenceChip(item.id, `${item.kind} / ${item.sensor_id || "network"} / ${item.channel || "all"} / ${item.id}`));
+  }
 }
 function renderGate(): void {
   const gate = box("gate-content");
@@ -930,7 +978,9 @@ function renderMetrics(): void {
   if (!projection) return;
   const window = selectedWindow;
   text("sample-coverage", window ? `${window.quality.usable_samples} / ${window.quality.expected_samples} · ${(window.quality.coverage * 100).toFixed(1)}%` : "WARMING_UP / not reported");
-  text("domain-count", window ? `${window.event.supporting_sensor_ids.length} supporting observers · ${window.event.failure_domain_count} event domains / ${window.quality.failure_domains_available} available` : "Not reported");
+  text("domain-count", window ? sensorAlertsOnly()
+    ? `${window.quality.failure_domains_available} instrument domains available · no cross-sensor diagnosis`
+    : `${window.event.supporting_sensor_ids.length} supporting observers · ${window.event.failure_domain_count} event domains / ${window.quality.failure_domains_available} available` : "Not reported");
   text("window-state", `${window?.quality.status || "WARMING_UP"} / ${episode()?.state || "no episode"}`);
   const queued = projection.tasks.filter(task => task.state === "QUEUED").length;
   const calls = projection.tasks.reduce((sum, task) => sum + task.model_calls, 0);
@@ -973,6 +1023,18 @@ async function loadTask(id: string, focus = true): Promise<void> {
     if (token !== taskToken || generation !== generationToken) return;
     if (detail.task.generation_id !== currentReplayId || detail.task.id !== id || detail.children.some(child => child.generation_id !== currentReplayId)) throw new Error("Task response scope mismatch.");
     if (detail.casefile && (detail.casefile.task_id !== id || detail.casefile.snapshot_id !== detail.task.snapshot_id)) throw new Error("Investigation handoff scope mismatch.");
+    if (detail.task.role === "operator_response") {
+      const basis = windows.find(window => window.id === detail.task.snapshot_id)
+        || await request<WindowSnapshot>(`/api/windows/${enc(detail.task.snapshot_id)}`);
+      if (token !== taskToken || generation !== generationToken) return;
+      if (basis.id !== detail.task.snapshot_id || basis.generation_id !== currentReplayId || basis.site_id !== detail.task.site_id) throw new Error("Workflow comparison snapshot scope mismatch.");
+      const file = detail.casefile;
+      if (file && (file.generation_id !== basis.generation_id || file.input_hash !== basis.input_hash
+        || file.pack_version !== basis.pack_version || file.baseline_version !== basis.baseline_version
+        || file.parameter_version !== basis.parameter_version || file.mode !== detail.task.mode
+        || file.state !== detail.task.state)) throw new Error("Workflow comparison evidence mismatch; refusing an unmatched comparison.");
+      if (!windows.some(window => window.id === basis.id)) windows.push(basis);
+    }
     taskDetail = detail;
     renderTaskDetail();
     renderAnswer();
@@ -1073,6 +1135,11 @@ function renderAnswer(): void {
   if (selectedWindow?.id !== task.snapshot_id) container.append(node("p", "Historical task explicitly selected: this answer does not match the visible window. Open its exact basis before using it.", "summary"));
   container.append(node("p", newer ? "Newer monitoring evidence is available. This answer has not been silently rebased." : "Answer basis matches the current monitoring snapshot."));
   const handoff = taskDetail?.task.id === task.id ? taskDetail.casefile : null;
+  if (basis && projection) renderWorkflowComparison(container, basis, task, handoff, projection.replay.scenario, () => {
+    void chooseWindow(task.snapshot_id).then(() => {
+      if (selectedWindow?.id === task.snapshot_id) switchTab("live");
+    });
+  });
   if (handoff) renderCasefile(container, handoff, {
     draft: question => {
       void chooseWindow(task.snapshot_id).then(() => {
@@ -1122,13 +1189,14 @@ function renderFeed(): void {
 }
 async function createReplay(): Promise<void> {
   const scenario = select("scenario").value, seed = Number(input("seed").value);
-  const mode: Mode = select("mode").value === "live" ? "live" : "scripted";
+  const mode: Mode = "live";
+  const workflow: Workflow = select("workflow").value === "sensor_alerts" ? "sensor_alerts" : "agent_assisted";
   if (!scenario || !Number.isSafeInteger(seed) || input("seed").value === "") { notify("Choose a scenario and enter an integer seed.", true); return; }
-  const bodyKey = JSON.stringify([scenario, seed, mode]);
+  const bodyKey = JSON.stringify([scenario, seed, mode, workflow]);
   if (createRetry?.bodyKey !== bodyKey) createRetry = { bodyKey, id: crypto.randomUUID() };
   commandBusy = true; updateControls();
   try {
-    const replay = await request<ReplaySession>("/api/replays", { scenario, seed, mode, idempotency_key: createRetry.id });
+    const replay = await request<ReplaySession>("/api/replays", { scenario, seed, mode, workflow, idempotency_key: createRetry.id });
     createRetry = null;
     replays.unshift(replay);
     await chooseReplay(replay.id);

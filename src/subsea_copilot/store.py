@@ -346,6 +346,7 @@ class Store:
                 previous.created_at,
                 previous.duration_seconds,
                 previous.mode,
+                previous.workflow,
             ) != (
                 session.scenario,
                 session.seed,
@@ -353,6 +354,7 @@ class Store:
                 session.created_at,
                 session.duration_seconds,
                 session.mode,
+                session.workflow,
             ):
                 raise Conflict("generation_identity_conflict")
             if session.latest_window_id:
@@ -392,7 +394,15 @@ class Store:
                 return ReplaySession.model_validate(existing["payload"])
             if previous.version != expected_version:
                 raise Conflict("version_conflict")
-            for field in ("scenario", "seed", "epoch", "created_at", "duration_seconds", "mode"):
+            for field in (
+                "scenario",
+                "seed",
+                "epoch",
+                "created_at",
+                "duration_seconds",
+                "mode",
+                "workflow",
+            ):
                 if getattr(previous, field) != getattr(session, field):
                     raise Conflict("generation_identity_conflict")
             if session.latest_window_id:

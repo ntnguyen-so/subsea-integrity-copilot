@@ -1,6 +1,7 @@
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type Channel = "pressure" | "acoustic" | "methane" | "temperature";
 export type Mode = "scripted" | "live";
+export type Workflow = "sensor_alerts" | "agent_assisted";
 export type Speed = 1 | 2 | 5 | 10;
 export interface Point { x: number; y: number }
 export interface Sensor { id: string; station_id: string; segment_id: string; chainage_m: number; position: Point; failure_domain_id: string; channels: Channel[] }
@@ -27,7 +28,7 @@ export interface WindowSnapshot {
   location: { status: string; best: LocationCandidate | null; compatible: LocationCandidate[]; reason: string; method: string; grid_m: number; inspection_start_m: number | null; inspection_end_m: number | null; station_bracket_m: number[] } | null;
   evidence: Record<string, EvidenceItem>; claims: Record<string, Claim>;
 }
-export interface ReplaySession { id: string; site_id: string; scenario: string; source_version: "legacy-v1" | "pressure-v2" | "pressure-v3"; seed: number; mode: Mode; state: "PAUSED" | "PLAYING" | "COMPLETED" | "FAILED"; clock_seconds: number; speed: Speed; duration_seconds: number; epoch: string; latest_window_id: string | null; version: number; updated_at: string; error: string | null }
+export interface ReplaySession { id: string; site_id: string; scenario: string; source_version: "legacy-v1" | "pressure-v2" | "pressure-v3"; seed: number; mode: Mode; workflow: Workflow; state: "PAUSED" | "PLAYING" | "COMPLETED" | "FAILED"; clock_seconds: number; speed: Speed; duration_seconds: number; epoch: string; latest_window_id: string | null; version: number; updated_at: string; error: string | null }
 export interface MonitoringEpisode { id: string; site_id: string; generation_id: string; state: string; hypothesis: string; basis_window_id: string; current_window_id: string; segment_ids: string[]; first_seen_seconds: number; material_revision: number; pending_window_id: string | null; auto_roots: number; dispatch_status: string | null }
 export interface HistoryInvestigation { assessment: "operating_change_plausible" | "instrumentation_context" | "unresolved"; document_ids: string[]; rejected_document_ids: string[]; comparison_call_ids: string[]; next_action: string }
 export interface CitedExplanation { text: string; references: string[] }

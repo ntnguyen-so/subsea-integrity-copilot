@@ -18,19 +18,29 @@ test("real replay, sensor evidence, pinned questions and keyboard navigation", a
     "What evidence supports this, and what remains unknown?",
   ]);
   await page.locator("#scenario").selectOption("S1");
+  await page.route("**/api/replays", async route => {
+    if (route.request().method() !== "POST") { await route.continue(); return; }
+    const body = route.request().postDataJSON();
+    expect(body.mode).toBe("live");
+    expect(body.workflow).toBe("agent_assisted");
+    const reply = await route.fetch({ postData: JSON.stringify({ ...body, mode: "scripted" }) });
+    await route.fulfill({ response: reply });
+  });
   await page.locator("#create-replay").click();
   await expect(page.locator("#step")).toBeEnabled();
+  await page.unrouteAll({ behavior: "wait" });
   await page.locator("#step").click();
   await expect(page.locator("#source-clock")).toContainText("5");
   await page.locator("#step").click();
   await expect(page.locator("#window-state")).toContainText(/WARMING[ _]UP/i);
-  await page.locator("#speed").selectOption("10");
+  await page.locator("#speed").selectOption("5");
   await page.locator("#play").click();
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak", {
     timeout: 120_000,
   });
   await page.locator("#play").click();
   await expect(page.locator("#play")).toHaveText("Play");
+  await expect(page.locator("#source-clock")).toContainText("PAUSED");
   await expect(page.locator("#event-summary")).toContainText(/suspected[ _]leak/i, {
     timeout: 120_000,
   });

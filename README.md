@@ -23,9 +23,10 @@ Reviewers need repository access before the interview.
 ## Run on Windows
 
 Requires Python 3.11, `uv`, Node.js, Docker Desktop with Linux containers, and
-PowerShell. Live mode additionally requires an authenticated GitHub Copilot CLI
-with model access. Scripted mode works without inference but is visibly labeled;
-it is not evidence of live-model performance.
+PowerShell. Agent-assisted runs additionally require an authenticated GitHub
+Copilot CLI with model access. Internal scripted API/CLI fixtures work without
+inference and remain labeled; they are not a customer-facing workflow choice or
+evidence of live-model performance.
 
 ```powershell
 uv sync --locked
@@ -51,6 +52,23 @@ Stopping Compose without `-v` preserves evidence.
 
 ### Five-minute operator walkthrough
 
+Choose between exactly two customer workflows under **Demo mode / new run**:
+
+- **Sensor alerts only:** the map and list flag individual instruments. Engineers
+  examine histories one by one and connect timing/location manually. There is no
+  combined leak/fault assessment, inspection interval, agent task or LLM call.
+- **Agent-assisted investigation:** the product correlates the alerts, distinguishes
+  possible leaks from sensor/telemetry concerns or insufficient evidence, and
+  recommends a supported inspection interval when justified. Real hosted agents
+  investigate records and explain competing causes with a reviewed evidence packet.
+
+Start S1 in **Sensor alerts only**, then start it again in **Agent-assisted
+investigation**, keeping the same scenario, seed and source time. This compares
+the same sensor data, not two inference adapters. The alert-only workflow is an
+illustration of the prospect's assumed current process, not a measured customer
+installation. A strong fixed workflow is a separate, credible comparator.
+Changing settings applies to the next run; existing runs retain their workflow.
+
 The default view has three areas: **pipeline map, sensor trend and agent
 assessment**. Source time and the current warning stay visible. Run settings,
 engineer questions, detection criteria and system diagnostics expand only when
@@ -65,9 +83,9 @@ correlated-drop support. These flags can coexist and are not confirmed leak or
 hardware-failure diagnoses. Chart keys separately identify pressure, baseline
 thresholds and missing-data bands; map, table and trend retain the same window.
 
-1. Choose **S1**, open **Run settings** and select **COPILOT HOSTED** for a genuine LLM demonstration
-   (**SCRIPTED** is explicitly an offline contract example). Create a generation,
-   select 10x speed and Play. The continuously updated UTC clock comes from the
+1. Choose **S1**, select **Agent-assisted investigation**, then **Start new run**.
+   This uses real hosted inference; no scripted/live selector is exposed.
+   Select 10x speed and Play. The continuously updated UTC clock comes from the
    server, never browser-extrapolated measurements. Samples arrive every simulated
    second; 60s windows slide every 5s after the 5s lateness allowance.
 2. Select a station on the map or an instrument in the alarm list. Its pressure
@@ -85,7 +103,13 @@ thresholds and missing-data bands; map, table and trend retain the same window.
    manual review never wait. In **Automatic investigation**, distinguish simulated
    source UTC from actual queue/report UTC. Replay speed accelerates the source,
    not the LLM.
-4. Pause when the supported interval appears. Review the report and its original
+4. Pause when the supported interval appears. **Compare with existing workflow**
+   opens a same-alert comparison of individual alerts/manual work versus the
+   product's actual document reads, measured comparisons, competing explanations,
+   grounding review and handoff. Both columns use the report's original snapshot,
+   not a newer live window. Hosted processing time is measured; ten-minute manual
+   investigation is only an assumption, and human review is additional.
+   Review the report and its original
    evidence. A newer material warning can wait for bounded dispatch while an older
    investigation is retained; historical reports are labeled, never silently
    rebased. Failures withhold reports without clearing numerical warnings.

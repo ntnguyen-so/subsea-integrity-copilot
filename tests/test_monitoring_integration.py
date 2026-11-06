@@ -100,6 +100,76 @@ def test_repeated_control_does_not_advance_clock_twice(monitor: Monitor) -> None
     assert monitor.store.get_window(second.latest_window_id).quality.status == "WARMING_UP"
 
 
+@pytest.mark.parametrize("scenario", ["S1", "S2"])
+def test_sensor_alert_workflow_never_admits_agents(
+    monitor: Monitor, monkeypatch: pytest.MonkeyPatch, scenario: str
+) -> None:
+    def forbidden_health() -> dict[str, object]:
+        raise AssertionError("Alert-only monitoring must not check or invoke the LLM")
+
+    monkeypatch.setattr(monitor.agents, "health", forbidden_health)
+    replay = monitor.create(scenario, 2026, "live", "alerts-" + scenario, workflow="sensor_alerts")
+    for index in range(37):
+        current = monitor.control(replay.id, "step", None, f"alert-step-{index}")
+    assert current.workflow == "sensor_alerts"
+    snapshot = monitor.store.get_window(current.latest_window_id)
+    assert any(f.anomaly_count or f.missing for f in snapshot.quality.findings)
+    assert not monitor.store.list_tasks(replay.id)
+    assert not monitor.store.list_episodes(replay.id)
+    warning = monitoring_warning(snapshot, sensor_alerts_only=True)
+    assert warning.kind == "sensor_alerts"
+    assert "does not classify" in warning.message
+    with pytest.raises(ValidationError, match="agent investigation is disabled"):
+        monitor.agents.submit_question(current, snapshot, "Leak or malfunction?", "disabled")
+    with pytest.raises(Conflict, match="generation_identity_conflict"):
+        monitor.store.save_replay(
+            current.model_copy(update={"workflow": "agent_assisted"}),
+            expected_version=current.version,
+        )
+
+
+def test_api_alert_workflow_blocks_questions_without_inference(settings: Settings) -> None:
+    app = create_app(settings, start_workers=False)
+    with TestClient(app) as client:
+        login = client.post(
+            "/api/login", json={"username": "operator", "password": settings.operator_password}
+        )
+        headers = {"X-CSRF-Token": login.json()["csrf_token"]}
+        replay = client.post(
+            "/api/replays",
+            headers=headers,
+            json={
+                "scenario": "S1",
+                "mode": "live",
+                "workflow": "sensor_alerts",
+                "idempotency_key": "api-alerts",
+            },
+        ).json()
+        assert replay["workflow"] == "sensor_alerts"
+        for index in range(24):
+            stepped = client.post(
+                f"/api/replays/{replay['id']}/control",
+                headers=headers,
+                json={"action": "step", "idempotency_key": f"step-{index}"},
+            )
+            assert stepped.status_code == 200
+        view = client.get(f"/api/replays/{replay['id']}/projection").json()
+        assert view["warning"]["kind"] == "sensor_alerts"
+        assert view["tasks"] == []
+        response = client.post(
+            f"/api/replays/{replay['id']}/questions",
+            headers=headers,
+            json={
+                "snapshot_id": view["latest_window"]["id"],
+                "mode": "live",
+                "question": "Leak or malfunction?",
+                "idempotency_key": "disabled",
+            },
+        )
+        assert response.status_code == 409
+        assert response.json()["code"] == "workflow_disabled"
+
+
 def test_maturing_leak_bypasses_unresolved_hold_without_an_obsolete_llm_job(
     monitor: Monitor,
 ) -> None:

@@ -19,6 +19,7 @@ Hypothesis = Literal[
 ]
 AgentRole = Literal["sensor_quality", "event_diagnosis", "operator_response"]
 Mode = Literal["scripted", "live"]
+Workflow = Literal["sensor_alerts", "agent_assisted"]
 TaskState = Literal[
     "QUEUED", "RUNNING", "WAITING_ON_CHILD", "SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED"
 ]
@@ -232,6 +233,7 @@ class ReplaySession(Contract):
     source_version: Literal["legacy-v1", "pressure-v2", "pressure-v3"] = "legacy-v1"
     seed: int = 2026
     mode: Mode = "scripted"
+    workflow: Workflow = "agent_assisted"
     state: Literal["PAUSED", "PLAYING", "COMPLETED", "FAILED"] = "PAUSED"
     clock_seconds: float = 0
     speed: Literal[1, 2, 5, 10] = 1

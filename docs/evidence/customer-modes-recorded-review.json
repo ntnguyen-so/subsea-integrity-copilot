@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "mode": "recorded hosted result plus actual alert-only replay; no new inference",
+  "baseline_replay_id": "replay-0d9319c3000fae37227bb3e5",
+  "agent_replay_id": "replay-d3b3f17e96acb18f2b411af0",
+  "agent_task_id": "85b3621e-786a-56d6-a4bf-aeabd284d1f4",
+  "baseline_snapshot_id": "window-1f84bf5e292f8e1d1b7ddd8eca145c57d0a9ec626076a733d942f0cf4469f1f3",
+  "agent_snapshot_id": "window-d4751442bf18de1e63693e6f1fc40d0c03d059b4c2b1ea6c9e30ac746cf767fb",
+  "shared_input_hash": "3b0d4cfc8b3ae7b2cb8723557f9f9345b19fc4ab2df37591bd82666c2ff68ffd",
+  "source_window_end_seconds": 110,
+  "baseline_agent_tasks": 0,
+  "hosted_document_reads": 2,
+  "hosted_comparisons": 1,
+  "hosted_calls": 7,
+  "hosted_report_processing_seconds": 145.078121,
+  "checks": {
+    "two_customer_modes": true,
+    "no_scripted_selector": true,
+    "baseline_no_agents": true,
+    "matching_measurements": true,
+    "baseline_individual_alerts_only": true,
+    "agent_inspection_interval": true,
+    "recorded_work_receipts": true,
+    "accepted_exact_handoff": true,
+    "mobile_no_page_overflow": true,
+    "no_browser_errors": true,
+    "agent_anomaly_trend": true,
+    "explicit_leak_or_malfunction_classification": true,
+    "baseline_raw_inspection_without_combined_claims": true
+  },
+  "limitations": [
+    "Uses a previously qualified hosted report, not a new inference attempt.",
+    "Customer alert-only workflow and ten-minute manual time are assumptions; no measured labor savings, field accuracy or superiority over fixed workflows."
+  ],
+  "reviewed_at": "2026-11-06T06:53:04.724Z"
+}

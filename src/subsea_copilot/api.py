@@ -20,7 +20,7 @@ from starlette.concurrency import run_in_threadpool
 
 from .casefile import InvestigationCase, build_casefile
 from .config import Settings
-from .contracts import AgentRole, Contract, Mode, WindowSnapshot, utc_now
+from .contracts import AgentRole, Contract, Mode, WindowSnapshot, Workflow, utc_now
 from .ingest import normalize_records
 from .llm.copilot_cli import CopilotCLIChatModel
 from .monitoring import Monitor
@@ -56,6 +56,7 @@ class ReplayCreate(Contract):
     scenario: Literal["S1", "S2", "S3", "S4", "S5", "S6"]
     seed: int = Field(default=2026, ge=0, le=2**32 - 1)
     mode: Mode = "scripted"
+    workflow: Workflow = "agent_assisted"
     idempotency_key: str = Field(min_length=1, max_length=200)
 
 
@@ -279,7 +280,9 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     @app.post("/api/replays")
     def create_replay(form: ReplayCreate, request: Request) -> object:
         principal(request, write=True)
-        return monitor_service().create(form.scenario, form.seed, form.mode, form.idempotency_key)
+        return monitor_service().create(
+            form.scenario, form.seed, form.mode, form.idempotency_key, workflow=form.workflow
+        )
 
     @app.post("/api/replays/{generation_id}/control")
     def control(generation_id: str, form: ReplayControl, request: Request) -> object:
@@ -296,10 +299,12 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         principal(request)
         view: dict[str, object] = dict(store.get_projection(generation_id))
         latest = view["latest_window"]
+        replay = store.get_replay(generation_id)
         view.update(
             {
                 "warning": monitoring_warning(
-                    WindowSnapshot.model_validate(latest) if latest is not None else None
+                    WindowSnapshot.model_validate(latest) if latest is not None else None,
+                    sensor_alerts_only=replay.workflow == "sensor_alerts",
                 ),
                 "pack": monitor_service().pack_for(generation_id),
                 "health": health(),

@@ -1,5 +1,74 @@
 # Qualification results
 
+## Two customer workflows, not two inference settings
+
+The customer-facing selector now has exactly two choices:
+**Sensor alerts only** and **Agent-assisted investigation**. Scripted versus
+hosted execution is no longer a customer-facing setting. New agent-assisted UI
+runs use real hosted inference; existing offline fixtures retain honest SCRIPTED
+labels when inspected.
+
+The alert-only view flags individual instruments and supports manual trend/raw
+inspection. It does not show a combined leak/malfunction diagnosis, correlated
+support diamonds, an inspection interval, agent reports or agent questions.
+Engineers must connect timing, location and operating context themselves.
+The product view adds cross-sensor numerical correlation, leak-versus-
+instrumentation assessment or explicit uncertainty, supported inspection
+intervals, and source-reviewed agent investigation and handover. LLMs do not
+invent physical measurements or leak coordinates.
+
+The selected workflow is persisted and immutable per replay. Alert-only runs
+never dispatch automatic agent work, and manual question admission is rejected
+server-side. No LLM is called for that workflow. Both views use the same
+synthetic source and existing per-sensor detection. The shared audit kernel
+retains numerical calculations behind the alert-only view: this is a controlled
+workflow demonstration, not a benchmark of the customer's installed software.
+The assumed current process is from the brief; customer connectors remain unbuilt.
+
+**38 monitoring/store integration tests and eight warning tests passed.**
+Coverage loss and warm-up remain explicit in both workflows. Normal physical
+conditions may still contain individual sensor flags; a lack of a correlated
+event is not the same as no outlying samples. Workflow admission, persistence
+and existing monitoring behavior are covered by
+`evidence\customer-modes-backend.xml` and `evidence\customer-modes-warnings.xml`.
+Ruff, strict mypy and TypeScript checks and the production UI build passed.
+
+Browser regression covered all **23 distinct offline journeys** across the
+cohort and corrective checks, not a clean first attempt. The cohort had
+**22 passes and one failure**: a paused replay did not reliably recognize
+browser-offline emulation from EventSource callbacks alone. Warning and clock
+freshness now also check the browser's offline state. The unchanged disconnect
+assertion and the expanded two-workflow journey then **both passed** on the
+final UI build, including raw inspection without combined claims in alert-only
+mode. Receipts: `evidence\customer-modes-browser-initial.xml` and
+`evidence\customer-modes-browser.xml`. An earlier manual journey raced the end
+of finite 10x playback; its 5x correction requires explicit PAUSED state, without
+increasing timeouts. Both original failures remain described in
+`evidence\customer-modes-initial.json`.
+
+The corrective 1x replay observed its warning 40.94s after Play, with
+**26.48-30.94s estimated local wall time from known source onset**. This is a
+single scripted-agent local timing observation, not hosted-report latency or a
+field SLO. Its separate receipt is
+`evidence\customer-modes-warning-timing.json`; earlier timing evidence is retained.
+
+A read-only comparison uses the original genuine hosted S1 report and an actual
+alert-only replay with **identical input hashes at source +110s**. The baseline
+has **zero agent tasks**. The hosted report contains **two document reads, one
+included pressure comparison, seven hosted calls and 145.08s from admission**,
+with its original accepted critic record and exact P1 200-600m handoff. No new
+inference was requested for this UI review. Evidence:
+`evidence\customer-modes-recorded-review.json`.
+Screenshots: [individual alerts](assets/dashboard-sensor-alerts.png),
+[agent-assisted view](assets/engineer-dashboard-live.png), and
+[same-alert workflow comparison](assets/dashboard-workflow-comparison.png).
+
+The comparison exposes actual source/review receipts and a reusable handoff,
+not inferred savings. Ten-minute manual investigation is still an assumption;
+human review time, onboarding benefit, field accuracy and total monetary cost
+remain unmeasured. The separate fixed-workflow benchmark below remains a
+credible alternative, not equivalent to this illustrative alert-only workflow.
+
 ## Light theme and consistent sensor meanings
 
 The readability review replaced the dark palette with white panels, dark text

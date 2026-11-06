@@ -120,6 +120,11 @@ class AgentService:
     ) -> AgentTask:
         from datetime import timedelta
 
+        if session.workflow == "sensor_alerts":
+            raise ValidationError(
+                "workflow_disabled",
+                "Sensor alerts only: agent investigation is disabled. Start an agent-assisted run.",
+            )
         if (
             session.id != snapshot.generation_id
             or session.site_id != snapshot.site_id

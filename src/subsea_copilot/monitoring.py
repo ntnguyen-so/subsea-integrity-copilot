@@ -18,6 +18,7 @@ from .contracts import (
     ReplaySession,
     SitePack,
     WindowSnapshot,
+    Workflow,
     content_hash,
     utc_now,
 )
@@ -101,7 +102,15 @@ class Monitor:
         with self._lock:
             return self._source(self.store.get_replay(generation_id)).dataset.pack
 
-    def create(self, scenario: str, seed: int, mode: Mode, idempotency_key: str) -> ReplaySession:
+    def create(
+        self,
+        scenario: str,
+        seed: int,
+        mode: Mode,
+        idempotency_key: str,
+        *,
+        workflow: Workflow = "agent_assisted",
+    ) -> ReplaySession:
         with self._lock:
             generation_id = (
                 "replay-"
@@ -117,6 +126,7 @@ class Monitor:
                     source_version=SOURCE_VERSION,
                     seed=seed,
                     mode=mode,
+                    workflow=workflow,
                     epoch=dataset.epoch,
                 )
             )
@@ -280,6 +290,8 @@ class Monitor:
             source.version = saved.version
 
     def _episode(self, session: ReplaySession, snapshot: WindowSnapshot) -> None:
+        if session.workflow == "sensor_alerts":
+            return
         if snapshot.quality.status == "WARMING_UP":
             return
         existing = [

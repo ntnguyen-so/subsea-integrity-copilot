@@ -1,0 +1,92 @@
+<testsuites id="" name="" tests="23" failures="1" skipped="0" errors="0" time="1031.518521">
+<testsuite name="console.spec.ts" timestamp="2026-11-06T06:31:11.637Z" hostname="" tests="5" failures="0" skipped="0" time="352.801" errors="0">
+<testcase name="real replay, sensor evidence, pinned questions and keyboard navigation" classname="console.spec.ts" time="74.253">
+</testcase>
+<testcase name="pressure S2 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="87.775">
+</testcase>
+<testcase name="pressure S4 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="87.854">
+</testcase>
+<testcase name="pressure S5 preserves uncertainty instead of inventing a leak location" classname="console.spec.ts" time="76.998">
+</testcase>
+<testcase name="asking a question opens Agents before its task detail read completes" classname="console.spec.ts" time="25.921">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-06T06:31:11.637Z" hostname="" tests="11" failures="0" skipped="0" time="580.146" errors="0">
+<testcase name="brief geometry, correct wall sides and manual comparison agree with actual evidence" classname="dashboard.spec.ts" time="80.546">
+</testcase>
+<testcase name="server-confirmed clock and selected trends stay live; only explicit review pins them" classname="dashboard.spec.ts" time="39.655">
+</testcase>
+<testcase name="pinning a pending live read never presents the previous window as the new evidence" classname="dashboard.spec.ts" time="34.833">
+</testcase>
+<testcase name="automatic report timestamps are explicit and failed analysis cannot clear a numerical warning" classname="dashboard.spec.ts" time="50.045">
+</testcase>
+<testcase name="unresolved-only triage exposes its source-time boundary without pretending an agent report exists" classname="dashboard.spec.ts" time="30.621">
+</testcase>
+<testcase name="monitoring controls and manual instruments fit a narrow viewport" classname="dashboard.spec.ts" time="25.095">
+</testcase>
+<testcase name="default view prioritizes map, trend and assessment while optional tools stay collapsed" classname="dashboard.spec.ts" time="59.891">
+</testcase>
+<testcase name="light theme has readable contrast and the map, chart and legend agree on pressure anomalies" classname="dashboard.spec.ts" time="63.497">
+</testcase>
+<testcase name="quality concerns use the same red cross in the legend and map, not the pressure-anomaly symbol" classname="dashboard.spec.ts" time="58.173">
+</testcase>
+<testcase name="unassessed sensors are grey rather than apparently healthy during warm-up" classname="dashboard.spec.ts" time="7.555">
+</testcase>
+<testcase name="two customer modes separate individual sensor alerts from agent investigation on matching S1 data" classname="dashboard.spec.ts" time="130.235">
+</testcase>
+</testsuite>
+<testsuite name="deck.spec.ts" timestamp="2026-11-06T06:31:11.637Z" hostname="" tests="4" failures="0" skipped="0" time="5.2" errors="0">
+<testcase name="topology depicts the source pack&apos;s connectivity, station distribution and sensor identities" classname="deck.spec.ts" time="0.812">
+</testcase>
+<testcase name="deck follows the interview schedule and supports chapter, keyboard and notes navigation" classname="deck.spec.ts" time="0.734">
+</testcase>
+<testcase name="interview clock survives navigation, pauses and resets without real waiting" classname="deck.spec.ts" time="0.599">
+</testcase>
+<testcase name="all slides fit desktop presentation and print pages, with readable mobile scrolling" classname="deck.spec.ts" time="3.055">
+</testcase>
+</testsuite>
+<testsuite name="sensor.spec.ts" timestamp="2026-11-06T06:31:11.637Z" hostname="" tests="2" failures="0" skipped="0" time="7.749" errors="0">
+<testcase name="actual projection counters and every pipeline chip are explicit" classname="sensor.spec.ts" time="2.262">
+</testcase>
+<testcase name="real sensor charts survive projection refreshes on a pinned window" classname="sensor.spec.ts" time="5.487">
+</testcase>
+</testsuite>
+<testsuite name="warning.spec.ts" timestamp="2026-11-06T06:31:11.637Z" hostname="" tests="1" failures="1" skipped="0" time="83.52" errors="0">
+<testcase name="1x replay delivers a clear warning independently of the pinned investigation" classname="warning.spec.ts" time="83.52">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\runtime\customer-modes-final\warning-1x-replay-delivers-475d8-of-the-pinned-investigation\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveAttribute(expected) failed" type="expect.toHaveAttribute">
+<![CDATA[  warning.spec.ts:4:5 › 1x replay delivers a clear warning independently of the pinned investigation
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('#monitoring-warning')
+    Expected: "unavailable"
+    Received: "possible_leak"
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "toHaveAttribute" locator('#monitoring-warning') with timeout 15000ms
+      - waiting for locator('#monitoring-warning')
+        33 × locator resolved to <section role="alert" aria-atomic="true" id="monitoring-warning" data-kind="possible_leak" class="monitoring-warning attention" data-snapshot="window-72545b0d00bbc86b4146e5af89907babb9824ea8d45f1bc6fae041d063117234" title="Latest numerical monitoring window: 2026-01-01T00:01:55Z. Independent of selected historical evidence and AI analysis.">POSSIBLE LEAK: prompt integrity review required. …</section>
+           - unexpected value "possible_leak"
+
+
+      59 |   await expect(page.locator("#monitoring-warning")).not.toHaveAttribute("data-snapshot", previous.id);
+      60 |   await page.context().setOffline(true);
+    > 61 |   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "unavailable", { timeout: 15_000 });
+         |                                                     ^
+      62 |   await expect(page.locator("#monitoring-warning")).toContainText("Last recorded assessment: POSSIBLE LEAK");
+      63 |   await writeFile("docs\\evidence\\warning-browser-timing.json", JSON.stringify({
+      64 |     mode: "scripted", passed: true, replay_id: replay.id, replay_speed: 1,
+        at C:\Users\thanh\subsea_monitoring\tests\browser\warning.spec.ts:61:53
+
+    Error Context: ..\..\runtime\customer-modes-final\warning-1x-replay-delivers-475d8-of-the-pinned-investigation\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

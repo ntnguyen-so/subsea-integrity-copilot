@@ -13,6 +13,8 @@ class MonitoringWarning(Contract):
         "sensor_telemetry",
         "unresolved",
         "no_qualifying_event",
+        "sensor_alerts",
+        "no_sensor_alerts",
     ]
     severity: Literal["attention", "warning", "info"]
     snapshot_id: str | None
@@ -20,7 +22,9 @@ class MonitoringWarning(Contract):
     message: str
 
 
-def monitoring_warning(snapshot: WindowSnapshot | None) -> MonitoringWarning:
+def monitoring_warning(
+    snapshot: WindowSnapshot | None, *, sensor_alerts_only: bool = False
+) -> MonitoringWarning:
     severity: Literal["attention", "warning", "info"]
     kind: Literal[
         "waiting",
@@ -29,6 +33,8 @@ def monitoring_warning(snapshot: WindowSnapshot | None) -> MonitoringWarning:
         "sensor_telemetry",
         "unresolved",
         "no_qualifying_event",
+        "sensor_alerts",
+        "no_sensor_alerts",
     ]
     if snapshot is None or snapshot.quality.status == "WARMING_UP":
         kind, severity = "waiting", "info"
@@ -40,6 +46,26 @@ def monitoring_warning(snapshot: WindowSnapshot | None) -> MonitoringWarning:
         message = (
             "Restore observation coverage and follow the operator's review procedure. "
             "Location withheld."
+        )
+    elif sensor_alerts_only:
+        count = len(
+            {
+                finding.sensor_id
+                for finding in snapshot.quality.findings
+                if finding.anomaly_count
+                or finding.missing
+                or finding.hard_excluded
+                or finding.spike_count
+                or finding.drift_suspected
+                or finding.peer_disagreement
+            }
+        )
+        kind, severity = ("sensor_alerts", "warning") if count else ("no_sensor_alerts", "info")
+        title = f"{count} SENSOR ALERTS: engineer review required" if count else "No sensor alerts"
+        message = (
+            "Inspect individual histories and connect the timing and location manually. "
+            "This alert-only demo does not classify leaks versus malfunction; "
+            "follow existing response procedures. No safety clearance is implied."
         )
     elif snapshot.event.hypothesis == "suspected_leak":
         kind, severity = "possible_leak", "attention"
