@@ -117,7 +117,7 @@ def main() -> None:
 
             if args.host not in ("127.0.0.1", "localhost", "::1"):
                 parser.error("Recorded QA console may bind only to loopback")
-            print(f"Recorded-only QA console: http://{args.host}:{args.port}")
+            print(f"Recorded investigation console: http://{args.host}:{args.port}")
             uvicorn.run(
                 create_recorded_console(
                     replace(Settings.from_env(), host=args.host, port=args.port), args.tenant,
@@ -218,7 +218,7 @@ def main() -> None:
 
             if args.host not in ("127.0.0.1", "localhost", "::1"):
                 parser.error("This installation may bind only to loopback")
-            print(f"Read-only synthetic console: http://{args.host}:{args.port}")
+            print(f"Read-only pressure-monitoring console: http://{args.host}:{args.port}")
             uvicorn.run(create_app(Settings.from_env()), host=args.host, port=args.port)
         elif args.command == "ingest":
             from .contracts import ReplaySession
