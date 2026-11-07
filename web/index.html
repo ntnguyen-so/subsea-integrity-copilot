@@ -73,10 +73,10 @@
         </div>
         <section class="panel agent-status-panel" aria-labelledby="automatic-title">
           <div class="panel-heading"><h2 id="automatic-title">Agents · investigation beyond the detector</h2><span id="automatic-state" class="badge">Waiting for telemetry</span></div>
-          <p class="analysis-cue"><strong>Agent-assisted RCA</strong> Quality review → cross-sensor evidence and records → competing causes and engineer checks. Findings appear only after executed work is recorded.</p>
+          <p class="analysis-cue"><strong>How agents work</strong> Coordinator assigns checks → Sensor Quality reviews readings → Event Diagnosis compares sensors and records → Coordinator drafts findings → Grounding Reviewer checks the wording. Interim outputs are provisional; only the accepted report can recommend an inspection area.</p>
           <div id="automatic-progress" class="agent-roles"></div>
           <p class="agent-conclusion-label">Agent conclusion · separate from the numerical alarm</p>
-          <p id="automatic-conclusion" class="automatic-conclusion">Anomalies start analysis automatically. Monitoring and manual analysis do not wait for an agent.</p>
+          <p id="automatic-conclusion" class="automatic-conclusion">New pressure anomalies start investigations automatically. Missing values alone do not start agents.</p>
           <div id="agent-findings" class="agent-findings"></div>
           <div id="automatic-actions" class="automatic-actions"></div>
           <details class="agent-diagnostics"><summary>Processing timestamps and limitations</summary><div id="automatic-timeline" class="automatic-timeline"></div><p class="muted">Both modes share the same sensor evidence and detector warnings. Map interpretation and inspection overlays appear only for a reviewed agent report matching the displayed window. Numerical tools constrain the admissible interval; it is not an exact leak coordinate. Sensor timestamps use simulated source UTC; agent timestamps use real processing time. No automatic actuation or correctness guarantee.</p></details>

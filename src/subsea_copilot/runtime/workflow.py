@@ -41,6 +41,7 @@ from subsea_copilot.grounding import (
     validate_revision,
 )
 from subsea_copilot.knowledge import KnowledgePacket, load_knowledge, select_knowledge
+from subsea_copilot.public_activity import ROLE_NAMES
 from subsea_copilot.runtime.agent import (
     WorkPlan,
     build_graph,
@@ -923,19 +924,39 @@ class AgentService:
                         [] if call_policy["final_only"] else self._schemas(task)
                     )
                     with self.telemetry.span(
-                        "generation",
+                        f"generation.{task.role}.{phase}",
                         {
                             "task_id": task.id,
                             "role": task.role,
+                            "phase": phase,
                             "mode": task.mode,
                             "call_id": call_id,
                             "prompt_hash": metadata["prompt_hash"],
+                            "langfuse.observation.input": json.dumps(
+                                [
+                                    {"role": message.type, "content": message.content}
+                                    for message in invocation_messages
+                                ],
+                                allow_nan=False,
+                            ),
                         },
                     ) as span:
                         remaining = (task.deadline - utc_now()).total_seconds()
                         if remaining <= 0:
                             raise ValidationError("deadline", "Root elapsed-time bound exhausted.")
                         response = model.invoke(invocation_messages, timeout=min(60.0, remaining))
+                        if response.usage_metadata:
+                            for key in ("input_tokens", "output_tokens", "total_tokens"):
+                                span.set_attribute(
+                                    f"gen_ai.usage.{key}", response.usage_metadata[key]
+                                )
+                        span.set_attribute(
+                            "langfuse.observation.output",
+                            json.dumps(
+                                {"content": response.content, "tool_calls": response.tool_calls},
+                                allow_nan=False,
+                            ),
+                        )
                         metadata.update(response.response_metadata)
                         if (
                             task.mode == "live"
@@ -986,6 +1007,31 @@ class AgentService:
     ) -> tuple[AgentResult, AgentTask]:
         rounds = []
         for index in range(2):
+            if result.interpretation is not None:
+                self._event(
+                    task,
+                    "agent.draft",
+                    {
+                        "agent": ROLE_NAMES[task.role],
+                        "role": task.role,
+                        "status": "draft_pending_review",
+                        "round": index + 1,
+                        "text": result.interpretation.answer.text,
+                        "references": result.interpretation.answer.references,
+                    },
+                )
+            self._event(
+                task,
+                "agent.review_requested",
+                {
+                    "agent": "Grounding Reviewer",
+                    "role": "grounding_reviewer",
+                    "round": index + 1,
+                    "candidate_hash": candidate_hash(result),
+                    "purpose": "Check each explanation against its cited evidence "
+                    "before releasing the report",
+                },
+            )
             reviewed, task = self._graph(task, snapshot, f"critic-{index}", candidate=result)
             assessment = GroundingAssessment.model_validate(reviewed)
             rounds.append(
@@ -998,6 +1044,7 @@ class AgentService:
                     "round": index + 1,
                     "decision": assessment.decision,
                     "issues": sum(check.verdict != "supported" for check in assessment.checks),
+                    "checks": [check.model_dump(mode="json") for check in assessment.checks],
                 },
             )
             if assessment.decision == "accept":
@@ -1129,7 +1176,7 @@ class AgentService:
                 or {}
             )
             with self.telemetry.span(
-                "agent",
+                f"agent.{task.role}",
                 {
                     "task_id": task.id,
                     "root_id": task.root_id,
@@ -1210,10 +1257,26 @@ class AgentService:
                         result.model_dump_json(), task, snapshot, self._gateway(task, snapshot)
                     )
                 task = self._save(task)
+                recipient = "engineer"
+                if task.parent_id:
+                    parent = self.store.get_task(task.parent_id)
+                    recipient = (
+                        "event_diagnosis"
+                        if task.role == "sensor_quality" and "diagnosis" in parent.plan
+                        else parent.role
+                    )
                 self._event(
                     task,
                     "answer.checked",
-                    {"state": task.state, "mode": task.mode, "claim_refs": result.claim_refs},
+                    {
+                        "state": task.state,
+                        "mode": task.mode,
+                        "claim_refs": result.claim_refs,
+                        "agent": ROLE_NAMES[task.role],
+                        "role": task.role,
+                        "public_output": task.answer,
+                        "to_role": recipient,
+                    },
                 )
         except Exception as exc:
             code = getattr(exc, "code", "runtime_failed")

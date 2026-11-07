@@ -751,6 +751,28 @@ class Store:
                 conn, generation_id, type, payload, snapshot_id, task_id, simulated_seconds
             )
 
+    def public_agent_activity(self, task_id: str) -> list[ConsoleEvent]:
+        kinds = [
+            "agent.check_started",
+            "agent.check_completed",
+            "agent.handoff_requested",
+            "agent.draft",
+            "agent.review_requested",
+            "answer.checked",
+            "answer.critique",
+        ]
+        with self._tx(read=True) as conn:
+            task = self._get(conn, "tasks", task_id, AgentTask)
+            return [
+                ConsoleEvent.model_validate(row)
+                for row in conn.execute(
+                    "SELECT * FROM subsea.events WHERE generation_id=%s AND type=ANY(%s) "
+                    "AND task_id IN (SELECT id FROM subsea.tasks WHERE root_id=%s) "
+                    "ORDER BY id LIMIT 500",
+                    (task.generation_id, kinds, task.root_id),
+                )
+            ]
+
     def newest_event_id(self, generation_id: str) -> int:
         with self._tx(read=True) as conn:
             self._get(conn, "replays", generation_id, ReplaySession)
@@ -1187,6 +1209,23 @@ class Store:
             saved = self._insert_task(
                 conn, clean, step_index=step_index, plan_revision=plan_revision
             )
+            self._event(
+                conn,
+                child.generation_id,
+                "agent.handoff_requested",
+                {
+                    "from_task_id": parent.id,
+                    "to_task_id": saved.id,
+                    "from_role": parent.role,
+                    "to_role": saved.role,
+                    "snapshot_id": saved.snapshot_id,
+                    "reason": "Check reading reliability before assessing causes"
+                    if saved.role == "sensor_quality"
+                    else "Investigate pressure patterns using the checked quality handoff",
+                },
+                task_id=parent.id,
+                snapshot_id=parent.snapshot_id,
+            )
             self._wait_for_children(conn, parent)
             return saved
 
@@ -1448,7 +1487,16 @@ class Store:
                 conn,
                 task.generation_id,
                 event_type,
-                {"call_id": call_id, "task_id": task_id, "error": data.get("error")},
+                {
+                    "call_id": call_id,
+                    "task_id": task_id,
+                    "error": data.get("error"),
+                    **(
+                        {"phase": data.get("phase"), "role": task.role}
+                        if table == "model_receipts"
+                        else {"tool": data.get("name")}
+                    ),
+                },
                 task_id=task_id,
                 snapshot_id=task.snapshot_id,
             )

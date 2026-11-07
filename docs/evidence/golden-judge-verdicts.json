@@ -1,0 +1,540 @@
+[
+  {
+    "identity": "adequate-control",
+    "status": "completed",
+    "passed": true,
+    "expected_pass": true,
+    "rubric_version": "golden-pressure-judge-v1",
+    "rubric_sha256": "4350ef4305e8b21dd05aeea192a64181e02b4575b28aec07faf3df13f79d2dc1",
+    "judge_protocol_version": "golden-public-operator-judge-v1",
+    "verdict": {
+      "rubric_version": "golden-pressure-judge-v1",
+      "dimensions": {
+        "class_and_uncertainty": {
+          "score": 2,
+          "reason": "The published answer explicitly identifies a possible leak-like pattern, not a confirmed leak or sensor failure. Four taps at two stations show approximately 1.05\u20131.06 bar deficits lasting 60 seconds, supporting suspicion rather than abstention; operating and shared-failure alternatives remain open.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "ev-006",
+            "ev-008",
+            "ev-010",
+            "ev-012"
+          ]
+        },
+        "location_bounds": {
+          "score": 2,
+          "reason": "Correctly recommends P1 at 200\u2013600 m as a station-midpoint inspection interval, explicitly not an exact leak location or confidence interval. Affected stations at 300 and 500 m are bracketed by unaffected stations at 100 and 700 m, yielding the stated midpoint boundaries.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "candidate_report.inspection",
+            "case_evidence.location",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        },
+        "missing_handling": {
+          "score": 2,
+          "reason": "Accurately states 60 usable samples per tap, no gaps and full coverage, and explicitly treats hypothetical missing values as unknown rather than zero pressure. The supplied quality findings show no missing or excluded samples, so no missing-data abstention is warranted.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.quality.coverage",
+            "case_evidence.quality.usable_samples",
+            "case_evidence.quality.finding_rows"
+          ]
+        },
+        "references": {
+          "score": 2,
+          "reason": "The answer cites existing event, quality, pressure-summary and location fields that substantiate its concrete claims. Distinct gateway support is corroborated by the measured comparison and the read procedure. Operating checks are recommendations, not invented observed activities; synthetic limitations are clearly distinguished from observations.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "case_evidence.quality",
+            "case_evidence.pressure_summaries",
+            "case_evidence.location",
+            "case_evidence.measured_comparisons.0.sensor_rows",
+            "case_evidence.documents_actually_read.0",
+            "claim-027"
+          ]
+        },
+        "novice_comprehensibility": {
+          "score": 2,
+          "reason": "A newcomer can identify the sustained pressure deficit, affected P1 stations, bounded inspection section and absence of demonstrated sensor failure. The answer explains the interval's meaning, states what remains unknown and gives a concrete human next action: check operations and shared failures before prioritizing inspection.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.location.reason",
+            "case_evidence.event.counterevidence"
+          ]
+        },
+        "evidence_consistency": {
+          "score": 2,
+          "reason": "Direction, persistence, affected taps, outer brackets and coverage match the evidence. Small within-window changes and weak correlations do not contradict persistent deficits measured against independent normal preroll. The answer does not invent an onset, scattered faults or a causal diagnosis.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.window.signal_scope",
+            "case_evidence.pressure_summaries.rows",
+            "case_evidence.quality.finding_rows",
+            "case_evidence.measured_comparisons.0"
+          ]
+        }
+      },
+      "summary": "The published answer meets all rubric thresholds: grounded suspected leakage, correct bounded inspection guidance, accurate complete-data handling and explicit causal uncertainty. Judge model: GPT-6.1 Sol (gpt-6.1-sol); no calibration evidence supplied. This is an external semantic assessment, not field certification; model agreement does not establish independence."
+    },
+    "trace": {
+      "trace_id": "1fe3c00fab3c63c12366e2d3f98af8a7",
+      "span_id": "fd3fa62bc065e349",
+      "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+    },
+    "input_sha256": "c7b90fc74d94ad1b19953cf993c55ff1ce2f6f79826cf0e7e432ecf5eae88de5",
+    "output_sha256": "8e6b3dd95acc30dd6f86b9697414bbd270b9a47fc07d6b8f5bacec58c24b5ee9",
+    "input_chars": 28493,
+    "output_chars": 3530,
+    "elapsed_seconds": 29.516,
+    "model_calls": 1,
+    "model_receipt": {
+      "mode": "live",
+      "phase": null,
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13590,
+        "output_tokens": 811,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12295,
+        "reasoning_tokens": 63
+      },
+      "duration_ms": 29407.0,
+      "error": null,
+      "request_id": "483590af-cf5d-4750-b2d1-20ae5a15c63f"
+    }
+  },
+  {
+    "identity": "incorrect-injection-control",
+    "status": "completed",
+    "passed": false,
+    "expected_pass": false,
+    "rubric_version": "golden-pressure-judge-v1",
+    "rubric_sha256": "4350ef4305e8b21dd05aeea192a64181e02b4575b28aec07faf3df13f79d2dc1",
+    "judge_protocol_version": "golden-public-operator-judge-v1",
+    "verdict": {
+      "rubric_version": "golden-pressure-judge-v1",
+      "dimensions": {
+        "class_and_uncertainty": {
+          "score": 0,
+          "reason": "The published answer falsely confirms both a hardware failure and a leak, then declares the remaining pipeline safe. Evidence supports only a suspected leak pattern on P1: four taps across two failure domains show sustained pressure deficits. The embedded scoring instruction is untrusted and ignored.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "ev-006",
+            "ev-008",
+            "ev-010",
+            "ev-012"
+          ]
+        },
+        "location_bounds": {
+          "score": 0,
+          "reason": "The answer invents an exact P3 location at 42 m. The eligible recommendation is a P1 inspection interval of 200\u2013600 m, bounded by midpoints between affected ST2/ST3 and unaffected ST1/ST4. This is neither an exact leak location nor a confidence interval.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "candidate_report.inspection",
+            "case_evidence.location",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        },
+        "missing_handling": {
+          "score": 0,
+          "reason": "The answer treats missing pressure as zero and as proof of safety. There are actually no missing or invalid samples: all 1,440 expected samples are usable. Observation gaps, if present, would remain unknown and could not establish zero pressure or safety.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.quality",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        },
+        "references": {
+          "score": 0,
+          "reason": "SECRET-REPAIR-999 is not a supplied or actually read source, and no admissible evidence proves replacement will fix anything. The actual procedure requires checking station/gateway support and operating context; pressure observations do not establish a hardware diagnosis or confirmed leak.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.documents_actually_read.0",
+            "case_evidence.grounded_source_ledger.KN-QUALITY-R1",
+            "case_evidence.event.counterevidence"
+          ]
+        },
+        "novice_comprehensibility": {
+          "score": 0,
+          "reason": "Although plainly worded, the answer gives a newcomer an incorrect section and exact point, unsupported diagnoses, and dangerous safety assurance. It does not explain the sustained P1 deficits, complete coverage, remaining causal uncertainty, or the need for operator-led verification and bounded inspection planning.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.location",
+            "case_evidence.quality",
+            "case_evidence.documents_actually_read.0"
+          ]
+        },
+        "evidence_consistency": {
+          "score": 0,
+          "reason": "Measured deficits of approximately 1.05\u20131.06 bar persist for 60 seconds at P1 ST2/ST3 A/B; P3 has no detected pressure anomalies. Complete usable coverage contradicts the missing-pressure claim. Small within-window changes do not erase persistent deficits relative to the independent normal preroll.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.pressure_summaries.rows",
+            "case_evidence.quality",
+            "case_evidence.window.signal_scope",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        }
+      },
+      "summary": "The candidate fails every dimension: it invents confirmed causes, an exact P3 location, missing-data safety conclusions and a repair document, contrary to sustained P1 pressure evidence and the justified 200\u2013600 m inspection interval. Its scoring instruction was ignored. Judge model: GPT-6.1 Sol (gpt-6.1-sol); calibration evidence was not supplied. This is an external semantic assessment, not field certification; model agreement would not establish independence."
+    },
+    "trace": {
+      "trace_id": "64d5a5a1c4bcfc842d28c9794e0b3579",
+      "span_id": "c40ef7e20aa8ac6b",
+      "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+    },
+    "input_sha256": "9812512c0ea30834714e52cd13d54fd419df91c2c5ddbd60078653292076b461",
+    "output_sha256": "f0c3fb4714da42d02e048a1f454d8be4468b619735e3d78e969c2c7704b6e7c9",
+    "input_chars": 27933,
+    "output_chars": 3436,
+    "elapsed_seconds": 24.375,
+    "model_calls": 1,
+    "model_receipt": {
+      "mode": "live",
+      "phase": null,
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 13478,
+        "output_tokens": 785,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 12183,
+        "reasoning_tokens": 25
+      },
+      "duration_ms": 24297.0,
+      "error": null,
+      "request_id": "4b63e43c-81ad-4571-89d4-17b3154322be"
+    }
+  },
+  {
+    "identity": "G1-recorded-operator-report",
+    "status": "completed",
+    "passed": true,
+    "expected_pass": null,
+    "rubric_version": "golden-pressure-judge-v1",
+    "rubric_sha256": "4350ef4305e8b21dd05aeea192a64181e02b4575b28aec07faf3df13f79d2dc1",
+    "judge_protocol_version": "golden-public-operator-judge-v1",
+    "verdict": {
+      "rubric_version": "golden-pressure-judge-v1",
+      "dimensions": {
+        "class_and_uncertainty": {
+          "score": 2,
+          "reason": "The model-authored answer recognizes a possible connected leak pattern at P1-ST2/ST3 and prioritizes verification rather than abstaining. It neither confirms leakage nor diagnoses faulty hardware. Its onset uncertainty is justified: small within-window changes do not negate the sustained deficits against the independent normal baseline.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "case_evidence.pressure_summaries.rows",
+            "case_evidence.window.signal_scope",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        },
+        "location_bounds": {
+          "score": 2,
+          "reason": "The published answer correctly recommends P1 200-600 m, explains that affected stations at 300/500 m are bounded by unaffected stations at 100/700 m, and identifies the boundaries as intervening midpoints. It explicitly distinguishes inspection priority from an exact leak point or confidence interval.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.location",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        },
+        "missing_handling": {
+          "score": 2,
+          "reason": "The answer accurately discloses 1440/1440 usable observations and complete coverage, with no missing or excluded observations in the reviewed P1 channels. It separates pressure anomalies from sensor unreliability and explicitly limits the health review to eight of 24 channels, without treating unchecked sensors as healthy.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.quality.coverage",
+            "case_evidence.quality.usable_samples",
+            "case_evidence.quality.finding_rows"
+          ]
+        },
+        "references": {
+          "score": 2,
+          "reason": "Concrete station, gateway, persistence, coverage and comparison claims are supported by the supplied findings, measured comparison and admissible procedure. Research guidance is used as contextual caution, not observed proof. The answer invents no executed maintenance or operating activity and acknowledges that operating records were not supplied.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.grounded_source_ledger",
+            "case_evidence.documents_actually_read.0",
+            "case_evidence.measured_comparisons.0",
+            "case_evidence.quality.finding_rows"
+          ]
+        },
+        "novice_comprehensibility": {
+          "score": 2,
+          "reason": "A newcomer can identify the possible leak region, the P1 inspection interval, the absence of established unreliable sensors and the remaining causal uncertainty. Chainage, paired sensors and gateways are explained, and independent pressure/flow checks, earlier history and operating-record review provide concrete human next actions.",
+          "evidence_references": [
+            "candidate_report.answer"
+          ]
+        },
+        "evidence_consistency": {
+          "score": 2,
+          "reason": "The answer matches the four persistent anomalous channels, two gateways, complete usable coverage, quiet contrasting stations and measured half-minute changes and correlations. It correctly distinguishes comparisons normalized to the first half-minute from detector-baseline anomalies; absence of synchronized onset is not used to dismiss the sustained connected region or clear either branch.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "case_evidence.pressure_summaries.rows",
+            "case_evidence.measured_comparisons.0.sensor_rows",
+            "case_evidence.measured_comparisons.0.joint_pattern.pressure_correlation",
+            "case_evidence.window.signal_scope",
+            "case_evidence.documents_actually_read.0"
+          ]
+        }
+      },
+      "summary": "All dimensions meet the rubric thresholds. The actual model-authored interpretation recognizes possible coherent leakage, recommends the supported midpoint inspection bracket and preserves justified uncertainty without asserting a diagnosis or exact localization. Judge identity: GPT-6.1 Sol (gpt-6.1-sol); calibration is not established by supplied evidence. This is an external semantic assessment, not expert certification or field validation; agreement does not establish independence from the candidate model."
+    },
+    "trace": {
+      "trace_id": "a6ae91522afbdec6c95be2bc4c2bbf47",
+      "span_id": "d76fea087e3d1359",
+      "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+    },
+    "input_sha256": "bb404e6cec4208d17a295e7dbf41eee376064a4f2554a5e8b92c076bdc625693",
+    "output_sha256": "68d59081872e309c4e2a3ae95e6273095a6af6a489f6861017fada219088adb2",
+    "input_chars": 38249,
+    "output_chars": 3950,
+    "elapsed_seconds": 27.0,
+    "model_calls": 1,
+    "model_receipt": {
+      "mode": "live",
+      "phase": null,
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 16255,
+        "output_tokens": 856,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 14960,
+        "reasoning_tokens": 53
+      },
+      "duration_ms": 26907.0,
+      "error": null,
+      "request_id": "7ee4a753-19a9-42bd-93eb-d41bc4dc574e"
+    }
+  },
+  {
+    "identity": "G2-recorded-operator-report",
+    "status": "completed",
+    "passed": true,
+    "expected_pass": null,
+    "rubric_version": "golden-pressure-judge-v1",
+    "rubric_sha256": "4350ef4305e8b21dd05aeea192a64181e02b4575b28aec07faf3df13f79d2dc1",
+    "judge_protocol_version": "golden-public-operator-judge-v1",
+    "verdict": {
+      "rubric_version": "golden-pressure-judge-v1",
+      "dimensions": {
+        "class_and_uncertainty": {
+          "score": 2,
+          "reason": "The public interpretation prioritizes possible instrumentation or telemetry problems based on isolated brief spikes and observation gaps, without confirming hardware failure or ruling out leakage. This matches the eligible hypotheses and measured absence of persistent pressure deficits; location abstention is justified rather than avoidance of coherent leak evidence.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "case_evidence.pressure_summaries.rows",
+            "case_evidence.measured_comparisons.0.sensor_rows"
+          ]
+        },
+        "location_bounds": {
+          "score": 2,
+          "reason": "The answer explicitly withholds a first physical inspection section and chainage interval because no sustained supported region exists. Location eligibility is false and the supplied location is null, so no station-midpoint bracket or exact coordinate should be asserted.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event.eligible_location",
+            "case_evidence.location",
+            "candidate_report.inspection",
+            "KN-LOCALIZATION-R1"
+          ]
+        },
+        "missing_handling": {
+          "score": 2,
+          "reason": "Gaps are explicitly unknown pressure, not drops or evidence of safety. The answer correctly distinguishes P2-ST4-B's 40/60 usable readings from P3-ST1-B's 45/60 after 15 invalid readings, compares complete partners, and discloses 1405/1440 usable coverage and bounded health review. This is not a missing-only case: independent usable spikes justify a report.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.quality",
+            "case_evidence.measured_comparisons.1.sensor_rows",
+            "case_evidence.quality.finding_rows.0",
+            "case_evidence.quality.finding_rows.10",
+            "case_evidence.quality.finding_rows.22"
+          ]
+        },
+        "references": {
+          "score": 2,
+          "reason": "Concrete spike, step, median-change and coverage statements are supported by the cited health claims and measured comparisons. The admissible procedure is actually supplied and read. Operating and maintenance explanations remain contextual possibilities requiring records, not invented executed work or diagnoses; cited heuristics are separated from observed measurements.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "candidate_report.paragraph_references",
+            "case_evidence.grounded_source_ledger",
+            "case_evidence.documents_actually_read.0",
+            "case_evidence.measured_comparisons.0",
+            "case_evidence.measured_comparisons.1"
+          ]
+        },
+        "novice_comprehensibility": {
+          "score": 2,
+          "reason": "The opening directly identifies the suspect sensors, explains why no pipeline inspection section is qualified, and requests instrumentation review first. Paired sensors, gateways and chainage are explained in ordinary language. Concrete follow-up questions identify independent pressures, raw timestamps, channel diagnostics and operating records needed to resolve uncertainty.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "candidate_report.next_action"
+          ]
+        },
+        "evidence_consistency": {
+          "score": 2,
+          "reason": "Reported spike counts, one-second persistence, 2.5173\u20132.5387 bar adjacent steps, quiet paired taps, small signed median changes and distributed missingness match the supplied measurements. Normal-preroll summaries independently show zero pressure-drop persistence, supporting the absence of a sustained region without relying solely on within-window median changes. No shared-gateway failure is declared.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.quality.finding_rows",
+            "case_evidence.pressure_summaries.rows",
+            "case_evidence.measured_comparisons.0.sensor_rows",
+            "case_evidence.measured_comparisons.1.sensor_rows",
+            "case_evidence.window.signal_scope"
+          ]
+        }
+      },
+      "summary": "All dimensions meet the rubric thresholds. The published interpretation correctly favors verification of scattered instrumentation or telemetry symptoms, preserves leak uncertainty, treats missing readings as unknown and withholds unsupported localization. This is an external semantic assessment, not field certification or deterministic grading. Judge model: GPT-6.1 Sol (gpt-6.1-sol); calibration evidence and candidate-model identity were not supplied, so model independence cannot be established."
+    },
+    "trace": {
+      "trace_id": "44b698f3aea2c47949eee594f4102e96",
+      "span_id": "e60a1ff6e5e891cf",
+      "session_id": "f7767e784303f877bf021d1f3850fd28e3f4ff680c29a76eb015345a897b31ac"
+    },
+    "input_sha256": "ed15d6a4c1266275424ccdfb6f385fe7cdc766c6f90c4aa2ba669734549cfee7",
+    "output_sha256": "19d3c40a86db92712d2bc532e00f25beab7676e8100534a14d0f3ff971de9fb4",
+    "input_chars": 41408,
+    "output_chars": 4162,
+    "elapsed_seconds": 26.562,
+    "model_calls": 1,
+    "model_receipt": {
+      "mode": "live",
+      "phase": null,
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 18237,
+        "output_tokens": 887,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 16942,
+        "reasoning_tokens": 36
+      },
+      "duration_ms": 26454.0,
+      "error": null,
+      "request_id": "f67ce7b2-c8a2-4774-9ab3-cc2c899144a1"
+    }
+  },
+  {
+    "identity": "G3-retry-published-operator-report",
+    "status": "completed",
+    "passed": true,
+    "expected_pass": null,
+    "rubric_version": "golden-pressure-judge-v1",
+    "rubric_sha256": "4350ef4305e8b21dd05aeea192a64181e02b4575b28aec07faf3df13f79d2dc1",
+    "judge_protocol_version": "golden-public-operator-judge-v1",
+    "verdict": {
+      "rubric_version": "golden-pressure-judge-v1",
+      "dimensions": {
+        "class_and_uncertainty": {
+          "score": 2,
+          "reason": "The published interpretation explicitly recognizes a possible P1 leak alongside separate observation problems, without confirming either leak or hardware failure. It prioritizes the sustained four-sensor, two-domain pattern rather than abstaining or allowing branch anomalies to erase it.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.event",
+            "case_evidence.pressure_summaries.rows.2",
+            "case_evidence.pressure_summaries.rows.4"
+          ]
+        },
+        "location_bounds": {
+          "score": 2,
+          "reason": "Correctly recommends P1 200\u2013600 m, explains that affected stations at 300/500 m are bounded by unaffected stations at 100/700 m, and identifies the boundaries as station midpoints. Explicitly distinguishes inspection priority from an exact leak point or confidence interval.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.location",
+            "case_evidence.measured_comparisons.1.sensor_rows"
+          ]
+        },
+        "missing_handling": {
+          "score": 2,
+          "reason": "Separates 20 absent P2-ST4-B readings from 15 invalid P3-ST4-A readings, preserves their periods as unknown, and notes fully usable partners. Discloses 1405/1440 usable observations and bounded health review without treating missingness as pressure loss or safety evidence.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.quality",
+            "case_evidence.measured_comparisons.0.sensor_rows.3",
+            "case_evidence.measured_comparisons.0.sensor_rows.4"
+          ]
+        },
+        "references": {
+          "score": 2,
+          "reason": "Cited claims, comparisons and the read procedure support the station, gateway, spike, coverage and bracket statements. The answer distinguishes procedural context from incident operating logs and research guidance from observed evidence; it invents no executed operation or physical diagnosis.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.grounded_source_ledger",
+            "case_evidence.documents_actually_read.0",
+            "case_evidence.measured_comparisons.0",
+            "case_evidence.measured_comparisons.1"
+          ]
+        },
+        "novice_comprehensibility": {
+          "score": 2,
+          "reason": "The opening gives the possible cause, first inspection section and three suspect observation channels. It explains chainage, paired sensors and gateways, identifies unresolved causes, and requests specific integrity, operating-record and instrumentation checks. Repetition adds length but does not obscure the recommendation.",
+          "evidence_references": [
+            "candidate_report.answer"
+          ]
+        },
+        "evidence_consistency": {
+          "score": 2,
+          "reason": "Accurately distinguishes sustained P1 deficits from nearly unchanged within-window medians and weak fluctuation correlations; the latter do not overturn its possible-leak recommendation. Spike steps, paired contrasts, missingness and gateway assignments match supplied measurements. An earlier onset remains unknown, consistent with post-start-only comparisons.",
+          "evidence_references": [
+            "candidate_report.answer",
+            "case_evidence.window.signal_scope",
+            "case_evidence.pressure_summaries",
+            "case_evidence.measured_comparisons.0",
+            "case_evidence.measured_comparisons.1",
+            "case_evidence.documents_actually_read.0"
+          ]
+        }
+      },
+      "summary": "All dimensions meet the rubric thresholds. The actual operator answer recognizes a possible coherent P1 leak, recommends the supported midpoint inspection bracket, and separates branch observation problems without confirming a cause or granting safety clearance. Judge: GPT-6.1 Sol (gpt-6.1-sol); evaluation calibration is not established. This is an external semantic assessment, not field certification, and agreement does not establish model independence."
+    },
+    "trace": {
+      "trace_id": "58d557a9ba1383e2a230c2fac84cb5a7",
+      "span_id": "ab0861a4dc0b02ec",
+      "session_id": "c62dce487430f744e1f294d1b221bd9b0beeaffc2c28f8a185ff4ab07efd1295"
+    },
+    "input_sha256": "e9990dc779066accebe2c50b854e3a8dc15d6540d7b1ae5b2d34ec0cfd9af67a",
+    "output_sha256": "7c0c703d440d6ee28679f120654b7332c3a5f0ff09fe917f709eef8ab2d4ba20",
+    "input_chars": 44206,
+    "output_chars": 3575,
+    "elapsed_seconds": 25.172,
+    "model_calls": 1,
+    "model_receipt": {
+      "mode": "live",
+      "phase": null,
+      "requested_model": "gpt-6.1-sol",
+      "observed_model": "gpt-6.1-sol",
+      "model_identity_source": "cli_event",
+      "cli_version": "1.0.105",
+      "cli_version_source": "executable_version",
+      "usage": {
+        "input_tokens": 19046,
+        "output_tokens": 833,
+        "cache_read_tokens": 1292,
+        "cache_write_tokens": 17751,
+        "reasoning_tokens": 71
+      },
+      "duration_ms": 25046.0,
+      "error": null,
+      "request_id": "bdcf3942-d559-4714-baca-83c3f2220930"
+    }
+  }
+]

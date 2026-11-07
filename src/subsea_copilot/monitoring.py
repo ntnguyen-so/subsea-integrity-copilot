@@ -25,6 +25,7 @@ from .contracts import (
 from .diagnostics import analyze_window
 from .ingest import CanonicalBuffer, normalize_records
 from .ontology import load_pack
+from .replay_sources import load_frozen_replay_source
 from .store import BudgetExceeded, Conflict, QueueFull, Store
 from .synthetic import SOURCE_VERSION, ReplayDataset, generate_scenario
 from .validation import ValidationError as AgentValidationError
@@ -39,7 +40,19 @@ AUTO_QUESTION = (
     "Is this a possible leak or an instrumentation issue? Which pipeline section "
     "should an integrity engineer inspect first, and which sensors are unreliable?"
 )
-UNAVAILABLE_DISPATCH = frozenset({"agent_unavailable", "knowledge_unavailable", "budget_blocked"})
+UNAVAILABLE_DISPATCH = frozenset(
+    {"agent_unavailable", "knowledge_unavailable", "budget_blocked", "no_pressure_anomaly"}
+)
+
+
+def _pressure_alert_keys(snapshot: WindowSnapshot) -> list[str]:
+    return sorted(
+        {
+            f"{finding.sensor_id}:pressure"
+            for finding in snapshot.quality.findings
+            if finding.anomaly_count > 0
+        }
+    )
 
 
 @dataclass
@@ -78,9 +91,11 @@ class Monitor:
         cached = self._sources.get(session.id)
         if cached is not None:
             return cached
-        dataset = generate_scenario(
-            session.scenario, session.seed, session.duration_seconds, session.site_id
-        )
+        dataset = load_frozen_replay_source(session)
+        if dataset is None:
+            dataset = generate_scenario(
+                session.scenario, session.seed, session.duration_seconds, session.site_id
+            )
         arrival = [
             (
                 datetime.fromisoformat(row.received_at.replace("Z", "+00:00")) - dataset.epoch
@@ -345,26 +360,7 @@ class Monitor:
             or snapshot.quality.status == "WARMING_UP"
         ):
             return False
-        keys = sorted(
-            {
-                f"{finding.sensor_id}:{kind}"
-                for finding in snapshot.quality.findings
-                for kind, flagged in (
-                    ("pressure", finding.anomaly_count > 0),
-                    (
-                        "gap",
-                        finding.missing > finding.expected * 0.1 or finding.hard_excluded > 0,
-                    ),
-                    (
-                        "quality",
-                        finding.spike_count > 0
-                        or finding.drift_suspected
-                        or finding.peer_disagreement,
-                    ),
-                )
-                if flagged
-            }
-        )
+        keys = _pressure_alert_keys(snapshot)
         current = self.store.get_replay(session.id)
         raised = set(keys) - set(current.detected_alert_keys)
         changes: dict[str, object] = {"detected_alert_keys": keys}
@@ -385,7 +381,7 @@ class Monitor:
                 {
                     "new_alert_count": len(raised),
                     "clock_seconds": saved.clock_seconds,
-                    "reason": "New detector flags; simulation waits for fresh agent checks",
+                    "reason": "New pressure anomalies; simulation waits for fresh agent checks",
                 },
                 snapshot_id=snapshot.id,
             )
@@ -405,6 +401,8 @@ class Monitor:
             if row.state not in ("QUIET", "SUPERSEDED_BY_REVISION")
         ]
         episode = existing[0] if existing else None
+        if episode is None and not held and not _pressure_alert_keys(snapshot):
+            return
         if held:
             matching = [
                 task
@@ -507,6 +505,11 @@ class Monitor:
         if episode.pending_window_id is None or active_roots or episode.state == "QUIET":
             return
         basis = self.store.get_window(episode.pending_window_id)
+        if not _pressure_alert_keys(basis):
+            episode.pending_window_id = None
+            episode.dispatch_status = "no_pressure_anomaly"
+            self.store.save_episode(episode)
+            return
         failed_provider = any(
             task.mode == "live" and task.error_code in ("proxy_auth", "proxy_quota")
             for task in self.store.list_tasks(session.id)

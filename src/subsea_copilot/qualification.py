@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
@@ -44,6 +45,18 @@ MODEL_METADATA_KEYS = (
 )
 
 
+def qualification_model_factory(
+    settings: Settings, model_id: str = "gpt-6.1-sol",
+) -> Callable[[AgentRole, Mode], BaseChatModel]:
+    """Shared transport/role factory for qualification; no alternative agent stack."""
+    def factory(role: AgentRole, selected_mode: Mode) -> BaseChatModel:
+        if selected_mode == "scripted":
+            return ScriptedChatModel(role=role)
+        return CopilotCLIChatModel(runtime_dir=settings.runtime_dir, model_id=model_id)
+
+    return factory
+
+
 def model_receipts(store: Store, task_ids: list[str]) -> list[JsonValue]:
     return [
         {key: receipt.get(key) for key in MODEL_METADATA_KEYS}
@@ -78,10 +91,7 @@ def qualify_agents(mode: Mode, repetitions: int = 3) -> dict[str, JsonValue]:
     measured_models: set[str] = set()
     measured_versions: set[str] = set()
 
-    def factory(role: AgentRole, selected_mode: Mode) -> BaseChatModel:
-        if selected_mode == "scripted":
-            return ScriptedChatModel(role=role)
-        return CopilotCLIChatModel(runtime_dir=settings.runtime_dir, model_id="gpt-6.1-sol")
+    factory = qualification_model_factory(settings)
 
     try:
         with postgres_checkpointer(settings.checkpoint_dsn) as checkpointer:

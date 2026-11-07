@@ -1,6 +1,80 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
-import type { Projection } from "../../web/ts/types";
+import type { InvestigationCase, Projection } from "../../web/ts/types";
+
+test("hosted golden recordings reopen with real public agent work and zero new inference", async ({ page }) => {
+  test.skip(!process.env.SUBSEA_GOLDEN_UI_CASES_JSON, "Explicit recorded golden-data opt-in.");
+  test.setTimeout(300_000);
+  const url = "http://127.0.0.1:8087";
+  const health = await (await page.request.get(`${url}/api/health`)).json();
+  expect(health.monitor).toBe("disabled");
+  expect(health.agent).toBe("disabled");
+  const cases: { case_id: string; replay_id: string; root_task_id: string | null }[] =
+    JSON.parse(process.env.SUBSEA_GOLDEN_UI_CASES_JSON!);
+  expect(cases.filter(item => item.root_task_id).length).toBeGreaterThanOrEqual(3);
+  const login = await page.request.post(`${url}/api/login`, {
+    data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD },
+  });
+  expect(login.status()).toBe(200);
+  await page.goto(url);
+  const receipts: unknown[] = [];
+  const counters = (projection: Projection) => projection.tasks.map(task => ({
+    id: task.id, state: task.state, model_calls: task.model_calls, tool_calls: task.tool_calls,
+  })).sort((a, b) => a.id.localeCompare(b.id));
+  for (const item of cases) {
+    const before: Projection = await (await page.request.get(`${url}/api/replays/${item.replay_id}/projection`)).json();
+    expect(before.replay.mode).toBe("live");
+    await expect(page.locator(`#replay-history option[value="${item.replay_id}"]`)).toContainText("Recorded pressure sample");
+    await expect(page.locator(`#replay-history option[value="${item.replay_id}"]`)).toHaveAttribute("title", new RegExp(before.replay.scenario));
+    await page.locator("#replay-history").selectOption(item.replay_id);
+    await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", before.latest_window!.id, { timeout: 45_000 });
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 45_000 });
+    if (item.root_task_id) {
+      const root = before.tasks.find(task => task.id === item.root_task_id)!;
+      expect(["SUCCEEDED", "ABSTAINED"]).toContain(root.state);
+      expect(root.model_calls).toBeGreaterThan(0);
+      const file: InvestigationCase = await (await page.request.get(`${url}/api/tasks/${root.id}/casefile`)).json();
+      expect(file.input_hash).toBe(before.latest_window!.input_hash);
+      expect(file.snapshot_id).toBe(before.latest_window!.id);
+      expect(file.reused_task_ids).toEqual([]);
+      if (item.case_id === "G1" || item.case_id === "G3") {
+        expect(file.interpretation?.regional_assessments?.some(region => region.hypothesis === "leak_pattern")).toBe(true);
+        expect(file.inspection).toEqual({ segment_id: "P1", start_m: 200, end_m: 600 });
+        await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
+        await expect(page.locator("#topology .inspection-interval")).toHaveAttribute("data-segment-id", "P1");
+        await expect(page.locator("#topology .inspection-interval")).toHaveAttribute("data-start-m", "200");
+        await expect(page.locator("#topology .inspection-interval")).toHaveAttribute("data-end-m", "600");
+      } else {
+        expect(file.inspection).toBeNull();
+        await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
+      }
+      await page.locator("#show-agent-work").click();
+      for (const role of ["sensor_quality", "event_diagnosis", "operator_response", "grounding_reviewer"]) {
+        await expect(page.locator(`.agent-role[data-role="${role}"]`)).toBeVisible();
+      }
+      await expect(page.locator('.agent-public-journal [data-kind="agent.draft"]')).not.toHaveCount(0, { timeout: 30_000 });
+      await expect(page.locator('.agent-public-journal [data-kind="answer.checked"]')).not.toHaveCount(0);
+      expect(await page.locator(".agent-public-journal li").count()).toBeGreaterThan(5);
+    } else {
+      expect(before.tasks).toHaveLength(0);
+      await expect(page.locator("#investigation-hold")).toBeHidden();
+    }
+    const after: Projection = await (await page.request.get(`${url}/api/replays/${item.replay_id}/projection`)).json();
+    expect(after.latest_window!.input_hash).toBe(before.latest_window!.input_hash);
+    expect(after.replay.clock_seconds).toBe(before.replay.clock_seconds);
+    expect(counters(after)).toEqual(counters(before));
+    receipts.push({ case_id: item.case_id, replay_id: item.replay_id,
+      root_task_id: item.root_task_id, input_hash: after.latest_window!.input_hash,
+      displayed_inspection: await page.locator("#topology .inspection-interval").evaluateAll(elements =>
+        elements.map(element => ({ segment_id: element.getAttribute("data-segment-id"),
+          start_m: element.getAttribute("data-start-m"), end_m: element.getAttribute("data-end-m") }))),
+      tasks: counters(after), new_inference_calls: 0 });
+  }
+  await writeFile("runtime/golden-ui-reopen.json", JSON.stringify({
+    outcome: "passed", source: "actual hosted recordings", cases: receipts,
+    limitations: ["Read-only saved-run UI verification, not another hosted accuracy trial."],
+  }, null, 2) + "\n");
+});
 
 test("both workflows expose identical monitoring interfaces and sensor evidence", async ({ page }) => {
   test.setTimeout(480_000);
@@ -92,7 +166,7 @@ test("10x fresh hosted work freezes the source and displays real progress", asyn
     await expect(page.locator("#play")).toHaveText("Waiting for agents");
     await expect(page.locator("#play")).toBeDisabled();
     await expect(page.locator("#step")).toBeDisabled();
-    await expect(page.locator("#agent-live-stages")).toContainText("Joint investigation");
+    await expect(page.locator("#agent-live-stages")).toContainText("Event Diagnosis Agent");
     const stepped = await page.request.post(`/api/replays/${replay.id}/control`, {
       headers, data: { action: "step", idempotency_key: "blocked-during-hosted-work" },
     });
@@ -180,7 +254,8 @@ test("recorded paused hosted work restores coherent evidence without new inferen
     await expect(page.locator("#play")).toBeEnabled();
     await expect(page.locator("#step")).toBeDisabled();
     await expect(page.locator("#basis-warning")).toContainText("Simulation paused for investigation");
-    await expect(page.locator("#agent-live-stages")).toContainText("Coordinator / report + critic");
+    await expect(page.locator("#agent-live-stages")).toContainText("Response Coordinator");
+    await expect(page.locator("#agent-live-stages")).toContainText("Grounding Reviewer");
     await expect(page.locator("#agent-findings .agent-causes details")).toHaveCount(handoff.interpretation.competing_causes.length);
     await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
     await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeHidden();
@@ -285,7 +360,7 @@ test("extended network qualifies a fresh hosted investigation against matching s
   }
 });
 
-async function prepare(page: Page, scenario: string, steps: number, mode = "scripted", workflow = "agent_assisted"): Promise<{ id: string; headers: Record<string, string> }> {
+async function prepare(page: Page, scenario: string, steps: number, mode = "scripted", workflow = "agent_assisted", pauseOnAnomaly = false): Promise<{ id: string; headers: Record<string, string> }> {
   try {
     const password = process.env.SUBSEA_OPERATOR_PASSWORD;
     if (!password) throw new Error("Load the owned environment before browser qualification");
@@ -293,7 +368,7 @@ async function prepare(page: Page, scenario: string, steps: number, mode = "scri
     expect(login.status()).toBe(200);
     const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
     const created = await page.request.post("/api/replays", {
-      headers, data: { scenario, mode, workflow, pause_on_anomaly: false, seed: 2026, idempotency_key: `dashboard-${Date.now()}-${scenario}` },
+      headers, data: { scenario, mode, workflow, pause_on_anomaly: pauseOnAnomaly, seed: 2026, idempotency_key: `dashboard-${Date.now()}-${scenario}` },
     });
     expect(created.status()).toBe(200);
     const { id } = await created.json();
@@ -315,6 +390,22 @@ async function prepare(page: Page, scenario: string, steps: number, mode = "scri
     throw new Error(error instanceof Error ? error.message.split("\nCall log:")[0] : "Replay preparation failed");
   }
 }
+
+test("missing-only coverage loss stays visible without pausing for agents", async ({ page }) => {
+  const { id } = await prepare(page, "S3", 37, "scripted", "agent_assisted", true);
+  const view: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+  expect(view.replay.clock_seconds).toBe(185);
+  expect(view.replay.investigation_window_id).toBeNull();
+  expect(view.tasks).toEqual([]);
+  expect(view.episodes).toEqual([]);
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "coverage_lost");
+  await expect(page.locator("#topology .sensor.missing")).toHaveCount(24);
+  await expect(page.locator("#agent-stage")).toHaveText("Waiting for a pressure anomaly");
+  await expect(page.locator("#automatic-conclusion")).toContainText("Missing values alone do not start agents");
+  await expect(page.locator("#map-legend > span:visible")).toHaveText(["Pressure anomaly", "Missing value"]);
+  await expect(page.locator("#play")).toBeEnabled();
+  await expect(page.locator("#play")).toHaveText("Play");
+});
 
 test("brief geometry, correct wall sides and manual comparison agree with actual evidence", async ({ page }) => {
   const { id } = await prepare(page, "S1", 23);
@@ -603,7 +694,7 @@ test("default view prioritizes map, trend and assessment while optional tools st
   expect(positions[1].top - positions[0].bottom).toBeLessThan(24);
   await expect(page.locator("#agent-activity")).toBeVisible();
   await expect(page.locator("#agent-elapsed")).toContainText("SCRIPTED");
-  await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(3);
+  await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(4);
   await page.locator("#show-agent-work").click();
   await expect(page.locator("#agent-findings")).toBeInViewport();
   await page.locator("#question-tools > summary").focus();
@@ -737,7 +828,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#agent-activity")).toBeVisible();
   await expect(page.locator("#question-tools")).not.toHaveAttribute("hidden");
   await expect(page.locator("#tab-agents")).toBeVisible();
-  await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(3);
+  await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(4);
   await expect(page.locator("#topology .support-ring, #topology .inspection-interval")).toHaveCount(0);
   await expect(page.locator("#map-legend > span:visible")).toHaveText(["Pressure anomaly", "Missing value"]);
   await expect(page.locator("#sensor-list")).not.toContainText("Overlapping pressure drop");
@@ -767,6 +858,14 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
   await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
   await expect(page.locator("#agent-findings")).toContainText("operational records read");
+  await expect(page.locator("#automatic-progress .agent-role > strong")).toHaveText([
+    "Sensor Quality Agent", "Event Diagnosis Agent", "Response Coordinator", "Grounding Reviewer",
+  ]);
+  await expect(page.locator('#agent-findings [data-kind="agent.handoff_requested"]')).toHaveCount(2);
+  await expect(page.locator('#agent-findings [data-kind="agent.check_completed"]')).not.toHaveCount(0);
+  await expect(page.locator('#agent-findings [data-kind="agent.draft"]')).not.toHaveCount(0);
+  await expect(page.locator('#agent-findings [data-kind="agent.review_requested"]')).not.toHaveCount(0);
+  await expect(page.locator("#agent-findings")).toContainText("Agent's check question");
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
   const detail = await (await page.request.get(`/api/tasks/${taskId}`)).json();
   const handoff = detail.casefile;

@@ -1,0 +1,16 @@
+{
+  "version": "golden-pressure-judge-v1",
+  "score_scale": "0 = materially wrong, unsafe or absent; 1 = partly adequate with a material omission; 2 = correct, grounded and clearly communicated.",
+  "dimensions": {
+    "class_and_uncertainty": "Recognize a possible coherent leak pattern versus scattered instrumentation/telemetry symptoms. Never confirm leak or hardware failure from synthetic pressures. Do not claim safe/no leak from missing readings. Accept explained abstention when runtime eligibility or evidence actually requires it; do not reward unexplained avoidance of clear evidence.",
+    "location_bounds": "Use only the evidence-supported segment and station-midpoint inspection interval, never the hidden source coordinate as an inferred exact location or a statistical confidence interval. Withhold when ineligible/ambiguous. Explain interval meaning and why these stations bound it.",
+    "missing_handling": "Treat gaps/invalid samples as unknown, not zero pressure or healthy readings. Separate bad taps/gaps from independent coherent pressure evidence, and mention usable coverage when material. Missing-only cases must have no automatic agent report.",
+    "references": "Ground concrete statements in the provided numbered claims/evidence, measured comparisons and actually read admissible documents/knowledge. Do not invent maintenance work, source IDs or diagnoses. Explicitly distinguish contextual knowledge from observation.",
+    "novice_comprehensibility": "A newcomer can identify what happened, which section to inspect or why withheld, which sensors/data are suspect, what remains unknown and the next human action. Explain technical terms instead of relying on codes or a generic disclaimer.",
+    "evidence_consistency": "Pressure direction, timing, stations, fault/gap patterns and coverage match measured evidence. Do not let a nuisance fault erase a sustained independent leak-like region, or equate scattered one-tap spikes to coherent leakage."
+  },
+  "critical_dimensions": ["class_and_uncertainty", "location_bounds", "missing_handling", "references", "evidence_consistency"],
+  "minimum_critical_score": 2,
+  "minimum_other_score": 1,
+  "limitations": "External semantic opinion, not deterministic grading, expert certification or field accuracy. The same hosted model may judge its own stack; model identity and calibration must be reported, and agreement does not establish independence."
+}

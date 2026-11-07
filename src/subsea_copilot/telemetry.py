@@ -40,6 +40,38 @@ _SAFE_STRING = re.compile(
     r"(?:^|[._])(?:id|hash|sha256|name|role|mode|purpose|outcome|status|code|model|source|"
     r"version|requested_model|observed_model|model_identity_source|error|type|session)$"
 )
+TRACE_CONTENT_LIMIT = 64 * 1024
+
+
+def _redact_content(value: str) -> str:
+    def clean(item: Any) -> Any:
+        if isinstance(item, dict):
+            if item.get("type") in {"thinking", "reasoning", "redacted_thinking"}:
+                return {"type": "private_reasoning_removed"}
+            return {
+                key: "[REDACTED]"
+                if _SENSITIVE.search(key) or "reasoning" in key.lower()
+                else clean(child)
+                for key, child in item.items()
+            }
+        if isinstance(item, list):
+            return [clean(child) for child in item]
+        return item
+
+    if value.lstrip().startswith(("{", "[")):
+        try:
+            parsed = json.loads(value)
+            cleaned = clean(parsed)
+            if cleaned != parsed:
+                value = json.dumps(cleaned, ensure_ascii=True)
+        except json.JSONDecodeError:
+            pass
+    value = re.sub(
+        r"(?i)(?:bearer\s+\S+|(?:password|secret|token|api[_-]?key)\s*[:=]\s*\S+)",
+        "[REDACTED]",
+        value,
+    )
+    return re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]+|sk-[A-Za-z0-9_-]+)", "[REDACTED]", value)
 
 
 def _enabled(name: str, default: bool = False) -> bool:
@@ -74,13 +106,15 @@ def _safe(key: str, value: object, content_enabled: bool) -> object | None:
     if _CONTENT.search(key):
         if not content_enabled or not isinstance(value, str):
             return None
-        value = re.sub(
-            r"(?i)(?:bearer\s+\S+|(?:password|secret|token|api[_-]?key)\s*[:=]\s*\S+)",
-            "[REDACTED]",
-            value,
+        value = _redact_content(value)
+        return (
+            value
+            if len(value) <= TRACE_CONTENT_LIMIT
+            else (
+                value[:TRACE_CONTENT_LIMIT]
+                + f"\n[Capture truncated at {TRACE_CONTENT_LIMIT} characters]"
+            )
         )
-        value = re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]+|sk-[A-Za-z0-9_-]+)", "[REDACTED]", value)
-        return value[:2000]
     if type(value) in {bool, int, float}:
         if isinstance(value, float) and not math.isfinite(value):
             return None

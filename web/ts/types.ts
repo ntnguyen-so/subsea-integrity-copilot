@@ -37,7 +37,7 @@ export interface RegionalAssessment extends CitedExplanation { sensor_ids: strin
 export interface EngineerInterpretation { focus: string; answer: CitedExplanation; competing_causes: CauseExplanation[]; follow_up_questions: string[]; regional_assessments?: RegionalAssessment[] }
 export interface InterpretationReview { protocol: "grounding-v1"; rounds: { candidate_hash: string; assessment: { decision: "accept" | "revise"; checks: { paragraph_id: string; verdict: string; reason: string; support: { reference: string; quote: string }[] }[] } }[] }
 export interface AgentResult { outcome: string; claim_refs: string[]; evidence_ids: string[]; limitations: string[]; hypothesis: string | null; recommendation_ids: string[]; summary: string; investigation: HistoryInvestigation | null; interpretation: EngineerInterpretation | null }
-export interface AgentTask { id: string; root_id: string; site_id: string; generation_id: string; snapshot_id: string; episode_id: string | null; parent_id: string | null; role: string; purpose: string; question: string; mode: Mode; state: string; created_at: string; updated_at: string; model_calls: number; tool_calls: number; plan: string[]; result: AgentResult | null; answer: string | null; error_code: string | null; error_message: string | null; automatic: boolean }
+export interface AgentTask { id: string; root_id: string; site_id: string; generation_id: string; snapshot_id: string; episode_id: string | null; parent_id: string | null; role: string; purpose: string; question: string; mode: Mode; state: string; created_at: string; updated_at: string; model_calls: number; tool_calls: number; plan: string[]; result: AgentResult | null; answer: string | null; error_code: string | null; error_message: string | null; automatic: boolean; interpretation_review?: InterpretationReview | null }
 export interface ConsoleEvent { id: number; site_id: string; generation_id: string; type: string; created_at: string; simulated_seconds: number | null; snapshot_id: string | null; task_id: string | null; payload: Record<string, Json> }
 export interface Session { authenticated: boolean; csrf_token: string | null; username: string | null }
 export interface Projection { replay: ReplaySession; pack: SitePack; latest_window: WindowSnapshot | null; warning: { kind: string; severity: string; snapshot_id: string | null; title: string; message: string }; episodes: MonitoringEpisode[]; tasks: AgentTask[]; cursor: number; health: { agent: string; observability: Record<string, Json>; monitor: string }; server_time: string }
@@ -57,7 +57,7 @@ export interface InvestigationCase {
   knowledge_packet: KnowledgePacket | null;
   knowledge_used_ids: string[];
 }
-export interface TaskDetail { task: AgentTask; children: AgentTask[]; receipts: Record<string, Json>[]; investigation_receipts: Record<string, Json>[]; casefile: InvestigationCase | null }
+export interface TaskDetail { task: AgentTask; children: AgentTask[]; receipts: Record<string, Json>[]; investigation_receipts: Record<string, Json>[]; casefile: InvestigationCase | null; activity?: ConsoleEvent[] }
 export interface KnowledgeCard {
   id: string; title: string; kind: "heuristic" | "procedure"; status: "draft" | "demo_curated" | "retired";
   guidance: string; limitations: string[]; review_basis: string;

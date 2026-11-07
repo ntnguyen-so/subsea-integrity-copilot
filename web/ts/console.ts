@@ -1,7 +1,7 @@
 import { box, bounds, button, element, friendly, node, svg, text, time } from "./dom";
 import { renderCharts } from "./charts";
 import { renderCasefile, renderWorkflowComparison } from "./casefile";
-import { renderAgentActivity, renderAgentWork, renderIdleAgentWork } from "./agentwork";
+import { agentName, renderAgentActivity, renderAgentWork, renderIdleAgentWork } from "./agentwork";
 import type { AgentTask, CanonicalObservation, ConsoleEvent, InvestigationCase, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
@@ -73,7 +73,7 @@ function investigationHold(): { waiting: boolean; unavailable: boolean } {
   if (!held) return { waiting: false, unavailable: false };
   const roots = projection!.tasks.filter(task => !task.parent_id && task.snapshot_id === held);
   const blocked = projection!.episodes.some(episode => episode.current_window_id === held
-    && ["agent_unavailable", "knowledge_unavailable", "budget_blocked"].includes(episode.dispatch_status || ""));
+    && ["agent_unavailable", "knowledge_unavailable", "budget_blocked", "no_pressure_anomaly"].includes(episode.dispatch_status || ""));
   return {
     waiting: roots.some(task => ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(task.state)) || !roots.length && !blocked,
     unavailable: blocked || roots.some(task => ["FAILED", "CANCELLED"].includes(task.state)),
@@ -197,9 +197,11 @@ function renderReplayHistory(): void {
   history.replaceChildren(new Option("Choose preserved generation", ""), ...[...replays].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).map(replay => {
     const archived = replay.source_version !== currentSource;
     const label = replay.workflow === "sensor_alerts" ? "SENSOR ALERTS ONLY" : `AGENT-ASSISTED · ${modeName(replay.mode)}`;
-    const option = new Option(`${archived ? "Archived" : "Saved"} ${replay.scenario} · ${label} · ${time(replay.updated_at)}`, replay.id);
+    const sourceLabel = replay.scenario.startsWith("frozen-pressure-")
+      ? `Recorded pressure sample ${replay.id.slice(-8)}` : replay.scenario;
+    const option = new Option(`${archived ? "Archived" : "Saved"} ${sourceLabel} · ${label} · ${time(replay.updated_at)}`, replay.id);
     option.disabled = archived;
-    option.title = archived ? "Previous topology/source version; snapshots and audit receipts remain retained." : `${replay.id} · ${replay.source_version}`;
+    option.title = archived ? "Previous topology/source version; snapshots and audit receipts remain retained." : `${replay.id} · ${replay.scenario} · ${replay.source_version}`;
     return option;
   }));
   history.value = currentReplayId || "";
@@ -747,17 +749,17 @@ function renderAutomaticInvestigation(): void {
       const item = node("div");
       item.append(node("small", "UNRESOLVED-ONLY REVIEW BOUNDARY / SOURCE UTC"), node("strong", time(boundary)));
       timeline.append(item);
-      text("automatic-conclusion", `Unresolved pattern: collect at most one ${pack.window_seconds}s source window before admitting this first LLM report. A qualifying leak pattern, sensor/telemetry issue or lost coverage bypasses this hold. Numerical warnings and manual review remain immediate; do not wait for AI.`);
+      text("automatic-conclusion", `Unresolved pressure anomaly: collect at most one ${pack.window_seconds}s source window before admitting this first LLM report. Pressure anomalies with a qualifying leak pattern or instrumentation/coverage concerns bypass this hold. Missing values alone do not start agents. Numerical warnings and manual review remain immediate; do not wait for AI.`);
       delete box("automatic-state").dataset.task;
       return;
     }
-    const state = sensorAlertsOnly() ? "Agent execution off · no model calls" : unavailable ? `Not queued: ${unavailable}` : "Waiting for a monitoring episode";
+    const state = sensorAlertsOnly() ? "Agent execution off · no model calls" : unavailable ? `Not queued: ${unavailable}` : "Waiting for a pressure anomaly";
     text("agent-stage", state); text("automatic-state", state);
     text("automatic-conclusion", sensorAlertsOnly()
       ? "No agent diagnosis or localization has been produced. The same sensor histories, quality flags, comparisons and evidence remain available for engineer review."
       : unavailable
       ? "No report is available. Numerical warnings and manual investigation remain active; do not treat unavailable analysis as safety clearance."
-      : "Anomalies start analysis automatically. Monitoring and manual analysis do not wait for an agent. No healthy-pipeline conclusion is inferred.");
+      : "New pressure anomalies start investigation automatically. Missing values alone do not start agents. Detector warnings and manual review remain available; no healthy-pipeline conclusion is inferred.");
     delete box("automatic-state").dataset.task;
     const buttons = node("div", "", "automatic-action-buttons");
     for (const label of ["Compare with existing workflow", "View investigation"]) {
@@ -784,7 +786,7 @@ function renderAutomaticInvestigation(): void {
   stamp(accepted ? "REPORT RECORDED / PROCESSING UTC" : failed ? "FAILURE RECORDED / PROCESSING UTC" : "LAST TASK UPDATE / PROCESSING UTC", time(root.updated_at));
   const detail = automaticDetail?.task.id === root.id ? automaticDetail : null;
   renderAgentWork(progress, box("agent-findings"), root, projection.tasks, detail, basis,
-    automaticReadError, id => { void loadTask(id); });
+    automaticReadError, id => { void loadTask(id); }, events);
   refreshAutomaticDetail(root);
   const conclusion = accepted ? root.result?.interpretation?.answer.text || root.result?.summary || root.answer || ""
     : failed ? `No accepted report: ${root.error_message || root.error_code || friendly(root.state)}. Do not wait for AI to act under existing response procedures.`
@@ -1059,7 +1061,7 @@ function renderTasks(): void {
   const tasks = [...projection.tasks];
   const renderTask = (task: AgentTask, child = false): void => {
     const card = node("article", "", `task${child ? " child" : ""}`);
-    card.append(node("h3", `${friendly(task.role)} · ${task.state}`), node("p", `${short(task.id)} · ${modeName(task.mode)} · basis ${short(task.snapshot_id)}`), node("p", `${task.purpose} · ${task.model_calls} model calls / ${task.tool_calls} tool calls`));
+    card.append(node("h3", `${agentName(task.role)} · ${task.state}`), node("p", `${short(task.id)} · ${modeName(task.mode)} · basis ${short(task.snapshot_id)}`), node("p", `${task.purpose} · ${task.model_calls} model calls / ${task.tool_calls} tool calls`));
     const open = button(selectedTaskId === task.id ? "Refresh public receipts / trace" : "Inspect public receipts / trace", () => { void loadTask(task.id); });
     open.dataset.task = task.id;
     card.append(open);
@@ -1083,6 +1085,12 @@ async function readTaskDetail(id: string, generation: number): Promise<TaskDetai
   if (detail.task.generation_id !== currentReplayId || detail.task.id !== id
     || detail.children.some(child => child.generation_id !== currentReplayId || child.site_id !== detail.task.site_id || child.parent_id !== id)) throw new Error("Task response scope mismatch.");
   if (detail.casefile && (detail.casefile.task_id !== id || detail.casefile.snapshot_id !== detail.task.snapshot_id)) throw new Error("Investigation handoff scope mismatch.");
+  const activityTasks = new Set([detail.task.id, detail.task.root_id,
+    ...detail.children.map(child => child.id),
+    ...(projection?.tasks.filter(task => task.root_id === detail.task.root_id).map(task => task.id) || [])]);
+  if (detail.activity?.some(event => event.generation_id !== currentReplayId
+    || event.snapshot_id !== detail.task.snapshot_id || !event.task_id || !activityTasks.has(event.task_id)))
+    throw new Error("Agent activity belongs to a different investigation; refusing to combine journals.");
   if (detail.task.role === "operator_response") {
     const basis = windows.find(window => window.id === detail.task.snapshot_id)
       || await request<WindowSnapshot>(`/api/windows/${enc(detail.task.snapshot_id)}`);
@@ -1141,7 +1149,7 @@ function renderTaskDetail(): void {
   container.replaceChildren(node("h3", `Public investigation ${task.id}`));
   container.append(node("p", `State ${task.state} · ${modeName(task.mode)} · pinned basis ${task.snapshot_id}`, "summary"));
   container.append(button("Open this task’s immutable evidence basis", () => { void chooseWindow(task.snapshot_id).then(() => switchTab("evidence")); }));
-  for (const child of children) container.append(button(`${friendly(child.role)} / ${child.state} / ${short(child.id)}`, () => { void loadTask(child.id); }));
+  for (const child of children) container.append(button(`${agentName(child.role)} / ${child.state} / ${short(child.id)}`, () => { void loadTask(child.id); }));
   if (task.result) {
     container.append(node("p", `Backend accepted result: ${task.result.outcome}. ${task.result.summary}`, "task-result"));
     const chips = node("div", "", "chips");

@@ -1,0 +1,121 @@
+{
+  "all_attempts_passed": false,
+  "failed_agent_attempt": {
+    "case_id": "G3",
+    "root_task_id": "a83d177b-2dcd-5268-b884-4e4fc57e6e60",
+    "replay_id": "golden-44d838e6fb63454185a45121fed56cf1",
+    "state": "FAILED",
+    "error_code": "grounding_rejected",
+    "agent_calls": 9,
+    "agent_elapsed_seconds": 248.015,
+    "history": "Critic-0 requested a synthetic-limitation citation in the answer. Reflection addressed it but altered the regional shared-connectivity interpretation. Critic-1 found the region uncertain: selectively reviewed healthy/warning channels cannot exclude uninvestigated shared failures. The normal one-reflection budget was exhausted; grounding_rejected correctly withheld an accepted answer/inspection. The eligible numerical leak candidate was not counted as model classification."
+  },
+  "rejected_judge_attempts": [
+    {
+      "identity": "adequate-control",
+      "trace_id": "c1baf657e8d707add9240111ece89cc4",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "76fb41ce-5044-41ed-baf3-6a48e42e45c7",
+      "calls": 1,
+      "elapsed_seconds": 24.0,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    },
+    {
+      "identity": "incorrect-injection-control",
+      "trace_id": "1b9317c6dd599ddd5c82ccd1bb73ebb1",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "4acc315d-a0f8-4db9-9c28-46b757253142",
+      "calls": 1,
+      "elapsed_seconds": 21.984,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    },
+    {
+      "identity": "G1-actual-agent-report",
+      "trace_id": "d52c94c87703b4014576caa51c0756ba",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "689d536b-8878-4195-a318-156ae9bad217",
+      "calls": 1,
+      "elapsed_seconds": 24.812,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    },
+    {
+      "identity": "G2-actual-agent-report",
+      "trace_id": "f6c31323452d7b8e18b855fd4c4db725",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "8c863b32-3364-42fb-8032-317a9037c9e1",
+      "calls": 1,
+      "elapsed_seconds": 25.625,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    }
+  ],
+  "changes_and_reruns": [
+    "No golden source recipe, source truth, baseline, geometry, admission gate, numerical threshold, runtime agent prompt, knowledge card or grounding criterion was relaxed.",
+    "Standalone Copilot CLI responses omitted mode, although observed model/request/usage were present. The external judge now supplies live mode only from actual owned CopilotCLIChatModel transport provenance; unobserved/scripted/provider failures fail.",
+    "Rubric version, rubric bytes, six dimensions and minimum scores stayed unchanged. External judge prompt/protocol was strengthened to grade model-authored causes, regions and published prose; class references must include candidate_report.answer. The mechanical field became numerical_contract_tag; expected outcomes explicitly say abstention is not leak classification. Accepted matching overlays are audited.",
+    "Re-ran two hosted calibration controls and judged unchanged recorded G1/G2 answers (four calls), not their agents. Ran one fresh normal pressure-triggered G3 attempt on identical frozen measurements (seven agent calls), then one hosted G3 judge. No further hosted calls were made to create these public receipts.",
+    "After historical output gaps were discovered, future rejected judge calls were hardened to capture schema-valid public output before identity/reference validation and mark error span status; malformed/private content records only a safe marker. This does not retroactively repair the four original missing outputs."
+  ],
+  "g3_fidelity": {
+    "original_dataset_sha256": "479c4c3c1239f15d24d84f5a6428ed5c4c249d281d80612bf4da9601eaf8d323",
+    "selected_dataset_sha256": "479c4c3c1239f15d24d84f5a6428ed5c4c249d281d80612bf4da9601eaf8d323",
+    "original_input_hash": "92e5454d9a1956a805c25885ed755e51463bbf4e684b2028b9f70b1983c22bab",
+    "selected_input_hash": "92e5454d9a1956a805c25885ed755e51463bbf4e684b2028b9f70b1983c22bab",
+    "original_truth_sha256": "417a59458a8f35b31ac471aa21720034adfa33a9e30bccd10b8687a87f5a4f75",
+    "selected_truth_sha256": "417a59458a8f35b31ac471aa21720034adfa33a9e30bccd10b8687a87f5a4f75",
+    "unchanged": true,
+    "recipe_sha256": "b8f010f5937eee27d6d8741132f85f92e29a887ab3ab69279d75104b9d88df6c",
+    "rubric_sha256": "4350ef4305e8b21dd05aeea192a64181e02b4575b28aec07faf3df13f79d2dc1"
+  }
+}

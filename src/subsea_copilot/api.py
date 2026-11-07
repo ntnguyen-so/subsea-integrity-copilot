@@ -198,11 +198,19 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         monitor = resources.get("monitor")
         service = resources.get("service")
         provider = service.health() if isinstance(service, AgentService) else {}
-        agent_status = worker.error or "running" if isinstance(worker, AgentWorker) else "starting"
+        agent_status = (
+            worker.error or ("running" if start_workers else "disabled")
+            if isinstance(worker, AgentWorker)
+            else "starting"
+        )
         if provider.get("available") is False:
             agent_status = str(provider.get("error_code") or "agent_unavailable")
         return {
-            "monitor": monitor.error or "running" if isinstance(monitor, Monitor) else "starting",
+            "monitor": (
+                monitor.error or ("running" if start_workers else "disabled")
+                if isinstance(monitor, Monitor)
+                else "starting"
+            ),
             "agent": agent_status,
             "observability": telemetry.health(),
             "provider": provider,
@@ -426,6 +434,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             "receipts": store.tool_receipts(task_id),
             "investigation_receipts": history_receipts,
             "casefile": casefile,
+            "activity": store.public_agent_activity(task.id),
         }
 
     @app.get("/api/tasks/{task_id}")

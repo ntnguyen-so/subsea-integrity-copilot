@@ -53,6 +53,12 @@ def main() -> None:
     serve = subparsers.add_parser("serve", help="Run console and independent worker threads")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8086)
+    recorded = subparsers.add_parser(
+        "serve-recorded", help="Read-only, no-worker QA console for an explicit recorded tenant"
+    )
+    recorded.add_argument("--tenant", required=True)
+    recorded.add_argument("--host", default="127.0.0.1")
+    recorded.add_argument("--port", type=int, default=8087)
     probe = subparsers.add_parser("provider-check", help="One explicit synthetic live call")
     probe.add_argument("--mode", choices=["live"], required=True)
     probe.add_argument("--model")
@@ -66,6 +72,23 @@ def main() -> None:
         "--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6", "S7"], default="S1"
     )
     generate.add_argument("--output", type=Path, default=Path("runtime") / "generated")
+    golden = subparsers.add_parser(
+        "golden", help="Generate verified golden datasets or explicitly qualify fresh agents/judge"
+    )
+    golden.add_argument(
+        "--stage", choices=[
+            "manifest", "qualify", "audit", "judge-recorded", "retry-case", "qualify-retry",
+            "public-receipts",
+        ],
+        default="manifest",
+    )
+    golden.add_argument("--mode", choices=["scripted", "live"], default="scripted")
+    golden.add_argument("--agent-model", default="gpt-6.1-sol")
+    golden.add_argument("--judge-model", default="gpt-6.1-sol")
+    golden.add_argument("--case", choices=["G1", "G2", "G3"], default="G3")
+    golden.add_argument("--source-output", type=Path)
+    golden.add_argument("--retry-output", type=Path)
+    golden.add_argument("--output", type=Path, default=Path("eval") / "results" / "golden")
     ingest = subparsers.add_parser("ingest", help="Create a paused named synthetic replay")
     ingest.add_argument("--fixture-set", choices=["interview"], default="interview")
     ingest.add_argument(
@@ -84,7 +107,67 @@ def main() -> None:
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     try:
-        if args.command == "knowledge":
+        if args.command == "serve-recorded":
+            from dataclasses import replace
+
+            import uvicorn
+
+            from .recorded_console import create_recorded_console
+
+            if args.host not in ("127.0.0.1", "localhost", "::1"):
+                parser.error("Recorded QA console may bind only to loopback")
+            print(f"Recorded-only QA console: http://{args.host}:{args.port}")
+            uvicorn.run(
+                create_recorded_console(
+                    replace(Settings.from_env(), host=args.host, port=args.port), args.tenant,
+                ),
+                host=args.host, port=args.port,
+            )
+        elif args.command == "golden":
+            if args.stage == "manifest":
+                from .golden_data import write_manifest
+
+                report = write_manifest(args.output)
+            elif args.stage == "audit":
+                from .golden_evaluation import audit_recorded_operator_outputs
+
+                report = audit_recorded_operator_outputs(args.output)
+            elif args.stage == "public-receipts":
+                from .golden_publication import publish_recorded_receipts
+
+                report = publish_recorded_receipts(args.output)
+            elif args.stage == "judge-recorded":
+                if args.mode != "live":
+                    parser.error("Recorded-report judging requires explicit --mode live")
+                from .golden_evaluation import judge_recorded_reports
+
+                report = judge_recorded_reports(args.output, judge_model=args.judge_model)
+            elif args.stage == "qualify-retry":
+                if args.mode != "live" or args.source_output is None or args.retry_output is None:
+                    parser.error("Retry qualification needs live mode and both source outputs")
+                from .golden_evaluation import qualify_recorded_retry
+
+                report = qualify_recorded_retry(
+                    args.source_output, args.retry_output, args.output,
+                    judge_model=args.judge_model,
+                )
+            elif args.stage == "retry-case":
+                if args.mode != "live" or args.source_output is None:
+                    parser.error("Focused retry needs --mode live and --source-output")
+                from .golden_evaluation import retry_recorded_case
+
+                report = retry_recorded_case(args.source_output, args.output, args.case)
+            else:
+                from .golden_evaluation import qualify_golden
+
+                report = qualify_golden(
+                    args.mode, args.output,
+                    agent_model=args.agent_model, judge_model=args.judge_model,
+                )
+            print(json.dumps(report, indent=2))
+            if not report.get("passed"):
+                raise SystemExit(1)
+        elif args.command == "knowledge":
             from .contracts import utc_now
             from .knowledge import DEFAULT_KNOWLEDGE_PATH, load_knowledge, select_knowledge
 

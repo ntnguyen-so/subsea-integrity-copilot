@@ -1,0 +1,76 @@
+{
+  "version": "golden-pressure-v1",
+  "seed": 20261107,
+  "duration_seconds": 120,
+  "scope": "Four bounded, deliberately clear synthetic examples on the original 24-tap Y geometry. Illustrative Gaussian pressure footprints, not hydraulics, calibrated leak probabilities, field reliability or hardware diagnoses. Signal starts at t=0 so the first complete production window is mature. No scenario-specific historical record is supplied.",
+  "cases": [
+    {
+      "id": "G1",
+      "name": "Sustained coherent local pressure deficit",
+      "source": {"segment_id": "P1", "chainage_m": 400, "strength_bar": 1.6, "spread_m": 110},
+      "spikes": [],
+      "invalid_sensor_ids": [],
+      "gap_sensor_ids": [],
+      "outage": false,
+      "expected": {
+        "pressure_trigger": true,
+        "hypothesis": "suspected_leak",
+        "inspection": {"segment_id": "P1", "start_m": 200, "end_m": 600},
+        "affected_sensor_ids": ["P1-ST2-A", "P1-ST2-B", "P1-ST3-A", "P1-ST3-B"],
+        "missing_or_invalid": false
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Scattered isolated excursions with invalid samples and gaps",
+      "source": null,
+      "spikes": [
+        {"sensor_id": "P1-ST1-A", "phase_seconds": 5},
+        {"sensor_id": "P2-ST2-A", "phase_seconds": 10},
+        {"sensor_id": "P3-ST4-A", "phase_seconds": 15}
+      ],
+      "invalid_sensor_ids": ["P3-ST1-B"],
+      "gap_sensor_ids": ["P2-ST4-B"],
+      "outage": false,
+      "expected": {
+        "pressure_trigger": true,
+        "hypothesis": "sensor_or_telemetry_issue",
+        "inspection": null,
+        "affected_sensor_ids": [],
+        "missing_or_invalid": true
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Coherent deficit plus unrelated excursion, invalid samples and gaps",
+      "source": {"segment_id": "P1", "chainage_m": 425, "strength_bar": 1.6, "spread_m": 110},
+      "spikes": [{"sensor_id": "P2-ST2-A", "phase_seconds": 10}],
+      "invalid_sensor_ids": ["P3-ST4-A"],
+      "gap_sensor_ids": ["P2-ST4-B"],
+      "outage": false,
+      "expected": {
+        "pressure_trigger": true,
+        "hypothesis": "suspected_leak",
+        "inspection": {"segment_id": "P1", "start_m": 200, "end_m": 600},
+        "affected_sensor_ids": ["P1-ST2-A", "P1-ST2-B", "P1-ST3-A", "P1-ST3-B"],
+        "missing_or_invalid": true
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Missing-only full telemetry outage; no pressure-triggered agent",
+      "source": null,
+      "spikes": [],
+      "invalid_sensor_ids": [],
+      "gap_sensor_ids": [],
+      "outage": true,
+      "expected": {
+        "pressure_trigger": false,
+        "hypothesis": "insufficient_evidence",
+        "inspection": null,
+        "affected_sensor_ids": [],
+        "missing_or_invalid": true
+      }
+    }
+  ]
+}

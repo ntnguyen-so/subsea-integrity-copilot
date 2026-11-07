@@ -31,6 +31,58 @@ the map**, rather than adding more alert legend entries.
 Private repository: https://github.com/ntnguyen-so/subsea-integrity-copilot.
 Reviewers need repository access before the interview.
 
+## Golden-data qualification
+
+Versioned synthetic cases and hidden evaluation labels live in
+`fixtures\golden\cases-v1.json`; the judge rubric is
+`fixtures\golden\judge-rubric-v1.json`. Qualification tests coordinated leak
+patterns, scattered instrument problems and mixed evidence, plus a missing-only
+negative control. Truth labels are evaluation inputs, not agent inputs.
+
+After starting the required services and loading the external credentials:
+
+```powershell
+$env:SUBSEA_TRACE_CONTENT='1'
+$env:SUBSEA_SYNTHETIC_ONLY='1'
+uv run subsea golden --stage qualify --mode live --output eval\results\golden-live
+```
+
+This spends real hosted inference calls. It evaluates fresh, tenant-isolated
+agent runs, checks classification/localization against the synthetic truth, and
+uses a calibrated LLM judge for explanation, evidence and uncertainty quality.
+Stored Langfuse observation trees and exact judge input/output hashes must
+verify; successful exporter delivery alone is insufficient. Frozen source hashes
+bind saved runs to their original measurements.
+
+These small golden cases and a same-model judge are regression evidence, not
+independent field validation or a measured accuracy/labor-saving claim.
+
+### Open the actual qualified recordings
+
+```powershell
+. .\tools\load-environment.ps1
+uv run subsea serve-recorded --tenant golden-eval-1aae671f78ef --port 8087
+```
+
+Open http://127.0.0.1:8087 with the same local operator credentials. This isolated
+console disables ingestion/agent workers and rejects execution commands; it
+does not copy records into the main tenant or rerun models. Choose a saved
+**Recorded pressure sample** and select **See agent work**.
+The tenant and sample suffixes below belong to the retained local qualification.
+After running a new qualification, use its returned tenant ID and replay IDs.
+
+| Case / sample suffix | Intended pattern | Selected hosted result |
+|---|---|---|
+| G1 / `4b21dfb2` | Coordinated pressure footprint | Possible leak; P1 200-600 m inspection bracket |
+| G2 / `af5af2e6` | Scattered spikes and missing readings | Instrument/telemetry concerns; no inspection interval |
+| G3 / `49b8da58` | Leak footprint mixed with quality problems | Possible leak plus quality concerns; P1 200-600 m bracket |
+| G4 / `98d4150d` | Missing values without pressure anomalies | Zero automatic agents |
+
+The selected substantive runs took **175-266 seconds**. One initial G3 attempt
+failed and four judge attempts were rejected; their history is retained.
+Selected coverage passes are not an all-attempt success rate. See
+`docs\RESULTS.md` for the evaluation and trace receipts.
+
 ## Run on Windows
 
 Requires Python 3.11, `uv`, Node.js, Docker Desktop with Linux containers, and
@@ -66,15 +118,39 @@ Stopping Compose without `-v` preserves evidence.
 The blue **agent activity** strip separates detector output from actual agent
 work. Its elapsed clock is real processing time, even while simulated telemetry
 is paused. New assisted runs **stop simulated ingestion at a newly raised
-detector alarm** and wait for fresh agents on that immutable window. The strip
-shows persisted quality, joint-investigation and reporting/critic stages,
+pressure anomaly** and wait for fresh agents on that immutable window. Missing
+values, exclusions and quality-only concerns never launch automatic agents by
+themselves; they remain visible warnings and investigation evidence. The strip
+shows the Sensor Quality Agent, Event Diagnosis Agent, Response Coordinator and
+the coordinator's separate Grounding Reviewer pass,
 actual model/tool counts and executed public activity, not invented percentages.
-**See agent work** scrolls to the quality, investigation and reporting
-handoffs, executed record searches/comparisons, source quotes, critic outcome
+**See agent work** scrolls to their
+handoffs, executed record searches/comparisons, source quotes, reviewer outcome
 and engineer verification question. These findings load automatically on Live;
 opening the Agents tab or asking a question is not required.
 
-The shared map initially shows only pressure and quality facts. Pattern and
+### What each agent does
+
+| Visible role | Operator question it addresses |
+|---|---|
+| Sensor Quality Agent | Which readings can we trust, and which need caution? |
+| Event Diagnosis Agent | Do nearby instruments change together like a possible leak, or do the anomalies better fit instrumentation, communications or operating changes? |
+| Response Coordinator | What should an engineer check next, and is an inspection area supported? |
+| Grounding Reviewer | Does the proposed response actually follow from the cited evidence? |
+
+There are **three persisted agent roles**. The reviewer is a separate model call
+within the coordinator task, not a fourth independently scheduled specialist.
+The coordinator assigns specialist checks; quality findings inform diagnosis;
+the coordinator drafts the response; the reviewer checks it before release.
+
+The public work journal shows actual requested checks, observations, agent-written
+questions, provisional drafts, reviewer feedback and linked handoffs. It labels
+application-required intake separately from model-requested investigation.
+Drafts are not accepted findings and cannot release map overlays. Saved runs
+restore their persisted journal; older recordings without this history say so.
+These are public explanations and evidence, **not private model chain-of-thought**.
+
+The shared map initially shows only pressure anomalies and missing values. Pattern and
 inspection overlays require an accepted agent handoff matching the displayed
 window, evidence hash and versions. A numerical candidate alone is not displayed
 as an agent result. Pending, failed, unavailable, mismatched and historical
@@ -114,15 +190,14 @@ needed. Comparisons appear after selecting them; full reports open in Agents,
 not as a second answer beneath the live dashboard.
 
 The light theme uses matching map and chart meanings: **amber** marks individual
-pressure anomalies, a **red cross** marks a quality concern, a **blue ring**
+pressure anomalies, a **blue ring**
 selects the graphed instrument, and grey-filled markers are **not assessed**.
 Dashed sensor outlines show missing/excluded readings; amber diamonds show
 agent-reviewed pressure patterns only after a matching report. These flags can coexist and are not confirmed leak or
 hardware-failure diagnoses. Chart keys separately identify pressure, baseline
 thresholds and missing-data bands; map, table and trend retain the same window.
-Both workflows show the **same raw pressure, gap/excluded and quality symbols**.
-These inexpensive detector flags can appear before any LLM call. Previously the
-alert-only view hid quality crosses and merged them into amber markers.
+Both workflows show the **same raw pressure and missing-value symbols**.
+These inexpensive detector flags can appear before any LLM call.
 
 1. Choose **S1**, select **Agent-assisted investigation**, then **Start new run**.
    This uses real hosted inference; no scripted/live selector is exposed.
@@ -136,10 +211,10 @@ alert-only view hid quality crosses and merged them into amber markers.
    reads, the map, alarm list and trend advance together only after scoped
    observations arrive; the last complete view stays visible instead of flashing
    blank or mixing windows. The latest numerical warning remains independent.
-3. After warm-up, a new pressure alarm, spike/drift/peer-quality flag, excluded
-   reading or missing fraction above 10% pauses the source and immediately queues
-   fresh specialists. A small isolated gap is visible quality telemetry, not
-   automatically a new incident. The first alert may be an instrumentation issue;
+3. After warm-up, a newly raised pressure anomaly pauses the source and immediately
+   queues fresh specialists. Missing/excluded readings and quality-only flags
+   never trigger an automatic investigation by themselves. Agents still examine
+   them when investigating pressure anomalies. The first alert may be an instrumentation issue;
    agents must abstain if a leak pattern has not developed. Play and Step are
    server-locked during the checks, including at 10x. Repeated persistent flags
    do not cause identical investigations. No specialist from another root is

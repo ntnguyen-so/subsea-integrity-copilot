@@ -11,6 +11,7 @@ from subsea_copilot.contracts import (
     WindowSnapshot,
 )
 from subsea_copilot.profiles import compact_comparison
+from subsea_copilot.public_activity import public_check
 from subsea_copilot.runtime.registry import REGISTRY, tool_schemas
 from subsea_copilot.synthetic import generate_pack
 from subsea_copilot.validation import ValidationError, compatible
@@ -399,16 +400,27 @@ class ToolGateway:
         self.task = self.store.reserve_tool_call(
             self.task.id, self.task.lease_token, REGISTRY[self.task.role].tool_limit
         )
+        update = public_check(self.task.role, call_id, name, arguments)
+        update["origin"] = call.get("origin", "model_request")
+        self.store.publish_event(
+            self.task.generation_id,
+            "agent.check_started",
+            update,
+            task_id=self.task.id,
+            snapshot_id=self.task.snapshot_id,
+        )
         result, error = None, None
         with self.telemetry.span(
-            "tool",
+            f"tool.{name}",
             {
                 "task_id": self.task.id,
+                "role": self.task.role,
                 "tool": name,
                 "call_id": call_id,
                 "dispatch_origin": call.get("origin", "model_request"),
+                "langfuse.observation.input": json.dumps(arguments, allow_nan=False),
             },
-        ):
+        ) as span:
             try:
                 result = self._read(name, arguments)
                 if name.startswith("history."):
@@ -451,5 +463,20 @@ class ToolGateway:
                 result,
                 error,
                 lease_token=self.task.lease_token,
+            )
+            update = public_check(
+                self.task.role, call_id, name, arguments, result, error, completed=True
+            )
+            update["origin"] = call.get("origin", "model_request")
+            self.store.publish_event(
+                self.task.generation_id,
+                "agent.check_completed",
+                update,
+                task_id=self.task.id,
+                snapshot_id=self.task.snapshot_id,
+            )
+            span.set_attribute(
+                "langfuse.observation.output",
+                json.dumps({"public_update": update, "result": result}, allow_nan=False),
             )
         return {"result": result, "error": error}

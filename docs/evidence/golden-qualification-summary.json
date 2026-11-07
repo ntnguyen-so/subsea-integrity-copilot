@@ -1,0 +1,446 @@
+{
+  "passed_selected_coverage": true,
+  "run_id": "golden-qualified-20261107",
+  "tenant_id": "golden-eval-1aae671f78ef",
+  "site_id": "northsea",
+  "model_calls_all_attempts": {
+    "agent": 32,
+    "external_judge": 9
+  },
+  "substantive_agent_attempt_count": 4,
+  "failed_agent_attempt_count": 1,
+  "all_attempts_passed": false,
+  "cases": [
+    {
+      "case_id": "G1",
+      "replay_id": "golden-f99c50c2a6b44a0f8528bcc94b21dfb2",
+      "root_task_id": "45a102b4-0e8f-58c1-93f0-5b28db07a649",
+      "snapshot_id": "window-71a2f5e9984edcaa61d7459a1359af39a2084255268760caac3ae770124e4465",
+      "input_hash": "b49045bd57900b875f0a7e13ca0fe15203cbf1dbeb3e97345be71a1aaeae80de",
+      "dataset_sha256": "d389106107c804eae30bfd039142f7c56a1ae740ed0bc92b8a7a2d4959131444",
+      "state": "SUCCEEDED",
+      "agent_calls": 7,
+      "agent_elapsed_seconds": 179.75,
+      "observed_agent_models": [
+        "gpt-6.1-sol"
+      ],
+      "runtime_root_trace": {
+        "trace_id": "8cc63d49fbdd0efd3a906887f76bf0e1",
+        "span_id": "1d9a7e6f7b7b4821",
+        "attempt_id": "e0ca4169-9d27-4936-ba93-20c68c36a9db",
+        "session_id": "61b8f7663eea751aa2d810d371263aa5c7f6bed8283146471d4d65f6d89892d2"
+      },
+      "judge_calls": 1,
+      "judge_elapsed_seconds": 27.0,
+      "judge_trace": {
+        "trace_id": "a6ae91522afbdec6c95be2bc4c2bbf47",
+        "span_id": "d76fea087e3d1359",
+        "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+      },
+      "judge_observed_model": "gpt-6.1-sol",
+      "judge_input_sha256": "bb404e6cec4208d17a295e7dbf41eee376064a4f2554a5e8b92c076bdc625693",
+      "judge_output_sha256": "68d59081872e309c4e2a3ae95e6273095a6af6a489f6861017fada219088adb2",
+      "operator_accuracy": {
+        "numerical_contract_tag": "suspected_leak",
+        "numerical_tag_is_not_model_classification": true,
+        "grounding_acceptance": true,
+        "model_authored_causal_interpretation": [
+          {
+            "text": "A physical event warrants verification, not confirmation. Both sensors at each of P1-ST2 and ST3 remain anomalous for all 60 seconds, across two gateways. A gateway is their shared data connection. However, the comparison shows only -0.0024 to +0.0100 bar changes between half-minute medians at these stations, not a developing pressure drop. No independent hydraulic reference or onset is established; synthetic screening cannot provide a leak probability.",
+            "references": [
+              "claim-025",
+              "subsea_42ad0c6d71da44f39bf0875cff975c83",
+              "PROC-INSPECT-001",
+              "KN-INDEPENDENCE-R1",
+              "claim-027"
+            ],
+            "cause": "leak",
+            "stance": "possible"
+          },
+          {
+            "text": "Check measurement accuracy without declaring these sensors faulty. The reviewed eight P1 sensors each have 60/60 usable readings, no spikes, suspected drift or paired disagreement. Paired sensors are two sensors at the same station; their agreement does not independently validate a shared gateway. Affected ST2 and ST3 use different gateways, while non-alerting ST4 and ST1 respectively share those gateways. That weakens a simple gateway-wide fault explanation but does not exclude calibration or another shared error.",
+            "references": [
+              "claim-002",
+              "claim-004",
+              "claim-024",
+              "PROC-INSPECT-001",
+              "KN-QUALITY-R1",
+              "KN-INDEPENDENCE-R1"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "possible"
+          },
+          {
+            "text": "An operating explanation remains untested. No valve or compressor records were supplied, so neither an executed change nor its absence is established. The small before/after differences do not explain why ST2/ST3 are persistently flagged against the detector baseline. Ask an engineer to compare incident-time operating records and earlier pressure history; a timing match alone would not prove cause.",
+            "references": [
+              "claim-025",
+              "subsea_42ad0c6d71da44f39bf0875cff975c83",
+              "PROC-INSPECT-001",
+              "KN-OPERATING-R1"
+            ],
+            "cause": "operating_change",
+            "stance": "not_testable"
+          }
+        ],
+        "model_authored_regional_interpretation": [
+          {
+            "text": "Prioritize this connected P1 region for verification, not a confirmed leak. All four sensors have 60 anomalous, usable readings and maximum scores about 27. ST2/ST3 are 200 m apart on different gateways. Yet half-minute changes are only -0.0024 to +0.0100 bar, and correlations range from -0.131 to 0.115: no synchronized onset is demonstrated. This comparison is relative to each sensor's first-half median, not the detector baseline. Seek earlier history and an independent pressure/flow reference to distinguish an existing physical offset from measurement bias.",
+            "references": [
+              "claim-002",
+              "claim-003",
+              "claim-004",
+              "claim-005",
+              "subsea_42ad0c6d71da44f39bf0875cff975c83",
+              "KN-INDEPENDENCE-R1"
+            ],
+            "sensor_ids": [
+              "P1-ST2-A",
+              "P1-ST2-B",
+              "P1-ST3-A",
+              "P1-ST3-B"
+            ],
+            "hypothesis": "leak_pattern"
+          },
+          {
+            "text": "These contrasting readings limit, rather than clear, the suspected region. Half-minute changes are -0.0098, +0.0040, +0.0078 and -0.0104 bar respectively, with 60 usable samples each. P1-ST1/ST4 have no detector alerts despite sharing gateways with affected ST3/ST2. Branch first-station comparisons show no common signed shift, but no weaker connected event onset is established either. Earlier synchronized history, operating records and independent references are needed; this is not evidence that either branch is leak-free.",
+            "references": [
+              "claim-000",
+              "claim-006",
+              "subsea_42ad0c6d71da44f39bf0875cff975c83",
+              "PROC-INSPECT-001",
+              "KN-INDEPENDENCE-R1",
+              "KN-OPERATING-R1"
+            ],
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST4-A",
+              "P2-ST1-A",
+              "P3-ST1-A"
+            ],
+            "hypothesis": "unresolved"
+          }
+        ],
+        "published_operator_answer": "ENGINEER QUESTION\nIs this a possible leak or an instrumentation issue? Which pipeline section should an integrity engineer inspect first, and which sensors are unreliable?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nA leak remains possible, but these readings cannot distinguish it from instrumentation or an operating change. Ask an integrity engineer to verify P1's 200-600 m inspection bracket first; chainage means distance along the pipe, not an exact leak point. No reviewed sensor is established as unreliable; the health review is partial. The suspected-leak label is numerical screening, not a causal diagnosis. The comparison shows little change within the minute, so it does not establish event onset.\nSources: claim-025, claim-026, claim-030, claim-002, subsea_42ad0c6d71da44f39bf0875cff975c83, KN-LOCALIZATION-R1\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\nleak (possible): A physical event warrants verification, not confirmation. Both sensors at each of P1-ST2 and ST3 remain anomalous for all 60 seconds, across two gateways. A gateway is their shared data connection. However, the comparison shows only -0.0024 to +0.0100 bar changes between half-minute medians at these stations, not a developing pressure drop. No independent hydraulic reference or onset is established; synthetic screening cannot provide a leak probability.\nSources: claim-025, subsea_42ad0c6d71da44f39bf0875cff975c83, PROC-INSPECT-001, KN-INDEPENDENCE-R1, claim-027\ninstrumentation or telemetry (possible): Check measurement accuracy without declaring these sensors faulty. The reviewed eight P1 sensors each have 60/60 usable readings, no spikes, suspected drift or paired disagreement. Paired sensors are two sensors at the same station; their agreement does not independently validate a shared gateway. Affected ST2 and ST3 use different gateways, while non-alerting ST4 and ST1 respectively share those gateways. That weakens a simple gateway-wide fault explanation but does not exclude calibration or another shared error.\nSources: claim-002, claim-004, claim-024, PROC-INSPECT-001, KN-QUALITY-R1, KN-INDEPENDENCE-R1\noperating change (not testable): An operating explanation remains untested. No valve or compressor records were supplied, so neither an executed change nor its absence is established. The small before/after differences do not explain why ST2/ST3 are persistently flagged against the detector baseline. Ask an engineer to compare incident-time operating records and earlier pressure history; a timing match alone would not prove cause.\nSources: claim-025, subsea_42ad0c6d71da44f39bf0875cff975c83, PROC-INSPECT-001, KN-OPERATING-R1\nJoint sensor assessment (leak pattern): P1-ST2-A, P1-ST2-B, P1-ST3-A, P1-ST3-B\nPrioritize this connected P1 region for verification, not a confirmed leak. All four sensors have 60 anomalous, usable readings and maximum scores about 27. ST2/ST3 are 200 m apart on different gateways. Yet half-minute changes are only -0.0024 to +0.0100 bar, and correlations range from -0.131 to 0.115: no synchronized onset is demonstrated. This comparison is relative to each sensor's first-half median, not the detector baseline. Seek earlier history and an independent pressure/flow reference to distinguish an existing physical offset from measurement bias.\nSources: claim-002, claim-003, claim-004, claim-005, subsea_42ad0c6d71da44f39bf0875cff975c83, KN-INDEPENDENCE-R1\nJoint sensor assessment (unresolved): P1-ST1-A, P1-ST4-A, P2-ST1-A, P3-ST1-A\nThese contrasting readings limit, rather than clear, the suspected region. Half-minute changes are -0.0098, +0.0040, +0.0078 and -0.0104 bar respectively, with 60 usable samples each. P1-ST1/ST4 have no detector alerts despite sharing gateways with affected ST3/ST2. Branch first-station comparisons show no common signed shift, but no weaker connected event onset is established either. Earlier synchronized history, operating records and independent references are needed; this is not evidence that either branch is leak-free.\nSources: claim-000, claim-006, subsea_42ad0c6d71da44f39bf0875cff975c83, PROC-INSPECT-001, KN-INDEPENDENCE-R1, KN-OPERATING-R1\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nCan an integrity engineer verify the P1 200-600 m bracket against independent pressure and flow measurements before treating it as a physical leak location?\nDo earlier synchronized readings and incident-time valve or compressor records explain when the ST2/ST3 baseline anomalies began?\nCan an instrumentation engineer check ST2/ST3 calibration and shared data paths against an independent reference, including the contrasting ST1/ST4 readings?\n\nCHECKED EVIDENCE\nLIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:01:00+00:00\nSupported snapshot evidence:\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST4-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 100.0% (1440/1440 observations).\nSuspected leak; not a confirmed diagnosis.\nWhy: 4 pressure instruments across 2 failure domains show overlapping drops for 60s. Review the cited sensor histories.\nPriority inspection interval: P1 200-600 m. This is an inspection bracket, not an exact leak position.\nWhy: affected stations at 300/500 m are bracketed by unaffected stations at 100/700 m. Inspection boundaries are the intervening station midpoints.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, INSPECTION_INTERVAL_NOT_LEAK_POINT, OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nStation spacing bounds an inspection priority, not the physical leak coordinate.\nCompatible candidates are not a confidence interval.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\n\nHISTORY-GROUNDED INVESTIGATION\nHistorical context does not resolve the cause; absence of a log is not absence of an event.\n[PROC-INSPECT-001 / revision 1] Pressure anomaly desk assessment and bounded inspection planning: Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure t\nMeasured comparison [subsea_42ad0c6d71da44f39bf0875cff975c83]: 0\u201360s; split 30s.\nP1-ST1-A: median change -0.0098 bar; usable before 30/30, after 30/30.\nP1-ST2-A: median change 0.0069 bar; usable before 30/30, after 30/30.\nP1-ST2-B: median change -0.0019 bar; usable before 30/30, after 30/30.\nP1-ST3-A: median change 0.01 bar; usable before 30/30, after 30/30.\nP1-ST3-B: median change -0.0024 bar; usable before 30/30, after 30/30.\nP1-ST4-A: median change 0.004 bar; usable before 30/30, after 30/30.\nP2-ST1-A: median change 0.0078 bar; usable before 30/30, after 30/30.\nP3-ST1-A: median change -0.0104 bar; usable before 30/30, after 30/30.\nReview the supported inspection interval with the integrity engineer.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+        "abstained": false,
+        "external_class_and_uncertainty_score": 2,
+        "synthetic_truth_operator_classification_passed": true,
+        "matching_accepted_casefile": true,
+        "actual_displayed_inspection": {
+          "segment_id": "P1",
+          "start_m": 200.0,
+          "end_m": 600.0
+        },
+        "displayed_inspection_matches_report": true,
+        "displayed_inspection_matches_golden_interval": true,
+        "scope": "Classification grades model-authored causes/regions and actual published prose, not eligible detector labels. Abstention is not a leak-classification pass. Inspection is the accepted matching casefile consumed by the dashboard overlay."
+      }
+    },
+    {
+      "case_id": "G2",
+      "replay_id": "golden-f67741580f0041a6bf121241af5af2e6",
+      "root_task_id": "06dcd70a-e8d8-5c4e-b1de-59e5e81c492f",
+      "snapshot_id": "window-c1dd7e9de2b5bdcbf00a441c1d41c36c5c9109664b73fc6fb483ff3489181729",
+      "input_hash": "14ed463ec233a3cb380ff38f963e062e6565efb113d4e9912ba4a1f9a4e6c72f",
+      "dataset_sha256": "064c09a2f2fea337290b2edc3533f72e28c03861018287fc14a348df3b533a54",
+      "state": "SUCCEEDED",
+      "agent_calls": 9,
+      "agent_elapsed_seconds": 265.672,
+      "observed_agent_models": [
+        "gpt-6.1-sol"
+      ],
+      "runtime_root_trace": {
+        "trace_id": "006128dc620b1c5f277dbd4aabac1ecf",
+        "span_id": "76bd96a56f93c1d1",
+        "attempt_id": "5474689e-a767-4cb6-9068-78e7969ee679",
+        "session_id": "a0980dca25f43699110f679ffcc13fe9a50fb78a1f4aa95c97785b4223acc287"
+      },
+      "judge_calls": 1,
+      "judge_elapsed_seconds": 26.562,
+      "judge_trace": {
+        "trace_id": "44b698f3aea2c47949eee594f4102e96",
+        "span_id": "e60a1ff6e5e891cf",
+        "session_id": "f7767e784303f877bf021d1f3850fd28e3f4ff680c29a76eb015345a897b31ac"
+      },
+      "judge_observed_model": "gpt-6.1-sol",
+      "judge_input_sha256": "ed15d6a4c1266275424ccdfb6f385fe7cdc766c6f90c4aa2ba669734549cfee7",
+      "judge_output_sha256": "19d3c40a86db92712d2bc532e00f25beab7676e8100534a14d0f3ff971de9fb4",
+      "operator_accuracy": {
+        "numerical_contract_tag": "sensor_or_telemetry_issue",
+        "numerical_tag_is_not_model_classification": true,
+        "grounding_acceptance": true,
+        "model_authored_causal_interpretation": [
+          {
+            "text": "Measurement-path problems are plausible: three sensors show 3\u20134 spikes with one-second persistence while their station partners lack comparable impulses. Two other sensors lose usable observations. This supports checking acquisition and instruments, not declaring hardware failures or every sensor on a shared connection faulty. Independent pressure references and timestamped diagnostics are needed; physical events can coexist.",
+            "references": [
+              "claim-000",
+              "claim-010",
+              "claim-022",
+              "subsea_9422ef4701da40c3bd8d935684915cbb",
+              "subsea_dd2fbaf3ccd64717a90f5fa0b5984c68",
+              "KN-QUALITY-R1"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "possible"
+          },
+          {
+            "text": "A leak remains possible but is not supported by a sustained connected pressure pattern in this window. The numerical screen has zero supporting stations and zero persistence; the reviewed comparisons instead show scattered impulses and small median changes. Missing observations, a short window and an uncalibrated synthetic model prevent clearance. Engineer verification would need reliable synchronized pressures, hydraulic context and independent measurements.",
+            "references": [
+              "claim-025",
+              "claim-024",
+              "claim-026",
+              "subsea_9422ef4701da40c3bd8d935684915cbb",
+              "KN-INDEPENDENCE-R1",
+              "KN-LOCALIZATION-R1"
+            ],
+            "cause": "leak",
+            "stance": "not_established"
+          },
+          {
+            "text": "An operating transient cannot be assessed from the supplied records: no valve or compressor records were supplied. The inspection procedure describes assessment requirements, not an executed operation. Request incident-time operating records and compare their timing, sign and affected assets with the pressure observations. Even a matching record would be association, not proof, and could explain only part of the episode.",
+            "references": [
+              "claim-025",
+              "PROC-INSPECT-001",
+              "KN-OPERATING-R1"
+            ],
+            "cause": "operating_change",
+            "stance": "not_testable"
+          }
+        ],
+        "model_authored_regional_interpretation": [
+          {
+            "text": "Check the spiking measurement paths before attributing pipe damage. A sensors at P1-ST1, P2-ST2 and P3-ST4 have adjacent steps of 2.5173\u20132.5387 bar; their B partners have steps below 0.044 bar. All eight median changes are within 0.0118 bar. One-second spikes lack a sustained connected profile. Paired sensors are two sensors at the same station; a gateway is their shared data connection. Stable partners and P1 contrasts argue against a gateway-wide effect, not against every leak. Exact impulse timing, operations and independent references need engineer verification.",
+            "references": [
+              "subsea_9422ef4701da40c3bd8d935684915cbb",
+              "claim-000",
+              "claim-010",
+              "claim-022",
+              "KN-QUALITY-R1",
+              "KN-INDEPENDENCE-R1"
+            ],
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST1-B",
+              "P1-ST3-A",
+              "P1-ST2-A",
+              "P2-ST2-A",
+              "P2-ST2-B",
+              "P3-ST4-A",
+              "P3-ST4-B"
+            ],
+            "hypothesis": "instrumentation_or_telemetry"
+          },
+          {
+            "text": "Treat the gaps as unknown pressure, not pressure drops. P2-ST4-B has 40/60 usable samples; P3-ST1-B has 45/60 after 15 invalid readings. Their complete A partners change by +0.008 and -0.0104 bar; the affected B changes are -0.0159 and +0.010 bar. Gaps occur across all time buckets, unlike brief impulses elsewhere. Complete sensors on the same gateways contradict a blanket gateway outage. Missingness does not exclude a physical event. Request engineer review of raw values, timestamps and channel diagnostics against independent references.",
+            "references": [
+              "subsea_dd2fbaf3ccd64717a90f5fa0b5984c68",
+              "claim-015",
+              "claim-017",
+              "PROC-INSPECT-001",
+              "KN-QUALITY-R1",
+              "KN-INDEPENDENCE-R1"
+            ],
+            "sensor_ids": [
+              "P2-ST4-B",
+              "P2-ST4-A",
+              "P2-ST2-A",
+              "P2-ST2-B",
+              "P3-ST1-B",
+              "P3-ST1-A",
+              "P3-ST4-A",
+              "P3-ST4-B"
+            ],
+            "hypothesis": "instrumentation_or_telemetry"
+          }
+        ],
+        "published_operator_answer": "ENGINEER QUESTION\nIs this a possible leak or an instrumentation issue? Which pipeline section should an integrity engineer inspect first, and which sensors are unreliable?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nInstrumentation or telemetry deserves verification first, but a leak is not ruled out. P1-ST1-A, P2-ST2-A and P3-ST4-A have suspect brief spikes; P2-ST4-B has missing readings and P3-ST1-B has invalid readings. None is a confirmed hardware fault. No pipeline section can be qualified for first physical inspection: the screen found zero supporting stations and no sustained pattern. Withhold an inspection interval in chainage, meaning distance along the pipe. Request engineer review of these measurement paths first; the checked label is numerical, not a cause.\nSources: claim-025, subsea_9422ef4701da40c3bd8d935684915cbb, subsea_dd2fbaf3ccd64717a90f5fa0b5984c68, PROC-INSPECT-001, KN-QUALITY-R1, KN-LOCALIZATION-R1\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\ninstrumentation or telemetry (possible): Measurement-path problems are plausible: three sensors show 3\u20134 spikes with one-second persistence while their station partners lack comparable impulses. Two other sensors lose usable observations. This supports checking acquisition and instruments, not declaring hardware failures or every sensor on a shared connection faulty. Independent pressure references and timestamped diagnostics are needed; physical events can coexist.\nSources: claim-000, claim-010, claim-022, subsea_9422ef4701da40c3bd8d935684915cbb, subsea_dd2fbaf3ccd64717a90f5fa0b5984c68, KN-QUALITY-R1\nleak (not established): A leak remains possible but is not supported by a sustained connected pressure pattern in this window. The numerical screen has zero supporting stations and zero persistence; the reviewed comparisons instead show scattered impulses and small median changes. Missing observations, a short window and an uncalibrated synthetic model prevent clearance. Engineer verification would need reliable synchronized pressures, hydraulic context and independent measurements.\nSources: claim-025, claim-024, claim-026, subsea_9422ef4701da40c3bd8d935684915cbb, KN-INDEPENDENCE-R1, KN-LOCALIZATION-R1\noperating change (not testable): An operating transient cannot be assessed from the supplied records: no valve or compressor records were supplied. The inspection procedure describes assessment requirements, not an executed operation. Request incident-time operating records and compare their timing, sign and affected assets with the pressure observations. Even a matching record would be association, not proof, and could explain only part of the episode.\nSources: claim-025, PROC-INSPECT-001, KN-OPERATING-R1\nJoint sensor assessment (instrumentation or telemetry): P1-ST1-A, P1-ST1-B, P1-ST3-A, P1-ST2-A, P2-ST2-A, P2-ST2-B, P3-ST4-A, P3-ST4-B\nCheck the spiking measurement paths before attributing pipe damage. A sensors at P1-ST1, P2-ST2 and P3-ST4 have adjacent steps of 2.5173\u20132.5387 bar; their B partners have steps below 0.044 bar. All eight median changes are within 0.0118 bar. One-second spikes lack a sustained connected profile. Paired sensors are two sensors at the same station; a gateway is their shared data connection. Stable partners and P1 contrasts argue against a gateway-wide effect, not against every leak. Exact impulse timing, operations and independent references need engineer verification.\nSources: subsea_9422ef4701da40c3bd8d935684915cbb, claim-000, claim-010, claim-022, KN-QUALITY-R1, KN-INDEPENDENCE-R1\nJoint sensor assessment (instrumentation or telemetry): P2-ST4-B, P2-ST4-A, P2-ST2-A, P2-ST2-B, P3-ST1-B, P3-ST1-A, P3-ST4-A, P3-ST4-B\nTreat the gaps as unknown pressure, not pressure drops. P2-ST4-B has 40/60 usable samples; P3-ST1-B has 45/60 after 15 invalid readings. Their complete A partners change by +0.008 and -0.0104 bar; the affected B changes are -0.0159 and +0.010 bar. Gaps occur across all time buckets, unlike brief impulses elsewhere. Complete sensors on the same gateways contradict a blanket gateway outage. Missingness does not exclude a physical event. Request engineer review of raw values, timestamps and channel diagnostics against independent references.\nSources: subsea_dd2fbaf3ccd64717a90f5fa0b5984c68, claim-015, claim-017, PROC-INSPECT-001, KN-QUALITY-R1, KN-INDEPENDENCE-R1\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nCan an engineer compare raw spike timestamps and independent pressures for P1-ST1-A, P2-ST2-A and P3-ST4-A with their paired sensors?\nCan an engineer verify missing packets for P2-ST4-B and invalid values for P3-ST1-B against channel and gateway diagnostics?\nCan an engineer review incident-time valve and compressor records plus a longer synchronized pressure window for a sustained connected pattern?\n\nCHECKED EVIDENCE\nLIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:01:00+00:00\nSupported snapshot evidence:\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 4 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP2-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP2-ST4-B pressure: 40/60 usable; 20 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP3-ST1-B pressure: 45/60 usable; 15 missing; 15 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP3-ST4-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 97.6% (1405/1440 observations).\nSensor or telemetry issues warrant review; not a proven hardware diagnosis.\nLimitations: OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, degraded_coverage, location_withheld, missing_data, partial_health_review, read_only.\nSynthetic evidence; instruments and model are uncalibrated.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nLocation withheld; no supported section or chainage is asserted.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\n\nHISTORY-GROUNDED INVESTIGATION\nHistorical context does not resolve the cause; absence of a log is not absence of an event.\n[PROC-INSPECT-001 / revision 1] Pressure anomaly desk assessment and bounded inspection planning: Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure t\nMeasured comparison [subsea_9422ef4701da40c3bd8d935684915cbb]: 0\u201360s; split 30s.\nP1-ST1-A: median change -0.009 bar; usable before 30/30, after 30/30.\nP1-ST1-B: median change -0.0118 bar; usable before 30/30, after 30/30.\nP1-ST3-A: median change 0.01 bar; usable before 30/30, after 30/30.\nP1-ST2-A: median change 0.0069 bar; usable before 30/30, after 30/30.\nP2-ST2-A: median change -0.0004 bar; usable before 30/30, after 30/30.\nP2-ST2-B: median change -0.0028 bar; usable before 30/30, after 30/30.\nP3-ST4-A: median change -0.0011 bar; usable before 30/30, after 30/30.\nP3-ST4-B: median change -0.0099 bar; usable before 30/30, after 30/30.\nMeasured comparison [subsea_dd2fbaf3ccd64717a90f5fa0b5984c68]: 0\u201360s; split 30s.\nP2-ST4-B: median change -0.0159 bar; usable before 20/30, after 20/30.\nP2-ST4-A: median change 0.008 bar; usable before 30/30, after 30/30.\nP2-ST2-A: median change -0.0004 bar; usable before 30/30, after 30/30.\nP2-ST2-B: median change -0.0028 bar; usable before 30/30, after 30/30.\nP3-ST1-B: median change 0.01 bar; usable before 22/30, after 23/30.\nP3-ST1-A: median change -0.0104 bar; usable before 30/30, after 30/30.\nP3-ST4-A: median change -0.0011 bar; usable before 30/30, after 30/30.\nP3-ST4-B: median change -0.0099 bar; usable before 30/30, after 30/30.\nReview the cited instrumentation with the integrity engineer.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+        "abstained": false,
+        "external_class_and_uncertainty_score": 2,
+        "synthetic_truth_operator_classification_passed": true,
+        "matching_accepted_casefile": true,
+        "actual_displayed_inspection": null,
+        "displayed_inspection_matches_report": true,
+        "displayed_inspection_matches_golden_interval": true,
+        "scope": "Classification grades model-authored causes/regions and actual published prose, not eligible detector labels. Abstention is not a leak-classification pass. Inspection is the accepted matching casefile consumed by the dashboard overlay."
+      }
+    },
+    {
+      "case_id": "G3",
+      "replay_id": "golden-b89bf2c63fea4f86b4f06a3149b8da58",
+      "root_task_id": "c50cace5-249a-5be9-b8ef-955bc58e2d14",
+      "snapshot_id": "window-afc4a61a4fc3974a176af8ba753c58a79dedb0b249a0300c4f09631c55dd0614",
+      "input_hash": "92e5454d9a1956a805c25885ed755e51463bbf4e684b2028b9f70b1983c22bab",
+      "dataset_sha256": "479c4c3c1239f15d24d84f5a6428ed5c4c249d281d80612bf4da9601eaf8d323",
+      "state": "SUCCEEDED",
+      "agent_calls": 7,
+      "agent_elapsed_seconds": 174.766,
+      "observed_agent_models": [
+        "gpt-6.1-sol"
+      ],
+      "runtime_root_trace": {
+        "trace_id": "2fab2b0797d3be0957c551f50e147b01",
+        "span_id": "d79eebef5675a97c",
+        "attempt_id": "67d282b4-3f11-48f8-9b3d-d0e043576f54",
+        "session_id": "4548dfb8b604997c5b1e373abd37dd34b45d812bbc706dd8302804714d1bcda3"
+      },
+      "judge_calls": 1,
+      "judge_elapsed_seconds": 25.172,
+      "judge_trace": {
+        "trace_id": "58d557a9ba1383e2a230c2fac84cb5a7",
+        "span_id": "ab0861a4dc0b02ec",
+        "session_id": "c62dce487430f744e1f294d1b221bd9b0beeaffc2c28f8a185ff4ab07efd1295"
+      },
+      "judge_observed_model": "gpt-6.1-sol",
+      "judge_input_sha256": "e9990dc779066accebe2c50b854e3a8dc15d6540d7b1ae5b2d34ec0cfd9af67a",
+      "judge_output_sha256": "7c0c703d440d6ee28679f120654b7332c3a5f0ff09fe917f709eef8ab2d4ba20",
+      "operator_accuracy": {
+        "numerical_contract_tag": "suspected_leak",
+        "numerical_tag_is_not_model_classification": true,
+        "grounding_acceptance": true,
+        "model_authored_causal_interpretation": [
+          {
+            "text": "P1 deserves priority because four sensors at two stations and two connection domains meet the 60-second screening criterion. However, the comparison shows almost unchanged pressure between the two 30-second halves, not a developing drop or strong synchronized fluctuations. A leak-compatible warning remains, but onset, hydraulic interpretation and independent pressure confirmation are missing; request engineer verification rather than treating the bracket as a confirmed leak location.",
+            "references": [
+              "claim-025",
+              "claim-026",
+              "subsea_835a8a4ca797411c8813981187a846fa",
+              "KN-INDEPENDENCE-R1",
+              "KN-LOCALIZATION-R1"
+            ],
+            "cause": "leak",
+            "stance": "possible"
+          },
+          {
+            "text": "Some observations warrant instrumentation checks: P2-ST2-A has three one-second spikes, P2-ST4-B lacks 20 of 60 readings, and P3-ST4-A has 15 invalid readings. Their compared partners do not show matching large changes. This supports checking instrument and data-path integrity, but does not identify failed hardware or explain P1. Missing readings are unknown pressure, not measured drops; instrumentation problems and a physical event may coexist.",
+            "references": [
+              "claim-010",
+              "claim-015",
+              "claim-022",
+              "subsea_4d941571912d4c0b81fe8a99dd6c9d10",
+              "KN-QUALITY-R1"
+            ],
+            "cause": "instrumentation_or_telemetry",
+            "stance": "possible"
+          },
+          {
+            "text": "An operating explanation remains open because no valve or compressor records were supplied. The reviewed procedure is not an incident operating log, and near-stable pressure within this minute cannot exclude an earlier operating change. Request incident-time records and compare their timing, affected assets and pressure direction; neither absent records nor temporal association establishes a cause.",
+            "references": [
+              "claim-025",
+              "PROC-INSPECT-001",
+              "subsea_835a8a4ca797411c8813981187a846fa",
+              "KN-OPERATING-R1"
+            ],
+            "cause": "operating_change",
+            "stance": "not_testable"
+          }
+        ],
+        "model_authored_regional_interpretation": [
+          {
+            "text": "Prioritize P1 for verification, not a confirmed leak: ST2/ST3 meet the sustained screen, while ST1/ST4 bracket them. Paired sensors are two sensors at one station; a gateway is their shared data connection. ST2/ST3 span two gateways, yet each gateway also serves a bracketing station, weakening a whole-gateway explanation. ST2/ST3 half-window changes are only \u22120.0024 to +0.0100 bar, with weak correlations: agreement in anomaly status is not synchronized pressure evidence. No onset or calibrated hydraulic fit is available; check independent pressures and operating records.",
+            "references": [
+              "claim-025",
+              "claim-026",
+              "subsea_835a8a4ca797411c8813981187a846fa",
+              "PROC-INSPECT-001",
+              "KN-INDEPENDENCE-R1",
+              "KN-LOCALIZATION-R1"
+            ],
+            "sensor_ids": [
+              "P1-ST1-A",
+              "P1-ST1-B",
+              "P1-ST2-A",
+              "P1-ST2-B",
+              "P1-ST3-A",
+              "P1-ST3-B",
+              "P1-ST4-A",
+              "P1-ST4-B"
+            ],
+            "hypothesis": "leak_pattern"
+          },
+          {
+            "text": "Treat P2-ST2-A's impulses as suspect observations, not a proven fault or leak. Its largest adjacent pressure step is 2.5387 bar versus 0.0435 bar for its paired sensor; half-window median changes are only \u22120.0004 and \u22120.0028 bar, with correlation \u22120.128. Three one-second spikes contrast with a sustained connected pattern. Both share gateway-P2-1, but B lacks matching impulses, so a gateway-wide fault is not established. Timing beyond this window and an independent reference are missing; request raw-sample and calibration verification.",
+            "references": [
+              "claim-010",
+              "subsea_4d941571912d4c0b81fe8a99dd6c9d10",
+              "PROC-INSPECT-001",
+              "KN-QUALITY-R1",
+              "KN-INDEPENDENCE-R1"
+            ],
+            "sensor_ids": [
+              "P2-ST2-A",
+              "P2-ST2-B"
+            ],
+            "hypothesis": "instrumentation_or_telemetry"
+          },
+          {
+            "text": "These stations have incomplete observation, not measured pressure loss: P2-ST4-B misses 20/60 readings and P3-ST4-A has 15/60 invalid readings. Paired partners retain 60 usable samples. Across these four sensors, half-window median changes range from \u22120.0159 to +0.0080 bar; there is no matching large sustained change in usable data. P2 and P3 use separate gateways, so one shared gateway failure is not demonstrated. Gaps remain unknown; request timestamp, invalid-value and independent-pressure checks rather than declaring either station healthy or its hardware failed.",
+            "references": [
+              "claim-015",
+              "claim-022",
+              "subsea_4d941571912d4c0b81fe8a99dd6c9d10",
+              "PROC-INSPECT-001",
+              "KN-QUALITY-R1",
+              "KN-INDEPENDENCE-R1"
+            ],
+            "sensor_ids": [
+              "P2-ST4-A",
+              "P2-ST4-B",
+              "P3-ST4-A",
+              "P3-ST4-B"
+            ],
+            "hypothesis": "instrumentation_or_telemetry"
+          }
+        ],
+        "published_operator_answer": "ENGINEER QUESTION\nIs this a possible leak or an instrumentation issue? Which pipeline section should an integrity engineer inspect first, and which sensors are unreliable?\nENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW\nCitation membership is checked; wording is not independently verified RCA. The checked evidence and safety limits below remain authoritative.\nA leak remains possible, while separate observation problems also need checking; neither cause is confirmed. Ask an integrity engineer to review P1 at chainage 200\u2013600 m first: chainage means distance along the pipe, and this bracket is not a leak point. P2-ST2-A has suspect spikes; P2-ST4-B has missing readings; P3-ST4-A has invalid readings. These establish observation concerns, not proven hardware faults. The checked suspected-leak label is numerical screening, not causal diagnosis; pressure anomalies alone do not make the P1 sensors unreliable.\nSources: claim-025, claim-026, claim-010, claim-015, claim-022, KN-LOCALIZATION-R1\nCOMPETING CAUSES - NOT CONFIRMED ROOT CAUSES\nleak (possible): P1 deserves priority because four sensors at two stations and two connection domains meet the 60-second screening criterion. However, the comparison shows almost unchanged pressure between the two 30-second halves, not a developing drop or strong synchronized fluctuations. A leak-compatible warning remains, but onset, hydraulic interpretation and independent pressure confirmation are missing; request engineer verification rather than treating the bracket as a confirmed leak location.\nSources: claim-025, claim-026, subsea_835a8a4ca797411c8813981187a846fa, KN-INDEPENDENCE-R1, KN-LOCALIZATION-R1\ninstrumentation or telemetry (possible): Some observations warrant instrumentation checks: P2-ST2-A has three one-second spikes, P2-ST4-B lacks 20 of 60 readings, and P3-ST4-A has 15 invalid readings. Their compared partners do not show matching large changes. This supports checking instrument and data-path integrity, but does not identify failed hardware or explain P1. Missing readings are unknown pressure, not measured drops; instrumentation problems and a physical event may coexist.\nSources: claim-010, claim-015, claim-022, subsea_4d941571912d4c0b81fe8a99dd6c9d10, KN-QUALITY-R1\noperating change (not testable): An operating explanation remains open because no valve or compressor records were supplied. The reviewed procedure is not an incident operating log, and near-stable pressure within this minute cannot exclude an earlier operating change. Request incident-time records and compare their timing, affected assets and pressure direction; neither absent records nor temporal association establishes a cause.\nSources: claim-025, PROC-INSPECT-001, subsea_835a8a4ca797411c8813981187a846fa, KN-OPERATING-R1\nJoint sensor assessment (leak pattern): P1-ST1-A, P1-ST1-B, P1-ST2-A, P1-ST2-B, P1-ST3-A, P1-ST3-B, P1-ST4-A, P1-ST4-B\nPrioritize P1 for verification, not a confirmed leak: ST2/ST3 meet the sustained screen, while ST1/ST4 bracket them. Paired sensors are two sensors at one station; a gateway is their shared data connection. ST2/ST3 span two gateways, yet each gateway also serves a bracketing station, weakening a whole-gateway explanation. ST2/ST3 half-window changes are only \u22120.0024 to +0.0100 bar, with weak correlations: agreement in anomaly status is not synchronized pressure evidence. No onset or calibrated hydraulic fit is available; check independent pressures and operating records.\nSources: claim-025, claim-026, subsea_835a8a4ca797411c8813981187a846fa, PROC-INSPECT-001, KN-INDEPENDENCE-R1, KN-LOCALIZATION-R1\nJoint sensor assessment (instrumentation or telemetry): P2-ST2-A, P2-ST2-B\nTreat P2-ST2-A's impulses as suspect observations, not a proven fault or leak. Its largest adjacent pressure step is 2.5387 bar versus 0.0435 bar for its paired sensor; half-window median changes are only \u22120.0004 and \u22120.0028 bar, with correlation \u22120.128. Three one-second spikes contrast with a sustained connected pattern. Both share gateway-P2-1, but B lacks matching impulses, so a gateway-wide fault is not established. Timing beyond this window and an independent reference are missing; request raw-sample and calibration verification.\nSources: claim-010, subsea_4d941571912d4c0b81fe8a99dd6c9d10, PROC-INSPECT-001, KN-QUALITY-R1, KN-INDEPENDENCE-R1\nJoint sensor assessment (instrumentation or telemetry): P2-ST4-A, P2-ST4-B, P3-ST4-A, P3-ST4-B\nThese stations have incomplete observation, not measured pressure loss: P2-ST4-B misses 20/60 readings and P3-ST4-A has 15/60 invalid readings. Paired partners retain 60 usable samples. Across these four sensors, half-window median changes range from \u22120.0159 to +0.0080 bar; there is no matching large sustained change in usable data. P2 and P3 use separate gateways, so one shared gateway failure is not demonstrated. Gaps remain unknown; request timestamp, invalid-value and independent-pressure checks rather than declaring either station healthy or its hardware failed.\nSources: claim-015, claim-022, subsea_4d941571912d4c0b81fe8a99dd6c9d10, PROC-INSPECT-001, KN-QUALITY-R1, KN-INDEPENDENCE-R1\nQUESTIONS TO RESOLVE WITH THE ENGINEER\nCan an integrity engineer verify the P1 200\u2013600 m bracket using independent pressure measurements and an appropriate hydraulic assessment?\nCan an engineer review incident-time valve, compressor, calibration and shared power/data records against the P1 pattern?\nCan an instrumentation engineer verify P2-ST2-A's spikes, P2-ST4-B's missing samples and P3-ST4-A's invalid values against raw timestamps and independent references?\n\nCHECKED EVIDENCE\nLIVE \u00b7 READ ONLY \u00b7 analysis as of 2026-01-01T00:01:00+00:00\nSupported snapshot evidence:\nP1-ST1-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST1-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST2-B pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP1-ST3-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP2-ST2-A pressure: 60/60 usable; 0 missing; 0 code-excluded observations; 3 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP2-ST4-B pressure: 40/60 usable; 20 missing; 0 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nP3-ST4-A pressure: 45/60 usable; 15 missing; 15 code-excluded observations; 0 usable spikes; drift suspicion: False; paired-instrument disagreement: False.\nUsable coverage: 97.6% (1405/1440 observations).\nSuspected leak; not a confirmed diagnosis.\nWhy: 4 pressure instruments across 2 failure domains show overlapping drops for 60s. Review the cited sensor histories.\nPriority inspection interval: P1 200-600 m. This is an inspection bracket, not an exact leak position.\nWhy: affected stations at 300/500 m are bracketed by unaffected stations at 100/700 m. Inspection boundaries are the intervening station midpoints.\nLimitations: COMPATIBLE_NOT_CONFIDENCE, INSPECTION_INTERVAL_NOT_LEAK_POINT, OPERATING_CONTEXT_REQUIRED, PRESSURE_PATTERNS_NOT_PROOF, SYNTHETIC_UNCALIBRATED, VERIFY_OPERATING_CHANGES_AND_SHARED_FAILURES, degraded_coverage, missing_data, partial_health_review.\nSynthetic evidence; instruments and model are uncalibrated.\nCorrelated pressure anomalies support investigation, not a confirmed leak.\nVerify valve/compressor changes and shared failures with the operator. Synthetic operational history can support investigation; customer operating records remain unconnected.\nStation spacing bounds an inspection priority, not the physical leak coordinate.\nCompatible candidates are not a confidence interval.\nHealth claim review is bounded, not exhaustive; the full quality report is retained.\nReviewed channel-health claims: 8/24; additional findings remain in the pinned quality report.\n\nHISTORY-GROUNDED INVESTIGATION\nHistorical context does not resolve the cause; absence of a log is not absence of an event.\n[PROC-INSPECT-001 / revision 1] Pressure anomaly desk assessment and bounded inspection planning: Fictional, nonconfidential procedure. The desk assessment uses pressure timing, persistence, coverage and paired taps to scope uncertainty before any inspection recommendation. Trunk P1, Branch A P2 and Branch B P3 each have ST1 through ST4 with A/B pressure t\nMeasured comparison [subsea_835a8a4ca797411c8813981187a846fa]: 0\u201360s; split 30s.\nP1-ST1-A: median change -0.0098 bar; usable before 30/30, after 30/30.\nP1-ST1-B: median change -0.0118 bar; usable before 30/30, after 30/30.\nP1-ST2-A: median change 0.0069 bar; usable before 30/30, after 30/30.\nP1-ST2-B: median change -0.0019 bar; usable before 30/30, after 30/30.\nP1-ST3-A: median change 0.01 bar; usable before 30/30, after 30/30.\nP1-ST3-B: median change -0.0024 bar; usable before 30/30, after 30/30.\nP1-ST4-A: median change 0.004 bar; usable before 30/30, after 30/30.\nP1-ST4-B: median change -0.0029 bar; usable before 30/30, after 30/30.\nMeasured comparison [subsea_4d941571912d4c0b81fe8a99dd6c9d10]: 0\u201360s; split 30s.\nP2-ST2-A: median change -0.0004 bar; usable before 30/30, after 30/30.\nP2-ST2-B: median change -0.0028 bar; usable before 30/30, after 30/30.\nP2-ST4-A: median change 0.008 bar; usable before 30/30, after 30/30.\nP2-ST4-B: median change -0.0159 bar; usable before 20/30, after 20/30.\nP3-ST4-A: median change -0.0044 bar; usable before 22/30, after 23/30.\nP3-ST4-B: median change -0.0099 bar; usable before 30/30, after 30/30.\nP2-ST1-A: median change 0.0078 bar; usable before 30/30, after 30/30.\nP3-ST1-A: median change -0.0104 bar; usable before 30/30, after 30/30.\nReview the supported inspection interval with the integrity engineer.\nSynthetic, read-only evidence. Association is not causation; no safety clearance or operational control.",
+        "abstained": false,
+        "external_class_and_uncertainty_score": 2,
+        "synthetic_truth_operator_classification_passed": true,
+        "matching_accepted_casefile": true,
+        "actual_displayed_inspection": {
+          "segment_id": "P1",
+          "start_m": 200.0,
+          "end_m": 600.0
+        },
+        "displayed_inspection_matches_report": true,
+        "displayed_inspection_matches_golden_interval": true,
+        "scope": "Classification grades model-authored causes/regions and actual published prose, not eligible detector labels. Abstention is not a leak-classification pass. Inspection is the accepted matching casefile consumed by the dashboard overlay."
+      }
+    },
+    {
+      "case_id": "G4",
+      "replay_id": "golden-1e1d4cafe8d5450ca248eed798d4150d",
+      "root_task_id": null,
+      "snapshot_id": "window-360c205bdfd40e53471bf4be52b85c8a416a2b8be7b358586d04c21790f87a7e",
+      "input_hash": "f3f38034309939ed6235e9187f0d9276cce73a0a6ddfa27cf60eee6d0be5b40c",
+      "dataset_sha256": "012126c12b06922b6e157be0bfc039b7b29aaeeb7e17ea18b26a60d2d0d9a5ad",
+      "state": null,
+      "agent_calls": 0,
+      "agent_elapsed_seconds": null,
+      "observed_agent_models": [],
+      "runtime_root_trace": null,
+      "judge_calls": 0,
+      "judge_elapsed_seconds": null,
+      "judge_trace": null,
+      "judge_observed_model": null,
+      "judge_input_sha256": null,
+      "judge_output_sha256": null,
+      "operator_accuracy": {
+        "not_applicable_no_pressure_trigger": true,
+        "zero_agents": true
+      }
+    }
+  ],
+  "limitations": [
+    "Four bounded, deliberately clear synthetic examples on the original 24-tap Y geometry. Illustrative Gaussian pressure footprints, not hydraulics, calibrated leak probabilities, field reliability or hardware diagnoses. Signal starts at t=0 so the first complete production window is mature. No scenario-specific historical record is supplied.",
+    "One seed per case; one bounded same-input G3 retry, with original failure retained. No reliability, expert certification or time-saving claim.",
+    "The external judge is semantic opinion separate from deterministic checks.",
+    "Requested agent and judge models match; self/same-model judging is not independent.",
+    "Calibration controls are evaluation-only, never runtime answers/specialist results.",
+    "Withholding can be conservative; the judge assesses whether abstention is justified.",
+    "Langfuse verification checks observation types/trees, not expert answer validity.",
+    "Synthetic input/output requires SUBSEA_TRACE_CONTENT=1 and SUBSEA_SYNTHETIC_ONLY=1.",
+    "Scripted/unobserved models, provider failure and missing traces do not qualify."
+  ],
+  "source_display": "Stored frozen-pressure-<SHA256> is the authoritative measurement identity; the ordinary replay seed is ignored, never used to regenerate a frozen source. Prefer a neutral Recorded pressure sample / short replay ID display, keeping stored scenario and hashes unchanged. No truth labels belong in runtime/UI metadata.",
+  "qa_command": ".\\.venv\\Scripts\\subsea.exe serve-recorded --tenant golden-eval-1aae671f78ef --port 8087",
+  "qa_browser_environment_command": "$env:SUBSEA_GOLDEN_UI_CASES_JSON = Get-Content -Raw 'eval\\results\\golden-qualified-20261107\\qa-ui-cases.json'"
+}

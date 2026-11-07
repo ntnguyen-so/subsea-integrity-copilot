@@ -75,13 +75,13 @@ def test_outage_windows_progress_when_provider_is_unavailable(
     assert snapshot.quality.status == "COVERAGE_LOST"
     assert snapshot.event.hypothesis == "insufficient_evidence"
     assert not monitor.store.list_tasks(replay.id)
-    assert monitor.store.list_episodes(replay.id)[0].dispatch_status == "agent_unavailable"
+    assert not monitor.store.list_episodes(replay.id)
 
     # Availability can change between checking health and admitting a task.
     monkeypatch.setattr(monitor.agents, "health", lambda: {"available": True})
 
     def unavailable(*_args: object, **_kwargs: object) -> None:
-        raise ValidationError(failure, "Provider unavailable; no automatic retry.")
+        raise AssertionError(f"{failure}: missing-only evidence must not admit agents")
 
     monkeypatch.setattr(monitor.agents, "submit_question", unavailable)
     monitor.control(replay.id, "step", None, "race-step")
@@ -98,6 +98,64 @@ def test_repeated_control_does_not_advance_clock_twice(monitor: Monitor) -> None
     assert second.clock_seconds == 10
     assert second.latest_window_id
     assert monitor.store.get_window(second.latest_window_id).quality.status == "WARMING_UP"
+
+
+@pytest.mark.parametrize("pause_on_anomaly", [False, True])
+def test_missing_only_outage_keeps_monitoring_without_agents(
+    monitor: Monitor, monkeypatch: pytest.MonkeyPatch, pause_on_anomaly: bool
+) -> None:
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("Missing values alone must not check or invoke agents")
+
+    monkeypatch.setattr(monitor.agents, "health", forbidden)
+    monkeypatch.setattr(monitor.agents, "submit_question", forbidden)
+    replay = monitor.create("S3", 2026, "live", "missing-only", pause_on_anomaly=pause_on_anomaly)
+    for index in range(37):
+        current = monitor.control(replay.id, "step", None, f"missing-step-{index}")
+        assert current.investigation_window_id is None
+    snapshot = monitor.store.get_window(current.latest_window_id)
+    assert current.clock_seconds == 185
+    assert snapshot.quality.status == "COVERAGE_LOST"
+    assert any(finding.missing > 0 for finding in snapshot.quality.findings)
+    assert not any(finding.anomaly_count for finding in snapshot.quality.findings)
+    assert monitoring_warning(snapshot, sensor_alerts_only=True).kind == "coverage_lost"
+    assert not monitor.store.list_tasks(replay.id)
+    assert not monitor.store.list_episodes(replay.id)
+
+
+def test_quality_only_findings_do_not_pause_or_admit_agents(monitor: Monitor) -> None:
+    replay = monitor.create("S6", 2026, "scripted", "quality-only", pause_on_anomaly=True)
+    for index in range(14):
+        current = monitor.control(replay.id, "step", None, f"normal-{index}")
+    snapshot = monitor.store.get_window(current.latest_window_id)
+    assert not any(finding.anomaly_count for finding in snapshot.quality.findings)
+    findings = [
+        finding.model_copy(update={"missing": 20, "hard_excluded": 1, "peer_disagreement": True})
+        for finding in snapshot.quality.findings
+    ]
+    flagged = snapshot.model_copy(
+        update={"quality": snapshot.quality.model_copy(update={"findings": findings})}
+    )
+    assert not monitor._pause_for_investigation(current, flagged)
+    monitor._episode(current, flagged)
+    assert monitor.store.get_replay(replay.id).investigation_window_id is None
+    assert not monitor.store.list_tasks(replay.id)
+
+
+def test_legacy_missing_only_hold_can_continue_without_an_agent(monitor: Monitor) -> None:
+    replay = monitor.create("S6", 2026, "scripted", "legacy-hold", pause_on_anomaly=True)
+    monitor._source(replay).received_seconds = []
+    for index in range(14):
+        current = monitor.control(replay.id, "step", None, f"missing-{index}")
+    current = monitor.store.save_replay(
+        current.model_copy(update={"investigation_window_id": current.latest_window_id})
+    )
+    monitor._episode(current, monitor.store.get_window(current.latest_window_id))
+    assert not monitor.store.list_tasks(replay.id)
+    assert monitor.store.list_episodes(replay.id)[0].dispatch_status == "no_pressure_anomaly"
+    resumed = monitor.control(replay.id, "play", None, "continue-legacy")
+    assert resumed.state == "PLAYING"
+    assert resumed.investigation_window_id is None
 
 
 def paused_s7(monitor: Monitor, *, mode: Mode = "scripted"):
@@ -126,6 +184,9 @@ def test_ten_times_stops_at_first_alarm_and_freezes_until_review(monitor: Monito
     assert current.investigation_window_id == current.latest_window_id
     basis = monitor.store.get_window(current.investigation_window_id)
     assert basis.quality.status != "WARMING_UP"
+    assert any(finding.anomaly_count > 0 for finding in basis.quality.findings)
+    assert current.detected_alert_keys
+    assert all(key.endswith(":pressure") for key in current.detected_alert_keys)
     roots = [task for task in monitor.store.list_tasks(current.id) if not task.parent_id]
     assert len(roots) == 1
     assert roots[0].snapshot_id == basis.id
@@ -151,6 +212,21 @@ def test_ten_times_stops_at_first_alarm_and_freezes_until_review(monitor: Monito
         if root.state in ("SUCCEEDED", "ABSTAINED"):
             break
     assert root.state in ("SUCCEEDED", "ABSTAINED"), root.error_code
+    activity = monitor.store.events(current.id, limit=500)
+    checks = [event for event in activity if event.type == "agent.check_completed"]
+    assert checks
+    assert all(event.payload["schema"] == "agent-public-v1" for event in checks)
+    assert any(event.payload.get("agent_question") for event in checks)
+    handoffs = [event for event in activity if event.type == "agent.handoff_requested"]
+    assert {event.payload["to_role"] for event in handoffs} == {"sensor_quality", "event_diagnosis"}
+    assert all(event.payload["from_task_id"] == root.id for event in handoffs)
+    assert {event.payload["role"] for event in activity if event.type == "answer.checked"} == {
+        "sensor_quality",
+        "event_diagnosis",
+        "operator_response",
+    }
+    assert any(event.type == "agent.draft" for event in activity)
+    assert any(event.type == "agent.review_requested" for event in activity)
     assert monitor.store.get_replay(current.id).clock_seconds == frozen[0]
     assert monitor.store.get_replay(current.id).state == "PAUSED"
     fake_root = root.model_copy(update={"id": "new-root", "root_id": "new-root"})
@@ -351,8 +427,8 @@ def test_maturing_leak_bypasses_unresolved_hold_without_an_obsolete_llm_job(
     assert monitor.store.list_episodes(replay.id)[0].pending_window_id is None
 
 
-@pytest.mark.parametrize("scenario", ["S2", "S3", "S5"])
-def test_instrumentation_and_coverage_warnings_bypass_context_hold(
+@pytest.mark.parametrize("scenario", ["S2", "S5"])
+def test_pressure_anomalies_with_instrumentation_or_coverage_warnings_bypass_context_hold(
     monitor: Monitor,
     scenario: str,
 ) -> None:
@@ -362,6 +438,8 @@ def test_instrumentation_and_coverage_warnings_bypass_context_hold(
         if not current.latest_window_id:
             continue
         snapshot = monitor.store.get_window(current.latest_window_id)
+        if not any(finding.anomaly_count > 0 for finding in snapshot.quality.findings):
+            continue
         if snapshot.quality.status != "COVERAGE_LOST" and (
             snapshot.event.hypothesis != "sensor_or_telemetry_issue"
         ):
@@ -488,8 +566,7 @@ def test_explicit_scripted_mode_is_not_disabled_by_live_provider_failure(
     monitor: Monitor,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    replay = monitor.create("S6", 2026, "scripted", "explicit-scripted")
-    monitor._source(replay).received_seconds = []
+    replay = monitor.create("S2", 2026, "scripted", "explicit-scripted")
     monkeypatch.setattr(monitor.agents, "health", lambda: {"available": False})
     for index in range(13):
         monitor.control(replay.id, "step", None, f"step-{index}")
@@ -497,6 +574,8 @@ def test_explicit_scripted_mode_is_not_disabled_by_live_provider_failure(
     assert len(roots) == 1
     assert roots[0].mode == "scripted"
     assert roots[0].state == "QUEUED"
+    basis = monitor.store.get_window(roots[0].snapshot_id)
+    assert any(finding.anomaly_count > 0 for finding in basis.quality.findings)
 
 
 def test_api_provider_error_is_explicit_and_controls_remain_available(

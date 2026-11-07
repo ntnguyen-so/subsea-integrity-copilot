@@ -1,6 +1,72 @@
 import { button, friendly, node, text, time } from "./dom";
 import type { AgentTask, ConsoleEvent, Json, TaskDetail, WindowSnapshot } from "./types";
 
+const agents = [
+  ["sensor_quality", "Sensor Quality Agent", "Are the readings usable? Missing values stay unknown."],
+  ["event_diagnosis", "Event Diagnosis Agent", "What explains the pressure changes? Compare sensors and operating records."],
+  ["operator_response", "Response Coordinator", "Assign specialist checks, then combine findings into an inspection recommendation or abstention."],
+] as const;
+export function agentName(role: string): string {
+  return role === "grounding_reviewer" ? "Grounding Reviewer"
+    : agents.find(agent => agent[0] === role)?.[1] || friendly(role);
+}
+function reviewerState(root: AgentTask | null, events: ConsoleEvent[]): string {
+  if (!root) return "Not started";
+  if (root.interpretation_review?.rounds.length) return "Completed";
+  const verdict = [...events].reverse().find(event => event.task_id === root.id && event.type === "answer.critique");
+  if (verdict?.payload.decision === "accept") return "Completed";
+  if (verdict?.payload.decision === "revise") return "Changes requested";
+  return events.some(event => event.task_id === root.id && event.type === "agent.review_requested")
+    ? "Checking the draft" : "Not started";
+}
+function publicJournal(container: HTMLElement, root: AgentTask, tasks: AgentTask[], events: ConsoleEvent[]): void {
+  const ids = new Set(linked(root, tasks).map(task => task.id));
+  const types = new Set(["agent.check_started", "agent.check_completed", "agent.handoff_requested",
+    "agent.draft", "agent.review_requested", "answer.checked", "answer.critique"]);
+  const updates = events.filter(event => event.task_id && ids.has(event.task_id) && types.has(event.type));
+  const heading = node("h3", "Live work journal");
+  container.append(heading, node("p", "Saved evidence checks, provisional drafts and handoffs. Initial intake checks are application-required; later check questions are agent-written. Drafts are not accepted conclusions, and private model reasoning is not displayed.", "muted"));
+  const list = node("ol", "", "agent-public-journal");
+  list.setAttribute("aria-label", "Agent checks, interim findings and handoffs");
+  for (const event of updates.slice(-200)) {
+    const payload = event.payload;
+    const role = typeof payload.role === "string" ? payload.role : tasks.find(task => task.id === event.task_id)?.role || "agent";
+    const item = node("li");
+    item.dataset.event = String(event.id); item.dataset.kind = event.type;
+    item.append(node("small", `${time(event.created_at)} · ${agentName(role)}`));
+    if (event.type === "agent.handoff_requested") {
+      const to = typeof payload.to_role === "string" ? payload.to_role : "agent";
+      item.append(node("strong", `Response Coordinator → ${agentName(to)}`),
+        node("p", typeof payload.reason === "string" ? payload.reason : "Separate specialist task requested."));
+      item.dataset.fromTask = String(payload.from_task_id); item.dataset.toTask = String(payload.to_task_id);
+    } else if (event.type === "agent.draft") {
+      item.append(node("strong", "Draft finding · review pending"), node("p", String(payload.text || "")));
+    } else if (event.type === "agent.review_requested") {
+      item.append(node("strong", "Draft → Grounding Reviewer"), node("p", String(payload.purpose || "")));
+    } else if (event.type === "answer.critique") {
+      item.append(node("strong", payload.decision === "accept" ? "Evidence wording accepted" : "Corrections requested"),
+        node("p", `${payload.issues || 0} review checks require attention. This review is not proof of physical accuracy.`));
+      if (Array.isArray(payload.checks)) for (const check of payload.checks) {
+        const value = record(check);
+        if (value && value.verdict !== "supported" && typeof value.reason === "string")
+          item.append(node("p", `Review feedback: ${value.reason}`));
+      }
+    } else if (event.type === "answer.checked") {
+      const to = typeof payload.to_role === "string" ? agentName(payload.to_role) : "Next step";
+      item.append(node("strong", `Checked handoff → ${to}`), node("p", String(payload.public_output || "Checked findings recorded.")));
+    } else {
+      item.append(node("strong", `${payload.title || "Evidence check"} · ${payload.status || "recorded"}`),
+        node("p", String(payload.purpose || "")));
+      item.append(node("small", payload.origin === "application_intake" ? "Application-required evidence intake" : "Agent-requested evidence check"));
+      if (typeof payload.agent_question === "string") item.append(node("p", `Agent's check question: ${payload.agent_question}`));
+      if (typeof payload.observation === "string") item.append(node("p", `Interim output: ${payload.observation}`));
+      if (typeof payload.call_id === "string") item.dataset.callId = payload.call_id;
+    }
+    list.append(item);
+  }
+  if (!updates.length) list.append(node("li", "This saved run has no current-format public journal. Its recorded receipts remain available; no new activity is invented."));
+  container.append(list);
+}
 function record(value: Json | undefined): Record<string, Json> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value : null;
 }
@@ -22,14 +88,18 @@ export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], 
   log.replaceChildren();
   if (!root) {
     text("agent-activity-state", !enabled ? "Agent execution off · sensor evidence remains available"
-      : triage ? "Detectors flagged an unresolved pattern; gathering context" : "Detectors monitoring · agents start automatically on a qualifying incident");
+      : triage ? "Pressure anomaly detected; gathering context" : "Monitoring pressure · new pressure anomalies start agents; missing values alone do not");
     text("agent-elapsed", "No LLM investigation admitted yet");
     text("agent-last-action", "Sensor flags are detector outputs. Leak assessment and inspection overlays require a reviewed agent report for the displayed window.");
-    for (const [role, label] of [["sensor_quality", "1. Quality checks"], ["event_diagnosis", "2. Joint investigation"],
-      ["operator_response", "Coordinator / report + critic"]]) {
+    for (const [role, label, purpose] of agents) {
       const stage = node("span", `${label}: ${enabled ? "Not started" : "Not enabled"}`);
+      stage.append(node("small", purpose));
       stage.dataset.role = role; stage.dataset.state = "NOT_STARTED"; stages.append(stage);
     }
+    const reviewer = node("span", `Grounding Reviewer: ${enabled ? "Not started" : "Not enabled"}`);
+    reviewer.dataset.role = "grounding_reviewer";
+    reviewer.append(node("small", "A separate model call checks the draft; not another sensor-investigation agent."));
+    stages.append(reviewer);
     log.append(node("li", "No agent actions recorded."));
     return;
   }
@@ -43,17 +113,21 @@ export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], 
       : active ? `Agents ${root.state === "QUEUED" ? "queued" : "investigating"} · no reviewed report yet`
         : "Agent report withheld · detector warnings remain active");
   text("agent-elapsed", `${duration(elapsed)} real processing ${done || !active ? "elapsed" : "since admission"} · ${calls} ${root.mode === "live" ? "hosted" : "SCRIPTED"} calls · ${tools} tool calls`);
-  for (const [role, label] of [["sensor_quality", "1. Quality checks"], ["event_diagnosis", "2. Joint investigation"],
-    ["operator_response", "Coordinator / report + critic"]]) {
+  for (const [role, label, purpose] of agents) {
     const member = role === "operator_response" ? root : members.find(task => task.role === role);
     const state = member?.state || "NOT_STARTED";
     const stage = node("span", `${label}: ${friendly(state)}${member ? ` · ${member.model_calls} model / ${member.tool_calls} tool calls` : ""}`);
     stage.dataset.role = role; stage.dataset.state = state;
+    stage.append(node("small", purpose));
     stages.append(stage);
   }
+  const reviewer = node("span", `Grounding Reviewer: ${reviewerState(root, events)}`);
+  reviewer.dataset.role = "grounding_reviewer";
+  reviewer.append(node("small", "Checks the draft against cited evidence; calls are included in the coordinator total."));
+  stages.append(reviewer);
   for (const event of events.filter(event => event.task_id && ids.has(event.task_id)
     && ["task.started", "model.started", "model.completed", "tool.completed", "answer.critique", "task.finished"].includes(event.type)).slice(-12)) {
-    const role = friendly(members.find(task => task.id === event.task_id)?.role || "agent");
+    const role = agentName(members.find(task => task.id === event.task_id)?.role || "agent");
     const phase = typeof event.payload.phase === "string" ? ` · ${friendly(event.payload.phase)}` : "";
     log.append(node("li", `${time(event.created_at)} · ${role} · ${friendly(event.type.replace(".", " "))}${phase}`));
   }
@@ -81,25 +155,33 @@ export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], 
 export function renderIdleAgentWork(progress: HTMLElement, findings: HTMLElement, enabled: boolean): void {
   progress.replaceChildren(); findings.replaceChildren();
   delete progress.dataset.renderKey; delete progress.dataset.task;
-  for (const [role, label] of [["sensor_quality", "1 · Data-quality agent"],
-    ["event_diagnosis", "2 · Investigation agent"], ["operator_response", "3 · Reporting agent + critic"]]) {
+  for (const [role, label, purpose] of agents) {
     const card = node("div", "", "agent-role"); card.dataset.role = role;
-    card.append(node("strong", label), node("span", enabled ? "Not started" : "Not enabled"));
+    card.append(node("strong", label), node("p", purpose), node("span", enabled ? "Not started" : "Not enabled"));
     progress.append(card);
   }
+  const reviewer = node("div", "", "agent-role");
+  reviewer.dataset.role = "grounding_reviewer";
+  reviewer.append(node("strong", "Grounding Reviewer"), node("p", "A separate model call checks whether the draft matches its sources."),
+    node("span", enabled ? "Not started" : "Not enabled"));
+  progress.append(reviewer);
 }
 
 export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, root: AgentTask,
   tasks: AgentTask[], detail: TaskDetail | null, basis: WindowSnapshot | null,
-  error: string | null, open: (taskId: string) => void): void {
+  error: string | null, open: (taskId: string) => void, events: ConsoleEvent[] = []): void {
   const key = JSON.stringify([root.id, root.state, root.updated_at, root.plan,
     linked(root, tasks).map(task => [task.id, task.updated_at, task.state, task.model_calls, task.tool_calls]),
     detail?.task.updated_at, detail?.investigation_receipts.map(receipt => receipt.call_id),
-    Boolean(detail?.casefile), basis?.id, error]);
+    Boolean(detail?.casefile), basis?.id, error, events[events.length - 1]?.id,
+    detail?.activity?.[detail.activity.length - 1]?.id]);
   if (progress.dataset.renderKey === key) return;
   const opened = new Set(progress.dataset.task === root.id
     ? [...progress.querySelectorAll<HTMLDetailsElement>("details[open]"), ...findings.querySelectorAll<HTMLDetailsElement>("details[open]")]
       .map(item => item.dataset.section) : []);
+  const existingSections = new Set(progress.dataset.task === root.id
+      ? [...progress.querySelectorAll<HTMLDetailsElement>("details")].map(item => item.dataset.section)
+      : []);
   const section = (id: string): HTMLDetailsElement => {
     const item = node("details");
     item.dataset.section = id; item.open = opened.has(id);
@@ -109,26 +191,36 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
   progress.replaceChildren();
   findings.replaceChildren();
   const members = linked(root, tasks);
-  for (const [role, label] of [["sensor_quality", "1 · Data-quality agent"],
-    ["event_diagnosis", "2 · Investigation agent"], ["operator_response", "3 · Reporting agent + critic"]]) {
+  for (const [role, label, purpose] of agents) {
     const task = role === "operator_response" ? root : members.find(item => item.role === role);
     const card = node("div", "", "agent-role");
     card.dataset.role = role;
-    card.append(node("strong", label));
+    card.append(node("strong", label), node("p", purpose));
     const reused = !task && root.plan.includes("reuse");
     card.append(node("span", task ? `${friendly(task.state)} · ${task.model_calls} model / ${task.tool_calls} tool calls`
       : reused ? "Reuse selected · inspect linked receipts" : "Not started"));
-    if (task?.result) {
+    if (task && accepted(task) && task.result) {
       const count = task.result.claim_refs.filter(id => basis?.claims[id]?.kind === "sensor_health").length;
       if (role === "sensor_quality") card.append(node("span",
         `${basis ? `${count} sensor-health claims checked` : "Loading checked claim scope"}${task.result.limitations.includes("partial_health_review") ? " · partial, not exhaustive" : ""}`));
       const result = section(`role:${role}`);
-      result.append(node("summary", "Read specialist handoff"), node("p", task.result.summary));
+      result.append(node("summary", "Read checked handoff"), node("p", task.answer || "Checked findings are loading."));
+      result.open = !existingSections.has(`role:${role}`) || opened.has(`role:${role}`);
       result.append(button("Open executed receipts", () => open(task.id)));
       card.append(result);
     }
     progress.append(card);
   }
+  const reviewer = node("div", "", "agent-role");
+  reviewer.dataset.role = "grounding_reviewer";
+  reviewer.append(node("strong", "Grounding Reviewer"), node("p", "Checks explanations against sources before the coordinator releases a report."),
+    node("span", reviewerState(root, events)),
+    node("small", "A separate review call, not a fourth sensor-investigation agent."));
+  progress.append(reviewer);
+  const journalEvents = [...new Map(
+    [...(detail?.activity || []), ...events].map(event => [event.id, event])
+  ).values()].sort((a, b) => a.id - b.id);
+  publicJournal(findings, root, tasks, journalEvents);
   findings.append(node("h3", "Investigation evidence · beyond individual sensor alerts"));
   if (error) {
     findings.append(node("p", `Work record unavailable: ${error}. No source checks are inferred. Reconnect to reload.`, "summary"));

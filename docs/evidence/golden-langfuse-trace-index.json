@@ -1,0 +1,431 @@
+{
+  "verified_at": "2026-11-07T10:20:33.914237+00:00",
+  "runtime_and_completed_judge_trees": [
+    {
+      "kind": "runtime_agent",
+      "case_id": "G1",
+      "task_id": "45a102b4-0e8f-58c1-93f0-5b28db07a649",
+      "role": "operator_response",
+      "identity": null,
+      "trace": {
+        "trace_id": "8cc63d49fbdd0efd3a906887f76bf0e1",
+        "span_id": "1d9a7e6f7b7b4821",
+        "attempt_id": "e0ca4169-9d27-4936-ba93-20c68c36a9db",
+        "session_id": "61b8f7663eea751aa2d810d371263aa5c7f6bed8283146471d4d65f6d89892d2"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 2,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G1",
+      "task_id": "604cc20f-86d2-50f1-a4a7-59245efed5aa",
+      "role": "sensor_quality",
+      "identity": null,
+      "trace": {
+        "trace_id": "e0db9f65aa90474d5c230679b658a6e7",
+        "span_id": "04436303fd95afda",
+        "attempt_id": "85f5fca1-ee81-4bf9-a9c0-9bf1e81ccd28",
+        "session_id": "61b8f7663eea751aa2d810d371263aa5c7f6bed8283146471d4d65f6d89892d2"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G1",
+      "task_id": "16b34856-b127-5b28-b9a6-4b41a1475f40",
+      "role": "event_diagnosis",
+      "identity": null,
+      "trace": {
+        "trace_id": "ee9c9afdc39849b782d85a84583091be",
+        "span_id": "90cb34d5d4a8a0d7",
+        "attempt_id": "9d63ab83-56e9-4656-b338-7fe65f13ae9c",
+        "session_id": "61b8f7663eea751aa2d810d371263aa5c7f6bed8283146471d4d65f6d89892d2"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 3,
+      "stored_tool_count": 8,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G2",
+      "task_id": "06dcd70a-e8d8-5c4e-b1de-59e5e81c492f",
+      "role": "operator_response",
+      "identity": null,
+      "trace": {
+        "trace_id": "006128dc620b1c5f277dbd4aabac1ecf",
+        "span_id": "76bd96a56f93c1d1",
+        "attempt_id": "5474689e-a767-4cb6-9068-78e7969ee679",
+        "session_id": "a0980dca25f43699110f679ffcc13fe9a50fb78a1f4aa95c97785b4223acc287"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 4,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G2",
+      "task_id": "6e38cd12-4be9-5e18-9e55-0d93cf5a0929",
+      "role": "sensor_quality",
+      "identity": null,
+      "trace": {
+        "trace_id": "b9c822174b72b3a10d3552e5b1380036",
+        "span_id": "169a08a7f5d4fd03",
+        "attempt_id": "6e3c9cc3-4aea-41b3-a18d-13a2e8aa2f10",
+        "session_id": "a0980dca25f43699110f679ffcc13fe9a50fb78a1f4aa95c97785b4223acc287"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G2",
+      "task_id": "da355a40-7abf-5bd6-aa3f-d2c51964563d",
+      "role": "event_diagnosis",
+      "identity": null,
+      "trace": {
+        "trace_id": "3299afe4da5412708bc3c60bf4f24b6f",
+        "span_id": "07e68ca9b4ccec3e",
+        "attempt_id": "8461cc62-d15b-49c5-b21a-4519428b57e2",
+        "session_id": "a0980dca25f43699110f679ffcc13fe9a50fb78a1f4aa95c97785b4223acc287"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 3,
+      "stored_tool_count": 8,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G3",
+      "task_id": "a83d177b-2dcd-5268-b884-4e4fc57e6e60",
+      "role": "operator_response",
+      "identity": null,
+      "trace": {
+        "trace_id": "064a1a9173f18dffc39cf7e5e4c0366b",
+        "span_id": "7875e9c6bc715a73",
+        "attempt_id": "a7b63da7-c141-4b33-a9f7-c2dcc3fd3d3f",
+        "session_id": "730569ea9def287dd69a58287b5be6307648438b08c18bbf63bc3da96e2b527b"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 4,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G3",
+      "task_id": "e87127b3-c0a9-53e5-ac67-55a9c668d1ad",
+      "role": "sensor_quality",
+      "identity": null,
+      "trace": {
+        "trace_id": "f3de6835a94d75e3fe62c4e8398c4126",
+        "span_id": "4ca968a437c1fd75",
+        "attempt_id": "fe8983e8-6fcf-42e9-a1bb-5682e493e9ca",
+        "session_id": "730569ea9def287dd69a58287b5be6307648438b08c18bbf63bc3da96e2b527b"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G3",
+      "task_id": "17a642bd-24a8-5f3c-8b42-0652f89d0480",
+      "role": "event_diagnosis",
+      "identity": null,
+      "trace": {
+        "trace_id": "c2d5646701702e343acaa742d5deb52d",
+        "span_id": "1be0fb7a067d8961",
+        "attempt_id": "3812b0ce-efa9-4ef8-aa27-fba708f8bc32",
+        "session_id": "730569ea9def287dd69a58287b5be6307648438b08c18bbf63bc3da96e2b527b"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 3,
+      "stored_tool_count": 8,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "external_judge",
+      "case_id": null,
+      "task_id": null,
+      "role": null,
+      "identity": "adequate-control",
+      "trace": {
+        "trace_id": "1fe3c00fab3c63c12366e2d3f98af8a7",
+        "span_id": "fd3fa62bc065e349",
+        "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+      },
+      "expected_input_hash": "c7b90fc74d94ad1b19953cf993c55ff1ce2f6f79826cf0e7e432ecf5eae88de5",
+      "expected_output_hash": "8e6b3dd95acc30dd6f86b9697414bbd270b9a47fc07d6b8f5bacec58c24b5ee9",
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 0,
+      "hidden_truth_absent_from_runtime_inputs": null
+    },
+    {
+      "kind": "external_judge",
+      "case_id": null,
+      "task_id": null,
+      "role": null,
+      "identity": "incorrect-injection-control",
+      "trace": {
+        "trace_id": "64d5a5a1c4bcfc842d28c9794e0b3579",
+        "span_id": "c40ef7e20aa8ac6b",
+        "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+      },
+      "expected_input_hash": "9812512c0ea30834714e52cd13d54fd419df91c2c5ddbd60078653292076b461",
+      "expected_output_hash": "f0c3fb4714da42d02e048a1f454d8be4468b619735e3d78e969c2c7704b6e7c9",
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 0,
+      "hidden_truth_absent_from_runtime_inputs": null
+    },
+    {
+      "kind": "external_judge",
+      "case_id": null,
+      "task_id": null,
+      "role": null,
+      "identity": "G1-recorded-operator-report",
+      "trace": {
+        "trace_id": "a6ae91522afbdec6c95be2bc4c2bbf47",
+        "span_id": "d76fea087e3d1359",
+        "session_id": "c8f58236eccc2cf2f2723f8e87803e1031165c2e470185592c383ce5ab845ad4"
+      },
+      "expected_input_hash": "bb404e6cec4208d17a295e7dbf41eee376064a4f2554a5e8b92c076bdc625693",
+      "expected_output_hash": "68d59081872e309c4e2a3ae95e6273095a6af6a489f6861017fada219088adb2",
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 0,
+      "hidden_truth_absent_from_runtime_inputs": null
+    },
+    {
+      "kind": "external_judge",
+      "case_id": null,
+      "task_id": null,
+      "role": null,
+      "identity": "G2-recorded-operator-report",
+      "trace": {
+        "trace_id": "44b698f3aea2c47949eee594f4102e96",
+        "span_id": "e60a1ff6e5e891cf",
+        "session_id": "f7767e784303f877bf021d1f3850fd28e3f4ff680c29a76eb015345a897b31ac"
+      },
+      "expected_input_hash": "ed15d6a4c1266275424ccdfb6f385fe7cdc766c6f90c4aa2ba669734549cfee7",
+      "expected_output_hash": "19d3c40a86db92712d2bc532e00f25beab7676e8100534a14d0f3ff971de9fb4",
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 0,
+      "hidden_truth_absent_from_runtime_inputs": null
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G3",
+      "task_id": "c50cace5-249a-5be9-b8ef-955bc58e2d14",
+      "role": "operator_response",
+      "identity": null,
+      "trace": {
+        "trace_id": "2fab2b0797d3be0957c551f50e147b01",
+        "span_id": "d79eebef5675a97c",
+        "attempt_id": "67d282b4-3f11-48f8-9b3d-d0e043576f54",
+        "session_id": "4548dfb8b604997c5b1e373abd37dd34b45d812bbc706dd8302804714d1bcda3"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 2,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G3",
+      "task_id": "853e088a-c748-586a-9f52-d4bcffbd6369",
+      "role": "sensor_quality",
+      "identity": null,
+      "trace": {
+        "trace_id": "586c170f9e562d2e1523ce6f32dc5582",
+        "span_id": "71a798261bdb69ca",
+        "attempt_id": "1810ab6e-8d6f-45c9-9670-3d967ec06c50",
+        "session_id": "4548dfb8b604997c5b1e373abd37dd34b45d812bbc706dd8302804714d1bcda3"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 4,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "runtime_agent",
+      "case_id": "G3",
+      "task_id": "0b51badc-0b99-580c-a6b8-497f0c014f6d",
+      "role": "event_diagnosis",
+      "identity": null,
+      "trace": {
+        "trace_id": "1a76daab6fc824780e35e4fb67ec7828",
+        "span_id": "6872b87449958e3e",
+        "attempt_id": "5299226a-b47c-4724-bab7-0ee159af41af",
+        "session_id": "4548dfb8b604997c5b1e373abd37dd34b45d812bbc706dd8302804714d1bcda3"
+      },
+      "expected_input_hash": null,
+      "expected_output_hash": null,
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 3,
+      "stored_tool_count": 8,
+      "hidden_truth_absent_from_runtime_inputs": true
+    },
+    {
+      "kind": "external_judge",
+      "case_id": null,
+      "task_id": null,
+      "role": null,
+      "identity": "G3-retry-published-operator-report",
+      "trace": {
+        "trace_id": "58d557a9ba1383e2a230c2fac84cb5a7",
+        "span_id": "ab0861a4dc0b02ec",
+        "session_id": "c62dce487430f744e1f294d1b221bd9b0beeaffc2c28f8a185ff4ab07efd1295"
+      },
+      "expected_input_hash": "e9990dc779066accebe2c50b854e3a8dc15d6540d7b1ae5b2d34ec0cfd9af67a",
+      "expected_output_hash": "7c0c703d440d6ee28679f120654b7332c3a5f0ff09fe917f709eef8ab2d4ba20",
+      "stored_tree_verified": true,
+      "stored_io_verified": true,
+      "stored_generation_count": 1,
+      "stored_tool_count": 0,
+      "hidden_truth_absent_from_runtime_inputs": null
+    }
+  ],
+  "rejected_judge_trees": [
+    {
+      "identity": "adequate-control",
+      "trace_id": "c1baf657e8d707add9240111ece89cc4",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "76fb41ce-5044-41ed-baf3-6a48e42e45c7",
+      "calls": 1,
+      "elapsed_seconds": 24.0,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    },
+    {
+      "identity": "incorrect-injection-control",
+      "trace_id": "1b9317c6dd599ddd5c82ccd1bb73ebb1",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "4acc315d-a0f8-4db9-9c28-46b757253142",
+      "calls": 1,
+      "elapsed_seconds": 21.984,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    },
+    {
+      "identity": "G1-actual-agent-report",
+      "trace_id": "d52c94c87703b4014576caa51c0756ba",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "689d536b-8878-4195-a318-156ae9bad217",
+      "calls": 1,
+      "elapsed_seconds": 24.812,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    },
+    {
+      "identity": "G2-actual-agent-report",
+      "trace_id": "f6c31323452d7b8e18b855fd4c4db725",
+      "local_error_code": "invalid_judge_output",
+      "stored_tree_verified": true,
+      "stored_input_matches_original_submission": true,
+      "stored_output_present": false,
+      "stored_error_code_matches": true,
+      "stored_levels": [
+        "DEFAULT"
+      ],
+      "stored_public_error_metadata": [
+        {
+          "error.code": "invalid_judge_output"
+        }
+      ],
+      "observed_model": "gpt-6.1-sol",
+      "request_id": "8c863b32-3364-42fb-8032-317a9037c9e1",
+      "calls": 1,
+      "elapsed_seconds": 25.625,
+      "output_gap": "Original code recorded output only after transport validation. Missing wire mode rejected these real calls before output capture. Original response text was not retained; it cannot be truthfully reconstructed or backfilled."
+    }
+  ],
+  "scope": "17 complete verified trees = 12 runtime + 5 completed judge. Four additional rejected judge trees exist; input hashes/error metadata are verified separately. Missing rejected outputs are an explicit historical observability gap."
+}

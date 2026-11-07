@@ -24,6 +24,11 @@ the checked ledger. Explain support, contradictions, uncertainty and useful next
 verification. Cite actual claims, reviewed current records or comparison call IDs.
 Apply pinned KN guidance with case evidence; knowledge is not an observation or
 expert operating approval. Do not invent quantities, assets or incidents.
+Write for a first-time operator with little subsea knowledge. Begin each finding
+with its practical meaning, then the supporting measurements and uncertainty.
+Explain paired sensors as two sensors at the same station, a gateway as their
+shared data connection, and chainage as distance along the pipe. Do not assume
+that correlation, missing readings or a maintenance log establish a cause.
 
 Knowledge-enabled work needs regional_assessments for compared sensor groups.
 Choose independent possible hypotheses: leak_pattern, instrumentation_or_telemetry,

@@ -161,8 +161,28 @@ def test_content_requires_synthetic_opt_in_and_redaction(monkeypatch, runtime):
     # Reasoning is never appropriate content, even in synthetic rehearsal.
     assert "reasoning" not in exporter.spans[-1].attributes
     assert "synthetic-secret" not in exporter.spans[-1].attributes["input"]
-    assert len(exporter.spans[-1].attributes["input"]) <= 2000
+    assert 5000 <= len(exporter.spans[-1].attributes["input"]) <= 65536
     telemetry.close()
+
+
+def test_detailed_json_capture_preserves_safe_bytes_and_redacts_private_fields():
+    import json
+
+    safe = '{ "case": "G1", "public_output": "Pressure evidence remains uncertain." }'
+    assert module._safe("input", safe, True) == safe
+    unsafe = json.dumps(
+        {
+            "password": "synthetic-test-only",
+            "content": [{"type": "thinking", "thinking": "private-provider-thought"}],
+            "public_output": "Missing readings stay unknown.",
+        }
+    )
+    captured = str(module._safe("output", unsafe, True))
+    assert "synthetic-test-only" not in captured
+    assert "private-provider-thought" not in captured
+    assert "Missing readings stay unknown." in captured
+    oversized = str(module._safe("input", "x" * 100000, True))
+    assert "[Capture truncated at 65536 characters]" in oversized
 
 
 def test_exception_message_not_exported_and_root_trace_separation(monkeypatch, runtime):

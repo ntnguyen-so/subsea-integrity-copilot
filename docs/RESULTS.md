@@ -1,5 +1,116 @@
 # Qualification results
 
+## Fresh hosted golden-data qualification
+
+Three selected substantive synthetic cases passed the external LLM judge and
+the independent code-owned evidence/localization contracts. Classification
+grading uses the model-authored causal/regional interpretation and the actual
+published operator answer, not the numerical eligible-hypothesis label. An LLM
+abstention is not counted as a leak-classification pass. Inspection checks use
+the accepted matching casefile consumed by the dashboard.
+
+| Case | Pattern | Agent calls | Agent elapsed | Displayed inspection |
+|---|---|---:|---:|---|
+| G1 | Coordinated possible-leak footprint | 7 | 179.750 s | P1 200-600 m |
+| G2 | Scattered instrument/telemetry concerns and missing readings | 9 | 265.672 s | None |
+| G3 | Possible leak mixed with sensor-quality problems | 7 | 174.766 s | P1 200-600 m |
+| G4 | Missing-only negative control | 0 | No agent run | None |
+
+All observed agent/judge models were `gpt-6.1-sol`. Across all attempts there
+were **32 agent calls and nine external-judge calls**. One initial G3 attempt
+failed; one bounded same-input retry succeeded. Four judge responses were
+rejected as `invalid_judge_output`. The selected final coverage passes; **not
+all agent attempts or judge attempts passed**.
+
+The initial G3 critic rejected an exclusion of shared failures based on partial
+health review; the normal reflection budget exhausted and correctly withheld
+the report. The retry used identical dataset, evidence and truth hashes. No
+source recipe, numerical threshold, agent prompt, knowledge card or grounding
+criterion was relaxed.
+
+The four judge failures were a transport-contract issue: the standalone proxy
+reply omitted wire `mode`. The adapter now derives live provenance only from
+its owned hosted transport, preserving checks against unobserved/scripted
+responses. Grading was strengthened to inspect published model explanations;
+rubric bytes, dimensions and minimum scores stayed unchanged.
+
+**21 stored Langfuse observation trees were verified:** 12 agent trees, five
+complete judge trees, and four failed judge trees. All five completed judge
+input/output pairs match their original SHA-256 hashes. The four original failed
+judge traces have matching inputs/error metadata but **no outputs**: the old
+adapter captured output only after validation, and the original response text
+was not retained. This historical gap cannot be truthfully backfilled. Future
+rejections now capture schema-valid public output before validation and mark
+error status; malformed/private content gets a safe marker instead.
+Seventy-six focused qualification, observer, telemetry and public-activity
+checks passed with the final capture implementation.
+
+The examples use one seed each on the 24-instrument Y layout and illustrative
+Gaussian pressure footprints, not a hydraulic simulator. Signals begin at t=0,
+so the first complete window is mature; within-window comparisons do not invent
+an observed onset. No scenario-specific operating record is supplied. The
+interpretation retains uncertainty about operating changes and shared errors.
+Intervals are inspection priorities, never confirmed physical leak coordinates.
+Same-model judging is non-independent; calibration controls do not constitute
+expert certification, field reliability or measured labor savings.
+
+The actual frozen recordings also passed the ordinary dashboard journey:
+three substantive public work journals plus the missing-only control reopened
+with identical evidence hashes/source clocks/task counters and **zero new
+inference**. Neutral sample labels preserve full source hashes in the option
+details. The isolated observer disables workers and execution commands.
+Initial UI assertions opened the wrong tab and expected a different draft
+heading; those assertions were corrected to inspect the Live workspace and
+the actual persisted draft event type. No agent report was changed for these
+UI corrections.
+The final browser check also verified model-authored leak-region interpretations
+and the real SVG inspection attributes: P1 200-600 m for G1/G3, with no interval
+for G2/G4. Receipts: `evidence\golden-qualification-summary.json`,
+`evidence\golden-qualification-failures.json`, `evidence\golden-judge-verdicts.json`,
+`evidence\golden-langfuse-trace-index.json` and `evidence\golden-ui-reopen.json`.
+
+## Visible public agent work
+
+The dashboard names Sensor Quality Agent, Event Diagnosis Agent and Response
+Coordinator consistently across cards, tasks and handoffs. Grounding Reviewer
+has its own visible progress card, explicitly described as a separate review
+call within the coordinator task rather than a fourth specialist.
+
+Executed checks, real observations, agent-authored questions, provisional drafts,
+reviewer feedback and checked outputs are persisted with stable event identities.
+The UI distinguishes application-required intake from model-requested checks.
+Historical task detail restores the public journal without rerunning inference;
+older recordings without these events are not backfilled. Private model
+chain-of-thought is neither displayed nor captured.
+
+Three browser journeys passed: fresh paired S1 with real persisted checks,
+drafts, review requests and two linked specialist handoffs; missing-only S3
+without an investigation hold; and the retained genuine hosted S7 report,
+reopened without new inference. The fresh S1 journey uses a scripted functional
+fixture, not hosted-model accuracy evidence.
+
+Detailed synthetic-only Langfuse capture includes named agent/generation/tool
+spans, bounded input/output and model usage. Both explicit content consent and
+synthetic-only mode are required. The content limit is 65,536 characters with
+an explicit truncation marker; credentials and private-thinking fields are
+redacted. Safe, unchanged JSON retains its exact serialization so qualification
+can verify stored judge input/output hashes. Twenty-two focused telemetry/public
+activity checks passed after this bound update.
+
+## Pressure-anomaly-only automatic investigations
+
+Only newly raised pressure anomalies pause new assisted runs and launch automatic
+specialists. Missing values, excluded readings, peer disagreement and quality-only
+concerns remain detector evidence and warnings, not independent investigation
+triggers. The same pressure-only admission boundary applies to continuous replay
+fixtures; manual investigation requests remain explicit and unchanged.
+
+Missing-data evidence is still checked within a pressure-anomaly investigation.
+Existing pending work without a pressure anomaly is marked `no_pressure_anomaly`
+instead of calling a provider. A historical missing-only hold can be continued
+without a report, preventing a legacy saved run from becoming locked.
+Earlier pause receipts below document the policy active at their recorded revision.
+
 ## Agent role and contextual legend recheck
 
 Six agent-contract cases and six browser journeys passed across the initial

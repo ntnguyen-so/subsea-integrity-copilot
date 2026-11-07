@@ -1,0 +1,114 @@
+{
+  "outcome": "passed",
+  "source": "actual hosted recordings",
+  "cases": [
+    {
+      "case_id": "G1",
+      "replay_id": "golden-f99c50c2a6b44a0f8528bcc94b21dfb2",
+      "root_task_id": "45a102b4-0e8f-58c1-93f0-5b28db07a649",
+      "input_hash": "b49045bd57900b875f0a7e13ca0fe15203cbf1dbeb3e97345be71a1aaeae80de",
+      "displayed_inspection": [
+        {
+          "segment_id": "P1",
+          "start_m": "200",
+          "end_m": "600"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "16b34856-b127-5b28-b9a6-4b41a1475f40",
+          "state": "SUCCEEDED",
+          "model_calls": 3,
+          "tool_calls": 8
+        },
+        {
+          "id": "45a102b4-0e8f-58c1-93f0-5b28db07a649",
+          "state": "SUCCEEDED",
+          "model_calls": 3,
+          "tool_calls": 4
+        },
+        {
+          "id": "604cc20f-86d2-50f1-a4a7-59245efed5aa",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        }
+      ],
+      "new_inference_calls": 0
+    },
+    {
+      "case_id": "G2",
+      "replay_id": "golden-f67741580f0041a6bf121241af5af2e6",
+      "root_task_id": "06dcd70a-e8d8-5c4e-b1de-59e5e81c492f",
+      "input_hash": "14ed463ec233a3cb380ff38f963e062e6565efb113d4e9912ba4a1f9a4e6c72f",
+      "displayed_inspection": [],
+      "tasks": [
+        {
+          "id": "06dcd70a-e8d8-5c4e-b1de-59e5e81c492f",
+          "state": "SUCCEEDED",
+          "model_calls": 5,
+          "tool_calls": 4
+        },
+        {
+          "id": "6e38cd12-4be9-5e18-9e55-0d93cf5a0929",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "id": "da355a40-7abf-5bd6-aa3f-d2c51964563d",
+          "state": "SUCCEEDED",
+          "model_calls": 3,
+          "tool_calls": 8
+        }
+      ],
+      "new_inference_calls": 0
+    },
+    {
+      "case_id": "G3",
+      "replay_id": "golden-b89bf2c63fea4f86b4f06a3149b8da58",
+      "root_task_id": "c50cace5-249a-5be9-b8ef-955bc58e2d14",
+      "input_hash": "92e5454d9a1956a805c25885ed755e51463bbf4e684b2028b9f70b1983c22bab",
+      "displayed_inspection": [
+        {
+          "segment_id": "P1",
+          "start_m": "200",
+          "end_m": "600"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "0b51badc-0b99-580c-a6b8-497f0c014f6d",
+          "state": "SUCCEEDED",
+          "model_calls": 3,
+          "tool_calls": 8
+        },
+        {
+          "id": "853e088a-c748-586a-9f52-d4bcffbd6369",
+          "state": "SUCCEEDED",
+          "model_calls": 1,
+          "tool_calls": 4
+        },
+        {
+          "id": "c50cace5-249a-5be9-b8ef-955bc58e2d14",
+          "state": "SUCCEEDED",
+          "model_calls": 3,
+          "tool_calls": 4
+        }
+      ],
+      "new_inference_calls": 0
+    },
+    {
+      "case_id": "G4",
+      "replay_id": "golden-1e1d4cafe8d5450ca248eed798d4150d",
+      "root_task_id": null,
+      "input_hash": "f3f38034309939ed6235e9187f0d9276cce73a0a6ddfa27cf60eee6d0be5b40c",
+      "displayed_inspection": [],
+      "tasks": [],
+      "new_inference_calls": 0
+    }
+  ],
+  "limitations": [
+    "Read-only saved-run UI verification, not another hosted accuracy trial."
+  ]
+}
