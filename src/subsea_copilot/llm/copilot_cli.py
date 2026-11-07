@@ -492,7 +492,7 @@ def _decode(content: str, allowed: set[str]) -> AIMessage:
     except (ValueError, TypeError):
         raise ProviderError("invalid_structured_output") from None
     calls = envelope["value"]
-    if not isinstance(calls, list) or not 1 <= len(calls) <= 8:
+    if not isinstance(calls, list) or not 1 <= len(calls) <= 24:
         raise ProviderError("invalid_tool_call")
     decoded = []
     summaries = {}
@@ -573,11 +573,11 @@ def _metadata(events: list[dict[str, Any]], requested: str | None) -> dict[str, 
 class CopilotCLIChatModel(BaseChatModel):
     runtime_dir: Path
     model_id: str | None = None
-    timeout_seconds: float = Field(default=60, gt=0)
-    max_prompt_chars: int = Field(default=48000, gt=0)
-    max_final_chars: int = Field(default=12000, gt=0)
-    max_capture_bytes: int = Field(default=2000000, gt=0)
-    max_stderr_bytes: int = Field(default=64000, gt=0)
+    timeout_seconds: float = Field(default=180, gt=0)
+    max_prompt_chars: int = Field(default=144000, gt=0)
+    max_final_chars: int = Field(default=36000, gt=0)
+    max_capture_bytes: int = Field(default=6000000, gt=0)
+    max_stderr_bytes: int = Field(default=192000, gt=0)
 
     @field_validator("model_id")
     @classmethod

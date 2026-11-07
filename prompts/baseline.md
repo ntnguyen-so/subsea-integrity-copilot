@@ -2,8 +2,8 @@
 
 This is one independently persisted read-only model task, not the production
 three-agent workflow. No child tasks or cached specialist results are authorized.
-You have at most three model turns, five tool requests and one repair within those
-bounds. Every tool must bind the exact site, snapshot and versions in BOUND_CONTEXT.
+Use the model/tool allowances in RUNTIME_REPLY_CONSTRAINTS and reserve a turn for
+FINAL. Every tool must bind the exact site, snapshot and versions in BOUND_CONTEXT.
 
 Application-owned intake has already read quality.coverage (including pinned
 sensor/failure-domain metadata), quality.sensor_patterns, event.assess and eligible

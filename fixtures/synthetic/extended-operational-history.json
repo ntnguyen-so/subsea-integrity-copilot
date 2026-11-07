@@ -13,7 +13,7 @@
       "effective_from": "2025-12-21T00:00:00Z",
       "revision": 1,
       "status": "approved",
-      "body": "Fictional, nonconfidential procedure. Seven 1600m pipeline segments carry eight stations each, with paired A/B pressure taps at 100m then every 200m. Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1. Multiple anomalous taps on a single shared gateway do not establish independent corroboration. Compare persistent negative pressure changes across distinct stations and gateways, check operating and maintenance context, and retain missing observers. Numerical brackets are inspection areas, not exact leak coordinates. A partial sensor review cannot establish that all other instruments are reliable. Operator authorization is required for physical intervention.",
+      "body": "Seven 1600m pipeline segments carry eight stations each, with paired A/B pressure taps at 100m then every 200m. Odd-numbered stations share gateway-<segment>-0; even-numbered stations share gateway-<segment>-1. Multiple anomalous taps on a single shared gateway do not establish independent corroboration. Compare persistent negative pressure changes across distinct stations and gateways, check operating and maintenance context, and retain missing observers. Numerical brackets are inspection areas, not exact leak coordinates. A partial sensor review cannot establish that all other instruments are reliable. Operator authorization is required for physical intervention.",
       "scenarios": ["S7"]
     },
     {
@@ -26,7 +26,7 @@
       "effective_from": "2026-01-01T00:01:30Z",
       "revision": 1,
       "status": "approved",
-      "body": "Fictional, nonconfidential operating record. A P2 operating setpoint transition was logged from source +90s to +145s, with an expected positive pressure change of about 0.4 bar across the west trunk. It does not explain an isolated negative pressure region on another branch. This log is contextual evidence, not proof that the measured changes have only one cause or that a coincident leak is absent.",
+      "body": "A P2 operating setpoint transition was logged from source +90s to +145s, with an expected positive pressure change of about 0.4 bar across the west trunk. It does not explain an isolated negative pressure region on another branch. This log is contextual evidence, not proof that the measured changes have only one cause or that a coincident leak is absent.",
       "scenarios": ["S7"]
     },
     {
@@ -40,7 +40,7 @@
       "effective_to": "2026-01-01T00:01:20Z",
       "revision": 1,
       "status": "superseded",
-      "body": "Fictional, nonconfidential superseded maintenance schedule. This earlier revision deferred the P7 gateway-0 pressure calibration. It is not current authority; use MAINT-P7-GW-002 for the revised work status. A schedule is not evidence that measured pressure changes are physical leaks or sensor faults.",
+      "body": "This earlier revision deferred the P7 gateway-0 pressure calibration. It is not current authority; use MAINT-P7-GW-002 for the revised work status. A schedule is not evidence that measured pressure changes are physical leaks or sensor faults.",
       "scenarios": ["S7"]
     },
     {
@@ -54,7 +54,7 @@
       "revision": 2,
       "supersedes": "MAINT-P7-GW-001",
       "status": "approved",
-      "body": "Fictional, nonconfidential revised maintenance record. A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7. These eight taps share one failure domain and are not eight independent witnesses. Compare unaffected P7 even-numbered stations and independent branches before attributing the pattern. This record supports a shared-instrumentation explanation, but does not establish that every flagged instrument is faulty or exclude a concurrent physical leak.",
+      "body": "A calibration test on gateway-P7-0 begins at source +90s. Its shared pressure-conversion channel may introduce an approximately -0.75 bar offset on both A/B taps at P7-ST1, ST3, ST5 and ST7. These eight taps share one failure domain and are not eight independent witnesses. Compare unaffected P7 even-numbered stations and independent branches before attributing the pattern. This record supports a shared-instrumentation explanation, but does not establish that every flagged instrument is faulty or exclude a concurrent physical leak.",
       "scenarios": ["S7"]
     },
     {
@@ -67,7 +67,7 @@
       "effective_from": "2026-01-01T00:01:10Z",
       "revision": 1,
       "status": "draft",
-      "body": "Fictional, nonconfidential draft proposal. A P5 valve exercise was proposed but this document has no approval or execution confirmation. It is not evidence that a valve moved, that it caused the pressure pattern, or that the branch is safe. Seek verified operating records rather than treating this proposal as an executed change.",
+      "body": "A P5 valve exercise was proposed but this document has no approval or execution confirmation. It is not evidence that a valve moved, that it caused the pressure pattern, or that the branch is safe. Seek verified operating records rather than treating this proposal as an executed change.",
       "scenarios": ["S7"]
     },
     {
@@ -80,7 +80,7 @@
       "effective_from": "2026-01-01T00:00:00Z",
       "revision": 1,
       "status": "approved",
-      "body": "Fictional, nonconfidential coverage statement. This excerpt contains the P2 setpoint record OP-P2-EXTENDED-001 and revised P7 calibration record MAINT-P7-GW-002 when they become incident-time available. It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent. No verified P5 operating action is supplied here. Missing entries cannot establish that no operation occurred, nor confirm or exclude a leak. Keep source validity and partial health-review limits explicit.",
+      "body": "This excerpt contains the P2 setpoint record OP-P2-EXTENDED-001 and revised P7 calibration record MAINT-P7-GW-002 when they become incident-time available. It is not a complete plant historian; upstream actions, delayed entries and manual work may be absent. No verified P5 operating action is supplied here. Missing entries cannot establish that no operation occurred, nor confirm or exclude a leak. Keep source validity and partial health-review limits explicit.",
       "scenarios": ["S7"]
     }
   ]

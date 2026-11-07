@@ -1,0 +1,83 @@
+{
+  "version": "product-budget-qualification-v1",
+  "execution_budget_multiplier": 3,
+  "limits": {
+    "root_deadline_seconds": 900,
+    "model_request_timeout_seconds": 180,
+    "task_lease_seconds": 1080,
+    "root_model_calls": 30,
+    "root_tool_calls": 54,
+    "schema_repairs": 3,
+    "grounding_corrections": 3,
+    "final_review_round_limit": 4,
+    "tool_result_max_bytes": 49152,
+    "diagnosis_context_max_characters": 64512,
+    "knowledge_packet_max_cards": 24,
+    "knowledge_packet_max_bytes": 72000,
+    "provider_prompt_max_characters": 144000,
+    "provider_final_max_characters": 36000,
+    "provider_capture_max_bytes": 6000000,
+    "trace_content_max_characters": 196608,
+    "queue_roots": 48,
+    "generation_model_calls": 300,
+    "automatic_roots_per_generation": 18,
+    "automatic_roots_per_episode": 9,
+    "automatic_cooldown_seconds": 20,
+    "manual_roots_per_operator_minute": 9
+  },
+  "fresh_hosted_investigation": {
+    "case_id": "G3",
+    "source": "Retained immutable pressure measurements",
+    "dataset_sha256": "479c4c3c1239f15d24d84f5a6428ed5c4c249d281d80612bf4da9601eaf8d323",
+    "input_hash": "92e5454d9a1956a805c25885ed755e51463bbf4e684b2028b9f70b1983c22bab",
+    "same_original_input_hash": true,
+    "replay_id": "golden-7ef2648419a54ce1995cd6297a42a1e5",
+    "root_task_id": "d6ed8240-4658-5229-837d-2175043ef37d",
+    "state": "SUCCEEDED",
+    "observed_model": "gpt-6.1-sol",
+    "elapsed_seconds": 273.969,
+    "fresh_model_calls": 9,
+    "fresh_tool_calls": 17,
+    "inspection": {
+      "segment_id": "P1",
+      "start_m": 200,
+      "end_m": 600
+    },
+    "diagnosis_tool_calls": 9,
+    "previous_diagnosis_tool_limit": 8,
+    "all_existing_deterministic_golden_checks_passed": true,
+    "unwanted_prototype_terms_in_published_answer": [],
+    "langfuse": [
+      {
+        "role": "operator_response",
+        "trace_id": "dcf0c5258bfb7927cc0c5ab5f27225ef",
+        "stored_content_verification_passed": true
+      },
+      {
+        "role": "sensor_quality",
+        "trace_id": "18b32e2113e4e5dcd1dd7ff09190f466",
+        "stored_content_verification_passed": true
+      },
+      {
+        "role": "event_diagnosis",
+        "trace_id": "97bc45d182247dd535e625dc4ecd4c43",
+        "stored_content_verification_passed": true
+      }
+    ]
+  },
+  "preserved_controls": [
+    "Pressure-only automatic agent admission",
+    "Missing measurements remain unknown",
+    "Immutable evidence and matching-window requirements",
+    "Cited-source grounding and unsupported-report withholding",
+    "Operator authority and no equipment actuation",
+    "Original historical deadlines, failures and audit text",
+    "Single truthful installation provenance disclosure"
+  ],
+  "limitations": [
+    "Synthetic reference telemetry, not field accuracy certification.",
+    "One fresh hosted investigation, not a performance or reliability benchmark.",
+    "Stored runtime span content verified present; not independently certified complete.",
+    "No new external-judge accuracy claim; earlier golden judging remains separately recorded."
+  ]
+}

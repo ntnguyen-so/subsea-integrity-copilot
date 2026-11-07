@@ -10,6 +10,7 @@ from langgraph.graph.message import add_messages
 from langgraph.types import interrupt
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
+from subsea_copilot.budgets import SCHEMA_REPAIR_LIMIT
 from subsea_copilot.contracts import AgentResult
 from subsea_copilot.validation import ValidationError, parse_json
 
@@ -73,10 +74,10 @@ def build_graph(checkpointer: Any = None, validator: Any = None, result_schema: 
             accepted = validator(message.content)
             return {"parsed": accepted.model_dump(mode="json")}
         except (ValueError, TypeError) as exc:
-            if state.get("repairs", 0) >= 1:
+            if state.get("repairs", 0) >= SCHEMA_REPAIR_LIMIT:
                 return {"failure": getattr(exc, "code", "structure")}
             return {
-                "repairs": 1,
+                "repairs": state.get("repairs", 0) + 1,
                 "messages": [
                     HumanMessage(
                         content=json.dumps(

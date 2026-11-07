@@ -19,6 +19,14 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.types import Command
 from pydantic import BaseModel
 
+from subsea_copilot.budgets import (
+    BUDGET_MULTIPLIER,
+    GRAPH_RECURSION_LIMIT,
+    MODEL_TIMEOUT_SECONDS,
+    REFLECTION_LIMIT,
+    ROOT_DEADLINE_SECONDS,
+    TASK_LEASE_SECONDS,
+)
 from subsea_copilot.contracts import (
     AgentResult,
     AgentRole,
@@ -186,7 +194,7 @@ class AgentService:
             purpose=REGISTRY["operator_response"].purpose,
             question=question,
             mode=session.mode,
-            deadline=utc_now() + timedelta(seconds=300),
+            deadline=utc_now() + timedelta(seconds=ROOT_DEADLINE_SECONDS),
             automatic=automatic,
             idempotency_key=idempotency_key,
             history_version=history_version,
@@ -230,7 +238,7 @@ class AgentService:
         )
 
     def _claim_task(self) -> AgentTask | None:
-        return self.store.claim_task(self.owner, ttl_seconds=360)
+        return self.store.claim_task(self.owner, ttl_seconds=TASK_LEASE_SECONDS)
 
     def _gateway(self, task: AgentTask, snapshot: WindowSnapshot) -> ToolGateway:
         return ToolGateway(self.store, task, snapshot, self.telemetry)
@@ -254,7 +262,7 @@ class AgentService:
     @staticmethod
     def _model_limit(task: AgentTask) -> int:
         return (
-            6
+            6 * BUDGET_MULTIPLIER
             if task.role == "operator_response" and task.response_protocol == "engineer-v2"
             else REGISTRY[task.role].model_limit
         )
@@ -475,7 +483,7 @@ class AgentService:
                 ]
                 result_schema["properties"]["claim_refs"]["items"] = (
                     {"type": "string", "enum": eligible_refs}
-                    if len(eligible_refs) <= 32
+                    if len(eligible_refs) <= 32 * BUDGET_MULTIPLIER
                     else {
                         "type": "string",
                         "description": (
@@ -597,12 +605,12 @@ class AgentService:
             "history_sensors": self._history_sensors(snapshot)
             if task.history_version
             and task.role == "event_diagnosis"
-            and len(snapshot.quality.findings) <= 32
+            and len(snapshot.quality.findings) <= 32 * BUDGET_MULTIPLIER
             else [],
             "network_pressure_table": self._network_pressure_table(snapshot)
             if task.history_version
             and task.role == "event_diagnosis"
-            and len(snapshot.quality.findings) > 32
+            and len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
             else None,
             "history_regions": [],
             "history_scope": (
@@ -724,6 +732,7 @@ class AgentService:
         gateway = self._gateway(task, snapshot)
 
         critic = phase.startswith("critic-")
+        reflection = phase.startswith("reflection")
         sources = (
             source_texts(
                 candidate, snapshot, self.store.tool_receipts(task.id), task.knowledge_packet
@@ -738,7 +747,7 @@ class AgentService:
                 if critic:
                     assert candidate is not None
                     return validate_assessment(value, candidate, sources)
-                if phase == "reflection":
+                if reflection:
                     assert candidate is not None
                     interpretation = EngineerInterpretation.model_validate(parse_json(value))
                     value = candidate.model_copy(
@@ -762,7 +771,10 @@ class AgentService:
                 ]
             ).encode()
         ).hexdigest()
-        config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
+        config = {
+            "configurable": {"thread_id": thread_id},
+            "recursion_limit": GRAPH_RECURSION_LIMIT,
+        }
         prompt_path = (
             Path(__file__).resolve().parents[3]
             / "prompts"
@@ -770,13 +782,13 @@ class AgentService:
         )
         prompt = prompt_path.read_text(encoding="utf-8")
         context: dict[str, Any] = (
-            self._context(task, snapshot, "answer" if phase == "reflection" else phase)
+            self._context(task, snapshot, "answer" if reflection else phase)
             if not critic
             else critic_context(task, candidate, sources, phase)
             if candidate
             else {}
         )
-        if phase == "reflection":
+        if reflection:
             assert candidate is not None and candidate.interpretation is not None
             assert criticism is not None
             context.pop("compatible_tasks")
@@ -817,7 +829,7 @@ class AgentService:
             output = graph.invoke(None, config)
         else:
             if phase != "plan" and not critic:
-                if phase == "reflection":
+                if reflection:
                     intake = [
                         {
                             "name": r["name"],
@@ -883,7 +895,7 @@ class AgentService:
                     )
                     or phase == "plan"
                     or critic
-                    or phase == "reflection",
+                    or reflection,
                     "preferred_action": "investigate_history_then_final"
                     if task.role == "event_diagnosis"
                     and task.history_version
@@ -944,7 +956,10 @@ class AgentService:
                         remaining = (task.deadline - utc_now()).total_seconds()
                         if remaining <= 0:
                             raise ValidationError("deadline", "Root elapsed-time bound exhausted.")
-                        response = model.invoke(invocation_messages, timeout=min(60.0, remaining))
+                        response = model.invoke(
+                            invocation_messages,
+                            timeout=min(float(MODEL_TIMEOUT_SECONDS), remaining),
+                        )
                         if response.usage_metadata:
                             for key in ("input_tokens", "output_tokens", "total_tokens"):
                                 span.set_attribute(
@@ -964,10 +979,7 @@ class AgentService:
                         ):
                             raise ValidationError("mode_mismatch", "Scripted output is not live.")
                         if response.tool_calls and (
-                            remaining_turns == 0
-                            or phase == "plan"
-                            or critic
-                            or phase == "reflection"
+                            remaining_turns == 0 or phase == "plan" or critic or reflection
                         ):
                             raise ValidationError(
                                 "final_turn_reserved",
@@ -996,7 +1008,9 @@ class AgentService:
                 resumed = tool_messages(request["calls"], results)
             output = graph.invoke(Command(resume=resumed), config)
         if output.get("failure"):
-            raise ValidationError(output["failure"], "Structured output rejected after one repair.")
+            raise ValidationError(
+                output["failure"], "Structured output repair allowance exhausted."
+            )
         return output["parsed"], task
 
     def _review_interpretation(
@@ -1006,7 +1020,7 @@ class AgentService:
         result: AgentResult,
     ) -> tuple[AgentResult, AgentTask]:
         rounds = []
-        for index in range(2):
+        for index in range(REFLECTION_LIMIT + 1):
             if result.interpretation is not None:
                 self._event(
                     task,
@@ -1056,9 +1070,13 @@ class AgentService:
                     source_hash=content_hash({key: value for key, value in sources.items()}),
                 )
                 return result, task
-            if index == 0:
+            if index < REFLECTION_LIMIT:
                 revised, task = self._graph(
-                    task, snapshot, "reflection", candidate=result, criticism=assessment
+                    task,
+                    snapshot,
+                    "reflection" if index == 0 else f"reflection-{index}",
+                    candidate=result,
+                    criticism=assessment,
                 )
                 result = AgentResult.model_validate(revised)
         raise ValidationError(

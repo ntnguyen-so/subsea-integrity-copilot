@@ -250,7 +250,7 @@ def test_judge_really_invokes_injected_transport_and_records_opinion_separately(
     assert result["passed"]
     assert result["model_calls"] == 1
     model.invoke.assert_called_once()
-    assert model.invoke.call_args.kwargs["timeout"] == 60
+    assert model.invoke.call_args.kwargs["timeout"] == 180
     assert result["trace"]["trace_id"] == "1" * 32
     assert result["model_receipt"]["observed_model"] == "test-hosted-model"
     assert "deterministic_checks" not in result

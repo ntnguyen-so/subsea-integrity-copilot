@@ -12,6 +12,7 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from pydantic import JsonValue
 
+from subsea_copilot.budgets import ROOT_DEADLINE_SECONDS, TASK_LEASE_SECONDS
 from subsea_copilot.contracts import (
     AgentResult,
     AgentRole,
@@ -78,7 +79,9 @@ class _BaselineService(AgentService):
     baseline_task_id: str
 
     def _claim_task(self) -> AgentTask | None:
-        return self.store.claim_task(self.owner, ttl_seconds=360, task_id=self.baseline_task_id)
+        return self.store.claim_task(
+            self.owner, ttl_seconds=TASK_LEASE_SECONDS, task_id=self.baseline_task_id
+        )
 
     def _gateway(self, task: AgentTask, snapshot: WindowSnapshot) -> ToolGateway:
         return _BaselineGateway(self.store, task, snapshot, self.telemetry)
@@ -166,7 +169,7 @@ def run_single_agent_baseline(
     question: str = DEFAULT_QUESTION,
     checkpointer: BaseCheckpointSaver[Any] | None = None,
 ) -> dict[str, JsonValue]:
-    """Consume the explicitly declared one-baseline allowance and shared generation budget."""
+    """Consume the explicitly declared baseline allowance and shared generation budget."""
     if not store.qualification:
         raise ValidationError("baseline_authority", "Baseline requires a CLI qualification store.")
     if not question.strip() or len(question) > 4000:
@@ -186,7 +189,7 @@ def run_single_agent_baseline(
         purpose=BASELINE_PURPOSE,
         question=question,
         mode=mode,
-        deadline=utc_now() + timedelta(seconds=300),
+        deadline=utc_now() + timedelta(seconds=ROOT_DEADLINE_SECONDS),
         plan=["answer"],
         idempotency_key=identifier,
     )

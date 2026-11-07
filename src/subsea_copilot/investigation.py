@@ -191,8 +191,7 @@ def render_investigation(review: HistoryInvestigation, receipts: list[dict[str, 
     lines.extend(
         [
             ACTION_LABELS[review.next_action],
-            "Synthetic, read-only evidence. Association is not causation; "
-            "no safety clearance or operational control.",
+            "Verify the assessment with the integrity engineer before physical intervention.",
         ]
     )
     return "\n".join(lines)

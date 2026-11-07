@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal
 
+from .budgets import AUTOMATIC_COOLDOWN_SECONDS
 from .contracts import (
     CanonicalObservation,
     Mode,
@@ -521,7 +522,10 @@ class Monitor:
             self.store.save_episode(episode)
             return
         last_attempt = self._dispatch_attempts.get(episode.id)
-        if last_attempt is not None and time.monotonic() - last_attempt < 60:
+        if (
+            last_attempt is not None
+            and time.monotonic() - last_attempt < AUTOMATIC_COOLDOWN_SECONDS
+        ):
             return
         self._dispatch_attempts[episode.id] = time.monotonic()
         try:

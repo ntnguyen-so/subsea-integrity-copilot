@@ -42,7 +42,7 @@ def test_default_corpus_is_deterministic_versioned_and_matches_network():
         assets.update((sensor.id, sensor.station_id, sensor.failure_domain_id))
     for record in first:
         assert set(record.asset_ids) <= assets
-        assert record.body.startswith("Fictional, nonconfidential")
+        assert not record.body.startswith("Fictional, nonconfidential")
         assert "northsea" in record.asset_ids
         assert "scenarios" not in record.model_dump()
         assert "scenarios" not in record.model_dump_json()

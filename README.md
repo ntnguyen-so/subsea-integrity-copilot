@@ -1,6 +1,6 @@
 # Subsea Integrity Copilot
 
-Read-only FDE demo for a fictional offshore gas operator. Existing anomaly
+Engineer decision support for subsea pipeline integrity. Existing anomaly
 detectors flag pressure readings; agents help engineers investigate those alerts,
 distinguish sensor faults from possible leaks, and recommend a supported inspection
 interval or abstain. **Synthetic data only; not a safety system.**
@@ -246,7 +246,7 @@ These inexpensive detector flags can appear before any LLM call.
 The three suggested questions are "Leak or faulty sensors?", "Where should we
 inspect, and why?", and "What evidence supports this, and what remains unknown?"
 This is a five-minute handover design, not a measured human-usability result.
-The 300s report budget starts at admission. Source-time triage, wall-clock queue
+The 900s report budget starts at admission. Source-time triage, wall-clock queue
 time and source-to-warning/report latency are distinct; accelerated replay does
 not establish a field response-time guarantee.
 
@@ -292,7 +292,7 @@ withholds a location. The wider S7 footprint can legitimately produce an
 ambiguous or withheld interval; it must not be forced into the earlier bracket.
 
 The diagnosis agent receives a compact measurement table for **all 112
-instruments**, including weak and quiet channels. It chooses up to eight
+instruments**, including weak and quiet channels. It chooses up to 24
 instruments per joint before/after comparison: pressure profiles, actual usable
 sample overlap, paired correlations, graph distances, extrema and adjacent
 steps. Missing data are never imputed into physical evidence. These are
@@ -309,7 +309,7 @@ guidance, prerequisites, verification steps, counterexamples and limitations.
 The investigation-program card expresses a reusable procedure; the other cards
 express domain heuristics. This follows DANA's capture/apply distinction, **not**
 a claim of DanaOS/OpenSSA implementation. The current corpus is research-curated
-and synthetic-advisory-only, **not approved by a pipeline SME**.
+with advisory authority, **not approved by a pipeline SME**.
 
 The service selects cards by site, pack, role, status and validity; withholds
 declared conflicts; pins a full immutable packet to the root and every child;
@@ -335,16 +335,36 @@ counterexamples with identical individual before/after distributions but changed
 cross-sensor timing. It records full explanations for independent semantic
 review, not an automatic accuracy grade.
 
-Root bounds remain 300 seconds, ten model calls and eighteen tool calls; the
-provider prompt remains 48,000 characters. Joint comparison handoffs use lossless
-columnar encoding and a 16 KiB tool-result bound. Repeated claim values reference
+Execution allowances are now **3x the previous limits**, including database
+enforcement. Each root allows 900 seconds, 30 model calls and 54 tool calls;
+the provider prompt allows 144,000 characters, individual model requests 180
+seconds, and worker leases 1,080 seconds. Quality allows 9 model/15 tool calls;
+diagnosis 12/24; the coordinator 9/15, or 18 model calls for its reviewed
+engineering-response protocol. The shared root ceiling still applies.
+Three schema repairs and three grounding corrections are allowed, with a final
+review after the third correction; unsupported responses still fail closed.
+Admission allows 48 queued roots, 300 generation model calls, 18 automatic
+roots per generation, 9 per episode and 9 manual roots per operator/minute.
+Automatic admission permits three times the prior rate (20-second cooldown).
+CLI qualification permits 27 manual roots and 3 standalone baselines.
+Joint comparison handoffs use lossless
+columnar encoding and a 48 KiB tool-result bound. Repeated claim values reference
 their identical evidence value without removing source data. Diagnosis delivery
-also has a cumulative 21 Ki-character normalized-JSON budget; additional reads
+also has a cumulative 63 Ki-character normalized-JSON budget; additional reads
 fail explicitly with `context_budget_exceeded`, which must remain a report
 limitation. No numerical certainty or operating authority is increased.
 Schema repair regenerates from the same complete source messages and validator
 feedback; the rejected draft remains audited but is not replayed into the repair
-prompt. Raw source evidence is never discarded to make a report fit.
+prompt. Knowledge packets allow 24 cards/72 KB; health pages 24 instruments;
+history reads 9 records and comparison ranges 900 seconds. Model output/capture
+and trace-content ceilings are also tripled. Raw source evidence is never
+discarded to make a report fit. Existing recordings retain their original
+deadlines and outcomes; the larger allowances apply to fresh work.
+The [fresh budget qualification](docs/evidence/product-budget-qualification.json)
+records a same-input hosted G3 investigation: 9 model calls, 17 tools, 273.969
+seconds and a reviewed P1 200-600m inspection interval. Diagnosis used 9 tools,
+crossing its former 8-tool ceiling; the three named-agent Langfuse trees were
+checked in stored observations. This is a focused regression, not field certification.
 
 The fresh automatic S7 worked example completed in **233.70 seconds, eight
 hosted calls and sixteen tools**, separating P5, P7 and P2 explanations while
@@ -482,7 +502,7 @@ bounded calls and checked claim IDs. The model cannot fabricate accepted numbers
 Monitoring uses 60-second windows, 5-second hops and 5-second lateness, independently
 of the inference worker; late evidence creates revisions rather than rewriting history.
 
-Stop the demo server and finish any qualification cohorts before Python integration
+Stop the monitoring server and finish any qualification cohorts before Python integration
 tests: their fixtures reapply the owned database schema. Do not run these migrations
 concurrently with workers or another test process.
 
@@ -548,7 +568,7 @@ scans every 5s hop. It
 measures synthetic source-time delay, not sensor-to-human delivery. The browser
 suite separately runs a local 1x warning-delivery journey and writes
 `docs\evidence\warning-browser-timing.json`. The report-processing target is
-300s from question admission to accepted result; UI/human receipt is a separate
+900s for new runs from question admission to accepted result; UI/human receipt is a separate
 measurement. Include failed, withheld and deadline-missed investigations in a
 pilot, not only accepted reports.
 
@@ -682,7 +702,7 @@ is not a geographic scale drawing.
 
 ## Interview deck
 
-The deck follows the current pressure demo and the brief's three questions.
+The deck follows the pressure-monitoring workflow and the brief's three questions.
 Historical acoustic receipts remain separately labeled in the engineering report;
 they are not pressure-version evidence.
 

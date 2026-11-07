@@ -604,7 +604,8 @@ def test_engineer_interpretation_is_separate_cited_and_response_only(investigate
     assert root.interpretation_review.rounds[-1].assessment.decision == "accept"
     assert root.result.interpretation is not None
     assert root.answer.index("ENGINEER QUESTION") < root.answer.index("CHECKED EVIDENCE")
-    assert "wording is not independently verified RCA" in root.answer
+    assert "ENGINEERING ASSESSMENT" in root.answer
+    assert "wording is not independently verified RCA" not in root.answer
     forged = root.result.model_copy(deep=True)
     forged.interpretation.answer.references = ["invented-document"]
     with pytest.raises(ValidationError, match="reviewed history"):
@@ -768,7 +769,7 @@ def test_current_reports_require_exact_complete_grounding_attestation(investigat
         validate_review(root.result, root, snapshot, receipts)
 
 
-def test_uncertain_critic_withholds_report_after_one_revision(investigated):
+def test_uncertain_critic_withholds_report_after_three_distinct_revisions(investigated):
     store, cases, telemetry = investigated
     _, snapshot, original, _ = cases["S4"]
     root = original.model_copy(deep=True)
@@ -787,7 +788,7 @@ def test_uncertain_critic_withholds_report_after_one_revision(investigated):
 
     def phase(task, _snapshot, name, candidate=None, criticism=None):
         phases.append(name)
-        if name == "reflection":
+        if name.startswith("reflection"):
             assert criticism.checks[0].reason == assessment.checks[0].reason
             return candidate.model_dump(), task
         return assessment.model_dump(), task
@@ -796,7 +797,10 @@ def test_uncertain_critic_withholds_report_after_one_revision(investigated):
     with patch.object(service, "_graph", side_effect=phase):
         with pytest.raises(ValidationError, match="report withheld"):
             service._review_interpretation(root, snapshot, root.result)
-    assert phases == ["critic-0", "reflection", "critic-1"]
+    assert phases == [
+        "critic-0", "reflection", "critic-1", "reflection-1",
+        "critic-2", "reflection-2", "critic-3",
+    ]
     assert root.interpretation_review is None
 
 
@@ -872,13 +876,20 @@ def test_casefile_retains_the_accepted_decision_sources_and_physical_abstention(
         )
         if scenario == "S1":
             on_target = root.model_copy(
-                update={"updated_at": root.created_at + timedelta(seconds=300)}
+                update={"updated_at": root.created_at + timedelta(seconds=900)}
             )
             late = root.model_copy(
-                update={"updated_at": root.created_at + timedelta(seconds=300.001)}
+                update={"updated_at": root.created_at + timedelta(seconds=900.001)}
             )
             assert build_casefile(on_target, snapshot, dependencies, receipts).report_target_met
             assert not build_casefile(late, snapshot, dependencies, receipts).report_target_met
+            archived = late.model_copy(update={
+                "deadline": root.created_at + timedelta(seconds=300),
+                "updated_at": root.created_at + timedelta(seconds=300.001),
+            })
+            archived_case = build_casefile(archived, snapshot, dependencies, receipts)
+            assert archived_case.report_target_seconds == 300
+            assert not archived_case.report_target_met
             assert handoff.inspection is not None
             assert (
                 handoff.inspection.segment_id,
@@ -969,7 +980,7 @@ def test_fabricated_assertion_is_revised_and_reviewed_with_persisted_budget(
             root = store.get_task(root.id)
             if root.state in {"SUCCEEDED", "ABSTAINED", "FAILED"}:
                 break
-    assert root.model_calls == 5
+    assert root.model_calls == (5 if repair_allowed else 9)
     if not repair_allowed:
         assert root.state == "FAILED"
         assert root.error_code == "grounding_rejected"

@@ -7,6 +7,7 @@ from uuid import uuid4
 from langchain_core.language_models import BaseChatModel
 from pydantic import JsonValue, TypeAdapter
 
+from .budgets import ROOT_WATCHDOG_SECONDS, WORKER_POLL_LIMIT
 from .casefile import build_casefile
 from .config import Settings
 from .contracts import AgentRole, Mode, ReplaySession, WindowSnapshot
@@ -96,10 +97,10 @@ def qualify_knowledge(mode: Mode) -> dict[str, JsonValue]:
                     "where to inspect and what remains unknown.",
                     idempotency_key="knowledge-ablation",
                 )
-                for _ in range(100):
+                for _ in range(WORKER_POLL_LIMIT):
                     if root.state in {"SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED"}:
                         break
-                    if time.monotonic() - started > 330:
+                    if time.monotonic() - started > ROOT_WATCHDOG_SECONDS:
                         raise RuntimeError("Knowledge ablation exceeded its bounded root deadline.")
                     progressed = service.run_once()
                     root = store.get_task(root.id)

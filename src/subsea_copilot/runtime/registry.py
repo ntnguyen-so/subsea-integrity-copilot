@@ -3,6 +3,11 @@
 from dataclasses import dataclass
 from typing import Any
 
+from subsea_copilot.budgets import (
+    BUDGET_MULTIPLIER,
+    COMPARISON_SENSOR_LIMIT,
+    HISTORY_DOCUMENT_LIMIT,
+)
 from subsea_copilot.contracts import AgentRole
 
 
@@ -36,8 +41,8 @@ REGISTRY: dict[AgentRole, RolePolicy] = {
                 "ontology.neighbors",
             }
         ),
-        3,
-        5,
+        3 * BUDGET_MULTIPLIER,
+        5 * BUDGET_MULTIPLIER,
         frozenset({"coverage", "sensor_health", "limitation"}),
     ),
     "event_diagnosis": RolePolicy(
@@ -56,16 +61,16 @@ REGISTRY: dict[AgentRole, RolePolicy] = {
             }
         ),
         frozenset({"task.result", "event.assess", "event.counterevidence"}),
-        4,
-        8,
+        4 * BUDGET_MULTIPLIER,
+        8 * BUDGET_MULTIPLIER,
         frozenset({"coverage", "sensor_health", "hypothesis", "location", "limitation"}),
     ),
     "operator_response": RolePolicy(
         "answer_incident_question",
         frozenset({"task.result", "evidence.get", "criteria.explain"}),
         frozenset({"task.result", "evidence.get", "criteria.explain"}),
-        3,
-        5,
+        3 * BUDGET_MULTIPLIER,
+        5 * BUDGET_MULTIPLIER,
         frozenset({"coverage", "sensor_health", "hypothesis", "location", "limitation"}),
     ),
 }
@@ -112,14 +117,18 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
             fields["task_id"] = {"type": "string"}
             required.append("task_id")
         if name == "evidence.get":
-            fields["ids"] = {"type": "array", "items": {"type": "string"}, "maxItems": 100}
+            fields["ids"] = {
+                "type": "array",
+                "items": {"type": "string"},
+                "maxItems": 100 * BUDGET_MULTIPLIER,
+            }
         if name == "quality.sensor_patterns":
             fields["offset"] = {"type": "integer", "minimum": 0}
         if name.startswith("history."):
             fields["knowledge_ids"] = {
                 "type": "array",
                 "items": {"type": "string"},
-                "maxItems": 3,
+                "maxItems": HISTORY_DOCUMENT_LIMIT,
                 "description": "Pinned KN cards motivating this check.",
             }
             fields["check_question"] = {
@@ -151,7 +160,7 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
                 "type": "array",
                 "items": {"type": "string"},
                 "minItems": 1,
-                "maxItems": 4,
+                "maxItems": 4 * BUDGET_MULTIPLIER,
                 "description": "Segment scopes include their instruments and gateways.",
             }
             required.extend(["query", "asset_ids"])
@@ -160,7 +169,7 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
                 "type": "array",
                 "items": {"type": "string"},
                 "minItems": 1,
-                "maxItems": 3,
+                "maxItems": HISTORY_DOCUMENT_LIMIT,
             }
             required.append("document_ids")
         if name == "history.compare":
@@ -168,7 +177,7 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
                 "type": "array",
                 "items": {"type": "string"},
                 "minItems": 2,
-                "maxItems": 8,
+                "maxItems": COMPARISON_SENSOR_LIMIT,
                 "description": (
                     "Joint pressure profiles, graph distances, paired-complete correlations, "
                     "coverage and before/after changes. Select groups and contrasting observers."

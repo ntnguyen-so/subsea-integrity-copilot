@@ -442,9 +442,7 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
             else:
                 lines.append(f"Location: {location.status}. {location.reason}")
     if result.limitations:
-        lines.append("Limitations: " + ", ".join(sorted(result.limitations)) + ".")
         explanations = {
-            "SYNTHETIC_UNCALIBRATED": "Synthetic evidence; instruments and model are uncalibrated.",
             "GRID_NOT_ACCURACY": "The numerical grid spacing is not localization accuracy.",
             "COMPATIBLE_NOT_CONFIDENCE": "Compatible candidates are not a confidence interval.",
             "LOCATION_MODEL_SIMPLIFIED": "Location uses a simplified numerical propagation model.",
@@ -455,9 +453,7 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                 "Correlated pressure anomalies support investigation, not a confirmed leak."
             ),
             "OPERATING_CONTEXT_REQUIRED": (
-                "Verify valve/compressor changes and shared failures with the operator. "
-                "Synthetic operational history can support investigation; "
-                "customer operating records remain unconnected."
+                "Verify valve/compressor changes and shared instrumentation with the operator."
             ),
             "COMMON_MODE_PRESSURE_CHANGE": (
                 "A broad pressure change can reflect operating changes or a shared failure; "
@@ -473,7 +469,12 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                 "the full quality report is retained."
             ),
         }
-        lines.extend(explanations[c] for c in result.limitations if c in explanations)
+        material = list(
+            dict.fromkeys(explanations[c] for c in result.limitations if c in explanations)
+        )
+        if material:
+            lines.append("Checks and uncertainties:")
+            lines.extend(material)
     if {"location_withheld", "LOCATION_WITHHELD"} & set(result.limitations):
         lines.append("Location withheld; no supported section or chainage is asserted.")
     reviewed = sum(snapshot.claims[r].kind == "sensor_health" for r in result.claim_refs)

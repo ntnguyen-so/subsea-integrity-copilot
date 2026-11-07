@@ -1,13 +1,16 @@
+import { productText } from "./presentation";
+
 export function element<T extends HTMLElement>(id: string, kind: { new(): T }): T {
   const node = document.getElementById(id);
   if (!(node instanceof kind)) throw new Error(`Required console element missing: ${id}`);
   return node;
 }
 export function box(id: string): HTMLElement { return element(id, HTMLElement); }
-export function text(id: string, value: string): void { box(id).textContent = value; }
+export function text(id: string, value: string): void { box(id).textContent = productText(value); }
 export function node<K extends keyof HTMLElementTagNameMap>(tag: K, content = "", className = ""): HTMLElementTagNameMap[K] {
   const result = document.createElement(tag);
-  result.textContent = content;
+  result.textContent = ["p", "h3", "h4", "strong", "small", "summary"].includes(tag)
+    ? productText(content) : content;
   result.className = className;
   return result;
 }

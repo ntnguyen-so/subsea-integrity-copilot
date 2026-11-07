@@ -59,12 +59,12 @@ export interface InvestigationCase {
 }
 export interface TaskDetail { task: AgentTask; children: AgentTask[]; receipts: Record<string, Json>[]; investigation_receipts: Record<string, Json>[]; casefile: InvestigationCase | null; activity?: ConsoleEvent[] }
 export interface KnowledgeCard {
-  id: string; title: string; kind: "heuristic" | "procedure"; status: "draft" | "demo_curated" | "retired";
+  id: string; title: string; kind: "heuristic" | "procedure"; status: "draft" | "curated" | "demo_curated" | "retired";
   guidance: string; limitations: string[]; review_basis: string;
   verification_steps?: string[]; counterexamples?: string[]; applies_when?: string;
   sources: { reference: string; locator: string; boundary: string }[];
 }
 export interface KnowledgePacket {
-  version: string; selected_at: string; authority: "synthetic_advisory_only";
+  version: string; selected_at: string; authority: "advisory_only" | "synthetic_advisory_only";
   cards: KnowledgeCard[]; excluded: Record<string, string>;
 }

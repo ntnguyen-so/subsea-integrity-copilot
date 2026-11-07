@@ -55,6 +55,17 @@ test("hosted golden recordings reopen with real public agent work and zero new i
       await expect(page.locator('.agent-public-journal [data-kind="agent.draft"]')).not.toHaveCount(0, { timeout: 30_000 });
       await expect(page.locator('.agent-public-journal [data-kind="answer.checked"]')).not.toHaveCount(0);
       expect(await page.locator(".agent-public-journal li").count()).toBeGreaterThan(5);
+      const prose = await page.locator(
+        ".agent-role p, .agent-role h3, .agent-role h4, .agent-public-journal p, #event-summary"
+      ).allTextContents();
+      expect(prose.join("\n")).not.toMatch(/\b(fictional|demo|prototype|frictional|synthetic)\b/i);
+      const quotes = await page.locator(".agent-source-finding").allTextContents();
+      const acceptedReview = file.interpretation_review?.rounds.at(-1);
+      for (const quote of quotes) {
+        expect(acceptedReview?.assessment.checks.some(check =>
+          check.support.some(support => quote.includes(support.quote))
+        )).toBe(true);
+      }
     } else {
       expect(before.tasks).toHaveLength(0);
       await expect(page.locator("#investigation-hold")).toBeHidden();
@@ -133,7 +144,7 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
 
 test("10x fresh hosted work freezes the source and displays real progress", async ({ page }) => {
   test.skip(process.env.SUBSEA_QUALIFY_PAUSED_LIVE !== "1", "Explicit hosted-inference opt-in.");
-  test.setTimeout(600_000);
+  test.setTimeout(1_800_000);
   const frames: unknown[] = [];
   let outcome = "failed";
   let result: Record<string, unknown> = {};
@@ -188,7 +199,7 @@ test("10x fresh hosted work freezes the source and displays real progress", asyn
       if (root?.state === "FAILED") throw new Error(`Fresh paused report withheld: ${root.error_code}`);
       observed.final = projection;
       return Boolean(root && ["SUCCEEDED", "ABSTAINED"].includes(root.state));
-    }, { timeout: 310_000, intervals: [2000, 4000] }).toBe(true);
+    }, { timeout: 930_000, intervals: [2000, 4000] }).toBe(true);
     expect(activeObserved).toBe(true);
     const completed = observed.final;
     if (!completed) throw new Error("No completed projection was recorded");
@@ -274,7 +285,7 @@ test("recorded paused hosted work restores coherent evidence without new inferen
 
 test("extended network qualifies a fresh hosted investigation against matching sensor-only evidence", async ({ page }) => {
   test.skip(process.env.SUBSEA_QUALIFY_DASHBOARD_LIVE !== "1", "Opt in explicitly; this consumes hosted inference.");
-  test.setTimeout(600_000);
+  test.setTimeout(1_800_000);
   const started = performance.now();
   const frames: unknown[] = [];
   let outcome = "failed";
@@ -308,7 +319,7 @@ test("extended network qualifies a fresh hosted investigation against matching s
       if (root?.state === "FAILED") throw new Error(`Hosted S7 report withheld: ${root.error_code}`);
       return root !== undefined && ["SUCCEEDED", "ABSTAINED"].includes(root.state)
         && !current.episodes.some(episode => episode.pending_window_id);
-    }, { timeout: 300_000, intervals: [3000, 5000] }).toBe(true);
+    }, { timeout: 900_000, intervals: [3000, 5000] }).toBe(true);
     await expect(page.locator("#automatic-state")).toContainText(/COPILOT HOSTED · (REPORT AVAILABLE|ABSTENTION)/);
     const taskId = await page.locator("#automatic-state").getAttribute("data-task");
     const response = await page.request.get(`/api/tasks/${taskId}/casefile`, { maxRetries: 2 });
@@ -937,7 +948,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
 
 test("LIVE automatic investigation completes while independent monitoring and manual review continue", async ({ page }) => {
   test.skip(process.env.SUBSEA_QUALIFY_DASHBOARD_LIVE !== "1", "Opt in explicitly; this consumes hosted inference.");
-  test.setTimeout(420_000);
+  test.setTimeout(1_260_000);
   const started = performance.now(), { id } = await prepare(page, "S1", 16, "live");
   const artifactPath = `runtime\\dashboard-live-${id}.json`;
   const receipts: { observed_after_seconds: number; projection: Projection }[] = [];
@@ -968,7 +979,7 @@ test("LIVE automatic investigation completes while independent monitoring and ma
       const newest = [...roots].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
       receipts.push({ observed_after_seconds: (performance.now() - started) / 1000, projection });
       return !projection.episodes.some(episode => episode.pending_window_id) && newest?.state === "SUCCEEDED";
-    }, { timeout: 300_000, intervals: [3000, 5000] }).toBe(true);
+    }, { timeout: 900_000, intervals: [3000, 5000] }).toBe(true);
     await expect(page.locator("#automatic-state")).toContainText("COPILOT HOSTED · REPORT AVAILABLE");
     const taskId = await page.locator("#automatic-state").getAttribute("data-task");
     const file = await page.request.get(`/api/tasks/${taskId}/casefile`, { maxRetries: 2 });

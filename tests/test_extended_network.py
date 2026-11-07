@@ -91,7 +91,7 @@ def test_extended_agent_reads_are_bounded_and_cover_supported_observers(extended
         "ontology.neighbors",
     ):
         result = gateway._read(name, {})
-        assert len(json.dumps(result).encode()) <= 12 * 1024
+        assert len(json.dumps(result).encode()) <= 48 * 1024
     patterns = gateway._read("quality.sensor_patterns", {})
     assert patterns["pagination"]["total"] == 112
     assert patterns["limitations"] == ["partial_health_review"]
@@ -100,13 +100,13 @@ def test_extended_agent_reads_are_bounded_and_cover_supported_observers(extended
         patterns = gateway._read(
             "quality.sensor_patterns", {"offset": patterns["pagination"]["next_offset"]}
         )
-        assert len(json.dumps(patterns).encode()) <= 12 * 1024
+        assert len(json.dumps(patterns).encode()) <= 48 * 1024
         reviewed.update(f["sensor_id"] for f in patterns["findings"])
     assert reviewed == {sensor.id for sensor in extended[0].pack.sensors}
     sensors = AgentService._history_sensors(snapshot)
-    assert len(sensors) <= 24
+    assert len(sensors) <= 72
     assert set(snapshot.event.supporting_sensor_ids) <= {s["id"] for s in sensors}
-    if len(snapshot.event.supporting_sensor_ids) < 24:
+    if len(snapshot.event.supporting_sensor_ids) < 72:
         assert any(not sensor["event_support"] for sensor in sensors)
         assert {sensor["segment_id"] for sensor in sensors} == {
             "P1",

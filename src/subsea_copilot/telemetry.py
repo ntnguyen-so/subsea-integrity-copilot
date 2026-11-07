@@ -40,7 +40,7 @@ _SAFE_STRING = re.compile(
     r"(?:^|[._])(?:id|hash|sha256|name|role|mode|purpose|outcome|status|code|model|source|"
     r"version|requested_model|observed_model|model_identity_source|error|type|session)$"
 )
-TRACE_CONTENT_LIMIT = 64 * 1024
+TRACE_CONTENT_LIMIT = 192 * 1024
 
 
 def _redact_content(value: str) -> str:

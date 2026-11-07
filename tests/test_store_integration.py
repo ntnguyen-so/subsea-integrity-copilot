@@ -560,8 +560,8 @@ def test_persisted_admission_and_role_budget(store: Store) -> None:
     assert store.save_episode(episode).auto_roots == 1
     claimed = store.claim_task("worker")
     assert claimed and claimed.lease_token
-    for _ in range(3):
-        claimed = store.reserve_model_call(created.id, claimed.lease_token, 3)
+    for _ in range(9):
+        claimed = store.reserve_model_call(created.id, claimed.lease_token, 9)
     with pytest.raises(BudgetExceeded):
         store.reserve_model_call(created.id, claimed.lease_token, 99)
     store.save_task(
@@ -582,11 +582,11 @@ def test_persisted_admission_and_role_budget(store: Store) -> None:
 def test_root_queue_and_manual_admission_are_database_enforced(store: Store) -> None:
     replay(store)
     store.save_window(window(store))
-    for n in range(3):
+    for n in range(9):
         store.create_task(root(store, f"manual-{n}"), operator_id="same-operator")
     with pytest.raises(BudgetExceeded):
         store.create_task(root(store, "rate-blocked"), operator_id="same-operator")
-    for n in range(13):
+    for n in range(39):
         store.create_task(root(store, f"queue-{n}"), operator_id=f"operator-{n}")
     with pytest.raises(QueueFull):
         store.create_task(root(store, "queue-blocked"), operator_id="another-operator")
@@ -618,7 +618,7 @@ def test_explicit_qualification_allowance_preserves_interactive_throttle(
     with Store(
         settings.database_dsn, tenant_id=store.tenant_id, qualification=True
     ) as qualification:
-        for n in range(9):
+        for n in range(27):
             qualification.create_task(root(qualification, f"qualification-{n}"))
         with pytest.raises(BudgetExceeded):
             qualification.create_task(root(qualification, "qualification-blocked"))
@@ -630,6 +630,10 @@ def test_explicit_qualification_allowance_preserves_interactive_throttle(
             )
         )
         assert baseline.purpose == "evaluate_single_agent_baseline"
+        for n in range(2):
+            qualification.create_task(
+                root(qualification, f"baseline-extra-{n}", purpose="evaluate_single_agent_baseline")
+            )
         with pytest.raises(BudgetExceeded):
             qualification.create_task(
                 root(
@@ -777,8 +781,8 @@ def test_supported_two_child_workflow_keeps_role_counters_separate(store: Store)
     current = store.claim_task("worker")
     assert current and current.lease_token
     for step, role, model_limit, tool_limit, purpose in (
-        (0, "sensor_quality", 3, 5, "assess_sensor_health"),
-        (1, "event_diagnosis", 4, 8, "assess_event_and_location"),
+        (0, "sensor_quality", 9, 15, "assess_sensor_health"),
+        (1, "event_diagnosis", 12, 24, "assess_event_and_location"),
     ):
         current = store.reserve_model_call(current.id, current.lease_token, 3)
         current = store.reserve_tool_call(current.id, current.lease_token, 5)
@@ -815,9 +819,14 @@ def test_supported_two_child_workflow_keeps_role_counters_separate(store: Store)
         assert current and current.id == created.id and current.lease_token
         assert current.model_calls == step + 1
         assert current.tool_calls == step + 1
-    current = store.reserve_model_call(current.id, current.lease_token, 3)
-    for _ in range(3):
-        current = store.reserve_tool_call(current.id, current.lease_token, 5)
+    for _ in range(7):
+        current = store.reserve_model_call(current.id, current.lease_token, 9)
+    for _ in range(13):
+        current = store.reserve_tool_call(current.id, current.lease_token, 15)
+    with pytest.raises(BudgetExceeded):
+        store.reserve_model_call(current.id, current.lease_token, 99)
+    with pytest.raises(BudgetExceeded):
+        store.reserve_tool_call(current.id, current.lease_token, 99)
     answered = store.save_task(
         current.model_copy(
             update={
@@ -829,14 +838,14 @@ def test_supported_two_child_workflow_keeps_role_counters_separate(store: Store)
         lease_token=current.lease_token,
     )
     tasks = store.list_tasks("generation")
-    assert answered.model_calls == 3 and answered.tool_calls == 5
+    assert answered.model_calls == 9 and answered.tool_calls == 15
     assert {task.role: task.model_calls for task in tasks} == {
-        "operator_response": 3,
-        "sensor_quality": 3,
-        "event_diagnosis": 4,
+        "operator_response": 9,
+        "sensor_quality": 9,
+        "event_diagnosis": 12,
     }
-    assert sum(task.model_calls for task in tasks) == 10
-    assert sum(task.tool_calls for task in tasks) == 18
+    assert sum(task.model_calls for task in tasks) == 30
+    assert sum(task.tool_calls for task in tasks) == 54
     assert answered.state == "SUCCEEDED"
 
 
@@ -876,7 +885,7 @@ def test_atomic_child_handoff_survives_coordinator_crash(store: Store, settings:
 
 
 def test_manual_rate_limit_survives_new_replay_generations(store: Store) -> None:
-    for n in range(4):
+    for n in range(10):
         generation_id = f"generation-{n}"
         replay(store, generation_id)
         store.save_window(window(store, generation_id, id=f"window-{n}"))
@@ -886,7 +895,7 @@ def test_manual_rate_limit_survives_new_replay_generations(store: Store) -> None
             generation_id=generation_id,
             snapshot_id=f"window-{n}",
         )
-        if n < 3:
+        if n < 9:
             store.create_task(proposed, operator_id="same-operator")
         else:
             with pytest.raises(BudgetExceeded):

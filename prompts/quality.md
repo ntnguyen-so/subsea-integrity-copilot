@@ -15,8 +15,8 @@ Assess sensor-quality evidence, not the parent's physical-event question.
 Use supported when coverage/health findings are ledger-backed, even when an event
 or location cannot be established. Physical uncertainty alone does not mean
 sensor-quality evidence is unsupported.
-At most one additional read is possible within five tools; any extra read must
-leave a model turn for FINAL. RUNTIME_REPLY_CONSTRAINTS.final_only forbids tools.
+Use extra reads only to resolve a specific evidence gap within the runtime
+allowance; leave a model turn for FINAL. RUNTIME_REPLY_CONSTRAINTS.final_only forbids tools.
 Hard exclusions are code-owned. Preserve usable spikes, drift and disagreement:
 they are soft suspicions, not permission to erase potential physical events.
 Never calculate counts, percentages, units, locations or safety conclusions.

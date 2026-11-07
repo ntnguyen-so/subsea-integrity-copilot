@@ -350,7 +350,7 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
       const provenance = section(`knowledge-provenance:${card.id}`);
       provenance.append(node("summary", "Sources, review basis and authority"),
         node("p", `${card.id} · ${knowledge.version} · pinned ${time(knowledge.selected_at)} at investigation time, not incident time.`, "muted"),
-        node("p", "Curated for this synthetic workspace and research-derived; not pipeline-SME approved. Guidance supports review, not a confirmed leak or hardware diagnosis.", "muted"),
+        node("p", "Domain guidance supports the investigation. Apply its prerequisites and verify findings against site evidence.", "muted"),
         node("p", `Review basis: ${card.review_basis}`, "muted"));
       for (const source of card.sources) provenance.append(node("p",
         `${source.reference} · ${source.locator}. ${source.boundary}`, "muted"));

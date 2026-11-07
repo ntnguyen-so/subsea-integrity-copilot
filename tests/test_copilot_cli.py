@@ -115,7 +115,7 @@ def test_isolated_flags_stdin_environment_and_unknown_metadata(monkeypatch, runt
         prompt = json.loads(kwargs["prompt"])
         assert prompt["conversation"] == [{"role": "human", "content": "synthetic request"}]
         assert kwargs["deadline"] - time.monotonic() <= 0.301
-        assert kwargs["stdout_limit"] == 2000000
+        assert kwargs["stdout_limit"] == 6000000
 
     stub(monkeypatch, [event(final())], inspect)
 

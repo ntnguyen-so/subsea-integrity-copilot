@@ -13,6 +13,7 @@ from typing import Literal
 from langchain_core.language_models.chat_models import BaseChatModel
 from pydantic import JsonValue, TypeAdapter
 
+from .budgets import ROOT_WATCHDOG_SECONDS, WORKER_POLL_LIMIT
 from .config import Settings
 from .contracts import AgentRole, Mode, ReplaySession, utc_now
 from .diagnostics import analyze_window
@@ -146,7 +147,10 @@ def qualify_agents(mode: Mode, repetitions: int = 3) -> dict[str, JsonValue]:
                         )
                         iterations = 0
                         while root.state not in TERMINALS:
-                            if time.monotonic() - started > 330 or iterations >= 100:
+                            if (
+                                time.monotonic() - started > ROOT_WATCHDOG_SECONDS
+                                or iterations >= WORKER_POLL_LIMIT
+                            ):
                                 raise RuntimeError(
                                     "Qualification root did not terminate within bounds"
                                 )

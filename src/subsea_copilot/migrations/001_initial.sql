@@ -197,10 +197,10 @@ BEGIN
     THEN RAISE EXCEPTION 'scope_error'; END IF;
     limit_model := CASE
         WHEN NEW.role='operator_response' AND NEW.payload->>'response_protocol'='engineer-v2'
-            THEN 6
-        WHEN NEW.role='event_diagnosis' THEN 4
-        ELSE 3 END;
-    limit_tool := CASE NEW.role WHEN 'event_diagnosis' THEN 8 ELSE 5 END;
+            THEN 18
+        WHEN NEW.role='event_diagnosis' THEN 12
+        ELSE 9 END;
+    limit_tool := CASE NEW.role WHEN 'event_diagnosis' THEN 24 ELSE 15 END;
     IF TG_OP='INSERT' THEN
         IF NEW.state <> 'QUEUED' OR NEW.model_calls <> 0 OR NEW.tool_calls <> 0
            OR NEW.lease_token IS NOT NULL THEN RAISE EXCEPTION 'invalid_task'; END IF;
@@ -208,7 +208,7 @@ BEGIN
             PERFORM pg_advisory_xact_lock(hashtextextended(
                 NEW.tenant_id || ':' || NEW.site_id || ':admission',0));
             IF NEW.root_id <> NEW.id OR NEW.role <> 'operator_response'
-               OR NEW.deadline > clock_timestamp() + interval '300 seconds'
+               OR NEW.deadline > clock_timestamp() + interval '900 seconds'
                OR NEW.deadline <= clock_timestamp()
             THEN RAISE EXCEPTION 'invalid_task'; END IF;
             IF NEW.payload->>'purpose'='evaluate_single_agent_baseline'
@@ -218,25 +218,25 @@ BEGIN
             SELECT count(*) INTO total FROM subsea.tasks WHERE tenant_id=NEW.tenant_id
               AND site_id=NEW.site_id
               AND parent_id IS NULL AND state='QUEUED';
-            IF total >= 16 THEN RAISE EXCEPTION 'queue_full'; END IF;
+            IF total >= 48 THEN RAISE EXCEPTION 'queue_full'; END IF;
             SELECT coalesce(sum(model_calls),0) INTO total FROM subsea.tasks
                 WHERE tenant_id=NEW.tenant_id AND site_id=NEW.site_id
                 AND generation_id=NEW.generation_id;
-            IF total >= 100 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+            IF total >= 300 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
             IF NEW.automatic THEN
                 IF NEW.episode_id IS NULL THEN RAISE EXCEPTION 'invalid_task'; END IF;
                 SELECT count(*) INTO total FROM subsea.tasks WHERE tenant_id=NEW.tenant_id
                   AND site_id=NEW.site_id AND generation_id=NEW.generation_id
                   AND parent_id IS NULL AND automatic;
-                IF total >= 6 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+                IF total >= 18 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
                 SELECT count(*) INTO total FROM subsea.tasks WHERE tenant_id=NEW.tenant_id
                   AND site_id=NEW.site_id AND episode_id=NEW.episode_id
                   AND parent_id IS NULL AND automatic;
-                IF total >= 3 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+                IF total >= 9 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
                 IF EXISTS (SELECT 1 FROM subsea.tasks WHERE tenant_id=NEW.tenant_id
                   AND site_id=NEW.site_id AND generation_id=NEW.generation_id
                   AND parent_id IS NULL AND automatic
-                  AND created_at > clock_timestamp()-interval '60 seconds')
+                  AND created_at > clock_timestamp()-interval '20 seconds')
                 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
             ELSE
                 IF current_setting('subsea.qualification',true) = 'true' THEN
@@ -245,20 +245,20 @@ BEGIN
                           AND site_id=NEW.site_id AND generation_id=NEW.generation_id
                           AND parent_id IS NULL AND NOT automatic
                           AND payload->>'purpose'='evaluate_single_agent_baseline';
-                        IF total >= 1 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+                        IF total >= 3 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
                     ELSE
                         SELECT count(*) INTO total FROM subsea.tasks WHERE tenant_id=NEW.tenant_id
                           AND site_id=NEW.site_id AND generation_id=NEW.generation_id
                           AND parent_id IS NULL AND NOT automatic
                           AND payload->>'purpose' IS DISTINCT FROM 'evaluate_single_agent_baseline';
-                        IF total >= 9 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+                        IF total >= 27 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
                     END IF;
                 ELSE
                     SELECT count(*) INTO total FROM subsea.tasks WHERE tenant_id=NEW.tenant_id
                       AND site_id=NEW.site_id AND parent_id IS NULL AND NOT automatic
                       AND operator_id=NEW.operator_id
                       AND created_at > clock_timestamp()-interval '60 seconds';
-                    IF total >= 3 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+                    IF total >= 9 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
                 END IF;
             END IF;
             IF NEW.episode_id IS NOT NULL AND EXISTS (
@@ -338,13 +338,13 @@ BEGIN
     SELECT coalesce(sum(model_calls),0) INTO total FROM subsea.tasks
       WHERE tenant_id=NEW.tenant_id AND site_id=NEW.site_id
       AND generation_id=NEW.generation_id AND id<>NEW.id;
-    IF total+NEW.model_calls > 100 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+    IF total+NEW.model_calls > 300 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
     SELECT coalesce(sum(model_calls),0) INTO total FROM subsea.tasks
       WHERE tenant_id=NEW.tenant_id AND site_id=NEW.site_id AND root_id=NEW.root_id AND id<>NEW.id;
-    IF total+NEW.model_calls > 10 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+    IF total+NEW.model_calls > 30 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
     SELECT coalesce(sum(tool_calls),0) INTO total FROM subsea.tasks
       WHERE tenant_id=NEW.tenant_id AND site_id=NEW.site_id AND root_id=NEW.root_id AND id<>NEW.id;
-    IF total+NEW.tool_calls > 18 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
+    IF total+NEW.tool_calls > 54 THEN RAISE EXCEPTION 'budget_blocked'; END IF;
     IF NOT coalesce(
         NEW.payload->>'tenant_id'=NEW.tenant_id AND NEW.payload->>'site_id'=NEW.site_id
         AND NEW.payload->>'id'=NEW.id AND NEW.payload->>'generation_id'=NEW.generation_id

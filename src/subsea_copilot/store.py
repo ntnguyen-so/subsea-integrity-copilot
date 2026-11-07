@@ -1083,7 +1083,7 @@ class Store:
             return saved
 
     def claim_task(
-        self, owner: str, ttl_seconds: int = 360, *, task_id: str | None = None
+        self, owner: str, ttl_seconds: int = 1080, *, task_id: str | None = None
     ) -> AgentTask | None:
         if not owner or ttl_seconds <= 0:
             raise ValueError("A lease owner and positive TTL are required")

@@ -1,4 +1,4 @@
-"""Independent local demo commands; live inference is an explicit operation."""
+"""Local monitoring commands; live inference is an explicit operation."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from pathlib import Path
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from .budgets import MODEL_TIMEOUT_SECONDS
 from .config import Settings
 
 
@@ -36,7 +37,7 @@ def provider_check(model_id: str | None = None) -> dict[str, object]:
             ),
             HumanMessage(content="Confirm the synthetic-only transport probe."),
         ],
-        timeout=60,
+        timeout=MODEL_TIMEOUT_SECONDS,
     )
     if not isinstance(message.content, str):
         raise ValueError("Provider probe did not return text")
@@ -216,7 +217,7 @@ def main() -> None:
             from .api import create_app
 
             if args.host not in ("127.0.0.1", "localhost", "::1"):
-                parser.error("This demo may bind only to loopback")
+                parser.error("This installation may bind only to loopback")
             print(f"Read-only synthetic console: http://{args.host}:{args.port}")
             uvicorn.run(create_app(Settings.from_env()), host=args.host, port=args.port)
         elif args.command == "ingest":

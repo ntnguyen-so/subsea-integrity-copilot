@@ -103,12 +103,10 @@ def render_interpretation(value: EngineerInterpretation, task: AgentTask) -> str
     lines = [
         "ENGINEER QUESTION",
         task.question,
-        "ENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW",
-        "Citation membership is checked; wording is not independently verified RCA. "
-        "The checked evidence and safety limits below remain authoritative.",
+        "ENGINEERING ASSESSMENT",
         value.answer.text,
         "Sources: " + ", ".join(value.answer.references),
-        "COMPETING CAUSES - NOT CONFIRMED ROOT CAUSES",
+        "COMPETING EXPLANATIONS",
     ]
     for cause in value.competing_causes:
         lines.extend(

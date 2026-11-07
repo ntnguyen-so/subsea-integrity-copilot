@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from .budgets import ROOT_WATCHDOG_SECONDS, WORKER_POLL_LIMIT
 from .casefile import build_casefile
 from .config import Settings
 from .contracts import Mode, ReplaySession, WindowSnapshot, utc_now
@@ -681,10 +682,10 @@ def retry_recorded_case(
             report["cases"].append(row)
             _save_report(output, report)
             started = time.monotonic()
-            for _ in range(100):
+            for _ in range(WORKER_POLL_LIMIT):
                 if root.state in TERMINALS:
                     break
-                if time.monotonic() - started > 330:
+                if time.monotonic() - started > ROOT_WATCHDOG_SECONDS:
                     raise RuntimeError("Focused root exceeded its production deadline")
                 if not service.run_once():
                     time.sleep(0.05)
@@ -984,10 +985,10 @@ def qualify_golden(
                 if roots:
                     root = roots[0]
                     started = time.monotonic()
-                    for _ in range(100):
+                    for _ in range(WORKER_POLL_LIMIT):
                         if root.state in TERMINALS:
                             break
-                        if time.monotonic() - started > 330:
+                        if time.monotonic() - started > ROOT_WATCHDOG_SECONDS:
                             raise RuntimeError("Golden root exceeded production deadline")
                         if not service.run_once():
                             time.sleep(0.05)

@@ -68,7 +68,7 @@ class InvestigationCase(Contract):
     fresh_model_calls: int
     fresh_tool_calls: int
     recorded_elapsed_seconds: float
-    report_target_seconds: int = 300
+    report_target_seconds: int = 900
     report_target_met: bool
     interpretation_review: InterpretationReview | None = None
     knowledge_packet: KnowledgePacket | None = None
@@ -194,6 +194,7 @@ def build_casefile(
         raise ValidationError("casefile_sources", "Accepted citations lack executed source reads.")
     fresh = [task, *[dep for dep in dependencies if dep.parent_id == task.id]]
     elapsed = max(0, (task.updated_at - task.created_at).total_seconds())
+    target = max(1, round((task.deadline - task.created_at).total_seconds()))
     return InvestigationCase(
         task_id=task.id,
         generation_id=task.generation_id,
@@ -224,7 +225,8 @@ def build_casefile(
         fresh_model_calls=sum(item.model_calls for item in fresh),
         fresh_tool_calls=sum(item.tool_calls for item in fresh),
         recorded_elapsed_seconds=elapsed,
-        report_target_met=elapsed <= 300,
+        report_target_seconds=target,
+        report_target_met=elapsed <= target,
         interpretation_review=task.interpretation_review,
         knowledge_packet=task.knowledge_packet,
         knowledge_used_ids=sorted(

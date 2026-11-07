@@ -12,6 +12,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from opentelemetry.trace import StatusCode
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, StringConstraints, model_validator
 
+from .budgets import MODEL_TIMEOUT_SECONDS
 from .contracts import content_hash
 from .llm.copilot_cli import CopilotCLIChatModel
 from .qualification import MODEL_METADATA_KEYS
@@ -167,7 +168,7 @@ def run_judge(
                 "langfuse.observation.input", serialized_input,
             )
             try:
-                response = model.invoke(messages, timeout=60)
+                response = model.invoke(messages, timeout=MODEL_TIMEOUT_SECONDS)
                 # Only schema-bounded public verdicts are captured, never arbitrary failure text.
                 try:
                     if not isinstance(response.content, str):

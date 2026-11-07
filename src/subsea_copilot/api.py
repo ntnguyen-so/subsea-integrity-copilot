@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import Field
 from starlette.concurrency import run_in_threadpool
 
+from .budgets import ROOT_WATCHDOG_SECONDS
 from .casefile import InvestigationCase, build_casefile
 from .config import Settings
 from .contracts import AgentRole, Contract, Mode, WindowSnapshot, Workflow, utc_now
@@ -97,7 +98,7 @@ class AgentWorker:
     def close(self) -> None:
         self._stop.set()
         if self.thread:
-            self.thread.join(timeout=330)
+            self.thread.join(timeout=ROOT_WATCHDOG_SECONDS)
             if self.thread.is_alive():
                 logger.error("Agent worker exceeded its root deadline during shutdown")
 

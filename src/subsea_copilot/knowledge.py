@@ -31,7 +31,7 @@ class KnowledgeCard(BaseModel):
     roles: list[Literal["sensor_quality", "event_diagnosis", "operator_response"]] = Field(
         min_length=1, max_length=3
     )
-    status: Literal["draft", "demo_curated", "retired"]
+    status: Literal["draft", "curated", "demo_curated", "retired"]
     site_ids: list[ScopeName] = Field(min_length=1, max_length=10)
     pack_versions: list[ScopeName] = Field(min_length=1, max_length=10)
     available_at: AwareDatetime
@@ -60,7 +60,7 @@ class KnowledgeCard(BaseModel):
 class KnowledgeCorpus(BaseModel):
     model_config = ConfigDict(extra="forbid")
     schema_version: Literal["expert-knowledge-v1"]
-    authority: Literal["synthetic_advisory_only"]
+    authority: Literal["advisory_only", "synthetic_advisory_only"]
     cards: list[KnowledgeCard] = Field(min_length=1, max_length=30)
 
     @model_validator(mode="after")
@@ -85,11 +85,11 @@ class KnowledgeCorpus(BaseModel):
 class KnowledgePacket(BaseModel):
     model_config = ConfigDict(extra="forbid")
     version: str = Field(pattern=r"^knowledge-[a-f0-9]{64}$")
-    authority: Literal["synthetic_advisory_only"]
+    authority: Literal["advisory_only", "synthetic_advisory_only"]
     selected_at: AwareDatetime
     site_id: ScopeName
     pack_version: ScopeName
-    cards: list[KnowledgeCard] = Field(max_length=8)
+    cards: list[KnowledgeCard] = Field(max_length=24)
     excluded: dict[ScopeName, ShortText] = Field(max_length=30)
     selection_method: Literal["exact_site_version_status_time_and_declared_conflicts"] = (
         "exact_site_version_status_time_and_declared_conflicts"
@@ -102,7 +102,7 @@ class KnowledgePacket(BaseModel):
             raise ValueError("Selected knowledge IDs must be unique and not excluded.")
         for card in self.cards:
             if (
-                card.status != "demo_curated"
+                card.status not in {"curated", "demo_curated"}
                 or self.site_id not in card.site_ids
                 or self.pack_version not in card.pack_versions
                 or card.available_at > self.selected_at
@@ -111,8 +111,8 @@ class KnowledgePacket(BaseModel):
                 or ids.intersection(card.conflicts_with)
             ):
                 raise ValueError("Pinned knowledge must be applicable and non-conflicting.")
-        if len(self.model_dump_json().encode()) > 24_000:
-            raise ValueError("Knowledge packet exceeds the 24 KB reviewed context budget.")
+        if len(self.model_dump_json().encode()) > 72_000:
+            raise ValueError("Knowledge packet exceeds the 72 KB reviewed context budget.")
         return self
 
     def identity(self) -> str:
@@ -137,8 +137,8 @@ def select_knowledge(
     excluded = {}
     for card in corpus.cards:
         reason = (
-            "not_demo_curated"
-            if card.status != "demo_curated"
+            "not_curated"
+            if card.status not in {"curated", "demo_curated"}
             else "wrong_site"
             if site_id not in card.site_ids
             else "wrong_geometry_version"
@@ -168,7 +168,7 @@ def select_knowledge(
     for identifier in conflicts:
         excluded[identifier] = "declared_conflict_requires_expert_review"
         eligible.pop(identifier)
-    if len(eligible) > 8:
+    if len(eligible) > 24:
         raise ValueError("Applicable knowledge exceeds the reviewed packet budget.")
     canonical = json.dumps(corpus.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
     return KnowledgePacket(

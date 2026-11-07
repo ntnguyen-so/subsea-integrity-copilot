@@ -9,9 +9,14 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
+from .budgets import (
+    BUDGET_MULTIPLIER,
+    COMPARISON_SENSOR_LIMIT,
+    HISTORY_DOCUMENT_LIMIT,
+    REVIEW_ROUND_LIMIT,
+)
+from .budgets import TOOL_RESULT_MAX_BYTES as TOOL_RESULT_MAX_BYTES
 from .knowledge import KnowledgePacket
-
-TOOL_RESULT_MAX_BYTES = 16 * 1024
 
 Channel = Literal["pressure", "acoustic", "methane", "temperature"]
 Hypothesis = Literal[
@@ -274,16 +279,16 @@ class MonitoringEpisode(Contract):
 
 class HistoryInvestigation(Contract):
     assessment: Literal["operating_change_plausible", "instrumentation_context", "unresolved"]
-    document_ids: list[str] = Field(default_factory=list, max_length=3)
+    document_ids: list[str] = Field(default_factory=list, max_length=HISTORY_DOCUMENT_LIMIT)
     rejected_document_ids: list[str] = Field(
         default_factory=list,
-        max_length=3,
+        max_length=HISTORY_DOCUMENT_LIMIT,
         description=(
             "Only successfully history.read documents with admissible=false. "
             "Search-only hits must not appear here; use an empty list if none were fully read."
         ),
     )
-    comparison_call_ids: list[str] = Field(default_factory=list, max_length=2)
+    comparison_call_ids: list[str] = Field(default_factory=list, max_length=2 * BUDGET_MULTIPLIER)
     next_action: Literal[
         "check_operating_records",
         "review_instrumentation",
@@ -304,7 +309,7 @@ class CauseExplanation(CitedExplanation):
 
 
 class RegionalAssessment(CitedExplanation):
-    sensor_ids: list[str] = Field(min_length=2, max_length=12)
+    sensor_ids: list[str] = Field(min_length=2, max_length=COMPARISON_SENSOR_LIMIT)
     hypothesis: Literal[
         "leak_pattern", "instrumentation_or_telemetry", "operating_change", "unresolved"
     ] = Field(description="Agent-generated possible explanation, not a confirmed physical cause.")
@@ -366,7 +371,7 @@ class GroundingRound(Contract):
 class InterpretationReview(Contract):
     protocol: Literal["grounding-v1"] = "grounding-v1"
     source_hash: str
-    rounds: list[GroundingRound] = Field(min_length=1, max_length=2)
+    rounds: list[GroundingRound] = Field(min_length=1, max_length=REVIEW_ROUND_LIMIT)
 
 
 class AgentTask(Contract):

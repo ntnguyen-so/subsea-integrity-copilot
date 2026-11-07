@@ -22,8 +22,8 @@ def select(corpus=None, **changes):
 @pytest.mark.parametrize(
     ("field", "value", "reason"),
     [
-        ("status", "draft", "not_demo_curated"),
-        ("status", "retired", "not_demo_curated"),
+        ("status", "draft", "not_curated"),
+        ("status", "retired", "not_curated"),
         ("site_ids", ["other"], "wrong_site"),
         ("pack_versions", ["other"], "wrong_geometry_version"),
         ("available_at", NOW + timedelta(days=1), "not_yet_available"),
@@ -41,9 +41,9 @@ def test_inapplicable_knowledge_is_withheld_with_an_explicit_reason(field, value
 def test_current_knowledge_is_versioned_scoped_and_not_expert_approved():
     packet = select()
     assert len(packet.cards) == 5
-    assert packet.authority == "synthetic_advisory_only"
+    assert packet.authority == "advisory_only"
     assert {card.kind for card in packet.cards} == {"heuristic", "procedure"}
-    assert len(packet.model_dump_json().encode()) <= 24_000
+    assert len(packet.model_dump_json().encode()) <= 72_000
     assert packet.version == select().version
     later = select(as_of=NOW + timedelta(seconds=1))
     assert later.selected_at != packet.selected_at
@@ -118,14 +118,34 @@ def test_oversized_packets_are_rejected_not_silently_truncated():
         )
         for index in range(3)
     ]
-    with pytest.raises(ValueError, match="24 KB"):
+    assert len(select(corpus).model_dump_json().encode()) > 24_000
+    corpus.cards *= 3
+    for index, card in enumerate(corpus.cards):
+        corpus.cards[index] = card.model_copy(update={"id": f"KN-LARGE-{index}"})
+    with pytest.raises(ValueError, match="72 KB"):
         select(corpus)
     corpus.cards = [
         load_knowledge().cards[0].model_copy(update={"id": f"KN-CARD-{index}"})
         for index in range(9)
     ]
+    assert len(select(corpus).cards) == 9
+    corpus.cards = [
+        corpus.cards[0].model_copy(update={"id": f"KN-CARD-{index}"})
+        for index in range(25)
+    ]
     with pytest.raises(ValueError, match="packet budget"):
         select(corpus)
+
+
+def test_archived_knowledge_labels_remain_readable_and_scoped():
+    corpus = load_knowledge().model_copy(deep=True)
+    corpus.authority = "synthetic_advisory_only"
+    for card in corpus.cards:
+        card.status = "demo_curated"
+    packet = select(corpus)
+    assert packet.authority == "synthetic_advisory_only"
+    assert len(packet.cards) == 5
+    assert select(corpus, site_id="other").cards == []
 
 
 def test_selection_rejects_naive_timestamps_and_leaves_no_guessed_scope():

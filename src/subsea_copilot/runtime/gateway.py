@@ -3,6 +3,13 @@
 import json
 from typing import Any
 
+from subsea_copilot.budgets import (
+    BUDGET_MULTIPLIER,
+    CONTEXT_SENSOR_LIMIT,
+    HEALTH_PAGE_SIZE,
+    HISTORY_CONTEXT_MAX_CHARS,
+    HISTORY_DOCUMENT_LIMIT,
+)
 from subsea_copilot.contracts import (
     TOOL_RESULT_MAX_BYTES,
     AgentTask,
@@ -22,7 +29,9 @@ def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
     return sorted(
         snapshot.quality.findings,
         key=lambda f: (
-            f.sensor_id not in support if len(snapshot.quality.findings) > 32 else False,
+            f.sensor_id not in support
+            if len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
+            else False,
             not bool(
                 f.hard_excluded
                 or f.spike_count
@@ -38,7 +47,7 @@ def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
 
 def context_sensors(snapshot: WindowSnapshot) -> list[Sensor]:
     sensors = generate_pack(snapshot.site_id, version=snapshot.pack_version).sensors
-    if len(sensors) <= 32:
+    if len(sensors) <= 32 * BUDGET_MULTIPLIER:
         return sensors
     findings = {finding.sensor_id: finding for finding in ranked_findings(snapshot)}
     by_id = {sensor.id: sensor for sensor in sensors}
@@ -65,14 +74,14 @@ def context_sensors(snapshot: WindowSnapshot) -> list[Sensor]:
             if candidate is not None:
                 selected[candidate.id] = candidate
     for sensor in ordered:
-        if len(selected) >= 24:
+        if len(selected) >= CONTEXT_SENSOR_LIMIT:
             break
         selected[sensor.id] = sensor
-    return list(selected.values())[:24]
+    return list(selected.values())[:CONTEXT_SENSOR_LIMIT]
 
 
 def pressure_regions(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
-    if len(snapshot.quality.findings) <= 32:
+    if len(snapshot.quality.findings) <= 32 * BUDGET_MULTIPLIER:
         return []
     pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
     summaries = {
@@ -161,7 +170,7 @@ class ToolGateway:
             question = arguments.get("check_question")
             if (
                 not isinstance(selected, list)
-                or not 1 <= len(selected) <= 3
+                or not 1 <= len(selected) <= HISTORY_DOCUMENT_LIMIT
                 or any(not isinstance(ref, str) or ref not in applicable for ref in selected)
                 or len(set(selected)) != len(selected)
                 or not isinstance(question, str)
@@ -200,7 +209,7 @@ class ToolGateway:
             ids = arguments["ids"]
             if (
                 not isinstance(ids, list)
-                or len(ids) > 100
+                or len(ids) > 100 * BUDGET_MULTIPLIER
                 or any(not isinstance(i, str) or i not in self.snapshot.evidence for i in ids)
             ):
                 raise ValidationError("tool_arguments", "Evidence IDs must resolve within scope.")
@@ -251,7 +260,7 @@ class ToolGateway:
         if name == "quality.sensor_patterns":
             start = arguments.get("offset", 0)
             findings = ranked_findings(snapshot)
-            page = findings[start : start + 8]
+            page = findings[start : start + HEALTH_PAGE_SIZE]
             identities = {(f.sensor_id, f.channel) for f in page}
             selected = {
                 k: c
@@ -265,7 +274,9 @@ class ToolGateway:
                 "pagination": {
                     "total": len(findings),
                     "offset": start,
-                    "next_offset": start + 8 if start + 8 < len(findings) else None,
+                    "next_offset": start + HEALTH_PAGE_SIZE
+                    if start + HEALTH_PAGE_SIZE < len(findings)
+                    else None,
                 },
                 "policy": "Usable spikes/drift are not hard invalidity.",
                 "claims": selected,
@@ -282,7 +293,7 @@ class ToolGateway:
                 for e in snapshot.evidence.values()
                 if e.kind in {"sensor_metadata", "topology", "ontology"}
             ]
-            if len(snapshot.quality.findings) > 32:
+            if len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER:
                 selected_ids = {sensor.id for sensor in context_sensors(snapshot)}
                 for item in metadata:
                     value = item["value"]
@@ -428,7 +439,9 @@ class ToolGateway:
                     result["intent"] = arguments["intent"]
                 if len(json.dumps(result, allow_nan=False).encode()) > TOOL_RESULT_MAX_BYTES:
                     result = None
-                    raise ValidationError("payload_too_large", "Required evidence exceeds 16 KiB.")
+                    raise ValidationError(
+                        "payload_too_large", "Required evidence exceeds the tool payload allowance."
+                    )
                 if self.task.role == "event_diagnosis":
                     from subsea_copilot.runtime.agent import model_tool_result
 
@@ -447,7 +460,7 @@ class ToolGateway:
                         )
                         for item in [*delivered, result]
                     )
-                    if total > 21 * 1024:
+                    if total > HISTORY_CONTEXT_MAX_CHARS:
                         result = None
                         raise ValidationError(
                             "context_budget_exceeded",

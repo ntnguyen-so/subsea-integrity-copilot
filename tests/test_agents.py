@@ -66,6 +66,9 @@ def test_reflection_receives_bounded_specific_criticism_and_cannot_retry_forever
     feedback = json.loads(revised["__interrupt__"][0].value["messages"][-1].content)
     assert feedback["repair"] == "interpretation_citations"
     assert feedback["validator_feedback"] == detail[:1000]
+    for _ in range(2):
+        repaired = graph.invoke(Command(resume=AIMessage(content="{}")), config)
+        assert not repaired.get("failure")
     rejected = graph.invoke(Command(resume=AIMessage(content="{}")), config)
     assert rejected["failure"] == "interpretation_citations"
     assert not rejected.get("parsed")
@@ -425,11 +428,11 @@ def test_failed_child_blocks_successful_response(snapshot):
 def test_exhausted_root_budget_is_not_reset_by_new_service(snapshot):
     store, service = service_for(snapshot)
     root = submit(service, snapshot, "Sensor health?")
-    store.tasks[root.id].model_calls = 3
+    store.tasks[root.id].model_calls = 9
     service.run_once()
     assert store.get_task(root.id).state == "FAILED"
     assert store.get_task(root.id).error_code == "budget_blocked"
-    assert store.get_task(root.id).model_calls == 3
+    assert store.get_task(root.id).model_calls == 9
 
 
 def test_gateway_scope_authority_and_idempotent_receipt(snapshot):
@@ -493,7 +496,7 @@ def test_diagnosis_aggregate_read_budget_records_an_explicit_gap(snapshot, monke
     assert diagnosis is not None
     task = store.claim_task("unit", task_id=diagnosis.id)
     gateway = ToolGateway(store, task, snapshot, FakeTelemetry())
-    monkeypatch.setattr(gateway, "_read", lambda *_args: {"payload": "x" * (8 * 1024)})
+    monkeypatch.setattr(gateway, "_read", lambda *_args: {"payload": "x" * (24 * 1024)})
     scope = {
         key: getattr(snapshot, key)
         for key in ("site_id", "pack_version", "baseline_version", "parameter_version")
@@ -544,7 +547,7 @@ def test_scripted_contract_smoke_with_actual_numerical_ledger(scenario):
         has_location = any(snapshot.claims[ref].kind == "location" for ref in result.claim_refs)
         assert has_location == (scenario == "S1")
     assert all(
-        len(str(r["result"]).encode()) <= 12 * 1024
+        len(str(r["result"]).encode()) <= 48 * 1024
         for task in store.tasks.values()
         for r in store.tool_receipts(task.id)
     )
@@ -567,12 +570,12 @@ def test_scripted_contract_smoke_with_actual_numerical_ledger(scenario):
         assert baseline["hypothesis"] == snapshot.event.hypothesis
     assert baseline["child_count"] == 0
     quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
-    quality.result.limitations.remove("partial_health_review")
+    assert "partial_health_review" not in quality.result.limitations
     refreshed = submit(service, snapshot, "Which sensors need a health review?", "current-contract")
     drain(service)
     assert store.get_task(refreshed.id).state == "SUCCEEDED"
-    assert store.get_task(refreshed.id).plan == ["quality", "answer"]
-    assert "partial_health_review" in store.get_task(refreshed.id).result.limitations
+    assert store.get_task(refreshed.id).plan == ["reuse", "answer"]
+    assert "partial_health_review" not in store.get_task(refreshed.id).result.limitations
 
 
 def test_provider_quota_is_durable_unavailability_without_retry(snapshot):
@@ -939,7 +942,7 @@ def test_single_agent_baseline_rejects_unsafe_output_and_nonqualification_store(
         FakeTelemetry(),
     )
     assert result["check_accepted"] is False
-    assert result["model_calls"] == 2
+    assert result["model_calls"] == 4
     assert result["error_code"] == "structure"
 
 
@@ -1075,14 +1078,14 @@ def test_prefetched_quality_handles_extra_round_and_repair_without_spending_fina
             )
             remaining = constraints["model_turns_after_this_reply"]
             message = result.generations[0].message
-            if behavior in {"malformed_final", "never_final"} and remaining == 2:
+            if behavior in {"malformed_final", "never_final"} and remaining == 8:
                 payload = json.loads(message.content)
                 payload["status"] = payload.pop("outcome")
                 message.content = json.dumps(payload)
             elif (
                 behavior == "extra_read"
-                and remaining == 2
-                or (behavior == "never_final" and remaining < 2)
+                and remaining == 8
+                or (behavior == "never_final" and remaining < 8)
             ):
                 replacement = AIMessage(
                     content="",
@@ -1112,8 +1115,8 @@ def test_prefetched_quality_handles_extra_round_and_repair_without_spending_fina
     quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
     if behavior == "never_final":
         assert quality.error_code == "final_turn_reserved"
-        assert quality.model_calls == 3
-        assert quality.tool_calls == 5
+        assert quality.model_calls == 9
+        assert quality.tool_calls == 11
         assert store.get_task(root.id).state == "FAILED"
     else:
         assert store.get_task(root.id).state == "SUCCEEDED"
@@ -1142,7 +1145,7 @@ def test_actual_s2_quality_decline_is_repaired_without_relaxing_event_abstention
                     and m.content.startswith("RUNTIME_REPLY_CONSTRAINTS\n")
                 )
             )
-            if constraints["model_turns_after_this_reply"] == 2:
+            if constraints["model_turns_after_this_reply"] == 8:
                 payload = json.loads(result.generations[0].message.content)
                 payload["outcome"] = "insufficient_evidence"
                 result.generations[0].message.content = json.dumps(payload)

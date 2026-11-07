@@ -9,6 +9,7 @@ from pathlib import Path
 from statistics import median
 from uuid import uuid4
 
+from subsea_copilot.budgets import ROOT_WATCHDOG_SECONDS
 from subsea_copilot.casefile import build_casefile
 from subsea_copilot.config import Settings
 from subsea_copilot.contracts import RawRecord, ReplaySession, utc_now
@@ -145,7 +146,7 @@ def main():
                     idempotency_key="frozen-joint-timing",
                 )
                 while root.state not in {"SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED"}:
-                    if time.monotonic() - started > 330:
+                    if time.monotonic() - started > ROOT_WATCHDOG_SECONDS:
                         raise RuntimeError("Probe exceeded the bounded workflow deadline.")
                     if not service.run_once():
                         time.sleep(0.05)

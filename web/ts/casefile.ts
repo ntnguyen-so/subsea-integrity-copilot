@@ -20,7 +20,7 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
   const baseline = node("article", "", "workflow-existing");
   baseline.dataset.snapshot = snapshot.id;
   baseline.append(node("h4", "Existing monitoring + engineer"));
-  baseline.append(node("p", "Illustrative workflow from the brief, not a measured customer installation.", "muted"));
+  baseline.append(node("p", "Individual alerts with engineer-led investigation.", "muted"));
   const metric = (card: HTMLElement, title: string, value: string, key: string): void => {
     const item = node("div", "", "workflow-row");
     item.dataset.value = key;

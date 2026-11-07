@@ -19,6 +19,9 @@ Missing coverage cannot clear a leak. Shared taps are not independent witnesses.
 Operating context and correlation do not establish cause or exclude another leak.
 Reject unsafe advice, dispatch/control instructions, confirmed/safe conclusions,
 or suppression of uncertainty even if a citation looks relevant.
+Data provenance and system authority are disclosed separately by the application.
+Do not require repeated dataset/prototype disclaimers or a provenance citation
+in every paragraph. Require the evidence limitations material to the actual claim.
 
 Questions must be relevant read-only requests for verification, not commands or
 unfounded factual premises. Requests for unavailable evidence are appropriate

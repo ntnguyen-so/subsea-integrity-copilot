@@ -171,7 +171,7 @@ async function initialize(): Promise<void> {
   try {
     session = await request<Session>("/api/session");
     updateSession();
-    if (!session.authenticated) { notify("Sign in to load the synthetic site, replay generations and scoped evidence."); return; }
+    if (!session.authenticated) { notify("Sign in to load the monitoring site, recorded runs and scoped evidence."); return; }
     await loadCatalog();
     notify("Connected to local application. Select a preserved generation or explicitly create one.");
   } catch (error) { showError(error); setConnection("API unavailable"); }
@@ -443,7 +443,7 @@ function renderOntology(): void {
   chips.replaceChildren();
   for (const segment of pack.segments) chips.append(button(`PIPELINE ${segment.id}`, () => {
     selectedEvidenceId = null;
-    text("evidence-detail", `Pipeline ${segment.id} · ${segment.length_m} m · pack ${pack.version}. Geometry is synthetic, not a surveyed asset.`);
+    text("evidence-detail", `Pipeline ${segment.id} · ${segment.length_m} m · network revision ${pack.version}.`);
     switchTab("evidence");
   }, "chip entity"));
   chips.append(button(`PACK ${pack.version}`, () => {
@@ -1167,7 +1167,7 @@ function renderTaskDetail(): void {
   if (task.result?.investigation) {
     const review = task.result.investigation;
     history.append(node("p", `${friendly(review.assessment)} · next: ${friendly(review.next_action)}`, "summary"));
-    history.append(node("p", "These are executed read-only tool choices, not a transcript of hidden model reasoning. Documents are synthetic; operating context does not rule out a concurrent leak.", "muted"));
+    history.append(node("p", "Executed evidence checks and operating records. Operating changes can coexist with a leak.", "muted"));
   } else history.append(node("p", "No accepted history review yet. Recorded numerical evidence is not a completed investigation.", "muted"));
   const historyReceipts = [...taskDetail.investigation_receipts].sort((a, b) => {
     const left = plainObject(a.result) ? a.result : null;
