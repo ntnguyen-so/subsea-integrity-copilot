@@ -39,6 +39,7 @@ AUTO_QUESTION = (
     "Is this a possible leak or an instrumentation issue? Which pipeline section "
     "should an integrity engineer inspect first, and which sensors are unreliable?"
 )
+UNAVAILABLE_DISPATCH = frozenset({"agent_unavailable", "knowledge_unavailable", "budget_blocked"})
 
 
 @dataclass
@@ -110,6 +111,7 @@ class Monitor:
         idempotency_key: str,
         *,
         workflow: Workflow = "agent_assisted",
+        pause_on_anomaly: bool = False,
     ) -> ReplaySession:
         with self._lock:
             generation_id = (
@@ -127,6 +129,7 @@ class Monitor:
                     seed=seed,
                     mode=mode,
                     workflow=workflow,
+                    pause_on_anomaly=pause_on_anomaly,
                     epoch=dataset.epoch,
                 )
             )
@@ -141,8 +144,33 @@ class Monitor:
         with self._lock:
             session = self.store.get_replay(generation_id)
             source = self._source(session)
+            action_hash = content_hash({"action": action, "speed": speed})
+            if self.store.replay_control_applied(generation_id, idempotency_key, action_hash):
+                return session
             self._advance(session, source)
             session = self.store.get_replay(generation_id)
+            if session.investigation_window_id and action in ("play", "step"):
+                reports = [
+                    task
+                    for task in self.store.list_tasks(session.id)
+                    if task.parent_id is None
+                    and task.snapshot_id == session.investigation_window_id
+                ]
+                unavailable = [
+                    episode
+                    for episode in self.store.list_episodes(session.id)
+                    if episode.current_window_id == session.investigation_window_id
+                    and episode.dispatch_status in UNAVAILABLE_DISPATCH
+                ]
+                if (not reports and not unavailable) or any(
+                    task.state not in ("SUCCEEDED", "ABSTAINED", "FAILED", "CANCELLED")
+                    for task in reports
+                ):
+                    raise Conflict("investigation_pending: wait for the agent checks to finish")
+                for episode in unavailable:
+                    episode.pending_window_id = None
+                    episode.dispatch_status = "continued_without_report"
+                    self.store.save_episode(episode)
             if session.state in ("COMPLETED", "FAILED"):
                 raise Conflict("Replay is terminal; select a scenario to create a new generation")
             if action == "step" and session.state != "PAUSED":
@@ -158,11 +186,13 @@ class Monitor:
                 changes["speed"] = speed
             else:
                 changes["clock_seconds"] = session.clock_seconds + source.dataset.pack.hop_seconds
+            if action in ("play", "step"):
+                changes["investigation_window_id"] = None
             updated = session.model_copy(update=changes)
             result = self.store.save_controlled_replay(
                 updated,
                 idempotency_key=idempotency_key,
-                action_hash=content_hash({"action": action, "speed": speed}),
+                action_hash=action_hash,
                 expected_version=session.version,
             )
             source.anchor = time.monotonic()
@@ -177,12 +207,25 @@ class Monitor:
             source.version = session.version
         elapsed = now - source.anchor
         source.anchor = now
+        if session.investigation_window_id:
+            return
         if session.state == "PLAYING":
             end = max(
                 session.duration_seconds + source.dataset.pack.lateness_seconds,
                 source.received_seconds[-1] if source.received_seconds else 0,
             )
             clock = min(end, session.clock_seconds + elapsed * session.speed)
+            if (
+                session.pause_on_anomaly
+                and session.workflow == "agent_assisted"
+                and session.last_endpoint < session.duration_seconds
+            ):
+                clock = min(
+                    clock,
+                    session.last_endpoint
+                    + source.dataset.pack.hop_seconds
+                    + source.dataset.pack.lateness_seconds,
+                )
             updated = session.model_copy(
                 update={
                     "clock_seconds": clock,
@@ -247,6 +290,8 @@ class Monitor:
         return result
 
     def _process(self, session: ReplaySession, source: SourceState) -> None:
+        if session.investigation_window_id:
+            return
         changed = self._release(session, source)
         pack = source.dataset.pack
         watermark = session.clock_seconds - pack.lateness_seconds
@@ -276,7 +321,11 @@ class Monitor:
             self.store.save_window(snapshot)
             latest_id = snapshot.id
             endpoint = next_endpoint
-            self._episode(session, snapshot)
+            held = self._pause_for_investigation(session, snapshot)
+            current = self.store.get_replay(session.id)
+            self._episode(current, snapshot)
+            if held:
+                break
             next_endpoint += pack.hop_seconds
             processed += 1
         if latest_id != session.latest_window_id or endpoint != session.last_endpoint:
@@ -289,10 +338,66 @@ class Monitor:
             )
             source.version = saved.version
 
+    def _pause_for_investigation(self, session: ReplaySession, snapshot: WindowSnapshot) -> bool:
+        if (
+            not session.pause_on_anomaly
+            or session.workflow == "sensor_alerts"
+            or snapshot.quality.status == "WARMING_UP"
+        ):
+            return False
+        keys = sorted(
+            {
+                f"{finding.sensor_id}:{kind}"
+                for finding in snapshot.quality.findings
+                for kind, flagged in (
+                    ("pressure", finding.anomaly_count > 0),
+                    (
+                        "gap",
+                        finding.missing > finding.expected * 0.1 or finding.hard_excluded > 0,
+                    ),
+                    (
+                        "quality",
+                        finding.spike_count > 0
+                        or finding.drift_suspected
+                        or finding.peer_disagreement,
+                    ),
+                )
+                if flagged
+            }
+        )
+        current = self.store.get_replay(session.id)
+        raised = set(keys) - set(current.detected_alert_keys)
+        changes: dict[str, object] = {"detected_alert_keys": keys}
+        if raised:
+            changes.update(
+                state="PAUSED",
+                investigation_window_id=snapshot.id,
+                latest_window_id=snapshot.id,
+                last_endpoint=snapshot.end_seconds,
+            )
+        saved = self.store.save_replay(
+            current.model_copy(update=changes), expected_version=current.version
+        )
+        if raised:
+            self.store.publish_event(
+                session.id,
+                "replay.investigation_paused",
+                {
+                    "new_alert_count": len(raised),
+                    "clock_seconds": saved.clock_seconds,
+                    "reason": "New detector flags; simulation waits for fresh agent checks",
+                },
+                snapshot_id=snapshot.id,
+            )
+        return bool(raised)
+
     def _episode(self, session: ReplaySession, snapshot: WindowSnapshot) -> None:
         if session.workflow == "sensor_alerts":
             return
         if snapshot.quality.status == "WARMING_UP":
+            return
+        held = session.investigation_window_id == snapshot.id
+        if session.pause_on_anomaly and not held:
             return
         existing = [
             row
@@ -300,9 +405,24 @@ class Monitor:
             if row.state not in ("QUIET", "SUPERSEDED_BY_REVISION")
         ]
         episode = existing[0] if existing else None
+        if held:
+            matching = [
+                task
+                for task in self.store.list_tasks(session.id)
+                if task.parent_id is None and task.snapshot_id == snapshot.id
+            ]
+            if matching:
+                if episode and episode.pending_window_id == snapshot.id:
+                    episode.pending_window_id = None
+                    episode.dispatch_status = "queued"
+                    self.store.save_episode(episode)
+                return
+            if episode and episode.current_window_id == snapshot.id:
+                if episode.dispatch_status in UNAVAILABLE_DISPATCH:
+                    return
         material = False
         if episode is None:
-            if snapshot.event.hypothesis == "no_event":
+            if snapshot.event.hypothesis == "no_event" and not held:
                 return
             episode = MonitoringEpisode(
                 id="episode-" + uuid.uuid4().hex,
@@ -327,6 +447,7 @@ class Monitor:
                     and "COVERAGE_LOST" in (old.quality.status, snapshot.quality.status)
                 )
                 or old.event.segment_ids != snapshot.event.segment_ids
+                or (held and old.id != snapshot.id)
             )
             if old.location and old.location.best and snapshot.location and snapshot.location.best:
                 material = (
@@ -336,7 +457,7 @@ class Monitor:
             episode = episode.model_copy(update={"current_window_id": snapshot.id})
             if snapshot.quality.status == "COVERAGE_LOST":
                 episode.state = "COVERAGE_LOST"
-            elif snapshot.event.hypothesis != "no_event":
+            elif snapshot.event.hypothesis != "no_event" or held:
                 episode.state = "ACTIVE"
                 episode.last_qualified_seconds = snapshot.end_seconds
                 episode.hypothesis = snapshot.event.hypothesis
@@ -355,12 +476,13 @@ class Monitor:
             and task.episode_id == episode.id
             and task.state in ("QUEUED", "RUNNING", "WAITING_ON_CHILD")
         ]
-        if material:
+        if material or held:
             episode.pending_window_id = snapshot.id
         episode = self.store.save_episode(episode)
         if episode.auto_roots == 0 and episode.pending_window_id and not active_roots:
             if (
-                episode.dispatch_status == "gathering_context"
+                not held
+                and episode.dispatch_status == "gathering_context"
                 and snapshot.event.hypothesis == "no_event"
             ):
                 episode.pending_window_id = None
@@ -369,7 +491,8 @@ class Monitor:
                 return
             pack = load_pack(session.site_id)
             if (
-                snapshot.event.hypothesis == "insufficient_evidence"
+                not held
+                and snapshot.event.hypothesis == "insufficient_evidence"
                 and snapshot.quality.status != "COVERAGE_LOST"
                 and snapshot.end_seconds - episode.first_seen_seconds < pack.window_seconds
             ):
@@ -434,6 +557,12 @@ class Monitor:
                 if session.source_version != SOURCE_VERSION:
                     continue
                 if session.state not in ("PLAYING", "PAUSED", "COMPLETED"):
+                    continue
+                if session.investigation_window_id:
+                    if self.store.acquire_monitor_lease(session.id, self.owner, ttl_seconds=10):
+                        self._episode(
+                            session, self.store.get_window(session.investigation_window_id)
+                        )
                     continue
                 pending = any(
                     row.pending_window_id is not None

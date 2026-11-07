@@ -2,6 +2,151 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import type { Projection } from "../../web/ts/types";
 
+test("both workflows expose identical raw pressure and quality markers", async ({ page }) => {
+  test.setTimeout(300_000);
+  const markerState = () => page.locator("#topology [data-sensor]").evaluateAll(elements =>
+    elements.map(element => ({
+      id: element.getAttribute("data-sensor"),
+      flags: ["missing", "fault", "anomalous", "unknown"].filter(flag => element.classList.contains(flag)),
+    })).sort((a, b) => (a.id || "").localeCompare(b.id || "")));
+  const baseline = await prepare(page, "S7", 23, "scripted", "sensor_alerts");
+  await expect(page.locator('#map-legend [data-legend="quality"]')).toBeVisible();
+  await expect(page.locator("#topology .sensor.missing").first()).toBeVisible();
+  const alerts = await markerState();
+  const before: Projection = await (await page.request.get(`/api/replays/${baseline.id}/projection`)).json();
+  const assisted = await prepare(page, "S7", 23);
+  const after: Projection = await (await page.request.get(`/api/replays/${assisted.id}/projection`)).json();
+  expect(after.latest_window!.input_hash).toBe(before.latest_window!.input_hash);
+  expect(await markerState()).toEqual(alerts);
+  await expect(page.locator('#map-legend [data-legend="quality"]')).toBeVisible();
+});
+
+test("10x fresh hosted work freezes the source and displays real progress", async ({ page }) => {
+  test.skip(process.env.SUBSEA_QUALIFY_PAUSED_LIVE !== "1", "Explicit hosted-inference opt-in.");
+  test.setTimeout(600_000);
+  const frames: unknown[] = [];
+  let outcome = "failed";
+  let result: Record<string, unknown> = {};
+  try {
+    const login = await page.request.post("/api/login", {
+      data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD },
+    });
+    expect(login.status()).toBe(200);
+    const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
+    const created = await page.request.post("/api/replays", {
+      headers, data: { scenario: "S7", mode: "live", seed: 2026, idempotency_key: `paused-live-${Date.now()}` },
+    });
+    expect(created.status()).toBe(200);
+    const replay = await created.json();
+    expect(replay.pause_on_anomaly).toBe(true);
+    await page.goto("/");
+    await page.locator("#replay-history").selectOption(replay.id);
+    await page.locator("#speed").selectOption("10");
+    await page.locator("#play").click();
+    const observed: { pinned?: Projection; final?: Projection } = {};
+    await expect.poll(async () => {
+      const projection: Projection = await (await page.request.get(`/api/replays/${replay.id}/projection`)).json();
+      if (projection.replay.investigation_window_id) observed.pinned = projection;
+      return Boolean(observed.pinned);
+    }, { timeout: 180_000, intervals: [1000, 2000] }).toBe(true);
+    const basis = observed.pinned;
+    if (!basis) throw new Error("No held source window was observed");
+    result = { replay_id: replay.id, source_seconds: basis.replay.clock_seconds, snapshot_id: basis.replay.investigation_window_id };
+    await expect(page.locator("#investigation-hold")).toBeVisible();
+    await expect(page.locator("#play")).toHaveText("Waiting for agents");
+    await expect(page.locator("#play")).toBeDisabled();
+    await expect(page.locator("#step")).toBeDisabled();
+    await expect(page.locator("#agent-live-stages")).toContainText("Joint investigation");
+    const stepped = await page.request.post(`/api/replays/${replay.id}/control`, {
+      headers, data: { action: "step", idempotency_key: "blocked-during-hosted-work" },
+    });
+    expect(stepped.status()).toBe(409);
+    await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", basis.replay.investigation_window_id!, { timeout: 30_000 });
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 30_000 });
+    await page.screenshot({ path: "runtime/paused-agent-running.png", fullPage: true });
+    let activeObserved = false;
+    await expect.poll(async () => {
+      const projection: Projection = await (await page.request.get(`/api/replays/${replay.id}/projection`)).json();
+      expect(projection.replay.clock_seconds).toBe(basis.replay.clock_seconds);
+      expect(projection.latest_window!.id).toBe(basis.replay.investigation_window_id);
+      const root = projection.tasks.find(task => !task.parent_id && task.automatic);
+      if (root && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state)) activeObserved = true;
+      frames.push({ at: new Date().toISOString(), clock_seconds: projection.replay.clock_seconds,
+        tasks: projection.tasks.map(task => ({ id: task.id, role: task.role, state: task.state,
+          model_calls: task.model_calls, tool_calls: task.tool_calls, error_code: task.error_code })),
+        activity: await page.locator("#agent-activity").textContent() });
+      if (root?.state === "FAILED") throw new Error(`Fresh paused report withheld: ${root.error_code}`);
+      observed.final = projection;
+      return Boolean(root && ["SUCCEEDED", "ABSTAINED"].includes(root.state));
+    }, { timeout: 310_000, intervals: [2000, 4000] }).toBe(true);
+    expect(activeObserved).toBe(true);
+    const completed = observed.final;
+    if (!completed) throw new Error("No completed projection was recorded");
+    const root = completed.tasks.find(task => !task.parent_id && task.automatic)!;
+    const response = await page.request.get(`/api/tasks/${root.id}/casefile`);
+    expect(response.status()).toBe(200);
+    const file = await response.json();
+    expect(file.reused_task_ids).toEqual([]);
+    expect(file.fresh_model_calls).toBeGreaterThan(0);
+    expect(file.interpretation_review.rounds.at(-1).assessment.decision).toBe("accept");
+    result.casefile = file;
+    await expect(page.locator("#play")).toHaveText("Continue monitoring");
+    await expect(page.locator("#play")).toBeEnabled();
+    await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
+    await page.reload();
+    await page.locator("#replay-history").selectOption(replay.id);
+    await expect(page.locator("#agent-last-action")).toContainText("saved result, not a new inference");
+    await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", basis.replay.investigation_window_id!);
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1);
+    const reopened: Projection = await (await page.request.get(`/api/replays/${replay.id}/projection`)).json();
+    expect(reopened.tasks.map(task => task.model_calls)).toEqual(completed.tasks.map(task => task.model_calls));
+    await page.screenshot({ path: "runtime/paused-agent-reviewed.png", fullPage: true });
+    outcome = "passed";
+  } catch (error) {
+    const message = error instanceof Error ? error.message.split("\nCall log:")[0] : "Paused qualification failed";
+    result.error = message;
+    throw new Error(message);
+  } finally {
+    await writeFile("runtime/paused-agent-live.json", JSON.stringify({ outcome, ...result, frames }, null, 2) + "\n");
+  }
+});
+
+test("recorded paused hosted work restores coherent evidence without new inference", async ({ page }) => {
+  test.skip(process.env.SUBSEA_QUALIFY_PAUSED_RECORDING !== "1", "Requires the retained paused-hosted qualification.");
+  test.setTimeout(120_000);
+  try {
+    const receipt: { replay_id: string; snapshot_id: string } = JSON.parse(await readFile("runtime/paused-agent-live.json", "utf8"));
+    const login = await page.request.post("/api/login", {
+      data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD },
+    });
+    expect(login.status()).toBe(200);
+    const before: Projection = await (await page.request.get(`/api/replays/${receipt.replay_id}/projection`)).json();
+    expect(before.replay.investigation_window_id).toBe(receipt.snapshot_id);
+    expect(before.replay.state).toBe("PAUSED");
+    await page.goto("/");
+    await expect(page.locator("#create-replay")).toBeEnabled();
+    await page.locator("#replay-history").selectOption(receipt.replay_id);
+    await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", receipt.snapshot_id, { timeout: 45_000 });
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 45_000 });
+    await expect(page.locator("#agent-last-action")).toContainText("saved result, not a new inference");
+    await expect(page.locator("#play")).toHaveText("Continue monitoring");
+    await expect(page.locator("#play")).toBeEnabled();
+    await expect(page.locator("#step")).toBeDisabled();
+    await expect(page.locator("#basis-warning")).toContainText("Simulation paused for investigation");
+    await expect(page.locator("#agent-live-stages")).toContainText("Coordinator / report + critic");
+    const after: Projection = await (await page.request.get(`/api/replays/${receipt.replay_id}/projection`)).json();
+    expect(after.tasks.map(task => [task.id, task.model_calls, task.tool_calls])).toEqual(
+      before.tasks.map(task => [task.id, task.model_calls, task.tool_calls]));
+    expect(after.replay.clock_seconds).toBe(before.replay.clock_seconds);
+    await page.screenshot({ path: "runtime/paused-agent-reviewed.png", fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await expect(page.locator("#play")).toBeVisible();
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message.split("\nCall log:")[0] : "Recorded qualification failed");
+  }
+});
+
 test("extended network qualifies a fresh hosted investigation against matching sensor-only evidence", async ({ page }) => {
   test.skip(process.env.SUBSEA_QUALIFY_DASHBOARD_LIVE !== "1", "Opt in explicitly; this consumes hosted inference.");
   test.setTimeout(600_000);
@@ -98,7 +243,7 @@ async function prepare(page: Page, scenario: string, steps: number, mode = "scri
     expect(login.status()).toBe(200);
     const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
     const created = await page.request.post("/api/replays", {
-      headers, data: { scenario, mode, workflow, seed: 2026, idempotency_key: `dashboard-${Date.now()}-${scenario}` },
+      headers, data: { scenario, mode, workflow, pause_on_anomaly: false, seed: 2026, idempotency_key: `dashboard-${Date.now()}-${scenario}` },
     });
     expect(created.status()).toBe(200);
     const { id } = await created.json();
@@ -400,8 +545,8 @@ test("default view prioritizes map, trend and assessment while optional tools st
   }
   const positions = await page.locator(".live-grid, .agent-status-panel").evaluateAll(elements =>
     elements.map(element => ({ top: element.getBoundingClientRect().top, bottom: element.getBoundingClientRect().bottom })));
-  expect(positions[0].top).toBeLessThan(450);
-  expect(positions[1].top).toBeLessThan(1100);
+  expect(positions[0].top).toBeLessThan(550);
+  expect(positions[1].top - positions[0].bottom).toBeLessThan(24);
   await expect(page.locator("#agent-activity")).toBeVisible();
   await expect(page.locator("#agent-elapsed")).toContainText("SCRIPTED");
   await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(3);
@@ -504,7 +649,7 @@ test("unassessed sensors are grey rather than apparently healthy during warm-up"
 
 test("knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links", async ({ page }) => {
   await prepare(page, "S7", 23);
-  await expect(page.locator("#agent-activity-state")).toContainText("Agent investigation ready");
+  await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
   const response = await page.request.get(`/api/tasks/${taskId}/casefile`);
   expect(response.status()).toBe(200);
@@ -565,7 +710,7 @@ test("two customer modes separate individual sensor alerts from agent investigat
   await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
   await expect(page.locator("#location-summary")).toContainText("200–600m");
   await expect(page.locator("#event-summary")).toContainText("not an LLM report");
-  await expect(page.locator("#agent-activity-state")).toContainText("Agent investigation ready");
+  await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
   await expect(page.locator("#agent-findings")).toContainText("operational records read");
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
   const detail = await (await page.request.get(`/api/tasks/${taskId}`)).json();
@@ -609,7 +754,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   await expect(page.locator("#source-clock")).toContainText("PAUSED");
   pending = false;
   await page.locator("#reconnect").click();
-  await expect(page.locator("#agent-activity-state")).toContainText("Agent investigation ready");
+  await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
   await expect(page.locator("#agent-findings")).toContainText("final decision accepted");
   const source = page.locator("#agent-findings .agent-source").first();
   await source.locator("summary").click();

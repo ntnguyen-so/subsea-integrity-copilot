@@ -29,7 +29,7 @@
     <div class="playback"><button id="play" type="button" disabled>Play</button><button id="step" type="button" disabled>Step + hop</button><label for="speed">Speed</label><select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="10">10×</option></select></div>
   </section>
   <section class="clock-strip" aria-label="Monitoring clocks and confirmed evidence">
-    <div><small>SIMULATED TIME / UTC</small><strong id="source-clock">Not reported</strong></div>
+    <div><small>SIMULATED TIME / UTC</small><strong id="source-clock">Not reported</strong><span id="simulation-policy" class="muted"></span></div>
   </section>
   <div class="shell">
     <nav class="rail" aria-label="Workspaces">
@@ -43,11 +43,14 @@
     </nav>
     <main id="workspace" tabindex="-1">
       <section id="monitoring-warning" class="monitoring-warning info" role="alert" aria-atomic="true">No current monitoring assessment. Warnings do not wait for an AI report.</section>
+      <section id="investigation-hold" class="monitoring-warning info" role="status" hidden></section>
       <div id="evidence-selection" class="selection-strip"><div class="selection-text"><strong id="selected-basis">No window selected</strong><span id="basis-warning">Questions require a visible, pinned snapshot.</span></div><div class="control"><label for="window-history">View a past window</label><select id="window-history"><option value="">Follow current window</option></select></div><button id="follow-live" type="button">Follow current</button></div>
       <section id="panel-live" role="tabpanel" aria-labelledby="tab-live">
         <section id="agent-activity" class="agent-activity" aria-label="Actual agent processing" hidden>
           <div><strong id="agent-activity-state">Detectors monitoring</strong><span id="agent-elapsed">No LLM investigation admitted yet</span></div>
           <p id="agent-last-action">Detector results are separate from agent investigation.</p>
+          <div id="agent-live-stages" class="agent-live-stages" aria-label="Persisted agent stages"></div>
+          <details class="agent-live-log"><summary>Executed activity</summary><ol id="agent-progress-log"></ol></details>
           <button id="show-agent-work" type="button">See agent work ↓</button>
         </section>
         <div class="live-grid">

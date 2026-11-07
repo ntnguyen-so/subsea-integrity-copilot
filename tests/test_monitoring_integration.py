@@ -100,6 +100,124 @@ def test_repeated_control_does_not_advance_clock_twice(monitor: Monitor) -> None
     assert monitor.store.get_window(second.latest_window_id).quality.status == "WARMING_UP"
 
 
+def paused_s7(monitor: Monitor, *, mode: Mode = "scripted"):
+    replay = monitor.create("S7", 2026, mode, "paused-s7", pause_on_anomaly=True)
+    monitor.control(replay.id, "speed", 10, "ten-times")
+    current = monitor.control(replay.id, "play", None, "start")
+    source = monitor._source(current)
+    for _ in range(60):
+        source.anchor -= 60
+        previous_endpoint = current.last_endpoint
+        monitor._advance(current, source)
+        current = monitor.store.get_replay(replay.id)
+        assert current.clock_seconds <= (
+            previous_endpoint
+            + source.dataset.pack.hop_seconds
+            + source.dataset.pack.lateness_seconds
+        )
+        if current.investigation_window_id:
+            return current, source
+    pytest.fail("The extended network never paused on a detector alarm")
+
+
+def test_ten_times_stops_at_first_alarm_and_freezes_until_review(monitor: Monitor) -> None:
+    current, source = paused_s7(monitor)
+    assert current.state == "PAUSED"
+    assert current.investigation_window_id == current.latest_window_id
+    basis = monitor.store.get_window(current.investigation_window_id)
+    assert basis.quality.status != "WARMING_UP"
+    roots = [task for task in monitor.store.list_tasks(current.id) if not task.parent_id]
+    assert len(roots) == 1
+    assert roots[0].snapshot_id == basis.id
+    frozen = (current.clock_seconds, source.released, basis.id, basis.input_hash)
+    for action in ("play", "step"):
+        with pytest.raises(Conflict, match="investigation_pending"):
+            monitor.control(current.id, action, None, "blocked-" + action)
+    monitor.control(current.id, "speed", 1, "speed-while-held")
+    for _ in range(3):
+        source.anchor -= 600
+        monitor.tick()
+    latest = monitor.store.get_replay(current.id)
+    assert (
+        latest.clock_seconds,
+        source.released,
+        latest.latest_window_id,
+        basis.input_hash,
+    ) == frozen
+    assert len(monitor.store.list_tasks(current.id)) == 1
+    for _ in range(10):
+        monitor.agents.run_once()
+        root = monitor.store.get_task(roots[0].id)
+        if root.state in ("SUCCEEDED", "ABSTAINED"):
+            break
+    assert root.state in ("SUCCEEDED", "ABSTAINED"), root.error_code
+    assert monitor.store.get_replay(current.id).clock_seconds == frozen[0]
+    assert monitor.store.get_replay(current.id).state == "PAUSED"
+    fake_root = root.model_copy(update={"id": "new-root", "root_id": "new-root"})
+    context = monitor.agents._context(fake_root, basis, "plan")
+    assert context["compatible_tasks"] == []
+    assert context["result_schema"]["properties"]["steps"]["enum"] == [
+        ["quality", "diagnosis", "answer"]
+    ]
+    resumed = monitor.control(current.id, "play", None, "continue-after-review")
+    assert resumed.state == "PLAYING"
+    assert resumed.investigation_window_id is None
+
+
+def test_unavailable_agent_is_explicit_and_never_deadlocks_simulation(
+    monitor: Monitor, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(monitor.agents, "health", lambda: {"available": False})
+    current, _source = paused_s7(monitor, mode="live")
+    episode = monitor.store.list_episodes(current.id)[0]
+    assert episode.dispatch_status == "agent_unavailable"
+    assert not monitor.store.list_tasks(current.id)
+    monitor.tick()
+    assert monitor.store.list_episodes(current.id)[0].material_revision == episode.material_revision
+    continued = monitor.control(current.id, "play", None, "continue-without-report")
+    assert continued.state == "PLAYING"
+    assert continued.investigation_window_id is None
+    episode = monitor.store.list_episodes(current.id)[0]
+    assert episode.dispatch_status == "continued_without_report"
+    assert episode.pending_window_id is None
+
+
+def test_restart_recovers_a_hold_persisted_before_dispatch(
+    monitor: Monitor, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = monitor._episode
+    monkeypatch.setattr(monitor, "_episode", lambda *_args: None)
+    current, _source = paused_s7(monitor)
+    assert not monitor.store.list_tasks(current.id)
+    assert current.latest_window_id == current.investigation_window_id
+    monkeypatch.setattr(monitor, "_episode", original)
+    monitor._sources.clear()
+    monitor.tick()
+    roots = monitor.store.list_tasks(current.id)
+    assert len(roots) == 1
+    assert roots[0].snapshot_id == current.investigation_window_id
+    assert monitor.store.get_replay(current.id).clock_seconds == current.clock_seconds
+
+
+def test_paused_workflow_drains_late_arrivals_after_its_final_window(
+    monitor: Monitor, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replay = monitor.create("S1", 2026, "scripted", "late-source-tail", pause_on_anomaly=True)
+    current = monitor.store.save_replay(
+        replay.model_copy(
+            update={"state": "PLAYING", "clock_seconds": 365, "last_endpoint": 360, "speed": 10}
+        )
+    )
+    source = monitor._source(current)
+    source.received_seconds[-1] = 425
+    source.anchor -= 60
+    monkeypatch.setattr(monitor, "_process", lambda *_args: None)
+    monitor._advance(current, source)
+    final = monitor.store.get_replay(current.id)
+    assert final.clock_seconds == 425
+    assert final.state == "COMPLETED"
+
+
 @pytest.mark.parametrize("scenario", ["S1", "S2"])
 def test_sensor_alert_workflow_never_admits_agents(
     monitor: Monitor, monkeypatch: pytest.MonkeyPatch, scenario: str

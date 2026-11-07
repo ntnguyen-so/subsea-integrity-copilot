@@ -347,6 +347,7 @@ class Store:
                 previous.duration_seconds,
                 previous.mode,
                 previous.workflow,
+                previous.pause_on_anomaly,
             ) != (
                 session.scenario,
                 session.seed,
@@ -355,10 +356,13 @@ class Store:
                 session.duration_seconds,
                 session.mode,
                 session.workflow,
+                session.pause_on_anomaly,
             ):
                 raise Conflict("generation_identity_conflict")
-            if session.latest_window_id:
-                window = self._get(conn, "windows", session.latest_window_id, WindowSnapshot)
+            for window_id in (session.latest_window_id, session.investigation_window_id):
+                if not window_id:
+                    continue
+                window = self._get(conn, "windows", window_id, WindowSnapshot)
                 if window.generation_id != session.id:
                     raise ScopeError("scope_error")
             saved = session.model_copy(
@@ -370,6 +374,20 @@ class Store:
             )
             self._event(conn, saved.id, "replay.state", saved.model_dump(mode="json"))
         return saved
+
+    def replay_control_applied(
+        self, generation_id: str, idempotency_key: str, action_hash: str
+    ) -> bool:
+        with self._tx(read=True) as conn:
+            self._get(conn, "replays", generation_id, ReplaySession)
+            existing = conn.execute(
+                "SELECT action_hash FROM subsea.control_requests "
+                "WHERE generation_id=%s AND idempotency_key=%s",
+                (generation_id, idempotency_key),
+            ).fetchone()
+            if existing and existing["action_hash"] != action_hash:
+                raise Conflict("idempotency_conflict")
+            return existing is not None
 
     def save_controlled_replay(
         self,
@@ -402,11 +420,14 @@ class Store:
                 "duration_seconds",
                 "mode",
                 "workflow",
+                "pause_on_anomaly",
             ):
                 if getattr(previous, field) != getattr(session, field):
                     raise Conflict("generation_identity_conflict")
-            if session.latest_window_id:
-                window = self._get(conn, "windows", session.latest_window_id, WindowSnapshot)
+            for window_id in (session.latest_window_id, session.investigation_window_id):
+                if not window_id:
+                    continue
+                window = self._get(conn, "windows", window_id, WindowSnapshot)
                 if window.generation_id != session.id:
                     raise ScopeError("scope_error")
             saved = session.model_copy(

@@ -328,10 +328,13 @@ class AgentService:
             "baseline_version": snapshot.baseline_version,
             "parameter_version": snapshot.parameter_version,
         }
+        fresh = task.automatic and self.store.get_replay(task.generation_id).pause_on_anomaly
         candidates = [
             t
             for t in self.store.list_tasks(task.generation_id)
-            if t.role != "operator_response" and compatible(task, t, snapshot)
+            if t.role != "operator_response"
+            and compatible(task, t, snapshot)
+            and (not fresh or t.root_id == task.root_id)
         ]
         checked_candidates = []
         for candidate in candidates:
@@ -403,11 +406,10 @@ class AgentService:
         result_schema = (
             WorkPlan.model_json_schema() if phase == "plan" else AgentResult.model_json_schema()
         )
-        if phase == "plan" and task.history_version:
+        if phase == "plan" and (task.history_version or fresh):
             result_schema["properties"]["steps"]["enum"] = [
                 ["quality", "diagnosis", "answer"],
-                ["reuse", "answer"],
-            ]
+            ] + ([] if fresh else [["reuse", "answer"]])
         if phase != "plan":
             ledger_codes = {
                 str(c.value.get("code")) if isinstance(c.value, dict) else str(c.value)

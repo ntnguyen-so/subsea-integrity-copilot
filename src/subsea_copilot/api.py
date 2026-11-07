@@ -57,6 +57,7 @@ class ReplayCreate(Contract):
     seed: int = Field(default=2026, ge=0, le=2**32 - 1)
     mode: Mode = "scripted"
     workflow: Workflow = "agent_assisted"
+    pause_on_anomaly: bool = True
     idempotency_key: str = Field(min_length=1, max_length=200)
 
 
@@ -281,7 +282,12 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def create_replay(form: ReplayCreate, request: Request) -> object:
         principal(request, write=True)
         return monitor_service().create(
-            form.scenario, form.seed, form.mode, form.idempotency_key, workflow=form.workflow
+            form.scenario,
+            form.seed,
+            form.mode,
+            form.idempotency_key,
+            workflow=form.workflow,
+            pause_on_anomaly=form.pause_on_anomaly,
         )
 
     @app.post("/api/replays/{generation_id}/control")

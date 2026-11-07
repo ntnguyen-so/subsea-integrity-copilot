@@ -1,5 +1,64 @@
 # Qualification results
 
+## Anomaly-paused investigations
+
+New API/UI assisted runs pause the synthetic source at a newly raised detector
+alarm after warm-up, pin the exact window and admit fresh hosted specialists.
+10x changes simulated source pacing, not model latency. The server rejects
+Play/Step until matching work is terminal; completion stays paused for explicit
+Continue monitoring. Unavailable admission permits an explicit Continue without
+report, retaining detector warnings. Persistent flags alone do not retrigger.
+The early alert can be instrumentation-only or insufficient evidence: pausing
+does not manufacture a mature leak footprint. Old recordings retain continuous
+behavior and immediately display their explicitly labeled saved reports.
+
+Pressure, gap/excluded and quality symbols now match across customer workflows
+for matching input windows. They are numerical data facts, not instant LLM
+discoveries. Raw missing readings remain visible even below the >10% missing
+fraction used as an automatic incident trigger.
+
+The CustomerOps reference API and frontend were already running, but their
+existing storage containers were stopped. Starting those existing containers
+restored `/healthz` to `ok` with integrity `ok`, without resetting reference data
+or replacing its processes. The adopted pattern is server-owned work, persisted
+public progress, explicit start/resume versus saved results, and no fabricated
+progress percentages. The reference frontend is at `http://127.0.0.1:18083`.
+
+Backend qualification: **24 distinct monitoring integration cases** across the
+initial suite and final targeted edge-case check, including accelerated
+first-alarm freezing, locked controls, reviewed continuation, unavailable-agent
+continuation, restart-before-dispatch recovery and late-arrival drainage after
+the final source window; **51 store/history integration
+cases**; **39 agent/replay/warning unit cases**. Two database-dependent agent
+cases were skipped in the separate environment-free unit invocation. Ruff,
+backend typing, TypeScript and the production dashboard build passed.
+
+Browser qualification passed the matching-S7 raw-marker comparison and a new
+**live 10x** assisted run. At source **+100 seconds**, the source stopped on the
+**+95-second window**. Across **26 recorded progress observations** its source
+clock stayed exactly +100s. Play/Step were locked while actual work progressed.
+The report completed in **159.573509 real seconds**, with **7 hosted model calls,
+16 tool calls and no reused specialist tasks**. The report abstained from a
+physical diagnosis/inspection interval, discussed a connected P5 pressure
+pattern and competing instrumentation effects, and passed source-grounding
+review. This is not a confirmed leak diagnosis or an accuracy estimate.
+The earlier +110-second workload is different; these times are not a controlled
+performance comparison.
+
+A separate read-only browser check reopened that actual retained run after the
+final UI wording update, waited for matching map/trend evidence, verified
+Continue monitoring was available, and confirmed unchanged task/call counts.
+No inference was repeated for that recorded-result check.
+Eight distinct browser journeys passed across the correction cohorts, including
+existing same-alert workflow comparison, public handoffs, unmatched-record
+rejection and mobile layout. The initial compact-view test caught the added
+progress strip exceeding its old 450px map-top bound (534.06px). The policy now
+shares the existing clock line; the revised layout check requires the map in
+the upper half of the 1100px viewport and the assessment directly after it.
+That check and the final desktop/mobile recorded-result check then passed.
+Receipt: [`evidence\anomaly-paused-hosted-current.json`](evidence/anomaly-paused-hosted-current.json).
+Current rendered view: [`assets\anomaly-paused-investigation.png`](assets/anomaly-paused-investigation.png).
+
 ## Joint-pattern RCA and knowledge: current revision
 
 The current S7 source has a graded near/far pressure footprint, staggered

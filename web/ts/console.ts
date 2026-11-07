@@ -49,7 +49,7 @@ let comparisonToken = 0;
 const comparisonSensorIds = new Set<string>();
 const currentSource = "pressure-v3";
 
-const eventTypes = ["replay.state", "window.completed", "window.revised", "episode.changed", "task.started", "task.updated", "model.started", "model.completed", "tool.completed", "answer.critique", "answer.checked", "task.finished", "health.changed"];
+const eventTypes = ["replay.investigation_paused", "replay.state", "window.completed", "window.revised", "episode.changed", "task.started", "task.updated", "model.started", "model.completed", "tool.completed", "answer.critique", "answer.checked", "task.finished", "health.changed"];
 const publicReceiptFields = ["id", "call_id", "name", "task_id", "tool", "tool_name", "action", "status", "summary", "validation", "outcome", "evidence_ids", "claim_refs", "duration_ms", "error", "error_code", "snapshot_id", "created_at"];
 const publicTraceFields = ["trace_id", "span_id", "attempt_id", "session_id", "task_id", "status", "mode", "model", "model_calls", "tool_calls", "usage", "duration_ms", "export_status", "stored", "langfuse_url", "url"];
 
@@ -64,8 +64,20 @@ function enc(id: string): string { return encodeURIComponent(id); }
 function modeName(mode: Mode): string { return mode === "live" ? "COPILOT HOSTED" : "SCRIPTED"; }
 function sensorAlertsOnly(): boolean { return projection?.replay.workflow === "sensor_alerts"; }
 function automaticRoot(): AgentTask | null {
-  return [...projection?.tasks || []].filter(task => task.automatic && task.role === "operator_response" && !task.parent_id)
+  const held = projection?.replay.investigation_window_id;
+  return [...projection?.tasks || []].filter(task => !task.parent_id && (held ? task.snapshot_id === held : task.automatic))
     .sort((a, b) => b.created_at.localeCompare(a.created_at))[0] || null;
+}
+function investigationHold(): { waiting: boolean; unavailable: boolean } {
+  const held = projection?.replay.investigation_window_id;
+  if (!held) return { waiting: false, unavailable: false };
+  const roots = projection!.tasks.filter(task => !task.parent_id && task.snapshot_id === held);
+  const blocked = projection!.episodes.some(episode => episode.current_window_id === held
+    && ["agent_unavailable", "knowledge_unavailable", "budget_blocked"].includes(episode.dispatch_status || ""));
+  return {
+    waiting: roots.some(task => ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(task.state)) || !roots.length && !blocked,
+    unavailable: blocked || roots.some(task => ["FAILED", "CANCELLED"].includes(task.state)),
+  };
 }
 function renderActivity(): void {
   box("agent-activity").hidden = !projection || sensorAlertsOnly();
@@ -116,10 +128,12 @@ function setConnection(value: string): void { connectionState = value; text("con
 function updateControls(): void {
   const replay = projection?.replay;
   const allowed = session.authenticated && !commandBusy;
+  const hold = investigationHold();
   controlButton("create-replay").disabled = !allowed || !select("scenario").value;
-  controlButton("play").disabled = !allowed || !replay || replay.state === "COMPLETED" || replay.state === "FAILED";
-  controlButton("play").textContent = replay?.state === "PLAYING" ? "Pause" : "Play";
-  controlButton("step").disabled = !allowed || replay?.state !== "PAUSED";
+  controlButton("play").disabled = !allowed || !replay || hold.waiting || replay.state === "COMPLETED" || replay.state === "FAILED";
+  controlButton("play").textContent = replay?.state === "PLAYING" ? "Pause" : replay?.investigation_window_id
+    ? hold.waiting ? "Waiting for agents" : hold.unavailable ? "Continue without report" : "Continue monitoring" : "Play";
+  controlButton("step").disabled = !allowed || replay?.state !== "PAUSED" || Boolean(replay.investigation_window_id);
   select("speed").disabled = !allowed || !replay || replay.state === "COMPLETED" || replay.state === "FAILED";
   controlButton("ask-submit").disabled = !session.authenticated || !selectedWindow || asking || sensorAlertsOnly();
   controlButton("ask-submit").textContent = asking ? "Submitting…" : "Investigate pinned window ↗";
@@ -378,10 +392,20 @@ function renderProjection(): void {
   box("question-tools").hidden = alertsOnly;
   box("tab-agents").hidden = alertsOnly;
   if (alertsOnly && activeTab === "agents") switchTab("live");
-  for (const key of ["quality", "support", "inspection"]) {
+  for (const key of ["support", "inspection"]) {
     document.querySelector<HTMLElement>(`#map-legend [data-legend="${key}"]`)!.hidden = alertsOnly;
   }
-  document.querySelector('#map-legend [data-legend="anomaly"]')!.lastChild!.textContent = alertsOnly ? "Sensor alert" : "Pressure anomaly";
+  const hold = investigationHold();
+  box("investigation-hold").hidden = !replay.investigation_window_id;
+  text("investigation-hold", replay.investigation_window_id
+    ? `Simulation paused at +${replay.clock_seconds.toFixed(1)}s · evidence ${short(replay.investigation_window_id)}. ${
+      hold.waiting ? "Fresh agents are checking this fixed window; simulated ingestion and stepping are locked."
+        : hold.unavailable ? "No reviewed agent report is available. Detector alerts remain active; continuing does not clear them."
+          : "Agent checks finished. Review the report, then Continue monitoring."} Only the simulation pauses, never a production safety feed.`
+    : "");
+  text("simulation-policy", alertsOnly ? "Continuous sensor alerts · no agent execution"
+    : replay.pause_on_anomaly ? "Pauses on new detector alarms for fresh agent checks"
+      : "Recorded continuous workflow · start a new run for anomaly-paused investigations");
   text("site-name", pack.name);
   renderClocks();
   text("live-bounds", latest ? `${bounds(latest.window_start, latest.window_end)} · ${latest.quality.status}` : `WARMING_UP / no completed window · width ${pack.window_seconds}s + lateness ${pack.lateness_seconds}s`);
@@ -454,13 +478,16 @@ function renderWindowHistory(): void {
 function renderBasis(): void {
   const window = selectedWindow, latest = projection?.latest_window;
   const newer = window && latest && window.id !== latest.id;
+  const held = Boolean(projection?.replay.investigation_window_id);
   box("evidence-selection").dataset.following = String(followCurrent);
   box("evidence-selection").dataset.updating = String(Boolean(newer));
+  box("evidence-selection").dataset.snapshotId = window?.id || "";
   text("selected-basis", window ? `${followCurrent ? "CURRENT VIEW" : "PINNED"} · ${bounds(window.window_start, window.window_end)} · revision ${window.revision}` : "No completed window selected");
   text("basis-warning", newer ? followCurrent
-    ? "Live inspector updating. Map and trend retain one coherent received window; the latest warning remains independent."
+    ? `${held ? "Loading the paused investigation window." : "Live inspector updating."} Map and trend retain one coherent received window; the latest warning remains independent.`
     : "Historical evidence pinned. Newer monitoring telemetry is available; this inspector will not change."
-    : followCurrent ? "Following current telemetry. Trends stay live; comparisons, raw evidence and questions pin this snapshot." : "Visible snapshot pinned. Stream continues independently.");
+    : held ? "Simulation paused for investigation. Map and trend show fixed received evidence; inspecting it does not resume the source."
+      : followCurrent ? "Following current telemetry. Trends stay live; comparisons, raw evidence and questions pin this snapshot." : "Visible snapshot pinned. Stream continues independently.");
   text("sensor-list-basis", window ? `${time(window.window_end)} · ${followCurrent ? "following stream" : "pinned review"}` : "Awaiting a completed window");
   text("ask-basis", window ? `AS OF ${time(window.window_end)} / R${window.revision}` : "PINNED SNAPSHOT REQUIRED");
   text("question-scope", window ? `${modeName(projection?.replay.mode || "scripted")} · ${short(window.id)} · questions never use a hidden later snapshot` : "No visible snapshot");
@@ -525,9 +552,8 @@ function sensorFlags(window: WindowSnapshot | null, id: string): { assessed: boo
   return {
     assessed,
     missing: assessed && findings.some(finding => finding.missing > 0 || finding.hard_excluded > 0),
-    quality: !sensorAlertsOnly() && assessed && findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement),
-    anomaly: assessed && findings.some(finding => finding.anomaly_count > 0 || sensorAlertsOnly()
-      && (finding.missing > 0 || finding.hard_excluded > 0 || finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement)),
+    quality: assessed && findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement),
+    anomaly: assessed && findings.some(finding => finding.anomaly_count > 0),
     support: !sensorAlertsOnly() && assessed && Boolean(window?.event.supporting_sensor_ids.includes(id)),
   };
 }
@@ -636,7 +662,10 @@ function renderMap(): void {
     ? `Priority inspection (numerical detector): ${location.best?.segment_id || "unresolved"} ${location.inspection_start_m}–${location.inspection_end_m}m. Not an exact leak point.`
     : location ? `Inspection interval withheld: ${location.reason}` : "Location not computed / not eligible. No confirmed leak location is claimed.");
   if (sensorAlertsOnly()) {
-    const count = pack.sensors.filter(sensor => sensorFlags(window, sensor.id).anomaly).length;
+    const count = pack.sensors.filter(sensor => {
+      const flags = sensorFlags(window, sensor.id);
+      return flags.anomaly || flags.missing || flags.quality;
+    }).length;
     text("event-summary", `${count} instruments with individual alerts in this window. Inspect each history; no combined leak/malfunction diagnosis is provided.`);
     text("location-summary", "Inspection area: engineer to determine by connecting the sensor alerts.");
   } else {
@@ -760,7 +789,9 @@ function renderAutomaticInvestigation(): void {
   refreshAutomaticDetail(root);
   const conclusion = accepted ? root.result?.interpretation?.answer.text || root.result?.summary || root.answer || ""
     : failed ? `No accepted report: ${root.error_message || root.error_code || friendly(root.state)}. Do not wait for AI to act under existing response procedures.`
-      : "Investigating the pinned alert evidence. Sensor ingestion, numerical warnings and manual trends continue independently.";
+      : projection.replay.investigation_window_id
+        ? "Investigating the pinned alert evidence. Simulated ingestion is paused while real agent checks run; detector warnings remain active."
+        : "Investigating the pinned alert evidence. Sensor ingestion, numerical warnings and manual trends continue independently.";
   text("automatic-conclusion", conclusion);
   const freshness = node("p", `${latest?.id !== root.snapshot_id ? "Historical analysis: newer monitoring evidence exists; this report is not rebased." : "Analysis uses the latest completed monitoring snapshot."}${pending ? ` New material warning is pending${unavailable ? `: ${unavailable}` : " until the active investigation finishes and admission permits"}.` : ""}`, "muted");
   freshness.id = "automatic-freshness"; actions.append(freshness);
@@ -1304,7 +1335,7 @@ async function ask(): Promise<void> {
     if (token !== generationToken) return;
     if (task.snapshot_id !== snapshot.id || task.generation_id !== replay.id) throw new Error("Question task did not retain its requested evidence basis.");
     questionRetry = null;
-    notify(`Investigation ${short(task.id)} queued against visible revision ${snapshot.revision}. Source monitoring continues independently.`);
+    notify(`Investigation ${short(task.id)} queued against visible revision ${snapshot.revision}. ${replay.investigation_window_id ? "The simulation remains paused for agent checks." : "Source monitoring continues independently."}`);
     if (projection && !projection.tasks.some(item => item.id === task.id)) projection.tasks.push(task);
     await loadTask(task.id);
     void refreshProjection();

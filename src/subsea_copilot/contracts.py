@@ -238,6 +238,9 @@ class ReplaySession(Contract):
     seed: int = 2026
     mode: Mode = "scripted"
     workflow: Workflow = "agent_assisted"
+    pause_on_anomaly: bool = False
+    investigation_window_id: str | None = None
+    detected_alert_keys: list[str] = Field(default_factory=list)
     state: Literal["PAUSED", "PLAYING", "COMPLETED", "FAILED"] = "PAUSED"
     clock_seconds: float = 0
     speed: Literal[1, 2, 5, 10] = 1

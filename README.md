@@ -54,7 +54,11 @@ Stopping Compose without `-v` preserves evidence.
 
 The blue **agent activity** strip separates detector output from actual agent
 work. Its elapsed clock is real processing time, even while simulated telemetry
-is paused. **See agent work** scrolls to the quality, investigation and reporting
+is paused. New assisted runs **stop simulated ingestion at a newly raised
+detector alarm** and wait for fresh agents on that immutable window. The strip
+shows persisted quality, joint-investigation and reporting/critic stages,
+actual model/tool counts and executed public activity, not invented percentages.
+**See agent work** scrolls to the quality, investigation and reporting
 handoffs, executed record searches/comparisons, source quotes, critic outcome
 and engineer verification question. These findings load automatically on Live;
 opening the Agents tab or asking a question is not required.
@@ -63,6 +67,9 @@ The map explicitly labels its initial assessment and inspection interval as
 numerical detector outputs. Pending, failed and unavailable work records do not
 become completed historical investigations. SCRIPTED recordings remain offline
 fixtures, not evidence of hosted performance.
+Opening a recorded run loads its saved actual report; it does not rerun inference.
+Older continuous runs are explicitly labeled and retain their original behavior.
+An immutable evidence snapshot is the input to an agent, not a prewritten answer.
 
 Choose between exactly two customer workflows under **Workflow / new run**:
 
@@ -94,6 +101,9 @@ Dashed sensor outlines show missing/excluded readings; amber diamonds show
 correlated-drop support. These flags can coexist and are not confirmed leak or
 hardware-failure diagnoses. Chart keys separately identify pressure, baseline
 thresholds and missing-data bands; map, table and trend retain the same window.
+Both workflows show the **same raw pressure, gap/excluded and quality symbols**.
+These inexpensive detector flags can appear before any LLM call. Previously the
+alert-only view hid quality crosses and merged them into amber markers.
 
 1. Choose **S1**, select **Agent-assisted investigation**, then **Start new run**.
    This uses real hosted inference; no scripted/live selector is exposed.
@@ -107,30 +117,36 @@ thresholds and missing-data bands; map, table and trend retain the same window.
    reads, the map, alarm list and trend advance together only after scoped
    observations arrive; the last complete view stays visible instead of flashing
    blank or mixing windows. The latest numerical warning remains independent.
-3. Qualifying leak, instrumentation and coverage-loss warnings automatically queue
-   the specialists. A first **unresolved-only** pattern instead shows explicit
-   evidence triage for at most one source window; a qualifying warning bypasses
-   that hold immediately. Persistent ambiguity is investigated using its latest
-   evidence; a resolved transient needs no LLM report. Numerical warnings and
-   manual review never wait. In **Automatic investigation**, distinguish simulated
-   source UTC from actual queue/report UTC. Replay speed accelerates the source,
-   not the LLM.
-4. Pause when the supported interval appears. **Compare with existing workflow**
+3. After warm-up, a new pressure alarm, spike/drift/peer-quality flag, excluded
+   reading or missing fraction above 10% pauses the source and immediately queues
+   fresh specialists. A small isolated gap is visible quality telemetry, not
+   automatically a new incident. The first alert may be an instrumentation issue;
+   agents must abstain if a leak pattern has not developed. Play and Step are
+   server-locked during the checks, including at 10x. Repeated persistent flags
+   do not cause identical investigations. No specialist from another root is
+   reused for these automatic investigations. The input window and source clock
+   stay fixed while actual model requests and tools execute.
+4. After the reviewed report is recorded, the source **remains paused**. Review
+   the findings, then explicitly **Continue monitoring**. Provider/knowledge/budget
+   admission failures remain visible; **Continue without report** never clears a
+   detector alert or implies a successful analysis. Existing dispatch budgets
+   still apply. Only synthetic simulation pauses: a production safety feed must
+   continue independently of the LLM.
+   **Compare with existing workflow**
    opens a same-alert comparison of individual alerts/manual work versus the
    product's actual document reads, measured comparisons, competing explanations,
    grounding review and handoff. Both columns use the report's original snapshot,
    not a newer live window. Hosted processing time is measured; ten-minute manual
    investigation is only an assumption, and human review is additional.
    Review the report and its original
-   evidence. A newer material warning can wait for bounded dispatch while an older
-   investigation is retained; historical reports are labeled, never silently
-   rebased. Failures withhold reports without clearing numerical warnings.
-   Minor quality changes still update the dashboard, but do not alone queue an
-   identical physical investigation. A changed hypothesis, affected segment,
-   material location or lost/recovered coverage remains a dispatch trigger.
+   evidence. Historical reports are labeled, never silently rebased. Failures
+   withhold reports without clearing numerical warnings. Recorded continuous
+   workflows retain their original material-change dispatch and bounded context
+   gathering; start a new run to use anomaly-paused monitoring.
 5. Open raw records, compare histories or ask a question to **pin** an immutable
-   window. The independent stream keeps running; **Follow current** resumes the
-   live inspector. Detection criteria and provenance remain available in the
+   window. Pinning the inspector does not itself pause ingestion; **Follow current**
+   returns to the current source window. An automatic investigation hold does
+   pause the simulated source. Detection criteria and provenance remain in the
    expandable details, and full agent receipts remain in Agents.
 
 The three suggested questions are "Leak or faulty sensors?", "Where should we

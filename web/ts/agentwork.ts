@@ -16,6 +16,10 @@ function linked(root: AgentTask, tasks: AgentTask[]): AgentTask[] {
 }
 export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], events: ConsoleEvent[],
   now: number, current: boolean, triage: boolean): void {
+  const stages = document.getElementById("agent-live-stages")!;
+  const log = document.getElementById("agent-progress-log")!;
+  stages.replaceChildren();
+  log.replaceChildren();
   if (!root) {
     text("agent-activity-state", triage ? "Detectors flagged an unresolved pattern; gathering context" : "Detectors monitoring · agents start automatically on a qualifying incident");
     text("agent-elapsed", "No LLM investigation admitted yet");
@@ -28,16 +32,31 @@ export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], 
   const calls = members.reduce((sum, task) => sum + task.model_calls, 0);
   const tools = members.reduce((sum, task) => sum + task.tool_calls, 0);
   text("agent-activity-state", !current ? "Connection unavailable · last recorded agent status below"
-    : done ? "Agent investigation ready · review findings and next checks"
+    : done ? "Recorded agent report · review findings and next checks"
       : active ? `Agents ${root.state === "QUEUED" ? "queued" : "investigating"} · no reviewed report yet`
         : "Agent report withheld · detector warnings remain active");
   text("agent-elapsed", `${duration(elapsed)} real processing ${done || !active ? "elapsed" : "since admission"} · ${calls} ${root.mode === "live" ? "hosted" : "SCRIPTED"} calls · ${tools} tool calls`);
+  for (const [role, label] of [["sensor_quality", "1. Quality checks"], ["event_diagnosis", "2. Joint investigation"],
+    ["operator_response", "Coordinator / report + critic"]]) {
+    const member = role === "operator_response" ? root : members.find(task => task.role === role);
+    const state = member?.state || "NOT_STARTED";
+    const stage = node("span", `${label}: ${friendly(state)}${member ? ` · ${member.model_calls} model / ${member.tool_calls} tool calls` : ""}`);
+    stage.dataset.role = role; stage.dataset.state = state;
+    stages.append(stage);
+  }
+  for (const event of events.filter(event => event.task_id && ids.has(event.task_id)
+    && ["task.started", "model.started", "model.completed", "tool.completed", "answer.critique", "task.finished"].includes(event.type)).slice(-12)) {
+    const role = friendly(members.find(task => task.id === event.task_id)?.role || "agent");
+    const phase = typeof event.payload.phase === "string" ? ` · ${friendly(event.payload.phase)}` : "";
+    log.append(node("li", `${time(event.created_at)} · ${role} · ${friendly(event.type.replace(".", " "))}${phase}`));
+  }
+  if (!log.children.length) log.append(node("li", "No public actions received in this connection yet. Persisted stage counts above remain authoritative; saved receipts are under See agent work."));
   const last = [...events].reverse().find(event => event.task_id && ids.has(event.task_id)
     && ["model.started", "model.completed", "tool.completed", "answer.critique"].includes(event.type));
   if (root.mode === "scripted") {
     text("agent-last-action", "Offline workflow fixture, not real LLM speed. Detector results are separate from this report.");
   } else if (done) {
-    text("agent-last-action", `Automatically admitted ${time(root.created_at)} · report recorded ${time(root.updated_at)}. Simulation speed does not accelerate the LLM.`);
+    text("agent-last-action", `Run ${root.id} · admitted ${time(root.created_at)} · report recorded ${time(root.updated_at)}. This is a saved result, not a new inference. Simulation speed does not accelerate the LLM.`);
   } else if (last) {
     const phase = typeof last.payload.phase === "string" ? last.payload.phase : "";
     const label = phase.startsWith("critic") ? "separate grounding critic"
