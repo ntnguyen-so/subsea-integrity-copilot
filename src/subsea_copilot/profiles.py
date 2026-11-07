@@ -29,23 +29,75 @@ def compact_evidence(result: dict[str, Any]) -> dict[str, Any]:
             }
         else:
             claims[identifier] = claim
-    return {**result, "claims": claims, "encoding": "referenced-evidence-v1"}
+    compact = {**result, "claims": claims, "encoding": "referenced-evidence-v1"}
+    items = list(evidence.values())
+    if len(items) >= 8 and all(
+        item["kind"] == "channel_summary" and isinstance(item["value"], dict)
+        for item in items
+    ):
+        columns = list(items[0]["value"])
+        if all(set(item["value"]) == set(columns) for item in items):
+            shared_values = {
+                key: value for key, value in items[0]["value"].items()
+                if all(item["value"][key] == value for item in items)
+            }
+            columns = [column for column in columns if column not in shared_values]
+            shared = {
+                key: value for key, value in items[0].items()
+                if key != "value" and all(key in item and item[key] == value for item in items)
+            }
+            compact.update(
+                evidence={
+                    identifier: {
+                        **{key: value for key, value in item.items() if key not in shared},
+                        "value": [item["value"][column] for column in columns],
+                    }
+                    for identifier, item in evidence.items()
+                },
+                evidence_shared_fields=shared,
+                evidence_shared_values=shared_values,
+                evidence_value_columns=columns,
+                encoding="columnar-shared-referenced-evidence-v3",
+            )
+    return compact
 
 
 def expanded_evidence(result: dict[str, Any]) -> dict[str, Any]:
+    evidence = {
+        identifier: {**result.get("evidence_shared_fields", {}), **item}
+        for identifier, item in result["evidence"].items()
+    }
+    if "evidence_value_columns" in result:
+        evidence = {
+            identifier: {
+                **item,
+                "value": {
+                    **result.get("evidence_shared_values", {}),
+                    **dict(zip(result["evidence_value_columns"], item["value"], strict=True)),
+                },
+            }
+            for identifier, item in evidence.items()
+        }
     claims = {}
     for identifier, claim in result["claims"].items():
         reference = claim.get("value_from_evidence_id")
         claims[identifier] = (
             {
                 **{key: value for key, value in claim.items() if key != "value_from_evidence_id"},
-                "value": result["evidence"][reference]["value"],
+                "value": evidence[reference]["value"],
             }
             if reference is not None
             else claim
         )
     return {
-        **{key: value for key, value in result.items() if key != "encoding"},
+        **{
+            key: value for key, value in result.items()
+            if key not in {
+                "encoding", "evidence_value_columns",
+                "evidence_shared_fields", "evidence_shared_values",
+            }
+        },
+        "evidence": evidence,
         "claims": claims,
     }
 
@@ -75,12 +127,17 @@ def compact_comparison(comparison: dict[str, Any]) -> dict[str, Any]:
     sensors = comparison.get("sensors", [])
     if not sensors:
         return comparison
-    columns = list(sensors[0])
+    shared = {
+        key: value for key, value in sensors[0].items()
+        if all(key in sensor and sensor[key] == value for sensor in sensors)
+    }
+    columns = [key for key in sensors[0] if key not in shared]
     return {
         **{key: value for key, value in comparison.items() if key != "sensors"},
+        "sensor_shared_fields": shared,
         "sensor_columns": columns,
         "sensor_rows": [[sensor[column] for column in columns] for sensor in sensors],
-        "encoding": "columnar-comparison-v1",
+        "encoding": "columnar-shared-comparison-v2",
     }
 
 
@@ -91,7 +148,10 @@ def comparison_sensors(comparison: dict[str, Any]) -> list[dict[str, Any]]:
     if "sensor_columns" not in comparison or "sensor_rows" not in comparison:
         raise ValueError("Measured comparison has no recognized sensor encoding.")
     return [
-        dict(zip(comparison["sensor_columns"], row, strict=True))
+        {
+            **comparison.get("sensor_shared_fields", {}),
+            **dict(zip(comparison["sensor_columns"], row, strict=True)),
+        }
         for row in comparison["sensor_rows"]
     ]
 

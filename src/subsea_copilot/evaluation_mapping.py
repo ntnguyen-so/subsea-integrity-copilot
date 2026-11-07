@@ -46,7 +46,7 @@ class LeakMapping(StrictMapping):
 
 class SensorMapping(StrictMapping):
     sensor_id: str
-    kind: Literal["spike", "drift", "offset", "invalid", "missing", "unspecified"]
+    kind: Literal["spike", "drift", "offset", "flatline", "invalid", "missing", "unspecified"]
     assertion: Literal["suspected", "confirmed"]
     quote: SupportingQuote
 
@@ -54,7 +54,7 @@ class SensorMapping(StrictMapping):
 class OutputMapping(StrictMapping):
     version: Literal["agent-output-mapping-v1"]
     leaks: list[LeakMapping] = Field(max_length=12)
-    sensor_issues: list[SensorMapping] = Field(max_length=112)
+    sensor_issues: list[SensorMapping] = Field(max_length=224)
     instrumentation_concern: bool
     instrumentation_quote: SupportingQuote | None
 
@@ -107,12 +107,19 @@ def extraction_messages(packet: dict[str, Any]) -> list[SystemMessage | HumanMes
         "Map a leak only when the agent identifies an observed leak-like pattern or an "
         "investigation/inspection priority for leakage on that pipeline. A generic competing "
         "possibility, 'cannot rule out', or a negated diagnosis is NOT a positive leak label. "
+        "Secondary pressure review, process review or integrity attention alone does not "
+        "assert a leak source on that branch. Several connected branches can show pressure "
+        "changes during one incident. Do not turn every reviewed pressure footprint into "
+        "a separately suspected leak. Require an actual leak-like diagnosis or explicitly "
+        "leak-directed priority for each extracted pipeline. "
         "Copy an inspection interval ONLY when the text explicitly proposes it; 'withheld' "
         "means null. Do not derive bounds from sensor positions. Preserve confirmed versus "
         "suspected. 'Confirmed' means an explicitly confirmed leak or hardware fault, NOT "
         "certainty in an observed spike, gap or invalid reading. Default sensor assertions "
         "to suspected. Record suspect measurement paths, spikes, drift, offsets, invalid readings "
-        "and missing readings by exact catalog ID. Healthy comparison partners are NOT "
+        "flatlines and missing readings by exact catalog ID. A flatline is a recorded "
+        "unchanging/stuck reading, not simply a stable mean; map it only when the agent "
+        "actually identifies that pattern. Healthy comparison partners are NOT "
         "problem sensors. Missing readings alone are NOT an instrumentation diagnosis; "
         "record kind=missing but instrumentation_concern=false unless other suspect "
         "measurement evidence is actually identified. 'Check a sensor' counts only if the "
@@ -124,6 +131,12 @@ def extraction_messages(packet: dict[str, Any]) -> list[SystemMessage | HumanMes
         "unspecified sensor issues just because their pressures are anomalous or independent "
         "reference checks are recommended. A measurement-bias alternative that merely "
         "remains possible in competing_causes is NOT an identified instrumentation concern. "
+        "Do not map numerical spike flags as actual instrument spikes when the text "
+        "explicitly says they do not identify unreliable instruments or are explained "
+        "by the joint pressure pattern. A described abrupt persistent shift to a new "
+        "level in an identified suspect measurement path is an offset; a described "
+        "unchanging/stuck reading is a flatline. Translate those stated patterns, "
+        "but do not infer a type from an unexplained pressure anomaly. "
         "Map an instrumentation concern only when the briefing or regional assessment "
         "identifies concrete measurement inconsistency or a prioritized suspect measurement "
         "path, not a hypothetical cause still being considered. "

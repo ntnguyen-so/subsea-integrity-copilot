@@ -1,5 +1,8 @@
 import { box, node } from "./dom";
 import { agentName } from "./agentwork";
+import { renderSpatialEvaluation, stopSpatialPlayback } from "./evaluation_maps";
+import type { SpatialNetwork } from "./evaluation_maps";
+import type { ConsoleEvent } from "./types";
 
 interface Rate {
   value: number | null;
@@ -16,7 +19,7 @@ interface Issue { sensor_id: string; kind: string; assertion?: string; quote?: Q
 interface Interval { start_m: number; end_m: number }
 interface Leak { segment_id: string; assertion: string; interval: Interval | null; quote: Quote }
 interface Mapping { leaks: Leak[]; sensor_issues: Issue[]; instrumentation_concern: boolean; instrumentation_quote?: Quote | null }
-interface EvaluationCase {
+export interface EvaluationCase {
   case_id: string; name: string; status: string; dataset_sha256: string;
   truth: {
     leak_source: { segment_id: string; chainage_m: number } | null;
@@ -31,9 +34,18 @@ interface EvaluationCase {
   agent_elapsed_seconds?: number; agent_calls?: number;
   traces?: { role: string; trace: Trace | null }[];
   model_receipts?: { observed_model?: string }[];
+  network_id?: string; source_seconds?: number; snapshot_id?: string; input_hash?: string;
+  accepted_report?: boolean; root_id?: string; agent_started_at?: string;
+  authorized_inspection?: { segment_id: string; start_m: number; end_m: number } | null;
+  activity?: ConsoleEvent[];
+  agent_tasks?: {
+    id: string; role: string; state: string; root_id: string; snapshot_id: string;
+    created_at: string; updated_at: string; summary: string | null;
+  }[];
 }
 interface Trace { trace_id?: string; langfuse_url?: string }
 export interface EvaluationReport {
+  version?: string; networks?: SpatialNetwork[]; duration_seconds?: number;
   status: string; cases: EvaluationCase[]; split?: string; seed?: number;
   run_id?: string; agent_model?: string; evaluator_model?: string; planned_cases?: number;
   implementation_sha256?: string; implementation_unchanged?: boolean;
@@ -113,6 +125,22 @@ const labels: Record<string, string> = {
 
 export function renderEvaluation(report: EvaluationReport): void {
   const container = box("evaluation-results");
+  if (report.version === "spatial-evaluation-v1" && report.networks) {
+    container.replaceChildren();
+    renderSpatialEvaluation(container, report);
+    const evidence = raw("details", "", "spatial-evidence");
+    evidence.append(raw("summary", "Detailed metrics, known labels, original reports and Langfuse traces"));
+    const body = raw("div");
+    renderEvidence(report, body);
+    evidence.append(body);
+    container.append(evidence);
+    return;
+  }
+  stopSpatialPlayback();
+  renderEvidence(report, container);
+}
+
+function renderEvidence(report: EvaluationReport, container: HTMLElement): void {
   const opened = new Set([...container.querySelectorAll<HTMLDetailsElement>("details[open]")].map(item => item.dataset.case));
   container.replaceChildren();
   if (report.status === "not_run") {
@@ -155,7 +183,7 @@ export function renderEvaluation(report: EvaluationReport): void {
     details.append(table(["Known source labels · evaluation only", "Extracted agent statements"], [
       [source ? `Leak source on ${source.segment_id} at ${source.chainage_m} m` : "No injected leak", mapping ? intervalText(mapping.leaks) : "No valid mapping available"],
       [issueText(item.truth.sensor_issues), mapping ? issueText(mapping.sensor_issues) : "No valid mapping available"],
-      [`Pressure anomalies: ${item.truth.pressure_anomaly_sensors.join(", ") || "none"}`, item.root_count === 0 ? "No agent invoked" : `Root state: ${item.state || "running"}`],
+      [report.version === "spatial-evaluation-v1" ? "Numerical pressure flags are shown on the map; continuous physical influence is not a binary source label." : `Pressure anomalies: ${item.truth.pressure_anomaly_sensors.join(", ") || "none"}`, item.root_count === 0 ? "No agent invoked" : `Root state: ${item.state || "running"}`],
       [`Missing/invalid values: ${item.truth.missing_value_sensors.join(", ") || "none"}`, item.judge ? `Explanation judge: ${item.judge.status}; ${item.judge.passed ? "passed" : "not passed"}` : "Explanation judge not completed"],
     ]));
     details.append(raw("p", `Agent time: ${item.agent_elapsed_seconds === undefined ? "not reported" : `${item.agent_elapsed_seconds.toFixed(1)} s`}; agent model calls: ${item.agent_calls === undefined ? (item.root_count === 0 ? "0" : "not reported") : item.agent_calls}.`));

@@ -12,11 +12,12 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 from subsea_copilot.api import create_app
 from subsea_copilot.config import Settings
-from subsea_copilot.contracts import AgentRole, Mode
+from subsea_copilot.contracts import AgentRole, Mode, ReplaySession
 from subsea_copilot.monitoring import Monitor
 from subsea_copilot.runtime.scripted import ScriptedChatModel
 from subsea_copilot.runtime.workflow import AgentService
 from subsea_copilot.store import Conflict, Store
+from subsea_copilot.synthetic import SOURCE_VERSION
 from subsea_copilot.telemetry import Telemetry
 from subsea_copilot.validation import ValidationError
 from subsea_copilot.warning import monitoring_warning
@@ -178,13 +179,18 @@ def paused_s7(monitor: Monitor, *, mode: Mode = "scripted"):
     pytest.fail("The extended network never paused on a detector alarm")
 
 
-def test_ten_times_stops_at_first_alarm_and_freezes_until_review(monitor: Monitor) -> None:
+def test_ten_times_acquires_pressure_context_then_freezes_until_review(monitor: Monitor) -> None:
     current, source = paused_s7(monitor)
     assert current.state == "PAUSED"
     assert current.investigation_window_id == current.latest_window_id
     basis = monitor.store.get_window(current.investigation_window_id)
     assert basis.quality.status != "WARMING_UP"
     assert any(finding.anomaly_count > 0 for finding in basis.quality.findings)
+    assert basis.end_seconds > 95
+    assert basis.event.persistence_seconds >= source.dataset.pack.persistence_seconds
+    assert basis.event.segment_ids == ["P5"]
+    assert basis.location is not None and basis.location.status == "located"
+    assert current.clock_seconds == 125
     assert current.detected_alert_keys
     assert all(key.endswith(":pressure") for key in current.detected_alert_keys)
     roots = [task for task in monitor.store.list_tasks(current.id) if not task.parent_id]
@@ -238,6 +244,40 @@ def test_ten_times_stops_at_first_alarm_and_freezes_until_review(monitor: Monito
     resumed = monitor.control(current.id, "play", None, "continue-after-review")
     assert resumed.state == "PLAYING"
     assert resumed.investigation_window_id is None
+
+
+def test_recorded_immediate_pause_policy_is_not_rewritten(monitor: Monitor) -> None:
+    replay = monitor.store.create_replay(ReplaySession(
+        id="legacy-policy-" + uuid.uuid4().hex,
+        tenant_id=monitor.store.tenant_id, site_id=monitor.store.site_id,
+        scenario="S7", source_version=SOURCE_VERSION, seed=2026,
+        mode="scripted", pause_on_anomaly=True,
+    ))
+    assert replay.investigation_context_seconds == 0
+    for step in range(24):
+        current = monitor.control(replay.id, "step", None, f"legacy-step-{step}")
+        if current.investigation_window_id:
+            break
+    assert current.clock_seconds == 100
+    assert monitor.store.get_window(current.investigation_window_id).end_seconds == 95
+
+
+def test_recorded_persistence_policy_keeps_its_original_pause(monitor: Monitor) -> None:
+    replay = monitor.store.create_replay(ReplaySession(
+        id="persistence-policy-" + uuid.uuid4().hex,
+        tenant_id=monitor.store.tenant_id, site_id=monitor.store.site_id,
+        scenario="S7", source_version=SOURCE_VERSION, seed=2026,
+        mode="scripted", pause_on_anomaly=True, investigation_context_seconds=20,
+    ))
+    for step in range(26):
+        current = monitor.control(replay.id, "step", None, f"old-context-{step}")
+        if current.investigation_window_id:
+            break
+    assert current.clock_seconds == 110
+    with pytest.raises(Conflict, match="generation_identity_conflict"):
+        monitor.store.save_replay(
+            current.model_copy(update={"investigation_context_policy": "inspection-context-v2"})
+        )
 
 
 def test_unavailable_agent_is_explicit_and_never_deadlocks_simulation(

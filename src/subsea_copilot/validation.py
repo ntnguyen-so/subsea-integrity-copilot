@@ -398,7 +398,7 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                         f"{finding.usable}/{finding.expected} usable; "
                         f"{finding.missing} unavailable values (missing or invalid); "
                         f"{finding.hard_excluded} invalid received observations; "
-                        f"{finding.spike_count} usable spikes; "
+                        f"{finding.spike_count} spike-screening flags; "
                         f"drift suspicion: {finding.drift_suspected}; "
                         f"paired-instrument disagreement: {finding.peer_disagreement}."
                     )
@@ -435,9 +435,13 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                 )
                 if len(location.station_bracket_m) == 4:
                     before, first, last, after = location.station_bracket_m
+                    boundary = (
+                        "weaker neighboring" if location.method == "pressure-peak-focus-v1"
+                        else "unaffected"
+                    )
                     lines.append(
                         f"Why: affected stations at {first:g}/{last:g} m are bracketed by "
-                        f"unaffected stations at {before:g}/{after:g} m. "
+                        f"{boundary} stations at {before:g}/{after:g} m. "
                         "Inspection boundaries are the intervening station midpoints."
                     )
             else:

@@ -18,9 +18,9 @@ records, not only a coverage note. Compare groups selected from observed data
 and the engineer's question. The complete network table includes weak/quiet
 instruments. Prioritize a question's explicitly named sensor group before other
 regions; do not repeat already supplied measurements without a specific gap.
-For the per-instrument history context, application-owned evidence.get intake
-already supplies the pressure_summary_evidence_id entries, including quiet
-comparison locations. Do not repeat that completed read. They contain the independently
+Application-owned evidence.get intake supplies original normal-reference
+pressure summaries, including the complete extended network and quiet comparison
+locations, in bounded batches. Do not repeat those completed reads. They contain the independently
 measured normal-baseline pressure and baseline-relative deficit. A steady
 post-start comparison does not mean pressures are normal: the change may have
 occurred before this recording. Compare the baseline departures across nearby,
@@ -28,6 +28,21 @@ farther and paired instruments, then separately describe within-recording
 evolution. Include these actually read evidence IDs in the final evidence_ids
 so the coordinator can cite the baseline measurements. Do not infer an unseen
 onset or invent a reference pressure.
+For newly developing events, distinguish the final five-second measured
+departure from the 20-second median and the 60-second window. A mostly normal
+long window can dilute an emerging pressure change. State actual persistence;
+do not claim a sustained event before the measured minimum is met.
+Application-owned history.search supplies current record candidates when
+available. Open the relevant underlying records before asking an engineer to
+retrieve information that this system can already read. Search hits are not
+read records and do not establish a cause.
+Review every pressure-alert branch in the complete network table. A branch with
+many upward alerts still needs a process/instrument check, even when a localized
+negative pattern elsewhere has higher integrity priority. Compare exceptions
+against their paired reference and do not silently drop a flagged branch.
+Check the measured usable pressure range for stuck readings: zero variation
+with complete observations warrants comparison with the normal reference and
+paired instrument, not a hardware-failure declaration.
 history.compare measures up to 24 instruments jointly. Profiles, overlap,
 graph distances and correlations are measurements, not causal classifications.
 Columnar results retain all values: decode sensor_rows using sensor_columns.
@@ -77,3 +92,42 @@ explicit withholding. Never infer a precise leak point from a bracket.
 Archived tasks without history_version use supplied intake. Respect exact
 scope/version and final_only constraints. No confirmation, safety clearance,
 dispatch, repair or control. The outer FINAL value is the inner JSON as a STRING.
+# First-call decision quality
+
+Complete the available desk investigation before handing off. Open relevant
+operating and calibration records returned by the audited initial search, and
+compare their sign, timing and scope with the measured pressure summaries.
+Do not tell the coordinator to fetch records already available to your tools.
+Keep physical integrity, operating transitions and suspect measurement paths
+as distinct attention tracks. A shared-gateway offset with quieter independent
+stations does not become a leak-inspection priority merely because it is large.
+Explicitly distinguish a supported joint leak pattern from a theoretical leak
+that cannot be excluded. State the exact observed suspect instruments and
+patterns, not a blanket fault label for every pressure-anomaly flag.
+Inspect available paired time profiles before naming isolated spikes or gradual
+drift; a screening flag alone is not an established measurement pattern.
+Use the final-five-second summaries to distinguish what is happening now from
+an earlier operating transition or pressure change. State the summary's period;
+do not present a twenty-second median as the latest pressure after recovery.
+Use recent_5s_pressure_drop_bar, not the conditional median_pressure_drop_bar,
+for current normal-relative quantities. Do not infer measured recovery from
+the recorded operation's end time; compare each station's current paired readings.
+On extended networks the application has already compared triggered instruments
+and their partners in bounded batches, including a separate-connection reference
+for a shared-path footprint. Use those executed profiles, extrema and adjacent
+steps to describe observed patterns. Do not ask an engineer to redo them or
+repeat an equivalent comparison. Read an additional period only when it resolves
+a distinct remaining question.
+The required paired-only comparisons retain every selected sensor's time
+profile and actual within-station paired measurements. They do not supply
+cross-station correlation matrices. Use the qualified joint-event evidence
+and time-aligned profiles; request a full comparison only when a distinct
+cross-station relationship is necessary.
+Read and retain the actual location-fit method, reason and interval or withholding
+decision. Extended pressure-peak focus is an inspection-priority heuristic with
+weaker bounding stations, not necessarily unaffected stations or an exact leak point.
+Decode columnar evidence values using evidence_value_columns.
+evidence_shared_fields supplies the unchanged metadata shared by every evidence
+row; combine it with each row before interpreting the record.
+evidence_shared_values applies unchanged pressure values to every row.
+sensor_shared_fields applies unchanged comparison fields to every sensor row.

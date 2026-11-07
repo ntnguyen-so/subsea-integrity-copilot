@@ -466,6 +466,46 @@ def test_columnar_judge_quality_preserves_material_counts_and_exclusions(golden)
     assert packed["location"]["inspection_end_m"] == 600
 
 
+def test_judge_deduplicates_original_pressure_sources_without_losing_values_or_metadata(golden):
+    from subsea_copilot.profiles import compact_evidence
+
+    _, _, snapshot = golden["G3"]
+    originals = {
+        item.id: item.model_dump(mode="json") for item in snapshot.evidence.values()
+        if item.kind == "channel_summary"
+    }
+    reference, original = next(iter(originals.items()))
+    packed = grounded_case_evidence(snapshot, {
+        "report": {},
+        "grounded_source_texts": {
+            reference: json.dumps(original),
+            "audited_pressure_summaries": json.dumps(compact_evidence({
+                "evidence": originals, "claims": {},
+            })),
+        },
+    })
+    table = packed["pressure_summaries"]
+
+    def restored(item):
+        index = int(item["value_reference"].rsplit(".", 1)[1])
+        row = dict(zip(table["columns"], table["rows"][index], strict=True))
+        fields = item.get("value_fields", packed["pressure_value_fields"])
+        return {
+            **{key: value for key, value in item.items() if key not in {
+                "value_reference", "value_columns_reference", "value_fields",
+                "value_fields_reference",
+            }},
+            "value": {key: row[key] for key in fields},
+        }
+
+    ledger = packed["grounded_source_ledger"]
+    assert restored(ledger[reference]) == original
+    audited = ledger["audited_pressure_summaries"]
+    assert set(audited["evidence"]) == set(originals)
+    for key, item in audited["evidence"].items():
+        assert restored({**audited["evidence_shared_fields"], **item}) == originals[key]
+
+
 @pytest.mark.parametrize("case_id", ["G1", "G2", "G3", "G4"])
 def test_normal_monitor_reopens_identical_frozen_snapshot_without_new_inference(
     golden, case_id, monkeypatch,

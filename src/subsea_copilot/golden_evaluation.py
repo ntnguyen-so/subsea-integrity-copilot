@@ -21,7 +21,7 @@ from .grounding import source_texts
 from .ingest import CanonicalBuffer, normalize_records
 from .monitoring import Monitor, SourceState
 from .operations_evaluation import audit_operations
-from .profiles import compact_comparison
+from .profiles import compact_comparison, expanded_evidence
 from .qualification import MODEL_METADATA_KEYS, TERMINALS, qualification_model_factory
 from .replay_sources import freeze_replay_source, load_frozen_replay_source
 from .runtime.checkpointer import postgres_checkpointer
@@ -33,7 +33,7 @@ from .telemetry import Telemetry
 
 
 def install_golden_input(
-    monitor: Monitor, dataset: ReplayDataset, mode: Mode,
+    monitor: Monitor, dataset: ReplayDataset, mode: Mode, *, duration_seconds: int = 120,
 ) -> ReplaySession:
     """Evaluation-only source adapter; unchanged production clocks/gates/auto dispatch.
 
@@ -45,7 +45,7 @@ def install_golden_input(
         id="golden-" + uuid4().hex, tenant_id=monitor.store.tenant_id,
         site_id=dataset.pack.id, scenario=freeze_replay_source(dataset),
         source_version=SOURCE_VERSION,
-        duration_seconds=120, epoch=dataset.epoch, mode=mode,
+        duration_seconds=duration_seconds, epoch=dataset.epoch, mode=mode,
         workflow="agent_assisted", pause_on_anomaly=True,
     ))
     monitor._sources[replay.id] = SourceState(
@@ -69,6 +69,34 @@ def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> d
         finding_rows=[[finding[column] for column in finding_columns] for finding in findings],
         finding_encoding="columnar-quality-findings-v1",
     )
+    summaries = [
+        {"evidence_id": item.id, "sensor_id": item.sensor_id, **item.value}
+        for item in snapshot.evidence.values()
+        if item.kind == "channel_summary" and isinstance(item.value, dict)
+    ]
+    columns = list(summaries[0]) if summaries else []
+    pressure_indices = {item["evidence_id"]: index for index, item in enumerate(summaries)}
+    pressure_value_fields = [
+        field for field in columns if field not in {"evidence_id", "sensor_id"}
+    ]
+
+    def pressure_source(reference: str, original: dict[str, Any]) -> dict[str, Any]:
+        index = pressure_indices[reference]
+        if original["value"] != {
+            key: summaries[index][key] for key in original["value"]
+        }:
+            raise ValueError("Original pressure source differs from its measured table.")
+        return {
+            **{key: value for key, value in original.items() if key != "value"},
+            "value_reference": f"case_evidence.pressure_summaries.rows.{index}",
+            "value_columns_reference": "case_evidence.pressure_summaries.columns",
+            **(
+                {"value_fields_reference": "case_evidence.pressure_value_fields"}
+                if set(original["value"]) == set(pressure_value_fields)
+                else {"value_fields": list(original["value"])}
+            ),
+        }
+
     source_ledger = {}
     for reference, serialized in audit.get("grounded_source_texts", {}).items():
         claim = snapshot.claims.get(reference)
@@ -89,6 +117,26 @@ def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> d
                     "coverage": "quality", "hypothesis": "event", "location": "location",
                 }[claim.kind],
             }
+        elif reference == "audited_pressure_summaries":
+            originals = expanded_evidence(json.loads(serialized))["evidence"]
+            linked = {
+                key: pressure_source(key, value) for key, value in originals.items()
+            }
+            items = list(linked.values())
+            shared = {
+                key: value for key, value in items[0].items()
+                if all(key in item and item[key] == value for item in items)
+            } if items else {}
+            source_ledger[reference] = {
+                "encoding": "shared-referenced-pressure-evidence-v1",
+                "evidence_shared_fields": shared,
+                "evidence": {
+                    key: {field: value for field, value in item.items() if field not in shared}
+                    for key, item in linked.items()
+                },
+            }
+        elif reference in pressure_indices:
+            source_ledger[reference] = pressure_source(reference, json.loads(serialized))
         else:
             document_index = next((
                 i for i, document in enumerate(audit["report"].get("documents", []))
@@ -109,12 +157,6 @@ def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> d
                 }
             else:
                 source_ledger[reference] = json.loads(serialized)
-    summaries = [
-        {"evidence_id": item.id, "sensor_id": item.sensor_id, **item.value}
-        for item in snapshot.evidence.values()
-        if item.kind == "channel_summary" and isinstance(item.value, dict)
-    ]
-    columns = list(summaries[0]) if summaries else []
     evidence = {
         "snapshot_id": snapshot.id, "input_hash": snapshot.input_hash,
         "window": {
@@ -132,6 +174,7 @@ def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> d
             "encoding": "columnar-pressure-summaries-v1", "columns": columns,
             "rows": [[row[column] for column in columns] for row in summaries],
         },
+        "pressure_value_fields": pressure_value_fields,
         "claim_ledger": {
             key: value.model_dump(mode="json") for key, value in snapshot.claims.items()
             if not source_ledger and value.kind != "sensor_health"
@@ -144,19 +187,10 @@ def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> d
         ],
         "runtime_validation_checks": audit.get("checks", {}),
     }
-    # Full numerical precision remains in persisted snapshots/source receipts.
-    def rounded(value: Any) -> Any:
-        if isinstance(value, float):
-            return round(value, 6)
-        if isinstance(value, list):
-            return [rounded(item) for item in value]
-        if isinstance(value, dict):
-            return {key: rounded(item) for key, item in value.items()}
-        return value
-
-    evidence["numeric_precision"] = "Six decimal places; full precision in persisted receipts."
-    rounded_evidence: dict[str, Any] = rounded(evidence)
-    return rounded_evidence
+    evidence["numeric_precision"] = (
+        "Full persisted precision; shared measured values are referenced."
+    )
+    return evidence
 
 
 def judge_candidate_report(report: dict[str, Any]) -> dict[str, Any]:

@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime, timedelta
 from statistics import median
 
@@ -48,6 +49,38 @@ def test_compact_documents_preserve_bodies_scope_and_nulls_without_discarding_ex
     assert compact["scope"] == result["scope"]
     heterogeneous = {"documents": [documents[0], {**documents[1], "extra": "retain"}]}
     assert compact_documents(heterogeneous) == heterogeneous
+
+
+def test_large_pressure_intake_is_lossless_without_repeating_value_column_names():
+    values = {
+        "baseline_median": 80.123456789,
+        "baseline_scale": 0.04,
+        "recent_pressure_drop_bar": 0.654321,
+        "recent_period_seconds": [130, 150],
+        "recent_5s_pressure_drop_bar": None,
+        "recent_5s_period_seconds": [145, 150],
+        "recent_5s_usable_samples": 0,
+        "usable_pressure_range_bar": 1.234567,
+    }
+    result = {
+        "evidence": {
+            f"pressure-{index}": {
+                "id": f"pressure-{index}", "kind": "channel_summary",
+                "sensor_id": f"P5-ST{index}-A", "channel": "pressure",
+                "value": {**values, "baseline_median": 80 + index / 100},
+            }
+            for index in range(112)
+        },
+        "claims": {},
+        "pagination": {"explicit_ids_required": True},
+    }
+    original = json.dumps(result)
+    compact = compact_evidence(result)
+    assert len(json.dumps(compact)) < len(original) * 0.65
+    assert expanded_evidence(compact) == result
+    assert json.dumps(result) == original
+    result["evidence"]["pressure-0"]["value"]["extra_measurement"] = 1.2
+    assert expanded_evidence(compact_evidence(result)) == result
 
 
 @pytest.mark.parametrize(

@@ -137,6 +137,7 @@ function updateControls(): void {
 function switchTab(name: string, focus = false): void {
   const tabs = [...document.querySelectorAll<HTMLButtonElement>("[role=tab]")];
   activeTab = name;
+  document.body.classList.toggle("evaluation-active", name === "evaluation");
   for (const tab of tabs) {
     const selected = tab.dataset.tab === name;
     tab.setAttribute("aria-selected", String(selected));
@@ -408,7 +409,13 @@ function renderProjection(): void {
         : hold.unavailable ? "No reviewed agent report is available. Detector alerts remain active; continuing does not clear them."
           : "Agent checks finished. Review the report, then Continue monitoring."} Only the simulation pauses, never a production safety feed.`
     : "");
-  text("simulation-policy", "Agent investigations pause the simulated source; recorded runs retain their playback policy.");
+  text("simulation-policy", replay.workflow === "sensor_alerts"
+    ? "Pressure monitoring only; no agents are launched."
+    : replay.pending_pressure_alert_seconds != null && !replay.investigation_window_id
+      ? `Pressure anomaly detected. Collecting up to ${replay.investigation_context_seconds ?? 0} additional source seconds to assess persistence before pausing for agents.`
+      : replay.pause_on_anomaly && (replay.investigation_context_seconds ?? 0) > 0
+        ? `Alerts appear immediately. Agents pause the source once pressure persistence is established, or after at most ${replay.investigation_context_seconds} additional source seconds.`
+        : "Agent investigations pause the simulated source; recorded runs retain their playback policy.");
   text("site-name", pack.name);
   renderClocks();
   text("live-bounds", latest ? `${bounds(latest.window_start, latest.window_end)} · ${latest.quality.status}` : `WARMING_UP / no completed window · width ${pack.window_seconds}s + lateness ${pack.lateness_seconds}s`);

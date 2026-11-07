@@ -146,6 +146,9 @@ class Monitor:
                     mode=mode,
                     workflow=workflow,
                     pause_on_anomaly=pause_on_anomaly,
+                    investigation_context_seconds=30
+                    if pause_on_anomaly and workflow == "agent_assisted" else 0,
+                    investigation_context_policy="inspection-context-v2",
                     epoch=dataset.epoch,
                 )
             )
@@ -364,8 +367,30 @@ class Monitor:
         keys = _pressure_alert_keys(snapshot)
         current = self.store.get_replay(session.id)
         raised = set(keys) - set(current.detected_alert_keys)
-        changes: dict[str, object] = {"detected_alert_keys": keys}
-        if raised:
+        pending = current.pending_pressure_alert_seconds
+        if raised and pending is None:
+            pending = snapshot.end_seconds
+        if not raised:
+            pending = None
+        ready = bool(raised) and (
+            current.investigation_context_seconds == 0
+            or (
+                snapshot.event.persistence_seconds >= self.pack_for(session.id).persistence_seconds
+                if current.investigation_context_policy == "pressure-persistence-v1"
+                else bool(
+                    snapshot.event.eligible_location and snapshot.location
+                    and snapshot.location.status == "located"
+                )
+            )
+            or pending is not None
+            and snapshot.end_seconds - pending >= current.investigation_context_seconds
+        )
+        changes: dict[str, object] = {
+            "pending_pressure_alert_seconds": None if ready else pending,
+        }
+        if ready or not raised:
+            changes["detected_alert_keys"] = keys
+        if ready:
             changes.update(
                 state="PAUSED",
                 investigation_window_id=snapshot.id,
@@ -375,18 +400,19 @@ class Monitor:
         saved = self.store.save_replay(
             current.model_copy(update=changes), expected_version=current.version
         )
-        if raised:
+        if ready:
             self.store.publish_event(
                 session.id,
                 "replay.investigation_paused",
                 {
                     "new_alert_count": len(raised),
                     "clock_seconds": saved.clock_seconds,
-                    "reason": "New pressure anomalies; simulation waits for fresh agent checks",
+                    "reason": "New pressure anomalies with acquired context; simulation waits "
+                    "for fresh agent checks",
                 },
                 snapshot_id=snapshot.id,
             )
-        return bool(raised)
+        return ready
 
     def _episode(self, session: ReplaySession, snapshot: WindowSnapshot) -> None:
         if session.workflow == "sensor_alerts":

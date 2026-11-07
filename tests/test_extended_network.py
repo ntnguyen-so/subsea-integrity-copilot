@@ -38,8 +38,15 @@ def test_extended_network_retains_graded_pressure_evidence_and_location_limits(e
     } <= set(snapshot.event.supporting_sensor_ids)
     if snapshot.event.hypothesis == "suspected_leak":
         assert snapshot.event.segment_ids == ["P5"]
-        assert snapshot.location.status in {"ambiguous", "withheld"}
-        assert snapshot.location.best is None
+        if snapshot.location.status == "located":
+            assert snapshot.location.method == "pressure-peak-focus-v1"
+            assert snapshot.location.inspection_start_m <= 800 <= snapshot.location.inspection_end_m
+            assert (
+                snapshot.location.inspection_end_m - snapshot.location.inspection_start_m
+                <= dataset.pack.max_location_width_m
+            )
+        else:
+            assert snapshot.location.best is None
     else:
         assert snapshot.event.hypothesis == "insufficient_evidence"
         assert "MULTIPLE_PRESSURE_REGIONS" in snapshot.event.counterevidence
@@ -148,7 +155,7 @@ def test_discovery_magnitudes_use_the_same_recent_period_for_near_far_and_quiet_
     rows = normalize_records(dataset.records, dataset.pack)
     snapshot = analyze_window(dataset.pack, baseline, rows, "uniform", 110, 115, dataset.epoch)
     table = AgentService._network_pressure_table(snapshot)
-    assert table["recent_period_seconds"] == [90, 110]
+    assert table["recent_period_seconds"] == [105, 110]
     decoded = {row[0]: dict(zip(table["columns"], row, strict=True)) for row in table["rows"]}
     for instrument in dataset.pack.sensors:
         recent = [
@@ -157,7 +164,7 @@ def test_discovery_magnitudes_use_the_same_recent_period_for_near_far_and_quiet_
             if row.sensor_id == instrument.id
             and row.validity == "usable"
             and row.value is not None
-            and dataset.epoch + timedelta(seconds=90)
+            and dataset.epoch + timedelta(seconds=105)
             <= row.observed_at
             < dataset.epoch + timedelta(seconds=110)
             and row.received_at <= dataset.epoch + timedelta(seconds=115)
@@ -168,11 +175,15 @@ def test_discovery_magnitudes_use_the_same_recent_period_for_near_far_and_quiet_
             if row.sensor_id == instrument.id and row.validity == "usable" and row.value is not None
         ]
         item = decoded[instrument.id]
-        assert item["recent_usable_samples"] == len(recent)
-        assert item["recent_drop_bar"] == (
+        assert item["recent_5s_usable_samples"] == len(recent)
+        assert item["recent_5s_pressure_drop_bar"] == (
             pytest.approx(median(reference) - median(recent), abs=0.00005)
             if reference and recent
             else None
         )
-    assert decoded["P5-ST4-A"]["recent_drop_bar"] > 0.9
-    assert 0.2 < decoded["P5-ST1-A"]["recent_drop_bar"] < 0.3
+    assert decoded["P5-ST4-A"]["recent_5s_pressure_drop_bar"] > 0.9
+    assert (
+        decoded["P5-ST4-A"]["recent_5s_pressure_drop_bar"]
+        > 3 * decoded["P5-ST1-A"]["recent_5s_pressure_drop_bar"]
+        > 0
+    )

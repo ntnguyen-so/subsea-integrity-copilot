@@ -10,7 +10,7 @@ test("evaluation opens authenticated recordings without submitting inference or 
   });
   expect(login.status()).toBe(200);
   const report: EvaluationReport = await (await page.request.get("/api/evaluation")).json();
-  expect(report.cases).toHaveLength(8);
+  expect(report.cases).toHaveLength(report.version === "spatial-evaluation-v1" ? 9 : 8);
   const postRequests: string[] = [];
   page.on("request", request => { if (request.method() === "POST") postRequests.push(request.url()); });
   await page.goto("/");
@@ -19,7 +19,12 @@ test("evaluation opens authenticated recordings without submitting inference or 
   await expect(page.getByRole("tab", { name: "Evaluation" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#panel-evaluation")).toBeVisible();
   await expect(page.locator("#panel-live")).toBeHidden();
-  await expect(page.locator(".evaluation-case")).toHaveCount(8);
+  if (report.version === "spatial-evaluation-v1") {
+    await expect(page.locator("#evaluation-truth-map [data-sensor]")).toHaveCount(112);
+    await expect(page.locator("#evaluation-agent-map [data-sensor]")).toHaveCount(112);
+    await page.locator(".spatial-evidence > summary").click();
+  }
+  await expect(page.locator(".evaluation-case")).toHaveCount(report.cases.length);
   await expect(page.locator("#evaluation-results")).toContainText("deterministic comparison");
   if (report.metrics) {
     await expect(page.locator("#evaluation-results")).toContainText(
@@ -29,12 +34,16 @@ test("evaluation opens authenticated recordings without submitting inference or 
     await expect(page.getByRole("row").filter({ hasText: "Agent issue-type mapping · sensor/window/type" }))
       .toContainText(`${issues.tp} / ${issues.fp} / ${issues.fn}`);
   }
-  await page.locator('.evaluation-case[data-case="G1"] > summary').click();
-  await expect(page.locator('.evaluation-case[data-case="G1"]')).toContainText("Leak source on P1 at 400 m");
-  await expect(page.locator('.evaluation-case[data-case="G1"] .evaluation-hash')).toContainText(report.cases[0].dataset_sha256);
-  if (report.cases[0].answer) {
+  const first = report.cases.find(item => item.answer) || report.cases[0];
+  const caseSelector = `.evaluation-case[data-case="${first.case_id}"]`;
+  await page.locator(`${caseSelector} > summary`).click();
+  if (first.truth.leak_source) await expect(page.locator(caseSelector)).toContainText(
+    `Leak source on ${first.truth.leak_source.segment_id} at ${first.truth.leak_source.chainage_m} m`,
+  );
+  await expect(page.locator(`${caseSelector} .evaluation-hash`)).toContainText(first.dataset_sha256);
+  if (first.answer) {
     await page.getByText("Complete accepted report · sensor groups and checked evidence", { exact: true }).first().click();
-    await expect(page.locator('.evaluation-case[data-case="G1"] details .evaluation-answer')).toHaveText(report.cases[0].answer);
+    await expect(page.locator(`${caseSelector} details .evaluation-answer`)).toHaveText(first.answer);
   }
   for (const item of report.cases) {
     const source = item.truth.leak_source;

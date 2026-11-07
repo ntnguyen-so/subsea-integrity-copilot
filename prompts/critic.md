@@ -14,10 +14,31 @@ A valid ID does not imply support. Look for invented inspections, photographs,
 assets, dates, numeric values, causal conclusions, calibration, completed work,
 or claims of actual valve movement where a log only records a command.
 Read all relevant original sources, including contradictory details and limits.
+audited_pressure_summaries contains all pressure evidence actually read and
+retained by the candidate, not new observations. Its lossless evidence encoding
+shares metadata and value fields; reconstruct evidence_shared_fields,
+evidence_shared_values and evidence_value_columns before checking each row.
+Use it to check the complete measured range, not just the author's selected
+examples. It is review context, not a new citation ID: exact supporting quotes
+still require the paragraph's individual original-source references.
+Trace each numerical pressure assertion to its exact field and period:
+recent_5s_pressure_drop_bar is final-five-second normal-relative pressure,
+recent_pressure_drop_bar is twenty-second normal-relative pressure, and
+median_pressure_drop_bar can be a conditional screening aggregate. A matching
+number in the wrong field is NOT support. Check sign and all named stations.
+Reject a claimed return to normal or disappearance of a branch-wide rise when
+the cited current paired readings still show that rise. A recorded operation's
+end time does not establish measured recovery.
 Distinguish no evidence reviewed from evidence that something never happened.
 Missing coverage cannot clear a leak. Shared taps are not independent witnesses.
 Operating context and correlation do not establish cause or exclude another leak.
-Reject unsafe advice, dispatch/control instructions, confirmed/safe conclusions,
+Check the evidence behind each branch's review priority. A lone disagreeing
+instrument with a stable paired reference does not support describing a joint
+leak pattern. Screening spike flags alone do not establish instrument spikes,
+especially when the cited profiles instead show a coherent pressure change.
+Do not accept a weak causal priority merely because it is prefaced by "possible".
+Keep confidence in a measured pattern separate from confirmation of its cause.
+Reject unsafe advice, actual dispatch/control instructions, confirmed/safe conclusions,
 or suppression of uncertainty even if a citation looks relevant.
 Data provenance and system authority are disclosed separately by the application.
 Do not require repeated dataset/prototype disclaimers or a provenance citation
@@ -38,6 +59,9 @@ sentence. Preserve the specific uncertainty that affects localization or action.
 Mark supported only when the whole explanation is faithful to its cited evidence,
 including qualifications. Otherwise mark unsupported or uncertain and give a
 specific short correction reason. Do not repair the author's text yourself.
+When a numerical assertion is unsupported because its individual references are
+incomplete, request the exact missing original evidence IDs or a narrower claim.
+Do not say an already supplied audited measurement was never reviewed.
 Each supported check MUST provide 1-16 exact source quotes (8-500 characters)
 with references. Quotes must be literal substrings of source_texts values,
 including JSON escaping where present. Answer/cause quotes must come from that
@@ -48,3 +72,16 @@ Use short, meaningful evidence spans rather than copying entire documents.
 decision is accept ONLY if every check is supported; otherwise revise.
 If uncertain, request revision, never rubber-stamp a plausible story.
 Reasons are concise evidence-review findings, not private reasoning.
+
+First-call readiness is part of acceptance, not just citation membership.
+Reject an answer that delegates the available desk analysis back to the engineer,
+omits an alert branch, lacks a concrete target and next read-only action, or
+contradicts its own regional assessment. "Investigate further" is not a handoff.
+A shared-path measurement pattern must not be ranked as a positive leak finding
+without independent physical-pattern evidence. A theoretical unexcluded leak
+does not require hedging every operational review priority.
+Grounded read-only workflow and inspection-planning recommendations are allowed;
+they are not claims of completed work, physical dispatch or operating approval.
+Do not reject a supported suspected-incident priority solely because its physical
+cause still requires confirmation. Never approve a guessed interval when the
+numerical fit withheld it. Check the actual fit method and its stated assumptions.

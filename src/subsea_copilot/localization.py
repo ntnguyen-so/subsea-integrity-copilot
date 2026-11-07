@@ -7,7 +7,7 @@ from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from statistics import median
 
-from .contracts import LocationCandidate, LocationFit, PipelineSegment, Point, SitePack
+from .contracts import LocationCandidate, LocationFit, PipelineSegment, Point, Sensor, SitePack
 
 
 def point_at_chainage(segment: PipelineSegment, chainage_m: float) -> Point:
@@ -77,6 +77,8 @@ def locate(
     scales: Mapping[str, float],
     segment_ids: Sequence[str],
     weights: Mapping[str, float] | None = None,
+    *,
+    focus_deficits: Mapping[str, float] | None = None,
 ) -> LocationFit:
     stations: dict[tuple[str, float], list[bool]] = defaultdict(list)
     observers = []
@@ -109,15 +111,19 @@ def locate(
     ]
     before = [chainage for chainage in healthy if chainage < positions[0]]
     after = [chainage for chainage in healthy if chainage > positions[-1]]
+    if any(positions[0] < chainage < positions[-1] for chainage in healthy):
+        return LocationFit(status="ambiguous", reason="Disconnected pressure-drop regions")
     if not before or not after:
+        if focus_deficits is not None:
+            return _pressure_peak_focus(pack, segment_id, focus_deficits, scales, weights)
         return LocationFit(
             status="withheld", reason="No usable unaffected pressure stations on both sides"
         )
-    if any(positions[0] < chainage < positions[-1] for chainage in healthy):
-        return LocationFit(status="ambiguous", reason="Disconnected pressure-drop regions")
     lower = (max(before) + positions[0]) / 2
     upper = (positions[-1] + min(after)) / 2
     if upper - lower > pack.max_location_width_m:
+        if focus_deficits is not None:
+            return _pressure_peak_focus(pack, segment_id, focus_deficits, scales, weights)
         return LocationFit(status="withheld", reason="Inspection bracket exceeds qualified width")
     segment = next(segment for segment in pack.segments if segment.id == segment_id)
 
@@ -137,4 +143,84 @@ def locate(
         station_bracket_m=[max(before), positions[0], positions[-1], min(after)],
         reason="Priority inspection interval between station midpoints; not an exact leak location "
         "or a confidence interval",
+    )
+
+
+def _pressure_peak_focus(
+    pack: SitePack,
+    segment_id: str,
+    deficits: Mapping[str, float],
+    scales: Mapping[str, float],
+    weights: Mapping[str, float] | None,
+) -> LocationFit:
+    """Bound a prominent pressure focus, not the full above-threshold footprint."""
+    grouped: dict[float, list[Sensor]] = defaultdict(list)
+    for sensor in pack.sensors:
+        if sensor.segment_id == segment_id:
+            grouped[sensor.chainage_m].append(sensor)
+    positions = sorted(grouped)
+    measured: dict[float, float] = {}
+    bands: dict[float, float] = {}
+    for position, sensors in grouped.items():
+        if len(sensors) < 2 or any(
+            sensor.id not in deficits or sensor.id not in scales or scales[sensor.id] <= 0
+            or (weights is not None and weights.get(sensor.id, 0) < pack.min_coverage)
+            for sensor in sensors
+        ):
+            continue
+        values = [deficits[sensor.id] for sensor in sensors]
+        band = pack.anomaly_threshold * max(scales[sensor.id] for sensor in sensors)
+        if max(values) - min(values) <= band:
+            measured[position] = median(values)
+            bands[position] = band
+    if not measured:
+        return LocationFit(status="withheld", reason="No usable paired pressure-peak observations")
+    peak = max(measured.values())
+    band = max(bands.values())
+    core = sorted(position for position, value in measured.items() if peak - value <= band)
+    first, last = positions.index(core[0]), positions.index(core[-1])
+    if peak <= band or first == 0 or last == len(positions) - 1:
+        return LocationFit(status="withheld", reason="Pressure peak has no bounding station pair")
+    if positions[first:last + 1] != core:
+        return LocationFit(
+            status="ambiguous", reason="Multiple or incompletely observed pressure peaks",
+        )
+    before, after = positions[first - 1], positions[last + 1]
+    if before not in measured or after not in measured:
+        return LocationFit(
+            status="withheld", reason="Pressure-peak comparison station is unavailable",
+        )
+    if min(measured[position] for position in core) - max(measured[before], measured[after]) < band:
+        return LocationFit(
+            status="withheld",
+            reason="Neighboring pressure contrast is below baseline noise allowance",
+        )
+    witnesses = [sensor for position in [before, *core, after] for sensor in grouped[position]]
+    if (
+        len(witnesses) < pack.min_observers
+        or len({sensor.station_id for sensor in witnesses}) < pack.min_stations
+        or len({sensor.failure_domain_id for sensor in witnesses}) < pack.min_failure_domains
+    ):
+        return LocationFit(
+            status="withheld", reason="Pressure-peak comparisons lack independent observers",
+        )
+    lower, upper = (before + core[0]) / 2, (core[-1] + after) / 2
+    if upper - lower > pack.max_location_width_m:
+        return LocationFit(status="withheld", reason="Pressure-peak focus exceeds qualified width")
+    segment = next(segment for segment in pack.segments if segment.id == segment_id)
+    candidates = [
+        LocationCandidate(
+            segment_id=segment_id, chainage_m=value, position=point_at_chainage(segment, value),
+        )
+        for value in [median([lower, upper]), lower, upper]
+    ]
+    return LocationFit(
+        status="located", best=candidates[0], compatible=candidates[1:],
+        inspection_start_m=lower, inspection_end_m=upper,
+        station_bracket_m=[before, core[0], core[-1], after],
+        method="pressure-peak-focus-v1",
+        reason="Priority inspection focus around a unique measured pressure-deficit peak, "
+        "bounded by weaker neighboring stations. These stations need not be unaffected. "
+        "This is a spatial pressure-focus heuristic, not hydraulic leak coordinates "
+        "or a confidence interval.",
     )

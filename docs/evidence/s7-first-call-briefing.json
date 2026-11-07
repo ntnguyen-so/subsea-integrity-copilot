@@ -1,0 +1,89 @@
+{
+  "generation_id": "replay-fc3707cc1040aa08b453b791",
+  "root_id": "eb652bed-24d7-52f9-9b29-1e6038dc080f",
+  "state": "SUCCEEDED",
+  "error_code": null,
+  "snapshot_id": "window-83e478ebb2176c51cbb2bd6823bf92f402a804638042596d2b43124dee57493d",
+  "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+  "parameter_version": "pressure-window-v4",
+  "window_end": 120,
+  "clock": 125.0,
+  "persistence_seconds": 17.0,
+  "location": {
+    "status": "located",
+    "best": {
+      "segment_id": "P5",
+      "chainage_m": 800.0,
+      "position": {
+        "x": -800.0,
+        "y": 1600.0
+      },
+      "residual": null,
+      "strength": null
+    },
+    "compatible": [
+      {
+        "segment_id": "P5",
+        "chainage_m": 600.0,
+        "position": {
+          "x": -920.0,
+          "y": 1440.0
+        },
+        "residual": null,
+        "strength": null
+      },
+      {
+        "segment_id": "P5",
+        "chainage_m": 1000.0,
+        "position": {
+          "x": -680.0,
+          "y": 1760.0
+        },
+        "residual": null,
+        "strength": null
+      }
+    ],
+    "reason": "Priority inspection focus around a unique measured pressure-deficit peak, bounded by weaker neighboring stations. These stations need not be unaffected. This is a spatial pressure-focus heuristic, not hydraulic leak coordinates or a confidence interval.",
+    "method": "pressure-peak-focus-v1",
+    "grid_m": 0.0,
+    "inspection_start_m": 600.0,
+    "inspection_end_m": 1000.0,
+    "station_bracket_m": [
+      500.0,
+      700.0,
+      900.0,
+      1100.0
+    ]
+  },
+  "elapsed_seconds": 743.875,
+  "traces": [
+    {
+      "task_id": "eb652bed-24d7-52f9-9b29-1e6038dc080f",
+      "trace": {
+        "trace_id": "44b05a3512369ea892f69f67025a4ac8",
+        "span_id": "ef49432edd8bfd9c",
+        "attempt_id": "55e4f7d1-ebb9-4909-8741-6398d3ece4cc",
+        "session_id": "70232154eb2366600ee24acd61cd6b374d30419da93c72c8e12406195e5fb752"
+      }
+    },
+    {
+      "task_id": "eac5e31c-64f9-51a9-a80c-a0d6b9a1f674",
+      "trace": {
+        "trace_id": "575aca694ce6e3e8a6dc8a397caf4b8a",
+        "span_id": "136d7b3473d8e8bf",
+        "attempt_id": "16175c6d-5f8d-43a5-8ba0-fae04cc694a5",
+        "session_id": "70232154eb2366600ee24acd61cd6b374d30419da93c72c8e12406195e5fb752"
+      }
+    },
+    {
+      "task_id": "f090f13e-2ced-5c9b-991f-604b118289af",
+      "trace": {
+        "trace_id": "d0316168ae638b9f090309d480a147fa",
+        "span_id": "250a96803cd43c46",
+        "attempt_id": "15cdf82c-df6b-4daf-b24a-4c493635671c",
+        "session_id": "70232154eb2366600ee24acd61cd6b374d30419da93c72c8e12406195e5fb752"
+      }
+    }
+  ],
+  "answer": "Decision\nReview P5 first for a suspected integrity incident: its joint pressure loss supports a possible leak. Use the accepted 600-1000 m inspection priority around stations ST4/ST5, at 700/900 m along P5. This is not a confirmed physical leak point or dispatch approval. Next prioritize P7's shared measurement connection for instrumentation review, P2 for process checks with a separate instrument concern, and P4 for smaller joint-pressure changes plus instrument checks. P1, P3 and P6 belong on instrument/data-quality tracks for the reviewed inconsistencies.\n\nYour first actions\n1. Scope the read-only P5 integrity review to 600-1000 m; retain ST3/ST6 as weaker neighboring comparisons, not unaffected boundaries.\n2. Keep P7-ST1-A/B, P7-ST3-A/B, P7-ST5-A/B and P7-ST7-A/B on the gateway-P7-0 track. A gateway is their shared data connection, so these are not eight independent witnesses.\n3. Use the opened P2 pressure-setting record to distinguish its broad rise from a new loss; retain P2-ST2-A's separate spike. Keep P4 ST1/ST2's joint decline separate from its disagreeing readings.\n4. Seek independent physical pressure/flow confirmation at the P5 focus and a pressure reference outside gateway-P7-0 to distinguish physical loss from measurement bias.\n\nAlready checked\nExecuted comparisons show P5's paired sensors\u2014two sensors at each station\u2014declining together around elapsed second 90 of the recording. During seconds 115-120, P5-ST4-A was 1.33 bar below the normal-baseline reference, P5-ST5-B 1.30 bar below, and P5-ST6-B 0.92 bar below; bar is a pressure unit. Both central pairs agree in their profiles, with weaker neighboring changes. These baseline-relative deficits are distinct from the smaller whole-half-recording differences. Screening supports seven stations across two connections with 17 seconds of joint persistence; it does not establish the cause. P4 ST1/ST2 show much smaller paired declines, not proven unreliable readings from spike flags alone.\n\nWhy this decision\nP7's named taps show a sustained downward offset\u2014a shift to another reading level\u2014around second 90, matching the revised calibration record. P7-ST1-A is 0.77 bar below its baseline in the final five seconds; P7-ST2-B remains near its baseline. P2's rise matches its logged transition's positive sign, approximate 0.4 bar magnitude and timing: final baseline-relative rises are 0.39 bar at P2-ST1-A and 0.26 bar at P2-ST8-B. Neither branch has a supported joint leak pattern in this window. Suspect readings are gradual unpaired rises at P1-ST6-A and P4-ST3-B, a gradual unpaired fall at P3-ST7-A, downward excursions at P3-ST2-A, and brief upward spikes at P2-ST2-A, P4-ST7-B and P6-ST3-A. These patterns do not confirm hardware faults or establish the accuracy of comparison partners.\n\nWhat changes the decision\nP1-ST7-B and P3-ST5-B each lack 10 of 60 reviewed samples; P4-ST8-A has eight unusable/missing samples despite receipt. P7 also has missing periods and invalid readings. Overall usable coverage is 98.56%, but health review is partial. Worsening P5 deficits, sustained independent P7 loss outside its shared connection, or P2 changes beyond the recorded transition would change priorities. P2's record extends to second 145, beyond this recording's end at 120; incomplete logs leave P5's cause unresolved. Advisory knowledge supports these review distinctions, not causal certainty."
+}

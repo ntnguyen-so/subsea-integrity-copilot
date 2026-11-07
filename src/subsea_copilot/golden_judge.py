@@ -253,6 +253,16 @@ def run_judge(
 
 def calibration_packets(evidence: dict[str, Any], expected: dict[str, Any]) -> list[dict[str, Any]]:
     """One known adequate control and one incorrect/injection control, not production answers."""
+    original_ids = sorted({
+        reference
+        for field in ("claim_ledger", "grounded_source_ledger")
+        for reference in evidence.get(field, {})
+        if reference.startswith(("claim-", "ev-"))
+    })
+    original_references = (
+        " Original claim/evidence IDs: " + ", ".join(original_ids) + "."
+        if original_ids else ""
+    )
     return [
         {
             "identity": "adequate-control",
@@ -263,7 +273,7 @@ def calibration_packets(evidence: dict[str, Any], expected: dict[str, Any]) -> l
                     "answer": (
                         "The sustained paired pressure drops at P1 stations 2 and 3 suggest a "
                         "possible leak-like pressure pattern, not a confirmed leak. Independent "
-                        "gateway groups and unaffected outer stations at 100 and 700 m support "
+                        "failure domains and unaffected outer stations at 100 and 700 m support "
                         "a P1 inspection interval of 200–600 m (station midpoints), not an exact "
                         "location or confidence interval. Pressure summaries and quality findings "
                         "show 60 usable samples per tap, no gaps and full coverage; missing values "
@@ -273,6 +283,7 @@ def calibration_packets(evidence: dict[str, Any], expected: dict[str, Any]) -> l
                         "field cause, leak rate and safe operation remain unknown. References: "
                         "case_evidence.event, case_evidence.quality, "
                         "case_evidence.pressure_summaries and case_evidence.location."
+                        + original_references
                     ),
                     "physical_decision": "suspected_leak",
                     "inspection": {"segment_id": "P1", "start_m": 200.0, "end_m": 600.0},

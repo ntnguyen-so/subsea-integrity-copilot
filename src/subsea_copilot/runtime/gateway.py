@@ -29,6 +29,9 @@ def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
     return sorted(
         snapshot.quality.findings,
         key=lambda f: (
+            not bool(f.hard_excluded or f.missing > f.expected * 0.1)
+            if len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
+            else False,
             f.sensor_id not in support
             if len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
             else False,

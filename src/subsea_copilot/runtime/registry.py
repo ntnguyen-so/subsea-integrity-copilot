@@ -177,6 +177,13 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
             }
             required.append("document_ids")
         if name == "history.compare":
+            fields["paired_only"] = {
+                "type": "boolean",
+                "description": (
+                    "Return every selected sensor's profile and within-station paired "
+                    "measurements only. Cross-station matrices remain available with false."
+                ),
+            }
             fields["sensor_ids"] = {
                 "type": "array",
                 "items": {"type": "string"},

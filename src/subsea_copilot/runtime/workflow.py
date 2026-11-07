@@ -22,6 +22,7 @@ from pydantic import BaseModel
 from subsea_copilot.budgets import (
     BUDGET_MULTIPLIER,
     GRAPH_RECURSION_LIMIT,
+    HISTORY_RANGE_SECONDS,
     MODEL_TIMEOUT_SECONDS,
     REFLECTION_LIMIT,
     ROOT_DEADLINE_SECONDS,
@@ -178,10 +179,22 @@ class AgentService:
 
             if session.source_version == SOURCE_VERSION:
                 from subsea_copilot.history_data import EXTENDED_HISTORY_PATH, history_index_rows
+                from subsea_copilot.synthetic import EXTENDED_PACK_VERSION
 
-                history_version = self.store.install_history(
-                    history_index_rows(EXTENDED_HISTORY_PATH if session.scenario == "S7" else None)
+                history_rows = history_index_rows(
+                    EXTENDED_HISTORY_PATH
+                    if snapshot.pack_version == EXTENDED_PACK_VERSION
+                    else None
                 )
+                if (
+                    snapshot.pack_version == EXTENDED_PACK_VERSION
+                    and session.scenario.startswith("frozen-pressure-")
+                ):
+                    # Bind layout-wide records to the source identity, not a workload name.
+                    history_rows = [
+                        {**row, "scenarios": [session.scenario]} for row in history_rows
+                    ]
+                history_version = self.store.install_history(history_rows)
         task = AgentTask(
             id=identifier,
             root_id=identifier,
@@ -298,25 +311,70 @@ class AgentService:
                 for sensor in context.get("history_sensors", [])
                 if sensor.get("pressure_summary_evidence_id")
             }
+            if context.get("network_pressure_table"):
+                pressure_ids.update(
+                    item.id for item in snapshot.evidence.values()
+                    if item.kind == "channel_summary"
+                )
         if pressure_ids:
             names.add("evidence.get")
+        if context.get("initial_record_search"):
+            names.add("history.search")
+        if context.get("initial_pressure_comparisons"):
+            names.add("history.compare")
         if task.role == "event_diagnosis" or context.get("baseline"):
             if snapshot.event.eligible_location:
                 names.add("location.fit")
         outputs = []
-        for name in sorted(names):
+        for name in sorted(names, key=lambda item: (item == "history.compare", item)):
             targets = context["compatible_tasks"] if name == "task.result" else [None]
+            if name == "history.compare":
+                targets = context["initial_pressure_comparisons"]
+            if name == "evidence.get":
+                ids = sorted(
+                    pressure_ids if task.role == "event_diagnosis" else
+                    {ref for t in context["compatible_tasks"] for ref in t["evidence_ids"]}
+                )
+                if task.role == "operator_response":
+                    ids.extend(
+                        item.id for item in snapshot.evidence.values()
+                        if item.kind == "location_fit" and item.id not in ids
+                    )
+                by_kind: dict[str, list[str]] = {}
+                for identifier in ids:
+                    kind = (
+                        snapshot.evidence[identifier].kind
+                        if task.role == "operator_response" and len(ids) > 24 else "batch"
+                    )
+                    by_kind.setdefault(kind, []).append(identifier)
+                targets = [
+                    {"ids": group[start:start + 24]}
+                    for group in by_kind.values()
+                    for start in range(0, len(group), 24)
+                ]
             if task.role == "event_diagnosis" and name == "task.result":
                 targets = [t for t in targets if t is not None and t["role"] == "sensor_quality"]
             for target in targets:
                 arguments = dict(context["scope"])
-                if target is not None:
+                if target is not None and name == "task.result":
                     arguments["task_id"] = target["id"]
                 if name == "evidence.get":
-                    arguments["ids"] = sorted(
-                        pressure_ids
-                        if task.role == "event_diagnosis"
-                        else {ref for t in context["compatible_tasks"] for ref in t["evidence_ids"]}
+                    if target is None:
+                        raise ValidationError("required_intake", "Evidence batch is missing.")
+                    arguments["ids"] = target["ids"]
+                if name == "history.search":
+                    arguments.update(context["initial_record_search"])
+                if name == "history.compare":
+                    if target is None:
+                        raise ValidationError("required_intake", "Pressure comparison is missing.")
+                    arguments.update(target)
+                    arguments.update(
+                        knowledge_ids=context["comparison_knowledge_ids"],
+                        check_question=(
+                            "Do paired time profiles support a joint pressure change "
+                            "or an individual reading problem?"
+                        ),
+                        intent="test_instrumentation",
                     )
                 identity = json.dumps(
                     [task.id, snapshot.id, name, arguments, "required-intake-v1"], sort_keys=True
@@ -507,6 +565,10 @@ class AgentService:
                 result_schema["properties"]["limitations"]["contains"] = {
                     "const": "child_abstained",
                 }
+        profile_comparisons = self._initial_pressure_comparisons(snapshot) if (
+            task.role == "event_diagnosis" and task.history_version and task.knowledge_packet
+            and len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
+        ) else []
         return {
             "phase": phase,
             "role": task.role,
@@ -623,7 +685,51 @@ class AgentService:
             and task.role == "event_diagnosis"
             and len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
             else None,
+            "initial_record_search": {
+                "query": "pressure calibration gateway operating valve",
+                "asset_ids": sorted({
+                    sensor.segment_id for sensor in context_sensors(snapshot)
+                    if next(f for f in snapshot.quality.findings if f.sensor_id == sensor.id)
+                    .anomaly_count
+                }) if any(f.anomaly_count for f in snapshot.quality.findings)
+                else [snapshot.site_id],
+                "knowledge_ids": [
+                    card.id for card in task.knowledge_packet.cards
+                    if task.role in card.roles and card.id in {
+                        "KN-INDEPENDENCE-R1", "KN-OPERATING-R1", "KN-QUALITY-R1",
+                    }
+                ],
+                "check_question": (
+                    "Which current operating or calibration records could explain "
+                    "the observed pressure changes?"
+                ),
+                "intent": "seek_counterevidence",
+            }
+            if task.role == "event_diagnosis" and task.history_version
+            and task.knowledge_packet
+            and (any(f.anomaly_count for f in snapshot.quality.findings) or profile_comparisons)
+            else None,
             "history_regions": [],
+            "initial_pressure_comparisons": profile_comparisons,
+            "comparison_knowledge_ids": [
+                card.id for card in task.knowledge_packet.cards
+                if task.role in card.roles and card.id in {
+                    "KN-INDEPENDENCE-R1", "KN-OPERATING-R1",
+                }
+            ] if task.knowledge_packet else [],
+            "pressure_summary_contract": (
+                "recent_pressure_drop_bar and recent_5s_pressure_drop_bar equal "
+                "baseline_median minus typical usable pressure in their named periods. "
+                "Both use the same supplied normal-baseline reference, not a completed "
+                "field verification: positive means below that reference, "
+                "negative means above normal. Use recent_5s_pressure_drop_bar for current "
+                "normal-relative pressure statements and label the final five seconds. "
+                "recent_pressure_drop_bar covers twenty seconds, not five. "
+                "The five-second value is not another within-recording comparison. "
+                "median_pressure_drop_bar "
+                "is a screening aggregate of qualifying drops when persistent, otherwise "
+                "all usable readings; it is not necessarily the current pressure."
+            ),
             "history_scope": (
                 "Network rows are measured summaries, not causes. "
                 "Decode columns and failure_domains. "
@@ -640,6 +746,76 @@ class AgentService:
         }
 
     @staticmethod
+    def _initial_pressure_comparisons(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+        from subsea_copilot.synthetic import generate_pack
+
+        pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
+        findings = {finding.sensor_id: finding for finding in snapshot.quality.findings}
+        by_id = {sensor.id: sensor for sensor in pack.sensors}
+        selected = {
+            identifier for identifier, finding in findings.items()
+            if finding.anomaly_count or finding.spike_count
+            or finding.drift_suspected or finding.peer_disagreement
+        }
+        selected.update(
+            item.sensor_id for item in snapshot.evidence.values()
+            if item.kind == "channel_summary" and item.sensor_id
+            and isinstance(item.value, dict) and item.value.get("usable_pressure_range_bar") == 0
+            and findings[item.sensor_id].usable
+            >= findings[item.sensor_id].expected * pack.min_coverage
+        )
+        stations = {(by_id[identifier].segment_id, by_id[identifier].station_id)
+                    for identifier in selected}
+        selected.update(
+            sensor.id for sensor in pack.sensors
+            if (sensor.segment_id, sensor.station_id) in stations
+        )
+        for branch in pack.segments:
+            alerts = [
+                sensor for sensor in pack.sensors
+                if sensor.segment_id == branch.id and findings[sensor.id].anomaly_count
+            ]
+            domains = {sensor.failure_domain_id for sensor in alerts}
+            if len(domains) != 1 or len({sensor.station_id for sensor in alerts}) < 2:
+                continue
+            quiet = [
+                sensor for sensor in pack.sensors
+                if sensor.segment_id == branch.id and sensor.failure_domain_id not in domains
+                and not (
+                    findings[sensor.id].anomaly_count or findings[sensor.id].spike_count
+                    or findings[sensor.id].peer_disagreement
+                )
+                and findings[sensor.id].usable >= findings[sensor.id].expected * pack.min_coverage
+            ]
+            if quiet:
+                reference = min(
+                    quiet,
+                    key=lambda sensor: (
+                        min(abs(sensor.chainage_m - alert.chainage_m) for alert in alerts),
+                        sensor.id,
+                    ),
+                )
+                selected.update(
+                    sensor.id for sensor in pack.sensors
+                    if sensor.segment_id == reference.segment_id
+                    and sensor.station_id == reference.station_id
+                )
+        identifiers = sorted(selected)
+        end = snapshot.end_seconds
+        start = max(0, end - HISTORY_RANGE_SECONDS)
+        # Paired-only results avoid cross-station matrices and keep station pairs together.
+        return [
+            {
+                "sensor_ids": identifiers[index:index + 24],
+                "paired_only": True,
+                "start_seconds": start,
+                "split_seconds": start + (end - start) // 2,
+                "end_seconds": end,
+            }
+            for index in range(0, len(identifiers), 24)
+        ]
+
+    @staticmethod
     def _network_pressure_table(snapshot: WindowSnapshot) -> dict[str, Any]:
         from subsea_copilot.synthetic import generate_pack
 
@@ -653,7 +829,7 @@ class AgentService:
         }
 
         def rounded_drop(identifier: str) -> float | None:
-            value = summaries.get(identifier, {}).get("recent_pressure_drop_bar")
+            value = summaries.get(identifier, {}).get("recent_5s_pressure_drop_bar")
             if value is None:
                 return None
             if not isinstance(value, (int, float)) or isinstance(value, bool):
@@ -666,19 +842,22 @@ class AgentService:
                 "chainage_m",
                 "failure_domain_index",
                 "usable_fraction",
-                "recent_drop_bar",
+                "recent_5s_pressure_drop_bar",
                 "max_abs_score",
                 "anomaly_count",
                 "quality_concern",
                 "drop_run_seconds",
                 "rise_run_seconds",
-                "recent_usable_samples",
+                "recent_5s_usable_samples",
             ],
-            "recent_period_seconds": [snapshot.end_seconds - 20, snapshot.end_seconds],
+            "recent_period_seconds": [snapshot.end_seconds - 5, snapshot.end_seconds],
             "drop_reference": (
-                "Verified-normal baseline median minus usable median in this same recent "
-                "20-second period for every instrument, without threshold conditioning. "
-                "Null means no baseline or usable recent observations."
+                "Supplied normal-baseline median minus usable median in the final "
+                "five source seconds for every instrument, without threshold conditioning. "
+                "Positive means below normal; negative means above normal. "
+                "This reference is not a completed field verification. "
+                "Null means no baseline or usable final-five-second observations. "
+                "Twenty-second and screening statistics remain in original pressure evidence."
             ),
             "failure_domains": domains,
             "rows": [
@@ -699,7 +878,7 @@ class AgentService:
                     ),
                     summaries.get(sensor.id, {}).get("pressure_drop_period_seconds"),
                     summaries.get(sensor.id, {}).get("pressure_rise_period_seconds"),
-                    summaries.get(sensor.id, {}).get("recent_usable_samples"),
+                    summaries.get(sensor.id, {}).get("recent_5s_usable_samples"),
                 ]
                 for sensor in pack.sensors
             ],

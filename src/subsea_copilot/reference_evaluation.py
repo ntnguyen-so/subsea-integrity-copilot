@@ -162,7 +162,7 @@ def read_evaluation() -> dict[str, Any]:
             "metrics": None,
         }
     report: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
-    if report.get("version") != "reference-evaluation-v1":
+    if report.get("version") not in {"reference-evaluation-v1", "spatial-evaluation-v1"}:
         raise ValueError("Unrecognized evaluation report")
     return report
 
@@ -177,7 +177,9 @@ def mapping_controls() -> list[dict[str, Any]]:
                 "pressure deficit. These are pressure anomalies, not identified faulty "
                 "instruments. Independent reference checks are needed because a common "
                 "measurement bias remains a competing explanation, not because a "
-                "measurement-path problem has been identified."
+                "measurement-path problem has been identified. P2 and P3 pressure changes "
+                "remain on secondary pressure and process review, not identified as "
+                "separate leak sources."
             ),
             "leaks": {("P1", "suspected", 200, 600)},
             "issues": set(),
@@ -220,6 +222,29 @@ def mapping_controls() -> list[dict[str, Any]]:
             ),
             "leaks": {("P3", "confirmed", 42, 42)},
             "issues": {("P1-ST1-A", "unspecified", "confirmed")},
+            "instrumentation": True,
+        },
+        {
+            "name": "screening-spike-flags-are-not-instrument-findings",
+            "text": (
+                "P1-ST2-A and P1-ST2-B have numerical spike flags, but their reviewed "
+                "profiles show a joint pressure change, not identified instrument spikes. "
+                "Neither instrument is prioritized as a suspect measurement path. "
+                "No concrete instrument problem has been identified."
+            ),
+            "leaks": set(), "issues": set(), "instrumentation": False,
+        },
+        {
+            "name": "plain-language-offset-and-stuck-reading",
+            "text": (
+                "P2-ST1-A is a suspect measurement path: its readings abruptly shifted "
+                "0.7 bar lower and remained at that new level, while P2-ST1-B stayed "
+                "near normal. P3-ST4-B is also suspect: its 60 received readings stayed "
+                "exactly unchanged while the paired instrument continued to vary. "
+                "These are measurement patterns, not confirmed hardware faults."
+            ),
+            "leaks": set(),
+            "issues": {("P2-ST1-A", "offset", "suspected"), ("P3-ST4-B", "flatline", "suspected")},
             "instrumentation": True,
         },
     ]

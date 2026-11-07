@@ -15,6 +15,7 @@ from uuid import NAMESPACE_URL, uuid5
 
 import numpy as np
 
+from .budgets import BUDGET_MULTIPLIER, REVIEW_ROUND_LIMIT
 from .contracts import AgentResult, AgentTask, WindowSnapshot
 from .evaluation import EXPECTED
 from .history_evaluation import fixed_history_baseline
@@ -257,11 +258,12 @@ def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) ->
     phases = Counter(str(metadata.get("phase")) for metadata in models[root.id])
     record = root.interpretation_review
     decisions = [r.assessment.decision for r in record.rounds] if record else []
-    critic_sequence = (
-        decisions == ["accept"]
-        and phases["critic-0"] >= 1
-        or decisions == ["revise", "accept"]
-        and all(phases[p] >= 1 for p in ("critic-0", "reflection", "critic-1"))
+    critic_sequence = bool(
+        decisions and decisions[-1] == "accept"
+        and len(decisions) <= REVIEW_ROUND_LIMIT
+        and all(decision == "revise" for decision in decisions[:-1])
+        and all(phases[f"critic-{index}"] >= 1 for index in range(len(decisions)))
+        and phases["reflection"] >= len(decisions) - 1
     )
     links_consumed = all(
         any(
@@ -322,13 +324,13 @@ def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) ->
             for document in documents.values()
         ),
         "observe_before_followup": bool(history_reads) and history_sequence,
-        "bounded_execution": sum(t.model_calls for t in fresh) <= 10
-        and sum(t.tool_calls for t in fresh) <= 18
+        "bounded_execution": sum(t.model_calls for t in fresh) <= 10 * BUDGET_MULTIPLIER
+        and sum(t.tool_calls for t in fresh) <= 18 * BUDGET_MULTIPLIER
         and len([t for t in fresh if t.parent_id]) <= 2
         and all(
             t.model_calls
             <= (
-                6
+                6 * BUDGET_MULTIPLIER
                 if t.role == "operator_response" and t.response_protocol == "engineer-v2"
                 else REGISTRY[t.role].model_limit
             )

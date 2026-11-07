@@ -18,11 +18,16 @@ from subsea_copilot.profiles import comparison_documents, comparison_sensors, ex
 def decoded_output(content: str) -> dict[str, Any]:
     output: dict[str, Any] = json.loads(content)
     value = output.get("result")
-    if isinstance(value, dict) and value.get("encoding") == "columnar-comparison-v1":
+    if isinstance(value, dict) and value.get("encoding") in {
+        "columnar-comparison-v1", "columnar-shared-comparison-v2",
+    }:
         output = {**output, "result": {**value, "sensors": comparison_sensors(value)}}
     elif isinstance(value, dict) and value.get("encoding") == "columnar-documents-v1":
         output = {**output, "result": {**value, "documents": comparison_documents(value)}}
-    elif isinstance(value, dict) and value.get("encoding") == "referenced-evidence-v1":
+    elif isinstance(value, dict) and value.get("encoding") in {
+        "referenced-evidence-v1", "columnar-referenced-evidence-v2",
+        "columnar-shared-referenced-evidence-v3",
+    }:
         output = {**output, "result": expanded_evidence(value)}
     return output
 
@@ -439,6 +444,17 @@ class ScriptedChatModel(BaseChatModel):
             if isinstance(message, ToolMessage) and isinstance(message.content, str)
             if "sensors" in (decoded_output(message.content).get("result") or {})
         ]
+        for message in messages:
+            if not isinstance(message, HumanMessage) or not isinstance(message.content, str):
+                continue
+            try:
+                intake = json.loads(message.content).get("application_intake", [])
+            except (ValueError, AttributeError):
+                continue
+            for entry in intake:
+                result = decoded_output(json.dumps(entry["output"])).get("result") or {}
+                if "sensors" in result:
+                    comparisons.append((entry["call_id"], result))
         if read_docs and not comparisons and context["history_bounds"]["end_seconds"] >= 20:
             sensors = context["history_sensors"]
             if not sensors and context.get("network_pressure_table"):
@@ -497,16 +513,25 @@ class ScriptedChatModel(BaseChatModel):
                 },
             ), None
         approved = [doc for doc in read_docs if doc["admissible"]]
-        changed = {
-            sensor["segment_id"]
+        operating = any(
+            len({
+                sensor["segment_id"]
+                for sensor in comparison["sensors"]
+                if sensor["change_bar"] is not None
+                and abs(sensor["change_bar"]) >= 0.2
+                and sensor["before_usable"] >= sensor["before_expected"] * 0.6
+                and sensor["after_usable"] >= sensor["after_expected"] * 0.6
+            }) >= 2
+            and any(
+                doc["type"] == "operation"
+                and comparison["start_seconds"]
+                <= datetime.fromisoformat(doc["effective_from"]).timestamp()
+                - context["history_bounds"]["epoch_unix"]
+                < comparison["end_seconds"]
+                for doc in approved
+            )
             for _, comparison in comparisons
-            for sensor in comparison["sensors"]
-            if sensor["change_bar"] is not None
-            and abs(sensor["change_bar"]) >= 0.2
-            and sensor["before_usable"] >= sensor["before_expected"] * 0.6
-            and sensor["after_usable"] >= sensor["after_expected"] * 0.6
-        }
-        operating = len(changed) >= 2 and any(doc["type"] == "operation" for doc in approved)
+        )
         instrumentation = intent == "test_instrumentation" and any(
             doc["type"] == "maintenance" for doc in approved
         )

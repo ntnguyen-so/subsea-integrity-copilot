@@ -215,3 +215,42 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 #evaluation-results > p, #evaluation-results > h3, .evaluation-case > p { margin: .8rem 0; }
 #evaluation-results td { white-space: normal; min-width: 110px; vertical-align: top; }
 #evaluation-results td:first-child { min-width: 250px; }
+.evaluation-active .toolbar,.evaluation-active .clock-strip,.evaluation-active .selection-strip{display:none}
+.spatial-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.spatial-heading strong{font-size:17px}.spatial-heading span{font-size:13px}
+.spatial-scorecards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.spatial-scorecards>div{background:#f6f9fc;border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.spatial-scorecards strong{display:block;font-size:25px;color:#21456d;margin:3px 0}
+.spatial-scorecards span{font-size:12px}.spatial-scorecards small{font-size:11px;letter-spacing:.4px}
+.spatial-qualification{font-size:12px;margin:8px 0!important}
+.spatial-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0}
+.spatial-controls>select:first-child{max-width:360px}.spatial-controls input[type=range]{flex:1;min-width:150px;padding:0;accent-color:var(--accent)}
+.spatial-clock{font:13px Consolas,monospace;white-space:nowrap}
+.spatial-checkpoints{display:flex;gap:8px;margin-bottom:10px}.spatial-checkpoints button{font-size:11px;padding:5px 8px}
+.spatial-map-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.spatial-map-pane{min-width:0;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
+.spatial-map-pane h3{font-size:16px}.spatial-map-pane small{font-size:11px;letter-spacing:.3px}
+.spatial-map-pane>svg{display:block;width:100%;max-height:370px;background:radial-gradient(ellipse,#fff,#f2f6fa);margin:8px 0}
+.spatial-map-pane .pipe{stroke-width:9}.spatial-map-pane .eval-leak-pattern{stroke:var(--sample-alert);stroke-dasharray:15 5}
+.eval-grid{stroke:#dfe7ee;stroke-width:1}.eval-pipe-label{font-size:16px;font-weight:700;fill:#335675}
+.eval-source circle{fill:#e0f8fc;stroke:#008699;stroke-width:3}.eval-source path{stroke:#008699;stroke-width:4}
+.eval-inspection{fill:none;stroke:#23865e;stroke-width:22;stroke-linecap:round;opacity:.8}
+.sensor.eval-known-issue circle.sensor-dot{fill:#8b5fc5;stroke:#6a419e}
+.sensor .eval-agent-issue{fill:none;stroke:#8b5fc5;stroke-width:3;stroke-dasharray:none}
+.sensor .eval-selection{fill:none;stroke:#174675;stroke-width:2;stroke-dasharray:none}
+.spatial-map-caption{font-size:13px;font-weight:600;min-height:22px}
+.spatial-legend{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin:10px 0;font-size:12px;color:var(--muted)}
+.spatial-legend span{display:flex;align-items:center;gap:6px}.spatial-legend i{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid}
+.eval-key-source{border-color:#008699!important;background:#e0f8fc}.eval-key-issue{border-color:#8b5fc5!important;background:#8b5fc5}
+.eval-key-anomaly{border-color:var(--sample-alert)!important;background:var(--sample-alert)}
+.eval-key-missing{border-color:#64748b!important;border-style:dashed!important}.eval-key-inspection{background:#23865e;border-color:#23865e!important;border-radius:3px!important;width:25px!important}
+.spatial-progress{border:1px solid var(--line);border-radius:8px;padding:12px;background:#f7fafc}
+.spatial-progress>strong{font-size:12px}.spatial-agent-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:9px}
+.spatial-agent{border-left:3px solid #cbd5e1;padding:3px 9px}.spatial-agent.completed{border-left-color:#23865e}.spatial-agent.active{border-left-color:var(--sample-alert)}
+.spatial-agent small{font-size:10px;letter-spacing:.2px}.spatial-agent strong{display:block;font-size:12px;margin:2px 0}.spatial-agent span{font-size:11px;line-height:1.5}
+.spatial-public-update{font-size:12px;line-height:1.5;margin-top:10px;max-height:72px;overflow:auto}
+.spatial-sensor-detail{font-size:12px;margin:9px 0}.spatial-footnote{font-size:11px;margin:8px 0}
+.spatial-journal,.spatial-evidence{margin-top:12px}.spatial-journal summary,.spatial-evidence>summary{font-size:12px;color:var(--accent);cursor:pointer}
+.spatial-journal .agent-public-journal{max-height:400px;overflow:auto}
+@media(max-width:900px){.spatial-scorecards{grid-template-columns:repeat(2,1fr)}.spatial-map-pane{padding:8px}.spatial-agent-cards{grid-template-columns:1fr}.spatial-map-pane>svg{max-height:310px}.spatial-legend{gap:10px}}
+@media(max-width:600px){.spatial-map-grid{grid-template-columns:1fr}.spatial-controls>select:first-child{width:100%}.spatial-map-pane>svg{max-height:330px}}

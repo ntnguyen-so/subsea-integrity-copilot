@@ -66,7 +66,7 @@
     {
       "id": "KN-LOCALIZATION-R1",
       "roles": ["event_diagnosis", "operator_response"],
-      "revision": 1,
+      "revision": 2,
       "title": "Separate a numerical inspection bracket from physical leak localization",
       "kind": "heuristic",
       "status": "curated",
@@ -74,8 +74,8 @@
       "pack_versions": ["pressure-pack-v3", "pressure-pack-v4-extended"],
       "available_at": "2026-11-06T00:00:00Z",
       "applies_when": "An engineer requests a leak location or an inspection recommendation from pressure observations.",
-      "guidance": "Use the qualified numerical tool for chainage and retain its assumptions. This method brackets affected stations against unaffected neighbours; it does not solve a calibrated hydraulic inverse problem. Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions. Do not infer an exact coordinate, leak size or leak probability from anomaly magnitude or from a research formula without its inputs. Withhold a location when coverage or the single-region assumption is inadequate.",
-      "verification_steps": ["Check the numerical tool's eligibility, observer independence and unaffected brackets.", "State the interval and distinguish it from a confidence interval or physical leak point.", "Request expert-selected independent confirmation; do not clear alarms while waiting for an LLM."],
+      "guidance": "Use the numerical tool's actual method and retain its assumptions. The default method brackets affected stations against unaffected neighbours. On extended networks, a broad continuous pressure footprint may leave no unaffected neighbours or an overly wide bracket. The pressure-peak-focus fallback can then identify a priority inspection focus from the final five seconds of fully observed paired readings: a unique contiguous pressure-deficit peak, agreeing pairs, independent comparison paths and weaker immediately neighbouring stations whose contrast exceeds the baseline-noise allowance. Missing comparisons, tied/disconnected peaks, inadequate independence and excessive width still withhold a focus. Those comparison stations need not be unaffected. This is a spatial pressure-focus heuristic, not a calibrated hydraulic inverse problem or a guarantee that a physical leak lies inside the interval. Pressure-wave localization requires justified propagation, timing, flow and pipeline assumptions. Do not infer an exact leak coordinate, leak size or leak probability from anomaly magnitude or a research formula without its inputs. Physical intervention still requires the approved site procedure and operator authorization.",
+      "verification_steps": ["Check eligibility, paired coverage, observer independence, actual method and bounding comparisons.", "State the priority interval and explain whether its neighbours are unaffected or simply weaker; do not call it a confidence interval or confirmed leak point.", "Keep physical confirmation and operator authorization separate from the completed pressure-pattern assessment; do not clear alarms while waiting for an LLM."],
       "counterexamples": ["A larger pressure residual is not necessarily the nearest sensor to a leak.", "Multiple disjoint pressure regions are not resolved by this single-leak bracket."],
       "limitations": ["The source review discusses methods with different fluid and deployment assumptions.", "Confirm inspection priorities using independent pressure and flow measurements."],
       "sources": [

@@ -99,6 +99,14 @@ def main() -> None:
     reference.add_argument("--agent-model", default="gpt-6.1-sol")
     reference.add_argument("--evaluator-model", default="gpt-6.1-terra")
     reference.add_argument("--output", type=Path, required=True)
+    spatial = subparsers.add_parser(
+        "spatial-evaluation", help="S7-scale temporal recordings with real agent checkpoints"
+    )
+    spatial.add_argument("--seed", type=int, default=20261109)
+    spatial.add_argument("--split", choices=["development", "held_out"], required=True)
+    spatial.add_argument("--agent-model", default="gpt-6.1-sol")
+    spatial.add_argument("--evaluator-model", default="gpt-6.1-terra")
+    spatial.add_argument("--output", type=Path, required=True)
     ingest.add_argument("--fixture-set", choices=["interview"], default="interview")
     ingest.add_argument(
         "--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6", "S7"], default="S1"
@@ -175,6 +183,16 @@ def main() -> None:
                 )
             print(json.dumps(report, indent=2))
             if not report.get("passed"):
+                raise SystemExit(1)
+        elif args.command == "spatial-evaluation":
+            from .spatial_evaluation import run_spatial_evaluation
+
+            report = run_spatial_evaluation(
+                args.output, seed=args.seed, split=args.split,
+                agent_model=args.agent_model, evaluator_model=args.evaluator_model,
+            )
+            print(json.dumps({"run_id": report["run_id"], "metrics": report["metrics"]}))
+            if not report["metrics"]["target_met"]:
                 raise SystemExit(1)
         elif args.command == "reference-evaluation":
             from .reference_evaluation import run_reference_evaluation

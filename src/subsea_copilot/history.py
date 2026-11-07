@@ -192,6 +192,25 @@ def read_history(
     rows = normalize_records(originals, pack)
     rows = [row for row in rows if row.channel == "pressure"]
     profiles, joint = joint_profiles(pack, rows, ids, replay.epoch, start, split, end)
+    paired_only = arguments.get("paired_only", False)
+    if type(paired_only) is not bool:
+        raise ValidationError("history_range", "paired_only must be a boolean.")
+    if paired_only:
+        matrices = {"pressure_correlation", "joint_usable_samples", "pipeline_distance_m"}
+        joint = {
+            **{key: value for key, value in joint.items() if key not in matrices},
+            "comparison_scope": "within-station pairs; cross-station matrices not requested",
+            "station_pairs": [
+                {
+                    "sensor_ids": [first, second],
+                    **{key: joint[key][i][j] for key in sorted(matrices)},
+                }
+                for i, first in enumerate(ids)
+                for j, second in enumerate(ids)
+                if i < j and sensors[first].segment_id == sensors[second].segment_id
+                and sensors[first].station_id == sensors[second].station_id
+            ],
+        }
     summaries = []
     for identifier in ids:
         selected_rows = [row for row in rows if row.sensor_id == identifier]

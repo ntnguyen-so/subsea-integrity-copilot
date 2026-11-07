@@ -1,6 +1,215 @@
 # Qualification results
 
-## Deterministic reference evaluation
+## Extended-network evaluation: development and held-out targets met
+
+The S7-scale development cohort comprises three 360-second recordings, each with
+112 pressure instruments, 56 paired stations, seven pipeline segments and 11.2 km
+of pipeline. Ground-truth and recorded-agent maps share the same source clock.
+Agents run at the predeclared 150/360-second checkpoints; three clean 60-second
+controls make no agent calls. Related checkpoints are not independent trials,
+and this evaluation does not measure production trigger latency.
+
+The frozen held-out run, `83ced3da77e14e05a212b1c8157e3f65`, seed `20261110`,
+met the same predeclared 95% target on nine cases. All three telemetry hashes
+differ from development; neither Python code nor prompts changed between cohorts.
+
+| Held-out measure | Result |
+|---|---:|
+| Leak/pipeline/instrumentation precision, recall and F1 | 100% |
+| Suspect-instrument precision, recall and F1 | 100% (72 TP, 0 FP, 0 FN) |
+| Issue-type precision, recall and F1 | 100% (80 TP, 0 FP, 0 FN) |
+| Source contained in authorized inspection interval | 4/4 |
+| Accepted reports / external explanation-judge passes | 6/6 / 6/6 |
+| Correct interval withholding / clean no-agent controls | 5/5 / 3/3 |
+
+Mean inspection width was 400 m and midpoint error 0 m; these are not exact
+physical leak-coordinate estimates. Mapping and judge calibration passed.
+Hosted investigations took 290.437-482.844 seconds. Stored-IO checks passed
+**36/38**, including all runtime-agent trees; N2@360 mapping/judge stored input
+hashes differed, while outputs matched. The [held-out report](evidence/spatial-held-out-20261110-v1.json)
+and [storage receipt](evidence/spatial-held-out-v1-storage.json) preserve the evidence.
+The dashboard's committed fallback now uses this actual held-out report.
+
+This held-out seed provides fresh waveforms within the same three source
+families, not new field installations or independent hydraulic validation.
+Related checkpoints and shared-path instruments are correlated. Four successful
+leak checkpoints have a Wilson 95% lower bound of approximately 51%, not 95%.
+The benchmark target is met; **95% field reliability is not established**.
+The author's first-call reading found concrete supported desk-review priorities;
+that assessment is not an independent operator usability study.
+
+Fresh development v7, `a0ca3f675b7d471fbae06ed26032962a`, met the predeclared
+95% target: all five deterministic precision/recall/F1 groups scored **100%**,
+all four leak sources were contained in accepted 400 m inspection intervals,
+and both report acceptance and the external explanation judge passed **6/6**.
+All five non-leak cases withheld intervals and all three clean controls made
+no agent calls. The independently prompted mapping and judge controls passed.
+These were genuine new agent executions, not repaired historical reports.
+The Python implementation and prompts stayed frozen throughout the run:
+`697806fec6878e7bc3ed13958dd0e6c95beb0c922a7e6b9487754bbe879283ba`.
+
+The six actual first-call briefings name the primary pipe or shared connection,
+give specific read-only first actions, distinguish secondary process review from
+separate leak sources, and explain measurements already compared. Current
+normal-reference quantities consistently use the final five source seconds.
+The author's first-call assessment finds the desk-review priorities usable;
+physical confirmation and authorization remain outside the agent's authority.
+Hosted investigations took 316.265-592.953 seconds; replay speed does not remove
+that model latency. This is not an independent operator study or 95% field
+reliability certification.
+
+Stored-IO checks passed **32/38** trees, including every runtime-agent tree.
+The N1@360, N2@150 and N2@360 mapping/judge input hashes differed from their
+submitted packets, while outputs matched. Those tracing gaps remain disclosed;
+they are not silently converted to full-storage passes.
+The [complete development report](evidence/spatial-development-20261109-v7.json)
+and [storage receipt](evidence/spatial-development-v7-storage.json) are retained.
+The subsequent held-out cohort above used this same frozen implementation.
+
+The same qualified implementation also produced a genuine new automatic S7
+briefing, root `defd2476-aa92-5101-bf2c-2e3d1f5ea51b`, at clock 125/end 120.
+It puts **P5 600-1000 m first**, names P7's shared connection, explains P2's
+current 0.388-bar rise as an operating/process review, and keeps P4's weaker
+joint loss separate from instrument checks. The author's solo first-call
+assessment found a concrete priority, targets and purposes without needing to
+repeat the available desk comparisons. Physical confirmation is still required.
+The run took **484.750 seconds** (8.1 minutes), and all three stored agent trees
+passed public-IO presence checks. Its [briefing](evidence/s7-first-call-briefing-v5.json)
+and [storage receipt](evidence/s7-first-call-storage-v5.json) are retained.
+
+Development v6, `bb6ae8fb9b134188afc36c09185743d5`, completed all nine
+cases and accepted all six pressure-triggered reports. Leak, pipeline,
+instrumentation, suspect-instrument and issue-type precision, recall and F1
+were **100%** (72 instrument true positives and 80 issue-type true positives,
+with no false positives or false negatives). All four sources were contained
+in authorized 400 m inspection intervals; midpoint error was 0 m, not proof of
+exact physical localization. All five non-leak cases withheld intervals and
+all three clean controls made no agent calls. Calibration passed.
+
+The original external judge completed four of six reports; two inputs exceeded
+the unchanged transport bound before inference. An evaluator-only continuation
+losslessly shared pressure values and metadata instead of duplicating them,
+then rejudged **all six immutable reports**. It did not reexecute agents or
+change telemetry, labels, mappings or original scores. Both reports and the
+original failed judge receipts are retained. All six rejudging calls completed,
+but only **4/6 passed**. The judge alleged recovery/period errors in N1@150
+and N3@360. Direct inspection of the original measured tables contradicts
+material parts of those objections: P2-ST1-A/B's final-five-second deficits
+are +0.0198/-0.0604 bar, not both approximately -0.39 bar; P1-ST6-A's
+twenty-second deficit is -3.63499 bar, whereas -3.36353 is its screening
+aggregate. The latter report's published 3.635-bar twenty-second rise was
+therefore correctly labelled. These are retained grading disagreements,
+not two established agent errors. Other numerical assertions still require
+source-by-source review; the original **4/6** receipt and unmet target are not
+rewritten. This is concrete evidence that an LLM judge can confuse encoded
+measurement fields even when its calibration controls pass.
+
+The current discovery view now explicitly uses final-five-second normal-reference
+values and sample counts for every instrument. Full original twenty-second,
+screening and historical measurements remain available. Reports and reviewers
+must bind each quantity to its actual field and period, and cannot infer recovery
+from an operating record's end time. These changes simplify source interpretation
+and require fresh agent recordings; the original v6 text and grades remain unchanged.
+Original v6 stored-IO checks passed **34/38** trees; the continuation passed
+**36/38**. N2@360 mapping and judge checks remain incomplete.
+
+Earlier development run `008b2b2078704b67a957d1aa4868ab7f`
+(v5), also **missed the target**: leak recall was 75%, pipeline precision 50%,
+instrument recall 69.44%, issue-type recall 70%, localization 3/4, accepted
+reports 4/6 and explanation-judge passes 4/6. A calibration control also failed.
+All original results remain unchanged.
+
+The remaining report rejections exposed a structural citation limit: regional
+explanations had only six reference slots, insufficient for central and neighboring
+paired measurements plus the location result and guidance. Their reference
+capacity now follows the requested 3x allowance; exact-source, read-authorization
+and grounding checks remain unchanged. Main answers use representative values;
+the detailed regional ranges cite all required sources. The extractor also
+mistook secondary pressure/process review for separate leak-source diagnoses.
+Its source-level distinction now has truth-blind calibration checks; the original
+v5 false-positive scores were not rewritten. The adequate judge control now
+includes its actual original claim IDs, in addition to valid field-path references.
+The new calibration controls passed before the next full fresh cohort was launched.
+V5 stored IO checks passed 32/34 trees; N1@150 extractor/judge stored input hashes
+did not match the submitted inputs, while outputs matched.
+
+Earlier completed development run `7afae6a4fc2f4b7fa3d44ce9dea5b67e`
+(v4, seed `20261109`), still **does not meet the target**. Leak and pipeline
+precision were 100%, recall 75%; instrumentation recall was 83.33%.
+Instrument precision was 100%, recall 79.17%; issue-type precision was 100%,
+recall 78.75%. Localization contained 3/4 sources, accepted-report coverage was
+5/6, and the explanation judge passed 4/6.
+
+The rejected N2@360 root remains a failure in every applicable denominator.
+Its grounding reviewer lacked many already-read original pressure bodies:
+the author cited representative examples while asserting multi-sensor ranges.
+The correction supplies all retained, actually read pressure evidence as
+lossless review context, without granting new citation authority or relaxing
+the exact-quote and fail-closed acceptance checks. N1@360 omitted a material
+invalid-reading instrument; quality intake now ranks material gaps/invalidity
+ahead of the large pressure footprint. These corrections need genuine new
+recordings, not reclassification of the failed roots. V4 stored IO checks
+passed 34/36 trees; the N1@360 extractor/judge stored input hashes did not match
+the submitted inputs, while outputs matched.
+
+Earlier run `227f9b69122b4b8dba59d7be5461689c` (v3), seed `20261109`, completed all nine
+planned cases with the Python implementation and prompts unchanged during
+inference. Its actual results were:
+
+| Agent task | Precision | Recall | F1 |
+|---|---:|---:|---:|
+| Leak-pattern recognition | 100% | 100% | 100% |
+| Affected-pipeline identification | 100% | 100% | 100% |
+| Instrumentation-pattern recognition | 100% | 100% | 100% |
+| Suspect-instrument identification | 98.63% | 100% | 99.31% |
+| Instrument/issue-type mapping | 88.89% | 90% | 89.44% |
+
+Four of four leak sources were contained in the authorized 400 m inspection
+focus; all six pressure-triggered reports were accepted. The separate explanation
+judge passed only **2/6** reports. Therefore **the overall 95% target is not met**.
+One report omitted explicit offset labels for eight affected P7 channels and
+mislabelled a comparison partner as a spike concern. The four leak reports also
+contained a real renderer error: it called weaker neighboring stations
+"unaffected." The judge correctly rejected this contradiction; its rubric and
+metric denominators were not relaxed.
+
+The separate automatic S7 recording at clock 110/end 105 also failed the author's
+first-on-call role-play: the briefing mostly requested further analysis, while
+available paired profiles remained unread. That report is not first-call-ready
+merely because the grounding reviewer accepted it. The revised acquisition policy
+waits at most 30 source seconds for independently supported inspection context;
+mandatory paired profiles, precise pressure-reference definitions, and immediate
+read-only workflow priorities address the observed causes.
+
+The subsequent genuine automatic recording
+`eb652bed-24d7-52f9-9b29-1e6038dc080f` succeeded at clock 125/end 120. Its accepted
+briefing tells the engineer to scope P5 integrity review to **600-1000 m**, assign
+P7's eight named taps to their shared-connection instrumentation track, distinguish
+P2's logged pressure rise from its separate instrument spike, and retain P4's
+smaller joint change as a separate pressure review. It gives concrete read-only
+first actions, names measurements already compared, and states what would change
+the priorities. Physical pressure/flow confirmation remains required; it is no
+longer a substitute for deciding the desk-review priorities.
+
+The author's first-on-call role-play found those desk decisions directly usable
+without reconstructing the available analysis. This is **not an independent user
+study** or proof that the physical cause is known. The hosted run took **743.875
+seconds** (12.4 minutes), which is a material latency limitation for a meeting or
+on-call workflow. All three stored agent trees contained public generation and
+tool IO. The [complete accepted briefing](evidence/s7-first-call-briefing.json)
+and [storage checks](evidence/s7-first-call-storage.json) preserve the run.
+
+Stored Langfuse IO checks for this cohort passed **36/38** trees. The N3@150
+extractor and judge outputs matched their recorded hashes, but their stored
+inputs did not match the submitted hashes; these gaps remain disclosed.
+All three stored specialist/coordinator trees for the earlier automatic S7
+recording contained public generation and tool IO. These checks are not a
+certification of complete tracing or field reliability.
+
+The earlier development v1/v2 failures remain retained. The following smaller
+benchmark is historical evidence, separate from the enlarged qualification above.
+
+## Historical 24-instrument deterministic reference evaluation
 
 The frozen implementation passed its **first held-out measurement cohort**,
 run `fa4b73b3265642a8be83d73145e1376a`, seed `20261108`. All eight datasets
@@ -84,7 +293,7 @@ unseen hydraulic conditions or arbitrary S7 windows. The pressure model is not
 field-calibrated, and model extraction/judging can still err. No threshold claim
 replaces operator verification or authorizes a physical action.
 
-Receipts: [held-out results](evidence/evaluation-report.json),
+Receipts: [historical held-out results](evidence/reference-held-out-20261108.json),
 [held-out storage](evidence/reference-held-out-storage.json),
 [qualified development](evidence/reference-development-20261107-v4.json),
 [development storage](evidence/reference-development-v4-storage.json),

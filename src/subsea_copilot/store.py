@@ -348,6 +348,8 @@ class Store:
                 previous.mode,
                 previous.workflow,
                 previous.pause_on_anomaly,
+                previous.investigation_context_seconds,
+                previous.investigation_context_policy,
             ) != (
                 session.scenario,
                 session.seed,
@@ -357,6 +359,8 @@ class Store:
                 session.mode,
                 session.workflow,
                 session.pause_on_anomaly,
+                session.investigation_context_seconds,
+                session.investigation_context_policy,
             ):
                 raise Conflict("generation_identity_conflict")
             for window_id in (session.latest_window_id, session.investigation_window_id):
@@ -421,6 +425,7 @@ class Store:
                 "mode",
                 "workflow",
                 "pause_on_anomaly",
+                "investigation_context_seconds",
             ):
                 if getattr(previous, field) != getattr(session, field):
                     raise Conflict("generation_identity_conflict")

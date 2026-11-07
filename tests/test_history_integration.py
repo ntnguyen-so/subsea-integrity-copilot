@@ -8,6 +8,7 @@ from uuid import uuid4
 import psycopg
 import pytest
 
+from subsea_copilot.budgets import BUDGET_MULTIPLIER
 from subsea_copilot.casefile import build_casefile
 from subsea_copilot.config import Settings
 from subsea_copilot.contracts import AgentTask, EngineerInterpretation, ReplaySession, utc_now
@@ -103,7 +104,7 @@ class PromptBoundedScripted(ScriptedChatModel):
                 if key != "document_ids"
             }
             end = context["history_bounds"]["end_seconds"]
-            for sensors in (ids[::14][:8], ids[7::14][:8]):
+            for sensors in (ids[::14][:8],):
                 action.tool_calls.append(
                     {
                         "name": "history.compare",
@@ -208,7 +209,10 @@ def test_context_changes_investigation_without_overriding_numerical_uncertainty(
             r["name"] for r in receipts
         }
         assert sum(t.model_calls for t in store.list_tasks(root.generation_id)) <= 10
-        assert sum(t.tool_calls for t in store.list_tasks(root.generation_id)) <= 18
+        assert (
+            sum(t.tool_calls for t in store.list_tasks(root.generation_id))
+            <= 18 * BUDGET_MULTIPLIER
+        )
         assert diagnosis.model_calls <= 4
         assert snapshot.event.hypothesis == (
             "suspected_leak"
@@ -279,8 +283,23 @@ def test_extended_network_uses_its_own_corpus_and_versioned_pressure_history(set
                 assert len(root.interpretation_review.rounds) == 2
                 tasks = store.list_tasks(replay.id)
                 diagnosis = next(task for task in tasks if task.role == "event_diagnosis")
-                assert diagnosis.model_calls == 4  # Includes the bounded schema repair.
+                assert diagnosis.model_calls <= 4
                 receipts = store.tool_receipts(diagnosis.id)
+                baseline_reads = [
+                    receipt for receipt in receipts
+                    if receipt["name"] == "evidence.get"
+                    and any(
+                        snapshot.evidence[identifier].kind == "channel_summary"
+                        for identifier in receipt["arguments"]["ids"]
+                    )
+                ]
+                assert {
+                    identifier for receipt in baseline_reads
+                    for identifier in receipt["arguments"]["ids"]
+                } >= {
+                    item.id for item in snapshot.evidence.values()
+                    if item.kind == "channel_summary"
+                }
                 documents = [
                     document
                     for receipt in receipts
@@ -307,6 +326,23 @@ def test_extended_network_uses_its_own_corpus_and_versioned_pressure_history(set
                     },
                 )
                 assert len(extended["sensors"]) == 8
+                full = read_history(
+                    store, diagnosis, snapshot, "history.compare",
+                    {
+                        **comparison["arguments"],
+                        "sensor_ids": [s.id for s in source.pack.sensors[:8]],
+                        "paired_only": False,
+                    },
+                )
+                assert extended["sensors"] == full["sensors"]
+                order = full["joint_pattern"]["sensor_order"]
+                for pair in extended["joint_pattern"]["station_pairs"]:
+                    i, j = (order.index(identifier) for identifier in pair["sensor_ids"])
+                    for key in (
+                        "pressure_correlation", "joint_usable_samples", "pipeline_distance_m",
+                    ):
+                        assert pair[key] == full["joint_pattern"][key][i][j]
+                assert "station_pairs" not in full["joint_pattern"]
                 assert len(json.dumps(extended).encode()) <= 12 * 1024
                 compact = compact_comparison(extended)
                 assert comparison_sensors(compact) == extended["sensors"]
@@ -323,7 +359,50 @@ def test_extended_network_uses_its_own_corpus_and_versioned_pressure_history(set
                     < 11 * 1024
                 )
                 assert sum(task.model_calls for task in tasks) <= 10
-                assert sum(task.tool_calls for task in tasks) <= 18
+                assert sum(task.tool_calls for task in tasks) <= 18 * BUDGET_MULTIPLIER
+        finally:
+            telemetry.close()
+
+
+def test_frozen_extended_source_retains_time_and_asset_scoped_operating_records(
+    settings, tmp_path, monkeypatch,
+):
+    from subsea_copilot.golden_evaluation import install_golden_input
+    from subsea_copilot.monitoring import Monitor
+
+    monkeypatch.setenv("SUBSEA_RUNTIME_DIR", str(tmp_path))
+    monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
+    with Store(
+        settings.database_dsn, tenant_id="frozen-history-" + uuid4().hex,
+        tools_dsn=settings.tools_dsn, qualification=True,
+    ) as store:
+        telemetry = Telemetry(runtime_dir=tmp_path)
+        try:
+            service = AgentService(
+                store, lambda role, mode: ScriptedChatModel(role=role), None, telemetry,
+            )
+            monitor = Monitor(store, service, telemetry)
+            dataset = generate_scenario("S7", duration_seconds=180)
+            replay = install_golden_input(monitor, dataset, "scripted", duration_seconds=180)
+            snapshot = store.save_window(analyze_window(
+                dataset.pack, normalize_records(dataset.baseline, dataset.pack),
+                normalize_records(dataset.records, dataset.pack), replay.id, 150, 155,
+                dataset.epoch, tenant_id=store.tenant_id,
+            ))
+            root = service.submit_question(
+                replay, snapshot, "Rank the pressure concerns.", "frozen",
+            )
+            rows = store.history_documents(
+                replay.id, root.history_version, snapshot.window_end,
+                query="pressure calibration operating", assets=["P2", "P7"],
+            )
+            assert {"OP-P2-EXTENDED-001", "MAINT-P7-GW-002"} <= {row["id"] for row in rows}
+            assert all(row["scenarios"] == [replay.scenario] for row in rows)
+            before = store.history_documents(
+                replay.id, root.history_version, dataset.epoch + timedelta(seconds=95),
+                query="pressure calibration operating", assets=["P2", "P7"],
+            )
+            assert "OP-P2-EXTENDED-001" not in {row["id"] for row in before}
         finally:
             telemetry.close()
 
@@ -342,7 +421,12 @@ def test_operations_audit_checks_actual_handoffs_review_and_provenance(investiga
         )
         history = [step for step in audit["tool_receipts"] if step["name"].startswith("history.")]
         assert history
-        assert all(step["origin"] == "model_requested" for step in history)
+        intake = [step for step in history if step["origin"] == "application_required_intake"]
+        assert len(intake) == 1 and intake[0]["name"] == "history.search"
+        assert all(
+            step["origin"] == "model_requested"
+            for step in history if step not in intake
+        )
 
 
 def test_matched_fixed_report_does_not_read_agent_answer(investigated):

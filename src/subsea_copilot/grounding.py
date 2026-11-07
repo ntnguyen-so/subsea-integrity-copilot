@@ -11,6 +11,7 @@ from .contracts import (
     content_hash,
 )
 from .knowledge import KnowledgePacket
+from .profiles import compact_evidence
 from .validation import ValidationError, parse_json
 
 
@@ -109,6 +110,17 @@ def source_texts(
             raise ValidationError("grounding_sources", "Cited pressure source was not read.")
         sources[reference] = json.dumps(
             snapshot.evidence[reference].model_dump(mode="json"), sort_keys=True
+        )
+    pressure = {
+        reference: snapshot.evidence[reference].model_dump(mode="json")
+        for reference in set(result.evidence_ids) & read_evidence
+        if reference in snapshot.evidence
+        and snapshot.evidence[reference].kind == "channel_summary"
+    }
+    if pressure:
+        sources["audited_pressure_summaries"] = json.dumps(
+            compact_evidence({"evidence": pressure, "claims": {}}),
+            sort_keys=True, separators=(",", ":"),
         )
     if knowledge and result.interpretation:
         sources.update(

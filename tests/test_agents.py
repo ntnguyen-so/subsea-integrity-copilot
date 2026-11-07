@@ -138,6 +138,47 @@ def test_baseline_citations_require_a_successful_read_and_reach_the_reviewer(sna
     validate_interpretation(result, task, [receipt])
     sources = source_texts(result, snapshot, [receipt])
     assert json.loads(sources[baseline.id])["value"]["median_pressure_drop_bar"] == 1.1
+    from subsea_copilot.profiles import expanded_evidence
+
+    uncited = baseline.model_copy(update={"id": "uncited-baseline-e", "sensor_id": "peer"})
+    unread = baseline.model_copy(update={"id": "unread-baseline-e", "sensor_id": "unread"})
+    snapshot.evidence.update({uncited.id: uncited, unread.id: unread})
+    result.evidence_ids.extend([uncited.id, unread.id])
+    receipts = [{
+        **receipt, "result": {"evidence": {
+            baseline.id: baseline.model_dump(mode="json"),
+            uncited.id: uncited.model_dump(mode="json"),
+        }},
+    }]
+    audited = expanded_evidence(json.loads(
+        source_texts(result, snapshot, receipts)["audited_pressure_summaries"],
+    ))
+    assert audited["evidence"][uncited.id] == uncited.model_dump(mode="json")
+    assert unread.id not in audited["evidence"]
+    assert uncited.id not in sources
+    paired_sources = [
+        baseline.model_copy(update={"id": f"paired-baseline-{index}"})
+        for index in range(8)
+    ]
+    for item in paired_sources:
+        snapshot.evidence[item.id] = item
+    expanded_result = result.model_copy(deep=True)
+    expanded_result.evidence_ids = [item.id for item in paired_sources]
+    expanded_result.interpretation = expanded_result.interpretation.model_copy(update={
+        "competing_causes": [
+            expanded_result.interpretation.competing_causes[0].model_copy(update={
+                "references": [item.id for item in paired_sources],
+            }),
+        ],
+    })
+    expanded_result = AgentResult.model_validate(expanded_result.model_dump())
+    complete_reads = {
+        **receipt, "result": {"evidence": {
+            item.id: item.model_dump(mode="json") for item in [baseline, *paired_sources]
+        }},
+    }
+    expanded_result.evidence_ids.append(baseline.id)
+    validate_interpretation(expanded_result, task, [complete_reads])
     for receipts in ([], [{**receipt, "error": "tool_result_size"}]):
         with pytest.raises(ValidationError, match="accepted claims"):
             validate_interpretation(result, task, receipts)
@@ -483,7 +524,7 @@ def test_fresh_children_are_real_separate_graph_tasks_and_preserve_anomalies(sna
     assert all(t.state == "SUCCEEDED" for t in tasks), [(t.role, t.error_code) for t in tasks]
     assert store.get_task(root.id).model_calls == 2
     assert sum(t.model_calls for t in tasks) == 4
-    assert "2 usable spikes" in store.get_task(root.id).answer
+    assert "2 spike-screening flags" in store.get_task(root.id).answer
     diagnosis = next(t for t in tasks if t.role == "event_diagnosis")
     quality = next(t for t in tasks if t.role == "sensor_quality")
     assert any(

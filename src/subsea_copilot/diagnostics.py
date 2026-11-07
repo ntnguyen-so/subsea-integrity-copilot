@@ -18,6 +18,7 @@ from .contracts import (
     EvidenceItem,
     QualityFinding,
     QualityReport,
+    Sensor,
     SitePack,
     WindowSnapshot,
     content_hash,
@@ -270,7 +271,26 @@ def analyze_window(
             and len({sensor.failure_domain_id for sensor in group}) >= pack.min_failure_domains
         ):
             clusters.append(group)
-    support = max(clusters, key=len, default=[])
+    # Overlapping neighborhoods can describe one long, continuously changing region.
+    components: list[tuple[list[Sensor], set[float]]] = []
+    for group in clusters:
+        merged = {sensor.id: sensor for sensor in group}
+        common = set.intersection(*(stats[sensor.id]["drops"] for sensor in group))
+        index = 0
+        while index < len(components):
+            previous, previous_common = components[index]
+            overlap = common & previous_common
+            if set(merged).intersection(sensor.id for sensor in previous) and _duration(
+                sorted(overlap), pack.sample_seconds
+            ) >= pack.persistence_seconds:
+                merged.update((sensor.id, sensor) for sensor in previous)
+                common = overlap
+                components.pop(index)
+                index = 0
+            else:
+                index += 1
+        components.append((list(merged.values()), common))
+    support = max((group for group, _ in components), key=len, default=[])
     limitations = [
         "SYNTHETIC_UNCALIBRATED",
         "PRESSURE_PATTERNS_NOT_PROOF",
@@ -284,10 +304,7 @@ def analyze_window(
         and not finding.peer_disagreement
     ]
     broad = len(sustained_changes) >= max(pack.min_observers, len(pack.sensors) // 2)
-    multiple_regions = support and any(
-        not {sensor.id for sensor in group} & {sensor.id for sensor in support}
-        for group in clusters
-    )
+    multiple_regions = len(components) > 1
     transient = False
     for anchor in pack.sensors:
         for timestamp in stats[anchor.id]["excursions"]:
@@ -363,6 +380,23 @@ def analyze_window(
                 else None,
                 recent_usable_samples=len(recent),
                 recent_period_seconds=[end_seconds - 20, end_seconds],
+            )
+            final_values = [
+                row.value for row in groups[finding.sensor_id]
+                if row.validity == "usable" and row.value is not None
+                and end - timedelta(seconds=5) <= row.observed_at < end
+            ]
+            window_values = [
+                row.value for row in groups[finding.sensor_id]
+                if row.validity == "usable" and row.value is not None
+            ]
+            periods.update(
+                recent_5s_pressure_drop_bar=reference - float(np.median(final_values))
+                if reference is not None and final_values else None,
+                recent_5s_period_seconds=[end_seconds - 5, end_seconds],
+                recent_5s_usable_samples=len(final_values),
+                usable_pressure_range_bar=float(max(window_values) - min(window_values))
+                if window_values else None,
             )
             for direction, key in (("drop", "drops"), ("rise", "rises")):
                 run = _longest_run(stats[finding.sensor_id][key], pack.sample_seconds)
@@ -478,6 +512,16 @@ def analyze_window(
             {key: value["scale"] for key, value in healthy.items()},
             segment_ids,
             {key: value["usable"] / expected_each for key, value in healthy.items()},
+            focus_deficits={
+                sensor_id: reference - float(np.median(values))
+                for sensor_id, measurement in healthy.items()
+                if (reference := measurement["median"]) is not None
+                and len(values := [
+                    row.value for row in groups[sensor_id]
+                    if row.validity == "usable" and row.value is not None
+                    and end - timedelta(seconds=5) <= row.observed_at < end
+                ]) >= math.ceil(5 / pack.sample_seconds)
+            } if len(pack.sensors) > 32 else None,
         )
         ledger(
             "location_fit",
@@ -490,6 +534,7 @@ def analyze_window(
                 "station_bracket_m": location.station_bracket_m,
                 "unit": "m",
                 "method": location.method,
+                "reason": location.reason,
             },
             "location",
         )
@@ -521,7 +566,7 @@ def analyze_window(
             "input": input_hash,
             "revision": revision,
             "predecessor": predecessor_id,
-            "parameters": "pressure-window-v2",
+            "parameters": "pressure-window-v4",
             "baseline": "pressure-median-mad-v2",
         }
     )
@@ -537,6 +582,7 @@ def analyze_window(
         predecessor_id=predecessor_id,
         input_hash=input_hash,
         pack_version=pack.version,
+        parameter_version="pressure-window-v4",
         clock_seconds=clock_seconds,
         watermark_seconds=clock_seconds - pack.lateness_seconds,
         canonical_count=len(selected),

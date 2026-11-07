@@ -20,6 +20,7 @@ from subsea_copilot.reference_evaluation import (
     reference_dataset,
     truth_labels,
 )
+from subsea_copilot.runtime.agent import model_tool_result
 from subsea_copilot.runtime.gateway import ToolGateway
 from subsea_copilot.runtime.workflow import AgentService
 from subsea_copilot.telemetry import Telemetry
@@ -185,6 +186,72 @@ def test_diagnosis_intake_reads_baseline_sources_without_a_model_round_trip() ->
     intake, _ = service._required_intake(task, snapshot, context, gateway)
     assert intake == []
     gateway.dispatch.assert_not_called()
+
+
+def test_extended_intake_reads_original_pressure_sources_in_bounded_batches() -> None:
+    task = Mock(role="event_diagnosis", id="task", history_version="history-v1")
+    evidence = {
+        f"pressure-{index:03}": SimpleNamespace(id=f"pressure-{index:03}", kind="channel_summary")
+        for index in range(112)
+    }
+    snapshot = Mock(
+        id="window", evidence=evidence, event=SimpleNamespace(eligible_location=False)
+    )
+    context = {
+        "scope": {"snapshot_id": "window"}, "required_tools": [], "compatible_tasks": [],
+        "history_sensors": [], "network_pressure_table": {"total_instruments": 112},
+    }
+    gateway = Mock(task=task)
+    gateway.dispatch.return_value = {"result": {"evidence": {}}, "error": None}
+    service = AgentService.__new__(AgentService)
+    intake, _ = service._required_intake(task, snapshot, context, gateway)
+    calls = [call.args[0] for call in gateway.dispatch.call_args_list]
+    assert len(intake) == len(calls) == 5
+    assert all(len(call["args"]["ids"]) <= 24 for call in calls)
+    assert {identifier for call in calls for identifier in call["args"]["ids"]} == set(evidence)
+    assert all(call["origin"] == "application_required_intake" for call in calls)
+
+
+def test_coordinator_groups_mixed_evidence_for_lossless_bounded_delivery() -> None:
+    task = Mock(role="operator_response", id="root")
+    evidence = {
+        f"ev-{index:03}": SimpleNamespace(
+            id=f"ev-{index:03}", kind="channel_summary" if index % 2 else "sensor_health",
+            value={"baseline_median": 80, "recent_5s_pressure_drop_bar": 1.5},
+        )
+        for index in range(224)
+    }
+    evidence["location"] = SimpleNamespace(
+        id="location", kind="location_fit", value={"status": "withheld", "reason": "too wide"},
+    )
+    snapshot = SimpleNamespace(id="window", evidence=evidence)
+    context = {
+        "scope": {"snapshot_id": "window"}, "required_tools": ["evidence.get"],
+        "compatible_tasks": [{"evidence_ids": [key for key in evidence if key != "location"]}],
+    }
+    gateway = Mock(task=task)
+    def dispatch(call: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "error": None, "result": {
+                "claims": {}, "evidence": {
+                    key: {
+                        "id": key, "kind": evidence[key].kind, "value": evidence[key].value,
+                    } for key in call["args"]["ids"]
+                },
+            },
+        }
+    gateway.dispatch.side_effect = dispatch
+    service = AgentService.__new__(AgentService)
+    intake, _ = service._required_intake(task, snapshot, context, gateway)
+    calls = [call.args[0] for call in gateway.dispatch.call_args_list]
+    assert {key for call in calls for key in call["args"]["ids"]} == set(evidence)
+    assert all(len(call["args"]["ids"]) <= 24 for call in calls)
+    assert all(len({evidence[key].kind for key in call["args"]["ids"]}) == 1 for call in calls)
+    pressure = [
+        model_tool_result(item["output"])["result"] for item in intake
+        if "channel_summary" == next(iter(item["output"]["result"]["evidence"].values()))["kind"]
+    ]
+    assert all("evidence_value_columns" in item for item in pressure)
 
 
 def test_invalid_check_plan_is_audited_without_reading_and_scope_still_fails(tmp_path: Any) -> None:

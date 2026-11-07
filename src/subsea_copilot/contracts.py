@@ -244,6 +244,11 @@ class ReplaySession(Contract):
     mode: Mode = "scripted"
     workflow: Workflow = "agent_assisted"
     pause_on_anomaly: bool = False
+    investigation_context_seconds: int = Field(default=0, ge=0, le=60)
+    investigation_context_policy: Literal[
+        "pressure-persistence-v1", "inspection-context-v2"
+    ] = "pressure-persistence-v1"
+    pending_pressure_alert_seconds: int | None = Field(default=None, ge=0)
     investigation_window_id: str | None = None
     detected_alert_keys: list[str] = Field(default_factory=list)
     state: Literal["PAUSED", "PLAYING", "COMPLETED", "FAILED"] = "PAUSED"
@@ -300,7 +305,7 @@ class HistoryInvestigation(Contract):
 
 class CitedExplanation(Contract):
     text: str = Field(min_length=1, max_length=2400)
-    references: list[str] = Field(min_length=1, max_length=6)
+    references: list[str] = Field(min_length=1, max_length=6 * BUDGET_MULTIPLIER)
 
 
 class EngineeringAnswer(CitedExplanation):

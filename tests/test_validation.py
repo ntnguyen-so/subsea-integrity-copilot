@@ -113,7 +113,7 @@ def test_accepts_equivalent_supported_ledger_unit_representations(snapshot):
     second = validate_result(equivalent, task, snapshot, receipts())
     assert render_result(first, task, snapshot) == render_result(second, task, snapshot)
     assert "100.0%" in render_result(second, task, snapshot)
-    assert "2 usable spikes" in render_result(first, task, snapshot)
+    assert "2 spike-screening flags" in render_result(first, task, snapshot)
 
 
 def test_required_receipts_and_cross_snapshot_fail(snapshot):

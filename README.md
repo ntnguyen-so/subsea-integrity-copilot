@@ -8,9 +8,10 @@ interval or abstain. **Synthetic data only; not a safety system.**
 The product hypothesis is reusable expert knowledge: reviewed procedures and
 worked evidence help less-experienced engineers investigate at scale. Knowledge
 elicitation/approval and onboarding benefit still require customer validation.
-Assume ten minutes for manual analysis; allow up to **five minutes for a grounded
-LLM report**, prioritizing correctness. These are planning assumptions, not
-measured labor savings.
+Ten minutes for manual analysis is a planning assumption, not measured labor
+savings. Agent investigations have a **15-minute hard deadline**; actual hosted
+latency is shown with each recording. Accelerated monitoring does not accelerate
+model inference.
 
 The global **monitoring warning** is numerical and never waits for the LLM.
 It follows the latest window even when a historical investigation is pinned.
@@ -33,7 +34,85 @@ Reviewers need repository access before the interview.
 
 ## Golden-data qualification
 
-### Deterministic agent evaluation
+### Visual, S7-scale temporal evaluation
+
+The Evaluation tab presents **ground truth and actual agent findings on two
+synchronized pipeline maps**. Each of the three new recordings uses S7's
+112 instruments, 56 paired stations, seven segments, 11.2 km and 360 seconds.
+Cases cover a broad leak footprint, a more concentrated leak on another branch,
+and a no-leak operating/shared-connection look-alike. Scattered drift, spikes,
+flatlining, invalid received values and missing readings overlap the events.
+Source causes and their start times are declared independently of the detector.
+
+Choose a recording, jump to either investigation or play its timeline. Source
+time pauses while recorded agent checks and handoffs unfold; measured model
+wall time remains visible. An interpretation overlay appears only for its exact
+accepted snapshot and input hash. Inspection overlays must also match the
+production-authorized interval. Scrubbing never launches inference, and final
+findings are not painted onto earlier source windows.
+
+The temporal benchmark samples real 60-second numerical windows every 15
+source seconds and schedules real agent investigations at **150 and 360 seconds**
+only when pressure warnings exist. Three initial clean windows are negative
+controls. This is a classification/localization benchmark, **not a measurement
+of production automatic admission latency**. Both scored checkpoints, failed
+roots, missed instrument labels and withheld leak intervals remain in the
+denominators. Weak physical influence is continuous, so numerical flags are
+displayed without inventing binary anomaly truth from detector predictions.
+
+```powershell
+. .\tools\load-environment.ps1
+$env:SUBSEA_TRACE_CONTENT='1'
+$env:SUBSEA_SYNTHETIC_ONLY='1'
+uv run subsea spatial-evaluation --split development --seed 20261109 --output eval\results\spatial-development
+# Freeze code and prompts before the measurement cohort.
+uv run subsea spatial-evaluation --split held_out --seed 20261110 --output eval\results\spatial-held-out
+```
+
+The compact scorecards are backed by deterministic comparisons, not judge
+opinions. Detailed metrics, original reports, exact mapping quotes and Langfuse
+traces remain behind an expander. The smaller, historical reference cohorts
+below do **not** qualify these larger networks or their temporal behavior.
+Fresh enlarged development v7 met the predeclared 95% target: deterministic
+precision/recall/F1 were 100%, localization contained 4/4 sources, and the external
+explanation judge passed 6/6 reports. A separate held-out seed reproduced those
+results with unchanged code/prompts and new telemetry hashes.
+These small, related source families do not establish 95% field reliability.
+Actual outcomes, earlier numerical-explanation failures and tracing gaps remain
+in [qualification results](docs/RESULTS.md).
+
+### First-on-call handoff
+
+The coordinator must state the first priority, exact pipe/stations or shared
+measurement connection, and the attention track for every pressure-alert branch.
+It completes the available pressure comparisons and record checks before giving
+two to four specific, read-only next actions. A broad operating pressure rise,
+a shared connection offset and a joint pressure-loss pattern require different
+responses; anomaly counts alone do not determine integrity priority.
+
+New assisted recordings acquire up to 30 additional source seconds before
+pausing for investigation, stopping earlier when independent pressure evidence
+qualifies an inspection interval. Single-connection persistence alone does not
+end acquisition. Historical recordings retain their original pause policy and reports.
+The discovery view uses explicitly labelled final-five-second normal-reference
+measurements and usable sample counts. Reports distinguish those current values
+from twenty-second summaries, conditional screening statistics and historical
+changes. An operating record's end time alone does not establish recovery.
+
+The existing inspection method uses unaffected stations on either side of a
+joint pressure pattern. On extended networks only, `pressure-peak-focus-v1`
+can instead qualify the strongest contiguous pressure-loss focus when agreeing
+pairs, complete recent observations, immediately adjacent weaker comparisons,
+local independence and the unchanged 400 m width limit all hold.
+Its assumptions are pinned in localization knowledge revision 2.
+This is an inspection-planning priority, **not a calibrated hydraulic leak
+coordinate, confidence interval or physical dispatch authorization**.
+If those checks fail, the briefing gives the measured station focus and the
+specific reason an interval was withheld. Independent physical pressure/flow
+confirmation remains necessary before intervention; engineers should not need
+to reconstruct analysis already completed by the agents.
+
+### Historical 24-instrument deterministic agent evaluation
 
 The **Evaluation** workspace displays labelled, recorded reference cases for
 leaks on P1/P2/P3, scattered spikes, an isolated drifting instrument, invalid
@@ -80,9 +159,12 @@ and stable controls are scored for zero automatic agent invocations, not counted
 as successful agent answers. Agent and numerical detector metrics are separate.
 
 The implementation hashes all package Python files and agent prompts before
-execution and verifies that they remain unchanged. For smaller networks,
-diagnosis intake supplies measured normal-pressure summaries for priority and
-quiet instruments. The coordinator may cite their original evidence only after
+execution and verifies that they remain unchanged. Diagnosis intake supplies
+original normal-pressure summaries for priority and quiet instruments; on extended
+networks it reads all 112 instruments in bounded, losslessly encoded batches.
+An audited, role-authorized search supplies relevant operating and calibration
+record candidates; the agents must still open and check the original records.
+The coordinator may cite original evidence only after
 an audited read, and the reviewer receives those same source bodies. Invalid
 read arguments are recorded and can be corrected within the existing budgets;
 foreign scope, role violations and operating actions still fail closed.
@@ -108,8 +190,11 @@ the separate explanation judge. Stable and missing-only controls invoked no
 agents. This is one eight-case reference cohort, not field certification.
 The [recorded results](docs/RESULTS.md) retain the three failed development
 cohorts, the qualified development cohort and the untouched held-out result.
-The committed [evaluation receipt](docs/evidence/evaluation-report.json) also
-serves as the read-only dashboard fallback on a clean clone.
+The [historical held-out receipt](docs/evidence/reference-held-out-20261108.json)
+is retained separately. The committed
+[latest enlarged evaluation receipt](docs/evidence/evaluation-report.json)
+serves as the read-only dashboard fallback on a clean clone, including its
+unmet targets and failed roots.
 
 Versioned synthetic cases and hidden evaluation labels live in
 `fixtures\golden\cases-v1.json`; the judge rubric is
@@ -194,8 +279,11 @@ Stopping Compose without `-v` preserves evidence.
 ### Five-minute operator walkthrough
 
 The **investigation panel** separates detector output from actual agent
-work. New assisted runs **stop simulated ingestion at a newly raised
-pressure anomaly** and wait for fresh agents on that immutable window. Missing
+work. New assisted runs show pressure alerts immediately, then collect context
+until measured persistence is sufficient or at most 20 additional source seconds
+have elapsed. They **pause simulated ingestion on that evidence-ready window**
+and wait for fresh agents. Existing recordings retain their original pause policy.
+Missing
 values, exclusions and quality-only concerns never launch automatic agents by
 themselves; they remain visible warnings and investigation evidence. The panel
 shows the Sensor Quality Agent, Event Diagnosis Agent, Response Coordinator and
@@ -453,10 +541,14 @@ seconds and a reviewed P1 200-600m inspection interval. Diagnosis used 9 tools,
 crossing its former 8-tool ceiling; the three named-agent Langfuse trees were
 checked in stored observations. This is a focused regression, not field certification.
 
-The fresh automatic S7 worked example completed in **233.70 seconds, eight
-hosted calls and sixteen tools**, separating P5, P7 and P2 explanations while
-withholding an unsupported location. See the [actual dashboard](docs/assets/knowledge-guided-investigation.png)
-and [qualification results](docs/RESULTS.md), including the failed prior attempt.
+The latest automatic S7 first-call briefing completed in **743.875 seconds**.
+It scopes P5 integrity review to **600-1000 m**, separates P7's shared-connection
+offset from P2's operating rise and individual spike, and gives immediate
+read-only priorities without asking the engineer to repeat available analysis.
+The [complete accepted briefing](docs/evidence/s7-first-call-briefing.json) and
+[qualification results](docs/RESULTS.md) preserve the outcome and earlier failures.
+Its 12.4-minute inference latency is a material workflow limitation; recorded
+playback is available for a time-limited meeting.
 One accepted run is not a reliability, field-accuracy or labor-saving result.
 
 This workload contains **one physical leak**, not simultaneous multi-leak

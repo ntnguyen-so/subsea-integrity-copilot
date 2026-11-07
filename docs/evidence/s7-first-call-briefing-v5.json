@@ -1,0 +1,90 @@
+{
+  "implementation_sha256": "697806fec6878e7bc3ed13958dd0e6c95beb0c922a7e6b9487754bbe879283ba",
+  "generation_id": "replay-27bf0db6470a179bfb70f864",
+  "root_id": "defd2476-aa92-5101-bf2c-2e3d1f5ea51b",
+  "state": "SUCCEEDED",
+  "error_code": null,
+  "snapshot_id": "window-d9fc7e2770612f1d48f65ed0e322aedac9eb2d0c482343e5d1d212bf8c7f2999",
+  "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+  "parameter_version": "pressure-window-v4",
+  "window_end": 120,
+  "clock": 125.0,
+  "persistence_seconds": 17.0,
+  "location": {
+    "status": "located",
+    "best": {
+      "segment_id": "P5",
+      "chainage_m": 800.0,
+      "position": {
+        "x": -800.0,
+        "y": 1600.0
+      },
+      "residual": null,
+      "strength": null
+    },
+    "compatible": [
+      {
+        "segment_id": "P5",
+        "chainage_m": 600.0,
+        "position": {
+          "x": -920.0,
+          "y": 1440.0
+        },
+        "residual": null,
+        "strength": null
+      },
+      {
+        "segment_id": "P5",
+        "chainage_m": 1000.0,
+        "position": {
+          "x": -680.0,
+          "y": 1760.0
+        },
+        "residual": null,
+        "strength": null
+      }
+    ],
+    "reason": "Priority inspection focus around a unique measured pressure-deficit peak, bounded by weaker neighboring stations. These stations need not be unaffected. This is a spatial pressure-focus heuristic, not hydraulic leak coordinates or a confidence interval.",
+    "method": "pressure-peak-focus-v1",
+    "grid_m": 0.0,
+    "inspection_start_m": 600.0,
+    "inspection_end_m": 1000.0,
+    "station_bracket_m": [
+      500.0,
+      700.0,
+      900.0,
+      1100.0
+    ]
+  },
+  "elapsed_seconds": 484.75,
+  "traces": [
+    {
+      "task_id": "defd2476-aa92-5101-bf2c-2e3d1f5ea51b",
+      "trace": {
+        "trace_id": "61127a12f27cc7abaeb706d7484ea762",
+        "span_id": "9335b80cc8f40836",
+        "attempt_id": "56f6f149-ec3c-4f56-b735-ffe7a92952f2",
+        "session_id": "d1aaeda4d31a2cd9aacd22250063f12e95d5aa2fb22d2cf2bc523e0386a37989"
+      }
+    },
+    {
+      "task_id": "04b39924-c303-5ac7-ba38-6828a491efc4",
+      "trace": {
+        "trace_id": "ee7bde8cb9e105e618bd05e98ef6081e",
+        "span_id": "d161e6510c3b2df7",
+        "attempt_id": "41050ab3-a6a1-4fa3-a807-4f910a7d1f52",
+        "session_id": "d1aaeda4d31a2cd9aacd22250063f12e95d5aa2fb22d2cf2bc523e0386a37989"
+      }
+    },
+    {
+      "task_id": "bd030d76-5e2e-5fdc-b65e-44a1c8a27f60",
+      "trace": {
+        "trace_id": "d937869fbe9d2455511b9f3292ae24b4",
+        "span_id": "c983ec2e593f335d",
+        "attempt_id": "8b1b68eb-6e69-4412-b7f4-e37ff3eefa22",
+        "session_id": "d1aaeda4d31a2cd9aacd22250063f12e95d5aa2fb22d2cf2bc523e0386a37989"
+      }
+    }
+  ],
+  "answer": "Decision\nPrioritize integrity review on P5, 600-1000 m along the pipe, around stations ST4/ST5: this is the strongest supported joint pressure-loss pattern and a suspected integrity incident. The accepted interval is a spatial inspection priority, not a confirmed leak point or dispatch approval [claim-114; KN-LOCALIZATION-R1]. Keep P7 on shared-connection instrumentation review, P2 on operating-transition/process review, and P4 on secondary pressure/process review plus specific instrument checks. P1, P3 and P6 need instrument-specific attention, not a separate joint leak diagnosis.\n\nYour first actions\n1. Scope the read-only P5 integrity review to the accepted interval and ST3/ST6 comparison stations; do not infer an exact source [claim-114; KN-LOCALIZATION-R1].\n2. Keep gateway-P7-0, the shared data connection for both sensors at ST1/ST3/ST5/ST7, on the measurement-path track using the already matched calibration record [MAINT-P7-GW-002].\n3. Use the opened P2 pressure-setting record to distinguish its broad rise from a new pressure loss; retain P2-ST2-A's brief spike and P4's weaker joint loss as separate review items [OP-P2-EXTENDED-001].\n4. Obtain independent pressure/flow confirmation for the P5 focus and confirmation of P7's conversion-path state to distinguish physical loss from measurement bias.\n\nAlready checked\nSpecialists compared synchronized profiles, two sensors at each station, shared data connections, and the opened operating and maintenance records. Current quantities use the supplied typical-pressure reference during the final five seconds, 115-120 seconds elapsed in the recording; bar is a pressure unit. P5-ST4-A is 1.327 bar below reference [ev-142]. P7-ST1-A is 0.772 bar below, versus only 0.003 bar below at independently connected ST2-A [ev-194; ev-198]. P2-ST1-A remains 0.388 bar above reference [ev-034]. P4-ST1-A/B are 0.156/0.172 bar below: a weaker joint change, not evidence that these two instruments are faulty [ev-098; ev-100].\n\nWhy this decision\nP5's paired loss develops across two gateways and strengthens around ST4/ST5. P7 instead shows a persistent shared-path offset matching the calibration window. Suspect readings are gradual upward drift at P1-ST6-A and P4-ST3-B, downward drift at P3-ST7-A, and brief spikes at P2-ST2-A, P3-ST2-A, P4-ST7-B and P6-ST3-A. Their comparison partners must not be labelled faulty; these patterns are not confirmed hardware failures [executed comparisons; KN-QUALITY-R1]. Coverage is 98.56%, but health review is partial and individual missing/invalid readings remain, detailed below [ev-225].\n\nWhat changes the decision\nSustained independent loss outside P7's shared connection, P2 changes inconsistent with its recorded 90-145-second transition, or deterioration of P5's pressure focus would change priorities. The incomplete log excerpt supplies no verified P5 operation; that absence cannot establish a cause [LOG-EXTENDED-COVERAGE-001]."
+}
