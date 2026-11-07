@@ -288,6 +288,46 @@ def test_api_alert_workflow_blocks_questions_without_inference(settings: Setting
         assert response.json()["code"] == "workflow_disabled"
 
 
+def test_both_api_workflows_share_detector_evidence_and_warnings(settings: Settings) -> None:
+    with TestClient(create_app(settings, start_workers=False)) as client:
+        login = client.post(
+            "/api/login", json={"username": "operator", "password": settings.operator_password}
+        )
+        headers = {"X-CSRF-Token": login.json()["csrf_token"]}
+        views = []
+        for workflow in ("sensor_alerts", "agent_assisted"):
+            response = client.post(
+                "/api/replays",
+                headers=headers,
+                json={
+                    "scenario": "S1",
+                    "mode": "scripted",
+                    "workflow": workflow,
+                    "pause_on_anomaly": False,
+                    "idempotency_key": "shared-" + workflow,
+                },
+            )
+            assert response.status_code == 200
+            replay_id = response.json()["id"]
+            for index in range(23):
+                stepped = client.post(
+                    f"/api/replays/{replay_id}/control",
+                    headers=headers,
+                    json={"action": "step", "idempotency_key": f"shared-step-{index}"},
+                )
+                assert stepped.status_code == 200
+            views.append(client.get(f"/api/replays/{replay_id}/projection").json())
+        assert views[0]["latest_window"]["input_hash"] == views[1]["latest_window"]["input_hash"]
+        assert views[0]["latest_window"]["quality"] == views[1]["latest_window"]["quality"]
+        warnings = [{**view["warning"], "snapshot_id": None} for view in views]
+        assert warnings[0] == warnings[1]
+        assert warnings[0]["kind"] == "sensor_alerts"
+        assert warnings[0]["severity"] == "attention"
+        assert views[0]["tasks"] == []
+        assert views[1]["tasks"]
+        assert all(task["model_calls"] == 0 for view in views for task in view["tasks"])
+
+
 def test_maturing_leak_bypasses_unresolved_hold_without_an_obsolete_llm_job(
     monitor: Monitor,
 ) -> None:

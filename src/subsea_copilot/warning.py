@@ -61,10 +61,13 @@ def monitoring_warning(
             }
         )
         kind, severity = ("sensor_alerts", "warning") if count else ("no_sensor_alerts", "info")
+        if count and snapshot.event.hypothesis == "suspected_leak":
+            severity = "attention"
         title = f"{count} SENSOR ALERTS: engineer review required" if count else "No sensor alerts"
         message = (
-            "Inspect individual histories and connect the timing and location manually. "
-            "This alert-only view does not classify leaks versus malfunction; "
+            "Review sensor histories, joint timing and independent observations promptly. "
+            "Detector output does not classify leaks versus malfunction "
+            "or select an inspection area; "
             "follow existing response procedures. No safety clearance is implied."
         )
     elif snapshot.event.hypothesis == "suspected_leak":

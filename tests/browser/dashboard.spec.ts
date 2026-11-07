@@ -2,23 +2,58 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import type { Projection } from "../../web/ts/types";
 
-test("both workflows expose identical raw pressure and quality markers", async ({ page }) => {
-  test.setTimeout(300_000);
+test("both workflows expose identical monitoring interfaces and sensor evidence", async ({ page }) => {
+  test.setTimeout(480_000);
   const markerState = () => page.locator("#topology [data-sensor]").evaluateAll(elements =>
     elements.map(element => ({
       id: element.getAttribute("data-sensor"),
       flags: ["missing", "fault", "anomalous", "unknown"].filter(flag => element.classList.contains(flag)),
     })).sort((a, b) => (a.id || "").localeCompare(b.id || "")));
+  const sharedInterface = async () => ({
+    legend: await page.locator("#map-legend").innerHTML(),
+    sensors: await page.locator("#sensor-list").innerText(),
+    summary: await page.locator("#event-summary").innerText(),
+    metrics: await page.locator("#domain-count,#sample-coverage,#window-state,#detector-stage").allTextContents(),
+    tabs: await page.locator("[role=tab]").allTextContents(),
+    comparison: await page.locator("#compare-sensors").innerText(),
+    header: await page.locator("#inference-mode").innerText(),
+  });
+  const manualEvidence = async () => {
+    await page.locator("#compare-sensors").click();
+    await expect(page.locator("#comparison-charts svg")).toHaveCount(4, { timeout: 45_000 });
+    const compared = await page.locator("#comparison-charts article > h3").allTextContents();
+    await page.locator("#inspect-raw").click();
+    await expect(page.locator("#raw-table table")).toBeVisible();
+    const evidence = (await page.locator("#evidence-chips button").allTextContents())
+      .map(label => label.split(" / ").slice(0, label.startsWith("CLAIM") ? 1 : 3).join(" / "));
+    return { compared, evidence };
+  };
   const baseline = await prepare(page, "S7", 23, "scripted", "sensor_alerts");
   await expect(page.locator('#map-legend [data-legend="quality"]')).toBeVisible();
   await expect(page.locator("#topology .sensor.missing").first()).toBeVisible();
   const alerts = await markerState();
+  const baselineInterface = await sharedInterface();
+  for (const selector of ["#agent-activity", ".agent-status-panel", "#tab-agents"]) await expect(page.locator(selector)).toBeVisible();
+  for (const selector of [".engineer-details", "#question-tools"]) await expect(page.locator(selector)).not.toHaveAttribute("hidden");
   const before: Projection = await (await page.request.get(`/api/replays/${baseline.id}/projection`)).json();
+  const beforeManual = await manualEvidence();
   const assisted = await prepare(page, "S7", 23);
   const after: Projection = await (await page.request.get(`/api/replays/${assisted.id}/projection`)).json();
   expect(after.latest_window!.input_hash).toBe(before.latest_window!.input_hash);
   expect(await markerState()).toEqual(alerts);
+  const assistedInterface = await sharedInterface();
+  expect(assistedInterface).toEqual(baselineInterface);
+  expect({ ...after.warning, snapshot_id: null }).toEqual({ ...before.warning, snapshot_id: null });
   await expect(page.locator('#map-legend [data-legend="quality"]')).toBeVisible();
+  const afterManual = await manualEvidence();
+  expect(afterManual).toEqual(beforeManual);
+  await writeFile("runtime/unified-mode-parity.json", JSON.stringify({
+    outcome: "passed", fixture_mode: "scripted", sensor_count: after.pack.sensors.length,
+    input_hash: after.latest_window!.input_hash, window_end: after.latest_window!.window_end,
+    baseline: baselineInterface, assisted: assistedInterface, manual_evidence: afterManual,
+    limitations: ["UI/workflow parity qualification, not hosted inference quality or field RCA accuracy.",
+      "Agent progress and reviewed diagnosis/localization are deliberately excluded from identical sensor presentation."],
+  }, null, 2) + "\n");
 });
 
 test("10x fresh hosted work freezes the source and displays real progress", async ({ page }) => {
@@ -256,7 +291,10 @@ async function prepare(page: Page, scenario: string, steps: number, mode = "scri
     await page.goto("/");
     await expect(page.locator("#create-replay")).toBeEnabled();
     await page.locator("#replay-history").selectOption(id);
-    await expect(page.locator("#channel-charts svg")).toHaveCount(1);
+    const view: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+    if (!view.latest_window) throw new Error("Prepared replay has no completed evidence window");
+    await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", view.latest_window.id, { timeout: 45_000 });
+    await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 45_000 });
     return { id, headers };
   } catch (error) {
     throw new Error(error instanceof Error ? error.message.split("\nCall log:")[0] : "Replay preparation failed");
@@ -264,7 +302,7 @@ async function prepare(page: Page, scenario: string, steps: number, mode = "scri
 }
 
 test("brief geometry, correct wall sides and manual comparison agree with actual evidence", async ({ page }) => {
-  const { id } = await prepare(page, "S1", 37);
+  const { id } = await prepare(page, "S1", 23);
   const response = await page.request.get(`/api/replays/${id}/projection`);
   const projection: Projection = await response.json();
   const figure = await readFile("docs\\assets\\pressure-leak-vs-sensor-faults.svg", "utf8");
@@ -340,7 +378,7 @@ test("brief geometry, correct wall sides and manual comparison agree with actual
   await expect(page.locator("#trend-basis")).toContainText("PINNED TREND");
   await page.locator("#clear-comparison").click();
   await expect(page.getByRole("checkbox", { checked: true })).toHaveCount(0);
-  await expect(page.locator("#compare-sensors")).toHaveText("Compare event / fault sensors");
+  await expect(page.locator("#compare-sensors")).toHaveText("Compare sensor histories");
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "runtime/dashboard-engineer-desktop.png", fullPage: true });
 });
@@ -505,12 +543,13 @@ test("automatic report timestamps are explicit and failed analysis cannot clear 
   await page.locator("#reconnect").click();
   await expect(page.locator("#automatic-state")).toContainText("REPORT WITHHELD");
   await expect(page.locator("#automatic-conclusion")).toContainText("No accepted report");
-  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak");
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   injection = "unavailable";
   await page.locator("#reconnect").click();
   await expect(page.locator("#automatic-state")).toContainText("Not queued: agent unavailable");
-  await expect(page.locator("#automatic-actions button")).toHaveCount(0);
-  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak");
+  await expect(page.locator("#automatic-actions button")).toHaveCount(2);
+  for (const control of await page.locator("#automatic-actions button").all()) await expect(control).toBeDisabled();
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   await page.unrouteAll({ behavior: "wait" });
 });
 
@@ -674,42 +713,43 @@ test("knowledge-assisted handoff shows regional reasoning and actual guidance-to
   await page.screenshot({ path: "runtime/joint-pattern-knowledge-dashboard.png", fullPage: true });
 });
 
-test("two customer modes separate individual sensor alerts from agent investigation on matching S1 data", async ({ page }) => {
+test("two customer modes keep one interface and add only reviewed investigation on matching S1 data", async ({ page }) => {
   const baseline = await prepare(page, "S1", 23, "live", "sensor_alerts");
   await expect(page.locator("#workflow option")).toHaveText(["Sensor alerts only", "Agent-assisted investigation"]);
   await expect(page.locator("#mode")).toHaveCount(0);
-  await expect(page.locator("#inference-mode")).toContainText("SENSOR ALERTS ONLY");
-  await expect(page.locator("#manual-workflow")).toBeVisible();
+  await expect(page.locator("#inference-mode")).toContainText("EVIDENCE");
+  await expect(page.locator("#manual-workflow")).toHaveCount(0);
   await expect(page.locator("#monitoring-warning")).not.toContainText(/\bdemo\b/i);
-  await expect(page.locator(".agent-status-panel")).toBeHidden();
-  await expect(page.locator("#agent-activity")).toBeHidden();
-  await expect(page.locator("#question-tools")).toBeHidden();
-  await expect(page.locator("#tab-agents")).toBeHidden();
+  await expect(page.locator(".agent-status-panel")).toBeVisible();
+  await expect(page.locator("#agent-activity")).toBeVisible();
+  await expect(page.locator("#question-tools")).not.toHaveAttribute("hidden");
+  await expect(page.locator("#tab-agents")).toBeVisible();
+  await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(3);
   await expect(page.locator("#topology .support-ring, #topology .inspection-interval")).toHaveCount(0);
   await expect(page.locator("#sensor-list")).not.toContainText("Overlapping pressure drop");
-  await expect(page.locator("#event-summary")).toContainText("no combined leak/malfunction diagnosis");
-  await expect(page.locator("#domain-count")).toContainText("no cross-sensor diagnosis");
-  await expect(page.locator("#agent-stage")).toContainText("Disabled");
+  await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
+  await expect(page.locator("#domain-count")).toContainText("instrument domains available");
+  await expect(page.locator("#agent-stage")).toContainText("execution off");
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   const before: Projection = await (await page.request.get(`/api/replays/${baseline.id}/projection`)).json();
   expect(before.tasks).toEqual([]);
   expect(before.episodes).toEqual([]);
   await page.screenshot({ path: "runtime/dashboard-sensor-alerts.png", fullPage: true });
   await page.locator("#inspect-raw").click();
-  await expect(page.locator("#evidence-chips")).not.toContainText("CLAIM");
+  await expect(page.locator("#evidence-chips")).toContainText("CLAIM");
   await expect(page.locator("#raw-table table")).toBeVisible();
   await page.locator("#tab-evidence").focus();
   await page.keyboard.press("ArrowDown");
-  await expect(page.locator("#tab-audit")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#tab-agents")).toHaveAttribute("aria-selected", "true");
   const assisted = await prepare(page, "S1", 23);
   const after: Projection = await (await page.request.get(`/api/replays/${assisted.id}/projection`)).json();
   expect(after.latest_window!.input_hash).toBe(before.latest_window!.input_hash);
-  await expect(page.locator("#manual-workflow")).toBeHidden();
+  await expect(page.locator("#manual-workflow")).toHaveCount(0);
   await expect(page.locator(".agent-status-panel")).toBeVisible();
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
   await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
   await expect(page.locator("#location-summary")).toContainText("200–600m");
-  await expect(page.locator("#event-summary")).toContainText("not an LLM report");
+  await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
   await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
   await expect(page.locator("#agent-findings")).toContainText("operational records read");
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
@@ -733,7 +773,7 @@ test("two customer modes separate individual sensor alerts from agent investigat
 });
 
 test("agent work stays separate from a running detector and rejects mismatched automatic handoffs", async ({ page }) => {
-  const { id } = await prepare(page, "S1", 24);
+  const { id } = await prepare(page, "S1", 23);
   await expect(page.locator("#automatic-state")).toContainText("REPORT AVAILABLE");
   const projection: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
   const root = projection.tasks.find(task => task.automatic && !task.parent_id)!;
@@ -746,7 +786,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   });
   await page.locator("#reconnect").click();
   await expect(page.locator("#agent-activity-state")).toContainText("no reviewed report yet");
-  await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
+  await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
   await expect(page.locator("#automatic-conclusion")).toContainText("Investigating");
   await expect(page.locator("#agent-findings .agent-source-finding")).toHaveCount(0);
   const elapsed = await page.locator("#agent-elapsed").innerText();
@@ -755,6 +795,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   pending = false;
   await page.locator("#reconnect").click();
   await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
+  await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
   await expect(page.locator("#agent-findings")).toContainText("final decision accepted");
   const source = page.locator("#agent-findings .agent-source").first();
   await source.locator("summary").click();
@@ -767,8 +808,9 @@ test("agent work stays separate from a running detector and rejects mismatched a
   });
   await page.locator("#reconnect").click();
   await expect(page.locator("#agent-findings")).toContainText("refusing an unmatched comparison");
+  await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
   await expect(page.locator("#agent-findings .agent-source-finding")).toHaveCount(0);
-  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak");
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   await page.unrouteAll({ behavior: "wait" });
 });
 
@@ -787,7 +829,7 @@ test("LIVE automatic investigation completes while independent monitoring and ma
     const current: Projection = await inFlight.json();
     receipts.push({ observed_after_seconds: (performance.now() - started) / 1000, projection: current });
     expect(current.tasks.some(task => task.automatic && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(task.state))).toBe(true);
-    await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak", { timeout: 30_000 });
+    await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts", { timeout: 30_000 });
     await page.getByRole("button", { name: "Trend P1-ST2-A", exact: true }).click();
     await expect(page.locator("#channel-charts [data-anomaly=true]")).not.toHaveCount(0);
     await expect.poll(async () => Number(await page.locator("#source-clock").getAttribute("data-confirmed-seconds"))).toBeGreaterThan(185);

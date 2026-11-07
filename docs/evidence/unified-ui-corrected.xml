@@ -1,0 +1,8 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="308.145887">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-07T04:23:17.278Z" hostname="" tests="2" failures="0" skipped="0" time="306.29" errors="0">
+<testcase name="both workflows expose identical monitoring interfaces and sensor evidence" classname="dashboard.spec.ts" time="291.083">
+</testcase>
+<testcase name="recorded paused hosted work restores coherent evidence without new inference" classname="dashboard.spec.ts" time="15.207">
+</testcase>
+</testsuite>
+</testsuites>

@@ -84,7 +84,7 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
   }
   columns.append(baseline, assisted); section.append(columns);
   if (scenario === "S1") section.append(node("p",
-    "Same S1 readings: alerts alone leave the engineer to connect the dots. The product adds cross-sensor numerical correlation, leak-versus-instrumentation assessment, a supported inspection interval and a transferable handoff. A possible leak is not a confirmed leak.", "workflow-value-note"));
+    "Same sensor evidence and interface: without agents, the engineer connects the dots. Agents add knowledge-guided joint checks, leak-versus-instrumentation assessment, a supported inspection interval and a transferable handoff. A possible leak is not a confirmed leak.", "workflow-value-note"));
   section.append(node("p",
     "Validation scope: compare answer quality, engineer review effort, failures and latency against a fixed workflow. Field accuracy and time savings remain unmeasured.", "muted"));
   container.append(section);

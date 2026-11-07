@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="21.110281999999998">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-07T04:30:30.958Z" hostname="" tests="1" failures="0" skipped="0" time="19.346" errors="0">
+<testcase name="recorded paused hosted work restores coherent evidence without new inference" classname="dashboard.spec.ts" time="19.346">
+</testcase>
+</testsuite>
+</testsuites>

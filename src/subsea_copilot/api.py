@@ -305,12 +305,11 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         principal(request)
         view: dict[str, object] = dict(store.get_projection(generation_id))
         latest = view["latest_window"]
-        replay = store.get_replay(generation_id)
         view.update(
             {
                 "warning": monitoring_warning(
                     WindowSnapshot.model_validate(latest) if latest is not None else None,
-                    sensor_alerts_only=replay.workflow == "sensor_alerts",
+                    sensor_alerts_only=True,
                 ),
                 "pack": monitor_service().pack_for(generation_id),
                 "health": health(),

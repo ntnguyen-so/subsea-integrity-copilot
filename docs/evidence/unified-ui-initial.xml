@@ -1,0 +1,49 @@
+<testsuites id="" name="" tests="8" failures="1" skipped="0" errors="0" time="920.3140629999999">
+<testsuite name="dashboard.spec.ts" timestamp="2026-11-07T04:05:09.876Z" hostname="" tests="8" failures="1" skipped="0" time="916.61" errors="0">
+<testcase name="both workflows expose identical raw pressure and quality markers" classname="dashboard.spec.ts" time="223.592">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\test-results\dashboard-both-workflows-e-893fa-ressure-and-quality-markers\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  dashboard.spec.ts:5:5 › both workflows expose identical raw pressure and quality markers ─────────
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('#channel-charts svg')
+    Expected: 1
+    Received: 0
+    Timeout:  15000ms
+
+
+      274 |     return { id, headers };
+      275 |   } catch (error) {
+    > 276 |     throw new Error(error instanceof Error ? error.message.split("\nCall log:")[0] : "Replay preparation failed");
+          |           ^
+      277 |   }
+      278 | }
+      279 |
+        at prepare (C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:276:11)
+        at C:\Users\thanh\subsea_monitoring\tests\browser\dashboard.spec.ts:29:20
+
+    Error Context: ..\..\test-results\dashboard-both-workflows-e-893fa-ressure-and-quality-markers\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="recorded paused hosted work restores coherent evidence without new inference" classname="dashboard.spec.ts" time="20.6">
+</testcase>
+<testcase name="brief geometry, correct wall sides and manual comparison agree with actual evidence" classname="dashboard.spec.ts" time="117.21">
+</testcase>
+<testcase name="automatic report timestamps are explicit and failed analysis cannot clear a numerical warning" classname="dashboard.spec.ts" time="119.5">
+</testcase>
+<testcase name="monitoring controls and manual instruments fit a narrow viewport" classname="dashboard.spec.ts" time="59.005">
+</testcase>
+<testcase name="default view prioritizes map, trend and assessment while optional tools stay collapsed" classname="dashboard.spec.ts" time="95.782">
+</testcase>
+<testcase name="two customer modes keep one interface and add only reviewed investigation on matching S1 data" classname="dashboard.spec.ts" time="173.893">
+</testcase>
+<testcase name="agent work stays separate from a running detector and rejects mismatched automatic handoffs" classname="dashboard.spec.ts" time="107.028">
+</testcase>
+</testsuite>
+</testsuites>

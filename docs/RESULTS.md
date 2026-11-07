@@ -1,5 +1,53 @@
 # Qualification results
 
+## Shared monitoring interface and agent-only interpretation
+
+Both customer modes now retain the same layout, tabs, controls, map legend,
+sensor conditions/order, comparison defaults, evidence access, coverage metrics
+and detector warning. The inactive mode keeps the investigation workspace
+visible and honestly reports no agent execution. Question submission is rejected
+explicitly by the server without an LLM call; the shared form is not hidden.
+
+Raw pressure, gap/excluded and quality markers remain numerical observations.
+Agent-reviewed regional patterns and inspection intervals require an accepted
+handoff matching the selected generation, window, input hash and pack/baseline/
+parameter versions. Pending, failed, unavailable or mismatched work cannot
+release an interval. A valid historical report cannot annotate a different live
+window. Numerical localization remains an auditable tool constraint, not a
+pre-agent answer or a confirmed physical leak coordinate.
+
+The shared detector banner reports pressure/quality alerts in both modes,
+preserving coverage-loss warnings and elevated attention for a strong pressure
+screen without presenting a causal diagnosis. The agent report is the separate
+knowledge-guided leak/instrumentation assessment and inspection recommendation.
+
+Backend qualification passed **33 cases**: the 25-case monitoring suite and
+eight independent warning cases. A new paired API case verifies matching
+pressure/quality evidence and warning content while alert-only admits no tasks
+and neither unworked arm reserves model calls. Ruff, backend typing, TypeScript
+and production build passed.
+
+Eight distinct browser journeys passed across the initial and corrected
+cohorts: matched S7 interface/evidence, retained hosted-report reopening,
+S1 geometry/manual comparison, failure-safe warning timestamps, mobile layout,
+compact layout, matched S1 workflows and pending/mismatched handoff rejection.
+The initial S7 preparation failed because its chart was not ready within 15s;
+no parity comparison occurred in that attempt. Preparation now waits for the
+exact completed window and its chart (up to 45s), rather than accepting a
+partial inspector. The corrected S7 journey also verifies identical default
+comparison instruments and raw/canonical evidence categories.
+
+The parity artifact export was corrected to retain both already-compared Live
+views before navigating to Evidence. A separate read-only recapture confirmed
+the stored interface/evidence equality and unchanged task/model/tool counters.
+The matched S7 arms are **SCRIPTED UI fixtures**, not hosted-model quality or
+field throughput evidence. The separate actual retained hosted report was
+reopened in the final interface without new inference.
+Receipts: `evidence\unified-mode-parity.json`,
+`evidence\unified-ui-initial.xml`, `evidence\unified-ui-corrected.xml` and
+`evidence\unified-ui-final-view.xml`. Current retained hosted view:
+`assets\unified-agent-investigation.png`.
+
 ## Anomaly-paused investigations
 
 New API/UI assisted runs pause the synthetic source at a newly raised detector

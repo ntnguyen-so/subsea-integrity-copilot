@@ -15,15 +15,22 @@ function linked(root: AgentTask, tasks: AgentTask[]): AgentTask[] {
   return tasks.filter(task => task.id === root.id || task.root_id === root.id);
 }
 export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], events: ConsoleEvent[],
-  now: number, current: boolean, triage: boolean): void {
+  now: number, current: boolean, triage: boolean, enabled: boolean): void {
   const stages = document.getElementById("agent-live-stages")!;
   const log = document.getElementById("agent-progress-log")!;
   stages.replaceChildren();
   log.replaceChildren();
   if (!root) {
-    text("agent-activity-state", triage ? "Detectors flagged an unresolved pattern; gathering context" : "Detectors monitoring · agents start automatically on a qualifying incident");
+    text("agent-activity-state", !enabled ? "Agent execution off · sensor evidence remains available"
+      : triage ? "Detectors flagged an unresolved pattern; gathering context" : "Detectors monitoring · agents start automatically on a qualifying incident");
     text("agent-elapsed", "No LLM investigation admitted yet");
-    text("agent-last-action", "Map flags and the initial inspection interval are numerical detector outputs, not an agent report.");
+    text("agent-last-action", "Sensor flags are detector outputs. Leak assessment and inspection overlays require a reviewed agent report for the displayed window.");
+    for (const [role, label] of [["sensor_quality", "1. Quality checks"], ["event_diagnosis", "2. Joint investigation"],
+      ["operator_response", "Coordinator / report + critic"]]) {
+      const stage = node("span", `${label}: ${enabled ? "Not started" : "Not enabled"}`);
+      stage.dataset.role = role; stage.dataset.state = "NOT_STARTED"; stages.append(stage);
+    }
+    log.append(node("li", "No agent actions recorded."));
     return;
   }
   const done = accepted(root), active = ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state);
@@ -68,6 +75,17 @@ export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], 
     text("agent-last-action", `Last recorded action: ${label} · ${time(last.created_at)}. Only executed public actions are shown.`);
   } else {
     text("agent-last-action", `Automatically admitted ${time(root.created_at)}. The detector's initial diagnosis is not a completed LLM investigation.`);
+  }
+}
+
+export function renderIdleAgentWork(progress: HTMLElement, findings: HTMLElement, enabled: boolean): void {
+  progress.replaceChildren(); findings.replaceChildren();
+  delete progress.dataset.renderKey; delete progress.dataset.task;
+  for (const [role, label] of [["sensor_quality", "1 · Data-quality agent"],
+    ["event_diagnosis", "2 · Investigation agent"], ["operator_response", "3 · Reporting agent + critic"]]) {
+    const card = node("div", "", "agent-role"); card.dataset.role = role;
+    card.append(node("strong", label), node("span", enabled ? "Not started" : "Not enabled"));
+    progress.append(card);
   }
 }
 

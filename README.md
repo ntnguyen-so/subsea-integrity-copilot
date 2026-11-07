@@ -63,15 +63,23 @@ handoffs, executed record searches/comparisons, source quotes, critic outcome
 and engineer verification question. These findings load automatically on Live;
 opening the Agents tab or asking a question is not required.
 
-The map explicitly labels its initial assessment and inspection interval as
-numerical detector outputs. Pending, failed and unavailable work records do not
-become completed historical investigations. SCRIPTED recordings remain offline
+The shared map initially shows only pressure and quality facts. Pattern and
+inspection overlays require an accepted agent handoff matching the displayed
+window, evidence hash and versions. A numerical candidate alone is not displayed
+as an agent result. Pending, failed, unavailable, mismatched and historical
+work records do not become current investigations. SCRIPTED recordings remain offline
 fixtures, not evidence of hosted performance.
 Opening a recorded run loads its saved actual report; it does not rerun inference.
-Older continuous runs are explicitly labeled and retain their original behavior.
+Older continuous runs retain their stored playback policy and original behavior.
 An immutable evidence snapshot is the input to an agent, not a prewritten answer.
 
 Choose between exactly two customer workflows under **Workflow / new run**:
+
+Both keep the **same interface**: map, trends, sensor descriptions/order,
+legends, comparison defaults, tabs, questions, raw/canonical evidence, coverage
+metrics and detector warnings. The investigation workspace stays visible when
+execution is off; it does not claim an agent ran. Manual question submission
+is rejected explicitly in that mode without making an LLM call.
 
 - **Sensor alerts only:** the map and list flag individual instruments. Engineers
   examine histories one by one and connect timing/location manually. There is no
@@ -98,7 +106,7 @@ The light theme uses matching map and chart meanings: **amber** marks individual
 pressure anomalies, a **red cross** marks a quality concern, a **blue ring**
 selects the graphed instrument, and grey-filled markers are **not assessed**.
 Dashed sensor outlines show missing/excluded readings; amber diamonds show
-correlated-drop support. These flags can coexist and are not confirmed leak or
+agent-reviewed pressure patterns only after a matching report. These flags can coexist and are not confirmed leak or
 hardware-failure diagnoses. Chart keys separately identify pressure, baseline
 thresholds and missing-data bands; map, table and trend retain the same window.
 Both workflows show the **same raw pressure, gap/excluded and quality symbols**.
