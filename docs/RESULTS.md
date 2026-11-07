@@ -1,5 +1,16 @@
 # Qualification results
 
+## Simplified sensor alert categories
+
+The shared map and sensor table now show only pressure anomalies and missing
+values; excluded unusable readings use the **Missing value** label. Spike,
+drift and paired-disagreement screening is retained in investigation evidence,
+not presented as a separate quality marker or confirmed sensor fault.
+The two S2 workflow checks passed. The pressure map/chart/legend and contrast
+check initially exhausted its 180-second fixture/request budget, then passed
+with a 420-second budget. TypeScript and the production build passed.
+Earlier UI captures below document their recorded revision, before this change.
+
 ## Shared monitoring interface and agent-only interpretation
 
 Both customer modes now retain the same layout, tabs, controls, map legend,
@@ -8,7 +19,7 @@ and detector warning. The inactive mode keeps the investigation workspace
 visible and honestly reports no agent execution. Question submission is rejected
 explicitly by the server without an LLM call; the shared form is not hidden.
 
-Raw pressure, gap/excluded and quality markers remain numerical observations.
+Raw pressure and missing-value markers remain numerical observations.
 Agent-reviewed regional patterns and inspection intervals require an accepted
 handoff matching the selected generation, window, input hash and pack/baseline/
 parameter versions. Pending, failed, unavailable or mismatched work cannot

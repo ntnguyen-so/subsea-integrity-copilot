@@ -29,7 +29,7 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
     return { compared, evidence };
   };
   const baseline = await prepare(page, "S7", 23, "scripted", "sensor_alerts");
-  await expect(page.locator('#map-legend [data-legend="quality"]')).toBeVisible();
+  await expect(page.locator('#map-legend [data-legend="quality"]')).toHaveCount(0);
   await expect(page.locator("#topology .sensor.missing").first()).toBeVisible();
   const alerts = await markerState();
   const baselineInterface = await sharedInterface();
@@ -44,7 +44,7 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
   const assistedInterface = await sharedInterface();
   expect(assistedInterface).toEqual(baselineInterface);
   expect({ ...after.warning, snapshot_id: null }).toEqual({ ...before.warning, snapshot_id: null });
-  await expect(page.locator('#map-legend [data-legend="quality"]')).toBeVisible();
+  await expect(page.locator('#map-legend [data-legend="quality"]')).toHaveCount(0);
   const afterManual = await manualEvidence();
   expect(afterManual).toEqual(beforeManual);
   await writeFile("runtime/unified-mode-parity.json", JSON.stringify({
@@ -651,26 +651,27 @@ test("light theme has readable contrast and the map, chart and legend agree on p
   await page.screenshot({ path: "runtime/dashboard-light-desktop.png", fullPage: true });
 });
 
-test("quality concerns use the same red cross in the legend and map, not the pressure-anomaly symbol", async ({ page }) => {
-  const { id } = await prepare(page, "S2", 37);
+for (const workflow of ["sensor_alerts", "agent_assisted"] as const) {
+test(`${workflow} shows only pressure and missing-value sensor flags while retaining screening evidence`, async ({ page }) => {
+  const { id } = await prepare(page, "S2", 37, "scripted", workflow);
   const projection: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
   const quality = projection.latest_window!.quality.findings.filter(f => f.spike_count || f.drift_suspected || f.peer_disagreement);
   expect(quality.length).toBeGreaterThan(0);
-  await expect(page.locator("#topology .sensor.fault .quality-mark")).toHaveCount(quality.length);
+  await expect(page.locator("#topology .sensor.fault, #topology .quality-mark")).toHaveCount(0);
+  await expect(page.locator('#map-legend [data-legend="quality"]')).toHaveCount(0);
+  await expect(page.locator('#map-legend [data-legend="missing"]')).toHaveText("Missing value");
+  await expect(page.locator("#sensor-list")).not.toContainText(/Spikes|Drift suspected|Paired disagreement/);
+  for (const finding of projection.latest_window!.quality.findings) {
+    const marker = page.locator(`#topology [data-sensor="${finding.sensor_id}"]`);
+    expect(await marker.getAttribute("class")).toMatch(finding.anomaly_count > 0 ? /anomalous/ : /^(?!.*anomalous)/);
+    expect(await marker.getAttribute("class")).toMatch(finding.missing || finding.hard_excluded ? /missing/ : /^(?!.*missing)/);
+  }
   const sensor = quality[0].sensor_id;
   await page.getByRole("button", { name: `Trend ${sensor}`, exact: true }).click();
-  await expect(page.locator(`#topology [data-sensor="${sensor}"] .quality-mark`)).toBeVisible();
-  const colors = await page.evaluate(id => {
-    const stroke = (selector: string): string => getComputedStyle(document.querySelector(selector)!).stroke;
-    return [
-      stroke(`#topology [data-sensor="${id}"] .quality-mark`),
-      stroke('#map-legend [data-legend="quality"] .quality-mark'),
-      getComputedStyle(document.querySelector('#map-legend [data-legend="anomaly"] .sensor-dot')!).fill,
-    ];
-  }, sensor);
-  expect(colors[0]).toBe(colors[1]);
-  expect(colors[0]).not.toBe(colors[2]);
+  await page.locator("#inspect-raw").click();
+  await expect(page.locator("#raw-table table")).toBeVisible();
 });
+}
 
 test("unassessed sensors are grey rather than apparently healthy during warm-up", async ({ page }) => {
   await prepare(page, "S6", 2);

@@ -551,13 +551,12 @@ function reviewedCaseForWindow(): InvestigationCase | null {
   }
   return null;
 }
-function sensorFlags(window: WindowSnapshot | null, id: string): { assessed: boolean; missing: boolean; quality: boolean; anomaly: boolean; support: boolean } {
+function sensorFlags(window: WindowSnapshot | null, id: string): { assessed: boolean; missing: boolean; anomaly: boolean; support: boolean } {
   const findings = window?.quality.findings.filter(finding => finding.sensor_id === id) || [];
   const assessed = Boolean(window && window.quality.status !== "WARMING_UP" && findings.length);
   return {
     assessed,
     missing: assessed && findings.some(finding => finding.missing > 0 || finding.hard_excluded > 0),
-    quality: assessed && findings.some(finding => finding.spike_count > 0 || finding.drift_suspected || finding.peer_disagreement),
     anomaly: assessed && findings.some(finding => finding.anomaly_count > 0),
     support: assessed && Boolean(reviewedCaseForWindow()?.interpretation?.regional_assessments?.some(
       region => region.hypothesis === "leak_pattern" && region.sensor_ids.includes(id))),
@@ -581,7 +580,7 @@ function renderMap(): void {
   const segments = pack.segments.filter(segment => !mapSegment || segment.id === mapSegment);
   const sensors = pack.sensors.filter(sensor => !mapSegment || sensor.segment_id === mapSegment);
   if (extended) {
-    const flags = pack.sensors.filter(sensor => sensorFlags(window, sensor.id).anomaly || sensorFlags(window, sensor.id).quality || sensorFlags(window, sensor.id).missing).length;
+    const flags = pack.sensors.filter(sensor => sensorFlags(window, sensor.id).anomaly || sensorFlags(window, sensor.id).missing).length;
     text("network-scale", `${(pack.segments.reduce((sum, segment) => sum + segment.length_m, 0) / 1000).toFixed(1)} km · ${pack.segments.length} segments · ${pack.sensors.length} instruments · ${flags} flagged in the inspected window. Compare timing and shared gateways; choose a branch for station labels.`);
   }
   map.dataset.snapshot = window?.id || "";
@@ -641,14 +640,13 @@ function renderMap(): void {
       }
     }
     const flags = sensorFlags(window, sensor.id);
-    const { missing, quality: fault, support } = flags;
+    const { missing, support } = flags;
     const selected = selectedSensorId === sensor.id || evidence?.sensor_id === sensor.id;
-    const health = !flags.assessed ? "Not assessed" : `${missing ? "Missing or excluded readings" : "Usable coverage"}${flags.anomaly ? "; flagged sensor readings" : ""}${fault ? "; quality concern: spikes, drift or paired disagreement" : ""}`;
-    const group = svg("g", { class: `sensor${!flags.assessed ? " unknown" : ""}${flags.anomaly ? " anomalous" : ""}${missing ? " missing" : ""}${fault ? " fault" : ""}${support ? " support" : ""}${selected ? " selected" : ""}`, role: "button", tabindex: 0, "aria-label": `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Agent-reviewed pressure pattern; cause unconfirmed." : "No agent-reviewed pattern recorded."}`, "aria-pressed": String(selectedSensorId === sensor.id), "data-sensor": sensor.id });
+    const health = !flags.assessed ? "Not assessed" : `${missing ? "Missing value: absent or excluded readings" : "Usable coverage"}${flags.anomaly ? "; pressure anomaly" : ""}`;
+    const group = svg("g", { class: `sensor${!flags.assessed ? " unknown" : ""}${flags.anomaly ? " anomalous" : ""}${missing ? " missing" : ""}${support ? " support" : ""}${selected ? " selected" : ""}`, role: "button", tabindex: 0, "aria-label": `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Agent-reviewed pressure pattern; cause unconfirmed." : "No agent-reviewed pattern recorded."}`, "aria-pressed": String(selectedSensorId === sensor.id), "data-sensor": sensor.id });
     if (support) group.append(svg("rect", { x: position.x - 11, y: position.y - 11, width: 22, height: 22, transform: `rotate(45 ${position.x} ${position.y})`, class: "support-ring" }));
     group.append(svg("circle", { cx: position.x, cy: position.y, r: 6, class: "sensor-dot" }));
     if (selected) group.append(svg("circle", { cx: position.x, cy: position.y, r: 10, class: "selection-ring" }));
-    if (fault) group.append(svg("path", { d: `M${position.x - 3} ${position.y - 3}L${position.x + 3} ${position.y + 3}M${position.x - 3} ${position.y + 3}L${position.x + 3} ${position.y - 3}`, class: "quality-mark" }));
     const labelOnLeft = sensor.segment_id === "P2" || sensor.segment_id === "P4";
     if ((!extended || mapSegment || selected || support) && sensor.id.endsWith(labelOnLeft ? "-B" : "-A")) {
       group.append(svg("text", { x: stationPosition.x + (labelOnLeft ? -27 : 27), y: stationPosition.y + 4,
@@ -670,9 +668,9 @@ function renderMap(): void {
   if (focusedId) [...map.querySelectorAll<SVGGElement>("[data-sensor]")].find(item => item.dataset.sensor === focusedId)?.focus();
   const count = pack.sensors.filter(sensor => {
     const flags = sensorFlags(window, sensor.id);
-    return flags.anomaly || flags.missing || flags.quality;
+    return flags.anomaly || flags.missing;
   }).length;
-  text("event-summary", window ? `${count} instruments with detector flags in this window. Pressure anomalies and quality flags alone do not establish cause or location.` : "No completed assessment. Warm-up is not a normal-pipeline verdict.");
+  text("event-summary", window ? `${count} instruments with pressure anomalies or missing values in this window. These observations alone do not establish cause or location.` : "No completed assessment. Warm-up is not a normal-pipeline verdict.");
   text("location-summary", location?.status === "located"
     ? `Agent-reviewed priority inspection: ${location.best?.segment_id || "unresolved"} ${location.inspection_start_m}–${location.inspection_end_m}m. Not an exact leak point.`
     : "No agent-reviewed inspection interval for this window. No confirmed leak location is claimed.");
@@ -686,7 +684,7 @@ function renderSensorList(): void {
   const findings = new Map(window?.quality.findings.map(item => [item.sensor_id, item]) || []);
   const rank = (id: string): number => {
     const finding = findings.get(id);
-    return finding && (finding.spike_count || finding.drift_suspected || finding.peer_disagreement) ? 2 : finding && (finding.anomaly_count || finding.missing || finding.hard_excluded) ? 1 : 0;
+    return finding && (finding.anomaly_count || finding.missing || finding.hard_excluded) ? 1 : 0;
   };
   const table = node("table"), head = node("thead"), headings = node("tr"), body = node("tbody");
   for (const title of ["Compare", "Instrument", "Window condition", "Anomalous samples", "Usable / expected"]) headings.append(node("th", title));
@@ -708,14 +706,10 @@ function renderSensorList(): void {
     sensorCell.append(open);
     const conditions = [
       flags.anomaly ? "Pressure anomaly" : "",
-      finding?.spike_count ? "Spikes" : "",
-      finding?.drift_suspected ? "Drift suspected" : "",
-      finding?.peer_disagreement ? "Paired disagreement" : "",
-      finding?.missing ? `${finding.missing} missing` : "",
-      finding?.hard_excluded ? `${finding.hard_excluded} excluded` : "",
+      flags.missing ? "Missing value" : "",
     ].filter(Boolean);
     const condition = !flags.assessed ? "Warming up / not assessed"
-      : conditions.join("; ") || (finding?.anomaly_count ? "Pressure anomaly" : "No flagged anomaly");
+      : conditions.join("; ") || "No pressure anomaly or missing value";
     row.append(compareCell, sensorCell, node("td", condition), node("td", finding ? String(finding.anomaly_count) : "—"), node("td", finding ? `${finding.usable} / ${finding.expected}` : "—"));
     body.append(row);
   }

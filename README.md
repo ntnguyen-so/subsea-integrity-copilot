@@ -17,6 +17,13 @@ It follows the latest window even when a historical investigation is pinned.
 Source loss is a coverage warning, not a no-leak conclusion. A disconnected
 browser labels the retained assessment as stale.
 
+Both modes use the same map and sensor-table alert categories: **Pressure anomaly**
+and **Missing value** (absent or excluded unusable readings). Pressure excursions
+use a median/MAD detector fitted to verified-normal reference readings, with a
+minimum scale and configured threshold. Spike, drift and paired-disagreement
+screening remains available as investigation evidence, not a separate map flag
+or a confirmed sensor-fault diagnosis.
+
 Private repository: https://github.com/ntnguyen-so/subsea-integrity-copilot.
 Reviewers need repository access before the interview.
 
