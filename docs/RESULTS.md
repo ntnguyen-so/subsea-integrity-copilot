@@ -1,5 +1,32 @@
 # Qualification results
 
+## Agent role and contextual legend recheck
+
+Six agent-contract cases and six browser journeys passed across the initial
+and corrected cohorts. S1 checks require a suspected-leak result and a supported
+200-600 m P1 inspection interval; S2 contract checks require sensor/telemetry
+assessment without a location claim. These are scripted functional checks,
+not hosted accuracy measurements.
+
+The retained genuine hosted S7 report was reopened without new model calls:
+it assesses leak, instrumentation/telemetry and operating-change explanations,
+abstains from a final cause, and withholds the inspection interval. Pending and
+mismatched reports likewise cannot release an interval or its legend key.
+
+Both modes retain Pressure anomaly and Missing value as the raw legend.
+Redundant normal, selected and unassessed keys were removed. Reviewed-pattern
+and inspection-area keys appear only when their matching overlays are drawn.
+The obsolete red-cross explanation was removed from the map notes.
+Pressure chart alert labels use the same Pressure anomaly and Missing value
+wording as the map.
+
+The first cohort had five passing browser journeys and one assertion failure:
+the S1 scripted fixture supplies one operating-change alternative, not the three
+alternatives in the genuine hosted S7 report. Its assertion was corrected to
+check the actual fixture, retaining the required leak hypothesis and interval,
+and the paired S1 journey passed. Ruff formatting, lint, TypeScript and the
+production build passed.
+
 ## Simplified sensor alert categories
 
 The shared map and sensor table now show only pressure anomalies and missing

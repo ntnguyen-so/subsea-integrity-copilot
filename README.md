@@ -23,6 +23,10 @@ use a median/MAD detector fitted to verified-normal reference readings, with a
 minimum scale and configured threshold. Spike, drift and paired-disagreement
 screening remains available as investigation evidence, not a separate map flag
 or a confirmed sensor-fault diagnosis.
+The common legend contains those two raw categories. Agent-reviewed pattern
+and inspection-area keys appear only when the corresponding reviewed overlays
+are actually drawn. Selection and warm-up states are explained in **How to read
+the map**, rather than adding more alert legend entries.
 
 Private repository: https://github.com/ntnguyen-so/subsea-integrity-copilot.
 Reviewers need repository access before the interview.

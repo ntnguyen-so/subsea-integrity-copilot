@@ -666,6 +666,10 @@ function renderMap(): void {
     map.append(group);
   }
   if (focusedId) [...map.querySelectorAll<SVGGElement>("[data-sensor]")].find(item => item.dataset.sensor === focusedId)?.focus();
+  for (const [key, selector] of [["support", ".support-ring"], ["inspection", ".inspection-interval"]] as const) {
+    const legend = box("map-legend").querySelector<HTMLElement>(`[data-legend="${key}"]`);
+    if (legend) legend.hidden = !map.querySelector(selector);
+  }
   const count = pack.sensors.filter(sensor => {
     const flags = sensorFlags(window, sensor.id);
     return flags.anomaly || flags.missing;

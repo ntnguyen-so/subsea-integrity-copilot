@@ -76,10 +76,10 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
     };
     entry("pressure", "Pressure");
     if (band.length) {
-      entry("anomaly", "Outside baseline");
+      entry("anomaly", "Pressure anomaly");
       entry("baseline", "Baseline limits");
     }
-    entry("missing", "Missing data");
+    entry("missing", "Missing value");
     heading.append(legend);
     section.append(heading, chart, node("p", `${unit} · ${usable.length} usable / ${records.length} received · ${gaps} gap interval${gaps === 1 ? "" : "s"}. Original samples in Evidence.`));
     if (band.length) section.append(node("p", "Amber points are individual pressure anomalies, not leak diagnoses or sensor-fault classifications."));

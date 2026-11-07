@@ -531,6 +531,18 @@ def test_scripted_contract_smoke_with_actual_numerical_ledger(scenario):
         (t.role, t.error_code, t.model_calls, t.tool_calls) for t in store.tasks.values()
     ]
     assert len(store.tasks) == 3
+    if scenario in {"S1", "S2"}:
+        result = store.get_task(root.id).result
+        assert result is not None
+        assert (
+            result.hypothesis
+            == {
+                "S1": "suspected_leak",
+                "S2": "sensor_or_telemetry_issue",
+            }[scenario]
+        )
+        has_location = any(snapshot.claims[ref].kind == "location" for ref in result.claim_refs)
+        assert has_location == (scenario == "S1")
     assert all(
         len(str(r["result"]).encode()) <= 12 * 1024
         for task in store.tasks.values()

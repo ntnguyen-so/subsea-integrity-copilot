@@ -10,7 +10,8 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
       flags: ["missing", "fault", "anomalous", "unknown"].filter(flag => element.classList.contains(flag)),
     })).sort((a, b) => (a.id || "").localeCompare(b.id || "")));
   const sharedInterface = async () => ({
-    legend: await page.locator("#map-legend").innerHTML(),
+    legend: await page.locator('#map-legend [data-legend="anomaly"], #map-legend [data-legend="missing"]').evaluateAll(
+      elements => elements.map(element => element.outerHTML)),
     sensors: await page.locator("#sensor-list").innerText(),
     summary: await page.locator("#event-summary").innerText(),
     metrics: await page.locator("#domain-count,#sample-coverage,#window-state,#detector-stage").allTextContents(),
@@ -158,17 +159,31 @@ test("recorded paused hosted work restores coherent evidence without new inferen
     const before: Projection = await (await page.request.get(`/api/replays/${receipt.replay_id}/projection`)).json();
     expect(before.replay.investigation_window_id).toBe(receipt.snapshot_id);
     expect(before.replay.state).toBe("PAUSED");
+    const root = before.tasks.find(task => task.automatic && !task.parent_id && task.snapshot_id === receipt.snapshot_id);
+    expect(root?.mode).toBe("live");
+    const report = await page.request.get(`/api/tasks/${root!.id}/casefile`);
+    expect(report.status()).toBe(200);
+    const handoff = await report.json();
+    expect(handoff.state).toBe("ABSTAINED");
+    expect(handoff.inspection).toBeNull();
+    expect(handoff.interpretation.competing_causes.map((cause: { cause: string }) => cause.cause))
+      .toEqual(expect.arrayContaining(["leak", "instrumentation_or_telemetry", "operating_change"]));
     await page.goto("/");
     await expect(page.locator("#create-replay")).toBeEnabled();
     await page.locator("#replay-history").selectOption(receipt.replay_id);
     await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", receipt.snapshot_id, { timeout: 45_000 });
     await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 45_000 });
+    await expect(page.locator('#channel-charts [data-legend="missing"]')).toHaveText("Missing value");
+    await expect(page.locator('#channel-charts [data-legend="anomaly"]')).toHaveText("Pressure anomaly");
     await expect(page.locator("#agent-last-action")).toContainText("saved result, not a new inference");
     await expect(page.locator("#play")).toHaveText("Continue monitoring");
     await expect(page.locator("#play")).toBeEnabled();
     await expect(page.locator("#step")).toBeDisabled();
     await expect(page.locator("#basis-warning")).toContainText("Simulation paused for investigation");
     await expect(page.locator("#agent-live-stages")).toContainText("Coordinator / report + critic");
+    await expect(page.locator("#agent-findings .agent-causes details")).toHaveCount(handoff.interpretation.competing_causes.length);
+    await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
+    await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeHidden();
     const after: Projection = await (await page.request.get(`/api/replays/${receipt.replay_id}/projection`)).json();
     expect(after.tasks.map(task => [task.id, task.model_calls, task.tool_calls])).toEqual(
       before.tasks.map(task => [task.id, task.model_calls, task.tool_calls]));
@@ -616,11 +631,9 @@ test("light theme has readable contrast and the map, chart and legend agree on p
       sample: color('#channel-charts circle[data-anomaly="true"]', "fill"),
       plotLegend: color('#channel-charts [data-legend="anomaly"] .legend-mark', "background-color"),
       selected: color('#topology [data-sensor="P1-ST2-A"] .selection-ring', "stroke"),
-      selectedLegend: color('#map-legend [data-legend="selected"] .selection-ring', "stroke"),
     };
   });
   expect(new Set([styles.dot, styles.legend, styles.sample, styles.plotLegend]).size).toBe(1);
-  expect(styles.selected).toBe(styles.selectedLegend);
   expect(styles.selected).not.toBe(styles.dot);
   for (const finding of projection.latest_window!.quality.findings) {
     const marker = page.locator(`#topology [data-sensor="${finding.sensor_id}"]`);
@@ -660,6 +673,11 @@ test(`${workflow} shows only pressure and missing-value sensor flags while retai
   await expect(page.locator("#topology .sensor.fault, #topology .quality-mark")).toHaveCount(0);
   await expect(page.locator('#map-legend [data-legend="quality"]')).toHaveCount(0);
   await expect(page.locator('#map-legend [data-legend="missing"]')).toHaveText("Missing value");
+  await expect(page.locator('#map-legend [data-legend="normal"], #map-legend [data-legend="selected"], #map-legend [data-legend="unknown"]')).toHaveCount(0);
+  for (const [key, selector] of [["support", ".support-ring"], ["inspection", ".inspection-interval"]]) {
+    expect(await page.locator(`#map-legend [data-legend="${key}"]`).isVisible())
+      .toBe(await page.locator(`#topology ${selector}`).count() > 0);
+  }
   await expect(page.locator("#sensor-list")).not.toContainText(/Spikes|Drift suspected|Paired disagreement/);
   for (const finding of projection.latest_window!.quality.findings) {
     const marker = page.locator(`#topology [data-sensor="${finding.sensor_id}"]`);
@@ -673,18 +691,12 @@ test(`${workflow} shows only pressure and missing-value sensor flags while retai
 });
 }
 
-test("unassessed sensors are grey rather than apparently healthy during warm-up", async ({ page }) => {
+test("unassessed sensors remain explicitly unassessed during warm-up", async ({ page }) => {
   await prepare(page, "S6", 2);
   await expect(page.locator("#topology .sensor.unknown")).toHaveCount(24);
   await expect(page.locator("#topology .sensor.anomalous, #topology .sensor.fault, #topology .sensor.support")).toHaveCount(0);
   await expect(page.locator("#sensor-list")).toContainText("not assessed");
-  const colors = await page.evaluate(() => [
-    getComputedStyle(document.querySelector('#topology .sensor-dot')!).stroke,
-    getComputedStyle(document.querySelector('#map-legend [data-legend="unknown"] .sensor-dot')!).stroke,
-    getComputedStyle(document.querySelector('#map-legend [data-legend="normal"] .sensor-dot')!).stroke,
-  ]);
-  expect(colors[0]).toBe(colors[1]);
-  expect(colors[0]).not.toBe(colors[2]);
+  await expect(page.locator("#map-legend > span:visible")).toHaveText(["Pressure anomaly", "Missing value"]);
 });
 
 test("knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links", async ({ page }) => {
@@ -727,6 +739,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#tab-agents")).toBeVisible();
   await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(3);
   await expect(page.locator("#topology .support-ring, #topology .inspection-interval")).toHaveCount(0);
+  await expect(page.locator("#map-legend > span:visible")).toHaveText(["Pressure anomaly", "Missing value"]);
   await expect(page.locator("#sensor-list")).not.toContainText("Overlapping pressure drop");
   await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
   await expect(page.locator("#domain-count")).toContainText("instrument domains available");
@@ -748,6 +761,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#manual-workflow")).toHaveCount(0);
   await expect(page.locator(".agent-status-panel")).toBeVisible();
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
+  await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeVisible();
   await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
   await expect(page.locator("#location-summary")).toContainText("200–600m");
   await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
@@ -756,6 +770,10 @@ test("two customer modes keep one interface and add only reviewed investigation 
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
   const detail = await (await page.request.get(`/api/tasks/${taskId}`)).json();
   const handoff = detail.casefile;
+  expect(handoff.hypothesis).toBe("suspected_leak");
+  expect(handoff.inspection).toEqual({ segment_id: "P1", start_m: 200, end_m: 600 });
+  expect(handoff.interpretation.competing_causes.map((cause: { cause: string }) => cause.cause))
+    .toEqual(expect.arrayContaining(["operating_change"]));
   await expect(page.locator("#agent-findings .agent-causes details")).toHaveCount(handoff.interpretation.competing_causes.length);
   await page.getByRole("button", { name: "Compare with existing workflow", exact: true }).click();
   await expect(page.locator("#workflow-comparison")).toBeVisible();
@@ -788,6 +806,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   await page.locator("#reconnect").click();
   await expect(page.locator("#agent-activity-state")).toContainText("no reviewed report yet");
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
+  await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeHidden();
   await expect(page.locator("#automatic-conclusion")).toContainText("Investigating");
   await expect(page.locator("#agent-findings .agent-source-finding")).toHaveCount(0);
   const elapsed = await page.locator("#agent-elapsed").innerText();
@@ -797,6 +816,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   await page.locator("#reconnect").click();
   await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
+  await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeVisible();
   await expect(page.locator("#agent-findings")).toContainText("final decision accepted");
   const source = page.locator("#agent-findings .agent-source").first();
   await source.locator("summary").click();
@@ -810,6 +830,7 @@ test("agent work stays separate from a running detector and rejects mismatched a
   await page.locator("#reconnect").click();
   await expect(page.locator("#agent-findings")).toContainText("refusing an unmatched comparison");
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
+  await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeHidden();
   await expect(page.locator("#agent-findings .agent-source-finding")).toHaveCount(0);
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   await page.unrouteAll({ behavior: "wait" });
