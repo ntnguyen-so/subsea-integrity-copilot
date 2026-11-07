@@ -161,23 +161,13 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 @media(max-width:900px){.workflow-columns{grid-template-columns:1fr}.automatic-action-buttons{flex-shrink:1}.run-settings-fields{flex-wrap:wrap;width:min(650px,calc(100vw - 28px))}}
 .manual-workflow{margin-top:12px}.manual-workflow p{font-size:15px;margin-top:8px}
 .manual-workflow .muted{font-size:13px}
-.agent-activity{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:10px 13px;margin:0 0 12px;border:1px solid #93b4ee;border-left:4px solid var(--accent);border-radius:5px;background:#eef4ff}
-.agent-activity>div{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;min-width:0}
-.agent-activity strong{font-size:15px}.agent-activity span,.agent-activity p{font-size:13px;color:var(--muted)}
-.agent-activity p{grid-column:1;overflow-wrap:anywhere}.agent-activity button{grid-column:2;grid-row:1/3;align-self:center;font-size:13px}
-.agent-activity>.agent-live-stages{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.agent-live-stages>span{padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:#fff}
-.agent-live-stages>[data-state="RUNNING"],.agent-live-stages>[data-state="WAITING_ON_CHILD"]{border-color:var(--accent);font-weight:600;color:var(--ink)}
-.agent-live-log{grid-column:1/-1;font-size:13px}.agent-live-log summary{cursor:pointer;color:var(--accent)}.agent-live-log ol{margin:8px 0;padding-left:22px;line-height:1.6}
 #simulation-policy{font-size:12px;color:var(--muted)}
 .sensor.missing circle.sensor-dot{stroke-width:3}
-@media(max-width:900px){.agent-activity>.agent-live-stages{grid-template-columns:1fr}}
 .agent-roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
 .agent-role{min-width:0;border-left:3px solid var(--accent);background:#f3f6fa;padding:9px 11px;font-size:13px}
 .agent-role strong,.agent-role span{display:block}.agent-role span{margin-top:4px;color:var(--muted)}
 .agent-role details{margin-top:5px}.agent-role summary,.agent-source summary,.agent-causes summary{cursor:pointer;color:var(--accent)}
 .agent-role details{max-height:220px;overflow:auto}.agent-role>p{margin:6px 0;line-height:1.5}
-.agent-live-stages small{display:block;letter-spacing:0;font:12px/1.5 Segoe UI,system-ui,sans-serif}
 .agent-public-journal{max-height:420px;overflow:auto;padding-left:24px}
 .agent-public-journal li{padding:10px 8px;border-bottom:1px solid var(--line)}
 .agent-public-journal p{white-space:pre-wrap;overflow-wrap:anywhere}
@@ -212,4 +202,4 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 #map-focus-control{display:flex;align-items:center;gap:8px;font-size:13px}
 #map-focus{font-size:13px;padding:6px;max-width:230px}
 #network-scale{font-size:13px;line-height:1.6;margin:0 0 10px}
-@media(max-width:900px){.agent-activity{grid-template-columns:1fr}.agent-activity button{grid-column:1;grid-row:auto;justify-self:start}.agent-roles,.agent-causes{grid-template-columns:1fr}}
+@media(max-width:900px){.agent-roles,.agent-causes{grid-template-columns:1fr}}

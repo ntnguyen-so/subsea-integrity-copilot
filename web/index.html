@@ -46,13 +46,6 @@
       <section id="investigation-hold" class="monitoring-warning info" role="status" hidden></section>
       <div id="evidence-selection" class="selection-strip"><div class="selection-text"><strong id="selected-basis">No window selected</strong><span id="basis-warning">Questions require a visible, pinned snapshot.</span></div><div class="control"><label for="window-history">View a past window</label><select id="window-history"><option value="">Follow current window</option></select></div><button id="follow-live" type="button">Follow current</button></div>
       <section id="panel-live" role="tabpanel" aria-labelledby="tab-live">
-        <section id="agent-activity" class="agent-activity" aria-label="Actual agent processing" hidden>
-          <div><strong id="agent-activity-state">Detectors monitoring</strong><span id="agent-elapsed">No LLM investigation admitted yet</span></div>
-          <p id="agent-last-action">Detector results are separate from agent investigation.</p>
-          <div id="agent-live-stages" class="agent-live-stages" aria-label="Persisted agent stages"></div>
-          <details class="agent-live-log"><summary>Executed activity</summary><ol id="agent-progress-log"></ol></details>
-          <button id="show-agent-work" type="button">See agent work ↓</button>
-        </section>
         <div class="live-grid">
           <section class="panel topology-panel"><div class="panel-heading"><h2>Pipeline map</h2><span class="muted">Select a sensor to inspect</span><label id="map-focus-control" hidden>Map focus <select id="map-focus"><option value="">Entire network</option></select></label></div><p id="network-scale" class="muted" hidden></p><div class="map-wrap"><svg id="topology" viewBox="0 0 760 520" role="group" aria-label="Synthetic pipeline network; select a pipe-mounted instrument"><text x="380" y="260" text-anchor="middle">Awaiting site geometry</text></svg></div><div id="map-legend" class="map-legend" aria-label="Pipeline marker legend">
             <span data-legend="anomaly"><svg viewBox="0 0 32 32" aria-hidden="true"><g class="sensor anomalous"><circle class="sensor-dot" cx="16" cy="16" r="6"/></g></svg>Pressure anomaly</span>

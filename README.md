@@ -67,7 +67,7 @@ uv run subsea serve-recorded --tenant golden-eval-1aae671f78ef --port 8087
 Open http://127.0.0.1:8087 with the same local operator credentials. This isolated
 console disables ingestion/agent workers and rejects execution commands; it
 does not copy records into the main tenant or rerun models. Choose a saved
-**Recorded pressure sample** and select **See agent work**.
+**Recorded pressure sample** and scroll to the investigation panel.
 The tenant and sample suffixes below belong to the retained local qualification.
 After running a new qualification, use its returned tenant ID and replay IDs.
 
@@ -115,16 +115,15 @@ Stopping Compose without `-v` preserves evidence.
 
 ### Five-minute operator walkthrough
 
-The blue **agent activity** strip separates detector output from actual agent
-work. Its elapsed clock is real processing time, even while simulated telemetry
-is paused. New assisted runs **stop simulated ingestion at a newly raised
+The **investigation panel** separates detector output from actual agent
+work. New assisted runs **stop simulated ingestion at a newly raised
 pressure anomaly** and wait for fresh agents on that immutable window. Missing
 values, exclusions and quality-only concerns never launch automatic agents by
-themselves; they remain visible warnings and investigation evidence. The strip
+themselves; they remain visible warnings and investigation evidence. The panel
 shows the Sensor Quality Agent, Event Diagnosis Agent, Response Coordinator and
 the coordinator's separate Grounding Reviewer pass,
 actual model/tool counts and executed public activity, not invented percentages.
-**See agent work** scrolls to their
+Scroll to the panel for their
 handoffs, executed record searches/comparisons, source quotes, reviewer outcome
 and engineer verification question. These findings load automatically on Live;
 opening the Agents tab or asking a question is not required.

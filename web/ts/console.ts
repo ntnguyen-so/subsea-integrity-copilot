@@ -1,7 +1,7 @@
 import { box, bounds, button, element, friendly, node, svg, text, time } from "./dom";
 import { renderCharts } from "./charts";
 import { renderCasefile, renderWorkflowComparison } from "./casefile";
-import { agentName, renderAgentActivity, renderAgentWork, renderIdleAgentWork } from "./agentwork";
+import { agentName, renderAgentWork, renderIdleAgentWork } from "./agentwork";
 import type { AgentTask, CanonicalObservation, ConsoleEvent, InvestigationCase, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
@@ -79,16 +79,6 @@ function investigationHold(): { waiting: boolean; unavailable: boolean } {
     unavailable: blocked || roots.some(task => ["FAILED", "CANCELLED"].includes(task.state)),
   };
 }
-function renderActivity(): void {
-  box("agent-activity").hidden = !projection;
-  if (!projection) return;
-  const root = automaticRoot();
-  renderAgentActivity(root, projection.tasks, events,
-    Date.parse(projection.server_time) + Math.max(0, Date.now() - projectionReceivedAt),
-    navigator.onLine && connectionState.startsWith("Connected"),
-    projection.episodes.some(episode => episode.dispatch_status === "gathering_context"),
-    !sensorAlertsOnly());
-}
 function jsonText(value: Json | undefined): string {
   return value === undefined ? "not reported" : typeof value === "string" ? value : JSON.stringify(value);
 }
@@ -125,7 +115,7 @@ function updateSession(): void {
   text("operator", session.authenticated ? session.username || "Operator" : "Signed out");
   updateControls();
 }
-function setConnection(value: string): void { connectionState = value; text("connection-state", value); renderMonitoringWarning(); renderActivity(); }
+function setConnection(value: string): void { connectionState = value; text("connection-state", value); renderMonitoringWarning(); }
 function updateControls(): void {
   const replay = projection?.replay;
   const allowed = session.authenticated && !commandBusy;
@@ -235,7 +225,7 @@ function resetView(): void {
   mapSegment = ""; select("map-focus").value = "";
   automaticDetail = null; automaticReadKey = null; automaticReadError = null;
   delete box("automatic-progress").dataset.renderKey; delete box("automatic-progress").dataset.task;
-  box("agent-activity").hidden = true; box("agent-findings").replaceChildren();
+  box("agent-findings").replaceChildren();
   renderMonitoringWarning();
   text("source-clock", "Not reported"); text("server-clock", "Not reported");
   text("clock-basis", "No received telemetry"); text("trend-basis", "No received telemetry");
@@ -728,7 +718,6 @@ function renderSensorList(): void {
 }
 function renderAutomaticInvestigation(): void {
   if (!projection) return;
-  renderActivity();
   const { replay, latest_window: latest, pack } = projection;
   text("stream-stage", `${replay.state} · received through +${replay.clock_seconds.toFixed(1)}s · ${pack.sensors.length} instruments`);
   text("detector-stage", latest ? `Pressure / quality screening · window ends +${latest.end_seconds}s` : `Warming up · ${pack.window_seconds}s window / ${pack.hop_seconds}s hop`);
@@ -1353,9 +1342,6 @@ element("login-form", HTMLFormElement).addEventListener("submit", event => {
   }).catch(showError).finally(() => { if (submit) submit.disabled = false; });
 });
 controlButton("create-replay").addEventListener("click", () => { void createReplay(); });
-controlButton("show-agent-work").addEventListener("click", () => {
-  document.querySelector<HTMLElement>(".agent-status-panel")?.scrollIntoView({ block: "start" });
-});
 controlButton("compare-sensors").addEventListener("click", () => { void compareSensors(); });
 controlButton("clear-comparison").addEventListener("click", () => { comparisonSensorIds.clear(); renderSensorList(); });
 select("scenario").addEventListener("change", updateControls);
@@ -1393,7 +1379,6 @@ window.addEventListener("beforeunload", closeStream);
 setInterval(() => {
   renderMonitoringWarning();
   renderClocks();
-  renderActivity();
 }, 250);
 updateControls();
 void initialize();

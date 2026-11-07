@@ -1,4 +1,4 @@
-import { button, friendly, node, text, time } from "./dom";
+import { button, friendly, node, time } from "./dom";
 import type { AgentTask, ConsoleEvent, Json, TaskDetail, WindowSnapshot } from "./types";
 
 const agents = [
@@ -70,88 +70,12 @@ function publicJournal(container: HTMLElement, root: AgentTask, tasks: AgentTask
 function record(value: Json | undefined): Record<string, Json> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value : null;
 }
-function duration(seconds: number): string {
-  const total = Math.max(0, Math.floor(seconds));
-  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
-}
 function accepted(task: AgentTask): boolean {
   return ["SUCCEEDED", "ABSTAINED"].includes(task.state) && task.result !== null && task.answer !== null;
 }
 function linked(root: AgentTask, tasks: AgentTask[]): AgentTask[] {
   return tasks.filter(task => task.id === root.id || task.root_id === root.id);
 }
-export function renderAgentActivity(root: AgentTask | null, tasks: AgentTask[], events: ConsoleEvent[],
-  now: number, current: boolean, triage: boolean, enabled: boolean): void {
-  const stages = document.getElementById("agent-live-stages")!;
-  const log = document.getElementById("agent-progress-log")!;
-  stages.replaceChildren();
-  log.replaceChildren();
-  if (!root) {
-    text("agent-activity-state", !enabled ? "Agent execution off · sensor evidence remains available"
-      : triage ? "Pressure anomaly detected; gathering context" : "Monitoring pressure · new pressure anomalies start agents; missing values alone do not");
-    text("agent-elapsed", "No LLM investigation admitted yet");
-    text("agent-last-action", "Sensor flags are detector outputs. Leak assessment and inspection overlays require a reviewed agent report for the displayed window.");
-    for (const [role, label, purpose] of agents) {
-      const stage = node("span", `${label}: ${enabled ? "Not started" : "Not enabled"}`);
-      stage.append(node("small", purpose));
-      stage.dataset.role = role; stage.dataset.state = "NOT_STARTED"; stages.append(stage);
-    }
-    const reviewer = node("span", `Grounding Reviewer: ${enabled ? "Not started" : "Not enabled"}`);
-    reviewer.dataset.role = "grounding_reviewer";
-    reviewer.append(node("small", "A separate model call checks the draft; not another sensor-investigation agent."));
-    stages.append(reviewer);
-    log.append(node("li", "No agent actions recorded."));
-    return;
-  }
-  const done = accepted(root), active = ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state);
-  const elapsed = ((done || !active ? Date.parse(root.updated_at) : now) - Date.parse(root.created_at)) / 1000;
-  const members = linked(root, tasks), ids = new Set(members.map(task => task.id));
-  const calls = members.reduce((sum, task) => sum + task.model_calls, 0);
-  const tools = members.reduce((sum, task) => sum + task.tool_calls, 0);
-  text("agent-activity-state", !current ? "Connection unavailable · last recorded agent status below"
-    : done ? "Recorded agent report · review findings and next checks"
-      : active ? `Agents ${root.state === "QUEUED" ? "queued" : "investigating"} · no reviewed report yet`
-        : "Agent report withheld · detector warnings remain active");
-  text("agent-elapsed", `${duration(elapsed)} real processing ${done || !active ? "elapsed" : "since admission"} · ${calls} ${root.mode === "live" ? "hosted" : "SCRIPTED"} calls · ${tools} tool calls`);
-  for (const [role, label, purpose] of agents) {
-    const member = role === "operator_response" ? root : members.find(task => task.role === role);
-    const state = member?.state || "NOT_STARTED";
-    const stage = node("span", `${label}: ${friendly(state)}${member ? ` · ${member.model_calls} model / ${member.tool_calls} tool calls` : ""}`);
-    stage.dataset.role = role; stage.dataset.state = state;
-    stage.append(node("small", purpose));
-    stages.append(stage);
-  }
-  const reviewer = node("span", `Grounding Reviewer: ${reviewerState(root, events)}`);
-  reviewer.dataset.role = "grounding_reviewer";
-  reviewer.append(node("small", "Checks the draft against cited evidence; calls are included in the coordinator total."));
-  stages.append(reviewer);
-  for (const event of events.filter(event => event.task_id && ids.has(event.task_id)
-    && ["task.started", "model.started", "model.completed", "tool.completed", "answer.critique", "task.finished"].includes(event.type)).slice(-12)) {
-    const role = agentName(members.find(task => task.id === event.task_id)?.role || "agent");
-    const phase = typeof event.payload.phase === "string" ? ` · ${friendly(event.payload.phase)}` : "";
-    log.append(node("li", `${time(event.created_at)} · ${role} · ${friendly(event.type.replace(".", " "))}${phase}`));
-  }
-  if (!log.children.length) log.append(node("li", "No public actions received in this connection yet. Persisted stage counts above remain authoritative; saved receipts are under See agent work."));
-  const last = [...events].reverse().find(event => event.task_id && ids.has(event.task_id)
-    && ["model.started", "model.completed", "tool.completed", "answer.critique"].includes(event.type));
-  if (root.mode === "scripted") {
-    text("agent-last-action", "Offline workflow fixture, not real LLM speed. Detector results are separate from this report.");
-  } else if (done) {
-    text("agent-last-action", `Run ${root.id} · admitted ${time(root.created_at)} · report recorded ${time(root.updated_at)}. This is a saved result, not a new inference. Simulation speed does not accelerate the LLM.`);
-  } else if (last) {
-    const phase = typeof last.payload.phase === "string" ? last.payload.phase : "";
-    const label = phase.startsWith("critic") ? "separate grounding critic"
-      : phase === "reflection" ? "author revising after criticism"
-        : phase === "plan" ? "coordinator planning specialist work"
-          : last.type === "answer.critique" ? `critic decision: ${String(last.payload.decision)}`
-            : last.type === "tool.completed" ? "evidence tool read"
-              : friendly(members.find(task => task.id === last.task_id)?.role || "agent");
-    text("agent-last-action", `Last recorded action: ${label} · ${time(last.created_at)}. Only executed public actions are shown.`);
-  } else {
-    text("agent-last-action", `Automatically admitted ${time(root.created_at)}. The detector's initial diagnosis is not a completed LLM investigation.`);
-  }
-}
-
 export function renderIdleAgentWork(progress: HTMLElement, findings: HTMLElement, enabled: boolean): void {
   progress.replaceChildren(); findings.replaceChildren();
   delete progress.dataset.renderKey; delete progress.dataset.task;

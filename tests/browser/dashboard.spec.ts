@@ -17,6 +17,7 @@ test("hosted golden recordings reopen with real public agent work and zero new i
   });
   expect(login.status()).toBe(200);
   await page.goto(url);
+  await expect(page.locator("#agent-activity")).toHaveCount(0);
   const receipts: unknown[] = [];
   const counters = (projection: Projection) => projection.tasks.map(task => ({
     id: task.id, state: task.state, model_calls: task.model_calls, tool_calls: task.tool_calls,
@@ -48,7 +49,7 @@ test("hosted golden recordings reopen with real public agent work and zero new i
         expect(file.inspection).toBeNull();
         await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
       }
-      await page.locator("#show-agent-work").click();
+      await page.locator(".agent-status-panel").scrollIntoViewIfNeeded();
       for (const role of ["sensor_quality", "event_diagnosis", "operator_response", "grounding_reviewer"]) {
         await expect(page.locator(`.agent-role[data-role="${role}"]`)).toBeVisible();
       }
@@ -119,7 +120,8 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
   await expect(page.locator("#topology .sensor.missing").first()).toBeVisible();
   const alerts = await markerState();
   const baselineInterface = await sharedInterface();
-  for (const selector of ["#agent-activity", ".agent-status-panel", "#tab-agents"]) await expect(page.locator(selector)).toBeVisible();
+  await expect(page.locator("#agent-activity")).toHaveCount(0);
+  for (const selector of [".agent-status-panel", "#tab-agents"]) await expect(page.locator(selector)).toBeVisible();
   for (const selector of [".engineer-details", "#question-tools"]) await expect(page.locator(selector)).not.toHaveAttribute("hidden");
   const before: Projection = await (await page.request.get(`/api/replays/${baseline.id}/projection`)).json();
   const beforeManual = await manualEvidence();
@@ -177,7 +179,7 @@ test("10x fresh hosted work freezes the source and displays real progress", asyn
     await expect(page.locator("#play")).toHaveText("Waiting for agents");
     await expect(page.locator("#play")).toBeDisabled();
     await expect(page.locator("#step")).toBeDisabled();
-    await expect(page.locator("#agent-live-stages")).toContainText("Event Diagnosis Agent");
+    await expect(page.locator("#automatic-progress")).toContainText("Event Diagnosis Agent");
     const stepped = await page.request.post(`/api/replays/${replay.id}/control`, {
       headers, data: { action: "step", idempotency_key: "blocked-during-hosted-work" },
     });
@@ -195,7 +197,7 @@ test("10x fresh hosted work freezes the source and displays real progress", asyn
       frames.push({ at: new Date().toISOString(), clock_seconds: projection.replay.clock_seconds,
         tasks: projection.tasks.map(task => ({ id: task.id, role: task.role, state: task.state,
           model_calls: task.model_calls, tool_calls: task.tool_calls, error_code: task.error_code })),
-        activity: await page.locator("#agent-activity").textContent() });
+        activity: await page.locator(".agent-status-panel").textContent() });
       if (root?.state === "FAILED") throw new Error(`Fresh paused report withheld: ${root.error_code}`);
       observed.final = projection;
       return Boolean(root && ["SUCCEEDED", "ABSTAINED"].includes(root.state));
@@ -213,10 +215,10 @@ test("10x fresh hosted work freezes the source and displays real progress", asyn
     result.casefile = file;
     await expect(page.locator("#play")).toHaveText("Continue monitoring");
     await expect(page.locator("#play")).toBeEnabled();
-    await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
+    await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/);
     await page.reload();
     await page.locator("#replay-history").selectOption(replay.id);
-    await expect(page.locator("#agent-last-action")).toContainText("saved result, not a new inference");
+    await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/);
     await expect(page.locator("#evidence-selection")).toHaveAttribute("data-snapshot-id", basis.replay.investigation_window_id!);
     await expect(page.locator("#channel-charts svg")).toHaveCount(1);
     const reopened: Projection = await (await page.request.get(`/api/replays/${replay.id}/projection`)).json();
@@ -260,13 +262,13 @@ test("recorded paused hosted work restores coherent evidence without new inferen
     await expect(page.locator("#channel-charts svg")).toHaveCount(1, { timeout: 45_000 });
     await expect(page.locator('#channel-charts [data-legend="missing"]')).toHaveText("Missing value");
     await expect(page.locator('#channel-charts [data-legend="anomaly"]')).toHaveText("Pressure anomaly");
-    await expect(page.locator("#agent-last-action")).toContainText("saved result, not a new inference");
+    await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/);
     await expect(page.locator("#play")).toHaveText("Continue monitoring");
     await expect(page.locator("#play")).toBeEnabled();
     await expect(page.locator("#step")).toBeDisabled();
     await expect(page.locator("#basis-warning")).toContainText("Simulation paused for investigation");
-    await expect(page.locator("#agent-live-stages")).toContainText("Response Coordinator");
-    await expect(page.locator("#agent-live-stages")).toContainText("Grounding Reviewer");
+    await expect(page.locator("#automatic-progress")).toContainText("Response Coordinator");
+    await expect(page.locator("#automatic-progress")).toContainText("Grounding Reviewer");
     await expect(page.locator("#agent-findings .agent-causes details")).toHaveCount(handoff.interpretation.competing_causes.length);
     await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
     await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeHidden();
@@ -301,7 +303,7 @@ test("extended network qualifies a fresh hosted investigation against matching s
     evidence.agent_replay_id = agent.id;
     expect(initial.latest_window!.input_hash).toBe(baselineProjection.latest_window!.input_hash);
     expect(initial.latest_window!.end_seconds).toBe(110);
-    await expect(page.locator("#agent-activity")).toBeVisible();
+    await expect(page.locator(".agent-status-panel")).toBeVisible();
     await expect(page.locator("#topology [data-sensor]")).toHaveCount(112);
     await expect.poll(async () => {
       const current: Projection = await (await page.request.get(`/api/replays/${agent.id}/projection`, { maxRetries: 2 })).json();
@@ -314,7 +316,7 @@ test("extended network qualifies a fresh hosted investigation against matching s
           model_calls: task.model_calls, tool_calls: task.tool_calls, error_code: task.error_code,
         })),
         pending_windows: current.episodes.map(episode => episode.pending_window_id),
-        activity: await page.locator("#agent-activity").textContent(),
+        activity: await page.locator(".agent-status-panel").textContent(),
       });
       if (root?.state === "FAILED") throw new Error(`Hosted S7 report withheld: ${root.error_code}`);
       return root !== undefined && ["SUCCEEDED", "ABSTAINED"].includes(root.state)
@@ -703,10 +705,10 @@ test("default view prioritizes map, trend and assessment while optional tools st
     elements.map(element => ({ top: element.getBoundingClientRect().top, bottom: element.getBoundingClientRect().bottom })));
   expect(positions[0].top).toBeLessThan(550);
   expect(positions[1].top - positions[0].bottom).toBeLessThan(24);
-  await expect(page.locator("#agent-activity")).toBeVisible();
-  await expect(page.locator("#agent-elapsed")).toContainText("SCRIPTED");
+  await expect(page.locator("#agent-activity")).toHaveCount(0);
+  await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
   await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(4);
-  await page.locator("#show-agent-work").click();
+  await page.locator("#agent-findings").scrollIntoViewIfNeeded();
   await expect(page.locator("#agent-findings")).toBeInViewport();
   await page.locator("#question-tools > summary").focus();
   await page.keyboard.press("Enter");
@@ -803,7 +805,7 @@ test("unassessed sensors remain explicitly unassessed during warm-up", async ({ 
 
 test("knowledge-assisted handoff shows regional reasoning and actual guidance-to-check links", async ({ page }) => {
   await prepare(page, "S7", 23);
-  await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
+  await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/);
   const taskId = await page.locator("#automatic-state").getAttribute("data-task");
   const response = await page.request.get(`/api/tasks/${taskId}/casefile`);
   expect(response.status()).toBe(200);
@@ -836,7 +838,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#manual-workflow")).toHaveCount(0);
   await expect(page.locator("#monitoring-warning")).not.toContainText(/\bdemo\b/i);
   await expect(page.locator(".agent-status-panel")).toBeVisible();
-  await expect(page.locator("#agent-activity")).toBeVisible();
+  await expect(page.locator("#agent-activity")).toHaveCount(0);
   await expect(page.locator("#question-tools")).not.toHaveAttribute("hidden");
   await expect(page.locator("#tab-agents")).toBeVisible();
   await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(4);
@@ -867,7 +869,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#automatic-state")).toContainText("SCRIPTED");
   await expect(page.locator("#location-summary")).toContainText("200–600m");
   await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
-  await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
+  await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/);
   await expect(page.locator("#agent-findings")).toContainText("operational records read");
   await expect(page.locator("#automatic-progress .agent-role > strong")).toHaveText([
     "Sensor Quality Agent", "Event Diagnosis Agent", "Response Coordinator", "Grounding Reviewer",
@@ -914,17 +916,15 @@ test("agent work stays separate from a running detector and rejects mismatched a
       task.id === root.id ? { ...task, state: "RUNNING", result: null, answer: null } : task) } : actual });
   });
   await page.locator("#reconnect").click();
-  await expect(page.locator("#agent-activity-state")).toContainText("no reviewed report yet");
+  await expect(page.locator("#automatic-conclusion")).toContainText("Investigating");
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
   await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeHidden();
   await expect(page.locator("#automatic-conclusion")).toContainText("Investigating");
   await expect(page.locator("#agent-findings .agent-source-finding")).toHaveCount(0);
-  const elapsed = await page.locator("#agent-elapsed").innerText();
-  await expect.poll(() => page.locator("#agent-elapsed").innerText()).not.toBe(elapsed);
   await expect(page.locator("#source-clock")).toContainText("PAUSED");
   pending = false;
   await page.locator("#reconnect").click();
-  await expect(page.locator("#agent-activity-state")).toContainText("Recorded agent report");
+  await expect(page.locator("#automatic-state")).toContainText(/REPORT AVAILABLE|ABSTENTION/);
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(1);
   await expect(page.locator('#map-legend [data-legend="inspection"]')).toBeVisible();
   await expect(page.locator("#agent-findings")).toContainText("final decision accepted");
