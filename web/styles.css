@@ -124,7 +124,7 @@ label{font-size:13px}.eyebrow,small,.badge,.identity p,.rail-note{font-family:Se
 .sensor-list input{accent-color:var(--accent)}#sensor-list-basis{font-size:12px}
 th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 .comparison-controls button{font-size:13px}.investigation-grid article,.comparison-grid article{background:#f8fafc}
-.agent-status-panel .automatic-conclusion{font-size:16px;max-width:none}
+.agent-status-panel .automatic-conclusion{font-size:16px;max-width:none;white-space:pre-wrap;line-height:1.8}
 .automatic-timeline small{font-size:12px;letter-spacing:0}.automatic-timeline strong{font-size:13px}
 .automatic-actions .muted,.agent-diagnostics p{font-size:13px}.automatic-actions button{font-size:14px}
 .monitoring-warning{font-size:14px;color:#14532d;background:#f0fdf4;border-color:#38845a}
@@ -180,6 +180,7 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 .agent-source-finding{margin:9px 0;padding:9px 12px;border-left:3px solid var(--accent);background:#eef4ff;font-size:14px;line-height:1.6}
 .agent-causes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
 .agent-causes>details{border:1px solid var(--line);border-radius:4px;padding:9px;min-width:0}
+.agent-region p,.agent-causes p,.investigation-case p{white-space:pre-wrap}
 .agent-next-question{font-weight:600}.agent-diagnostics .automatic-timeline{margin-top:12px}
 .analysis-cue{font-size:13px;line-height:1.6;color:var(--muted);padding:8px 10px;margin:0 0 12px;border-left:3px solid #94a3b8;background:#f8fafc}
 .analysis-cue strong{color:var(--text);margin-right:6px}.agent-status-panel>.analysis-cue{border-left-color:var(--accent)}
@@ -203,3 +204,14 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 #map-focus{font-size:13px;padding:6px;max-width:230px}
 #network-scale{font-size:13px;line-height:1.6;margin:0 0 10px}
 @media(max-width:900px){.agent-roles,.agent-causes{grid-template-columns:1fr}}
+.evaluation-case { margin: 1rem 0; padding: 1rem; border: 1px solid var(--line); border-radius: 12px; }
+.evaluation-case summary { cursor: pointer; font-weight: 600; }
+.evaluation-answer, .evaluation-quote { white-space: pre-wrap; line-height: 1.8; }
+.evaluation-quote { padding: .75rem; border-left: 3px solid #708cbe; background: rgba(112, 140, 190, .06); }
+.evaluation-hash { overflow-wrap: anywhere; font-family: monospace; font-size: .8rem; }
+.evaluation-pass { color: #237d64; }
+.evaluation-warning { color: #a76c24; }
+#evaluation-results table { margin: 1rem 0; }
+#evaluation-results > p, #evaluation-results > h3, .evaluation-case > p { margin: .8rem 0; }
+#evaluation-results td { white-space: normal; min-width: 110px; vertical-align: top; }
+#evaluation-results td:first-child { min-width: 250px; }

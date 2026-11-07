@@ -130,7 +130,7 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
       review.append(node("p", "Separate critic context, same underlying model. Exact quotes and review coverage checked by code; humans retain review authority.", "muted"));
       card.append(review);
     } else card.append(node("p", "Archived explanation: predates independent grounding review. Do not treat it as reviewed by the current protocol.", "summary"));
-    card.append(node("h3", "Engineer interpretation - model-written, verify against sources"));
+    card.append(node("h3", "Engineering briefing"));
     card.append(node("p", file.interpretation.answer.text));
     card.append(references(file.interpretation.answer.references));
     const causes = node("div", "", "case-causes");

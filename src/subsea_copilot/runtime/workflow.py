@@ -291,6 +291,15 @@ class AgentService:
     ) -> tuple[list[dict[str, Any]], AgentTask]:
         """Application-owned reads, not invented model requests or model generations."""
         names = set(context["required_tools"])
+        pressure_ids: set[str] = set()
+        if task.role == "event_diagnosis":
+            pressure_ids = {
+                sensor["pressure_summary_evidence_id"]
+                for sensor in context.get("history_sensors", [])
+                if sensor.get("pressure_summary_evidence_id")
+            }
+        if pressure_ids:
+            names.add("evidence.get")
         if task.role == "event_diagnosis" or context.get("baseline"):
             if snapshot.event.eligible_location:
                 names.add("location.fit")
@@ -305,7 +314,9 @@ class AgentService:
                     arguments["task_id"] = target["id"]
                 if name == "evidence.get":
                     arguments["ids"] = sorted(
-                        {ref for t in context["compatible_tasks"] for ref in t["evidence_ids"]}
+                        pressure_ids
+                        if task.role == "event_diagnosis"
+                        else {ref for t in context["compatible_tasks"] for ref in t["evidence_ids"]}
                     )
                 identity = json.dumps(
                     [task.id, snapshot.id, name, arguments, "required-intake-v1"], sort_keys=True
@@ -709,6 +720,10 @@ class AgentService:
             or f.missing > f.expected * 0.1
         }
         sensors = context_sensors(snapshot)
+        pressure_summaries = {
+            evidence.sensor_id: evidence.id for evidence in snapshot.evidence.values()
+            if evidence.kind == "channel_summary"
+        }
         return [
             {
                 "id": s.id,
@@ -717,6 +732,7 @@ class AgentService:
                 "quality_concern": s.id in concerns,
                 "event_support": s.id in snapshot.event.supporting_sensor_ids,
                 "anomalous_samples": findings[s.id].anomaly_count,
+                "pressure_summary_evidence_id": pressure_summaries.get(s.id),
             }
             for s in sensors
         ]

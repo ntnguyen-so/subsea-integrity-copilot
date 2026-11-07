@@ -333,6 +333,26 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         store.get_replay(generation_id)
         return {"windows": store.list_windows(generation_id, limit=120)}
 
+    @app.get("/api/evaluation")
+    def evaluation_report(request: Request) -> object:
+        principal(request)
+        from .qualification import MODEL_METADATA_KEYS
+        from .reference_evaluation import read_evaluation
+
+        try:
+            report = read_evaluation()
+            for case in report.get("cases", []):
+                case["model_receipts"] = [
+                    {key: receipt.get(key) for key in ("task_id", *MODEL_METADATA_KEYS)}
+                    for receipt in case.get("model_receipts", [])
+                ]
+            return report
+        except (OSError, ValueError, TypeError) as exc:
+            logger.error("Reference evaluation artifact is unreadable: %s", type(exc).__name__)
+            raise HTTPException(
+                status_code=503, detail="Recorded evaluation unavailable; no score is verified."
+            ) from exc
+
     @app.get("/api/windows/{snapshot_id}")
     def window(snapshot_id: str, request: Request) -> object:
         principal(request)

@@ -89,12 +89,28 @@ def source_texts(
         ref: json.dumps(snapshot.claims[ref].model_dump(mode="json"), sort_keys=True)
         for ref in result.claim_refs
     }
-    if knowledge and result.interpretation:
-        cited = {
+    cited = (
+        {
             reference
             for paragraph in result.interpretation.cited_paragraphs()
             for reference in paragraph.references
         }
+        if result.interpretation
+        else set()
+    )
+    read_evidence = {
+        reference
+        for receipt in receipts
+        if receipt["name"] == "evidence.get" and not receipt.get("error")
+        for reference in (receipt.get("result") or {}).get("evidence", {})
+    }
+    for reference in cited & set(result.evidence_ids):
+        if reference not in read_evidence or reference not in snapshot.evidence:
+            raise ValidationError("grounding_sources", "Cited pressure source was not read.")
+        sources[reference] = json.dumps(
+            snapshot.evidence[reference].model_dump(mode="json"), sort_keys=True
+        )
+    if knowledge and result.interpretation:
         sources.update(
             {
                 card.id: json.dumps(

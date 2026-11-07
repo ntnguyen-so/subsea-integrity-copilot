@@ -189,14 +189,14 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
     const panel = node("section", "", "agent-regions");
     panel.append(node("h3", "Agent conclusions by sensor group"),
       node("p", file.interpretation_review
-        ? "Model-written explanations with source-grounding review; separate from numerical detector flags. Physical causes remain unconfirmed."
+        ? "Source-reviewed explanations of the compared readings. Each group explains the observations, plausible causes and the next verification."
         : "Model-written explanations from an archived handoff; no current-protocol grounding review. Separate from detector flags; physical causes remain unconfirmed.", "muted"));
     const groups = node("div", "", "agent-region-grid");
     const labels = {
-      leak_pattern: "Leak-compatible pressure pattern",
-      instrumentation_or_telemetry: "Instrumentation or telemetry explanation",
-      operating_change: "Operating-change explanation",
-      unresolved: "Cause unresolved",
+      leak_pattern: "Pressure pattern to investigate for leakage",
+      instrumentation_or_telemetry: "Sensor or data-connection problems to check",
+      operating_change: "Operating conditions to review",
+      unresolved: "Additional evidence needed",
     };
     for (const [index, region] of regions.entries()) {
       const item = node("article", "", "agent-region");

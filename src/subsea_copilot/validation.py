@@ -395,8 +395,9 @@ def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot
                 if sensor == finding.sensor_id and (channel is None or channel == finding.channel):
                     lines.append(
                         f"{finding.sensor_id} {finding.channel}: "
-                        f"{finding.usable}/{finding.expected} usable; {finding.missing} missing; "
-                        f"{finding.hard_excluded} code-excluded observations; "
+                        f"{finding.usable}/{finding.expected} usable; "
+                        f"{finding.missing} unavailable values (missing or invalid); "
+                        f"{finding.hard_excluded} invalid received observations; "
                         f"{finding.spike_count} usable spikes; "
                         f"drift suspicion: {finding.drift_suspected}; "
                         f"paired-instrument disagreement: {finding.peer_disagreement}."

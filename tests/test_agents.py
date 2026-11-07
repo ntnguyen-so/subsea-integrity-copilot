@@ -30,6 +30,148 @@ class FakeSpan:
         pass
 
 
+def test_detailed_engineering_briefing_preserves_paragraphs_and_citation_checks():
+    from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
+    from subsea_copilot.interpretation import validate_interpretation
+
+    briefing = "\n\n".join(
+        [
+            "Recommended next step\n"
+            "Review the connected pressure pattern with the integrity engineer.",
+            "What the readings show\n" + "Compare the nearby instruments and their timing. " * 20,
+            "What would resolve the remaining question\n"
+            "Review the operating records before deciding on an inspection area.",
+        ]
+    )
+    result = AgentResult(
+        outcome="supported",
+        claim_refs=["measured-pressure"],
+        limitations=[],
+        interpretation=EngineerInterpretation(
+            focus="inspection_rationale",
+            answer={"text": briefing, "references": ["measured-pressure"]},
+            competing_causes=[
+                {
+                    "cause": "leak",
+                    "stance": "possible",
+                    "text": "Review the pressure pattern before identifying its cause.",
+                    "references": ["measured-pressure"],
+                }
+            ],
+            follow_up_questions=["Can the engineer review the pressure timing?"],
+        ),
+    )
+    task = AgentTask(
+        id="brief",
+        root_id="brief",
+        generation_id="generation",
+        snapshot_id="snapshot",
+        site_id="northsea",
+        role="operator_response",
+        purpose="answer_incident_question",
+        question="Where to review?",
+        mode="live",
+        deadline=utc_now(),
+        response_protocol="engineer-v2",
+    )
+    validate_interpretation(result, task)
+    assert result.model_dump()["interpretation"]["answer"]["text"] == briefing
+    result.interpretation.answer.references = ["invented-evidence"]
+    with pytest.raises(ValidationError, match="accepted claims"):
+        validate_interpretation(result, task)
+
+
+def test_baseline_citations_require_a_successful_read_and_reach_the_reviewer(snapshot):
+    import json
+
+    from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
+    from subsea_copilot.grounding import source_texts
+    from subsea_copilot.interpretation import validate_interpretation
+
+    baseline = EvidenceItem(
+        id="baseline-e",
+        kind="channel_summary",
+        sensor_id="sensor",
+        value={"baseline_median": 80, "median_pressure_drop_bar": 1.1},
+    )
+    snapshot.evidence[baseline.id] = baseline
+    result = AgentResult(
+        outcome="supported",
+        claim_refs=["health"],
+        evidence_ids=["health-e", baseline.id],
+        limitations=[],
+        interpretation=EngineerInterpretation(
+            focus="inspection_rationale",
+            answer={
+                "text": "The pressure is about 1.1 bar below its normal reference.",
+                "references": [baseline.id],
+            },
+            competing_causes=[
+                {
+                    "cause": "leak",
+                    "stance": "possible",
+                    "text": "An independent reference can help distinguish the physical cause.",
+                    "references": ["health"],
+                }
+            ],
+            follow_up_questions=["Can the engineer check an independent pressure reference?"],
+        ),
+    )
+    task = AgentTask(
+        id="baseline",
+        root_id="baseline",
+        generation_id="generation",
+        snapshot_id=snapshot.id,
+        site_id=snapshot.site_id,
+        role="operator_response",
+        purpose="answer_incident_question",
+        question="What does this pattern show?",
+        mode="live",
+        deadline=utc_now(),
+        response_protocol="engineer-v2",
+    )
+    receipt = {
+        "name": "evidence.get",
+        "result": {"evidence": {baseline.id: baseline.model_dump(mode="json")}},
+        "error": None,
+    }
+    validate_interpretation(result, task, [receipt])
+    sources = source_texts(result, snapshot, [receipt])
+    assert json.loads(sources[baseline.id])["value"]["median_pressure_drop_bar"] == 1.1
+    for receipts in ([], [{**receipt, "error": "tool_result_size"}]):
+        with pytest.raises(ValidationError, match="accepted claims"):
+            validate_interpretation(result, task, receipts)
+        with pytest.raises(ValidationError, match="source"):
+            source_texts(result, snapshot, receipts)
+
+
+def test_checked_health_distinguishes_unavailable_values_from_invalid_received_records(snapshot):
+    from subsea_copilot.contracts import AgentResult, AgentTask
+    from subsea_copilot.validation import render_result
+
+    snapshot.quality.findings[0] = snapshot.quality.findings[0].model_copy(
+        update={"received": 60, "usable": 45, "missing": 15, "hard_excluded": 15}
+    )
+    task = AgentTask(
+        id="health",
+        root_id="health",
+        generation_id="generation",
+        snapshot_id=snapshot.id,
+        site_id=snapshot.site_id,
+        role="sensor_quality",
+        purpose="assess_sensor_health",
+        question="Which values need checking?",
+        mode="live",
+        deadline=utc_now(),
+    )
+    text = render_result(
+        AgentResult(outcome="supported", claim_refs=["health"], limitations=[]), task, snapshot
+    )
+    assert "15 unavailable values" in text
+    assert "15 invalid received observations" in text
+    assert "15 missing;" not in text
+
+
 def test_repair_projection_retains_source_receipts_and_audited_invalid_draft():
     source = SystemMessage(content="Complete scoped source context")
     receipt = ToolMessage(content='{"pressure": [null, 79.5]}', tool_call_id="read-1")

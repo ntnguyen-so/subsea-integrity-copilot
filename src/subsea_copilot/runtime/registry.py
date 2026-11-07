@@ -121,6 +121,10 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
                 "type": "array",
                 "items": {"type": "string"},
                 "maxItems": 100 * BUDGET_MULTIPLIER,
+                "description": (
+                    "Immutable evidence item IDs from supplied evidence keys, never claim IDs. "
+                    "Claim references belong in claim_refs, not this read's ids."
+                ),
             }
         if name == "quality.sensor_patterns":
             fields["offset"] = {"type": "integer", "minimum": 0}

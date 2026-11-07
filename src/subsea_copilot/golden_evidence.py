@@ -31,6 +31,7 @@ def _contains_hidden_truth(value: Any) -> bool:
     if isinstance(parsed, dict):
         return bool({
             "source_truth", "hidden_expected_outcomes", "golden_case_id", "source_probe",
+            "leak_source", "source_sensor_issue_labels", "truth",
         } & parsed.keys()) or any(_contains_hidden_truth(item) for item in parsed.values())
     if isinstance(parsed, list):
         return any(_contains_hidden_truth(item) for item in parsed)
@@ -60,7 +61,10 @@ def content_evidence(
     *, expected_input_hash: str | None = None, expected_output_hash: str | None = None,
 ) -> dict[str, Any]:
     """Deterministic storage checks, not a judge or exporter enqueue assertion."""
-    required = {"generation"} if kind == "external_judge" else {"generation", "tool"}
+    required = (
+        {"generation"} if kind in {"external_judge", "output_mapping"}
+        else {"generation", "tool"}
+    )
     checked = []
     for observation in observations:
         observation_type = str(observation.get("type", "")).lower()
@@ -82,11 +86,11 @@ def content_evidence(
             "usage_details": observation.get("usageDetails"),
             "public_model_metadata": observation.get("public_model_metadata", {}),
         }
-        if kind == "runtime_agent":
+        if kind in {"runtime_agent", "output_mapping"}:
             entry["hidden_truth_absent_from_stored_input"] = not _contains_hidden_truth(
                 actual_input,
             )
-        if kind == "external_judge":
+        if kind in {"external_judge", "output_mapping"}:
             entry["input_matches_submitted_judge_packet"] = (
                 expected_input_hash is not None and entry["input_sha256"] == expected_input_hash
             )
@@ -100,7 +104,7 @@ def content_evidence(
         and all(
             entry.get("hidden_truth_absent_from_stored_input", True) for entry in checked
         )
-        and (kind != "external_judge" or any(
+        and (kind not in {"external_judge", "output_mapping"} or any(
             entry["input_matches_submitted_judge_packet"]
             and entry["output_matches_recorded_verdict"] for entry in checked
         ))

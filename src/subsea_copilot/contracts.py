@@ -299,8 +299,13 @@ class HistoryInvestigation(Contract):
 
 
 class CitedExplanation(Contract):
-    text: str = Field(min_length=1, max_length=600)
+    text: str = Field(min_length=1, max_length=2400)
     references: list[str] = Field(min_length=1, max_length=6)
+
+
+class EngineeringAnswer(CitedExplanation):
+    text: str = Field(min_length=1, max_length=6000)
+    references: list[str] = Field(min_length=1, max_length=18)
 
 
 class CauseExplanation(CitedExplanation):
@@ -323,7 +328,7 @@ class EngineerInterpretation(Contract):
         "inspection_rationale",
         "evidence_gaps",
     ]
-    answer: CitedExplanation
+    answer: EngineeringAnswer
     competing_causes: list[CauseExplanation] = Field(min_length=1, max_length=3)
     regional_assessments: list[RegionalAssessment] = Field(default_factory=list, max_length=3)
     follow_up_questions: list[
@@ -355,7 +360,7 @@ class GroundingCheck(Contract):
     paragraph_id: str = Field(min_length=1, max_length=50)
     verdict: Literal["supported", "unsupported", "uncertain"]
     reason: str = Field(min_length=1, max_length=350)
-    support: list[GroundingSupport] = Field(default_factory=list, max_length=4)
+    support: list[GroundingSupport] = Field(default_factory=list, max_length=16)
 
 
 class GroundingAssessment(Contract):

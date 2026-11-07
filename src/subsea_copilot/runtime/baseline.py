@@ -61,8 +61,10 @@ class _BaselineGateway(ToolGateway):
     def _authorize(self, name: str, arguments: dict[str, Any]) -> None:
         if self.task.purpose != BASELINE_PURPOSE or name not in BASELINE_TOOLS:
             raise ValidationError("baseline_authority", "Tool is outside the CLI baseline policy.")
-        schemas = {s["function"]["name"]: s["function"]["parameters"] for s in baseline_schemas()}
-        self._validate_arguments(name, arguments, schemas)
+        self._validate_scope(arguments)
+
+    def _argument_schemas(self) -> dict[str, Any]:
+        return {s["function"]["name"]: s["function"]["parameters"] for s in baseline_schemas()}
 
     def _read(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         result = super()._read(name, arguments)

@@ -1,0 +1,3346 @@
+{
+  "scope": "Stored public generation and tool IO presence, with full extraction and judge hash matching; not field certification.",
+  "cohort_run_id": "8b83b2109d6847c9a2e92f7971b7998b",
+  "records": [
+    {
+      "case_id": "G1",
+      "role": "operator_response",
+      "trace_id": "c40a6ed6c77ac25482a68a7294a0f2ee",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "3bc4a64ba7f3a67b",
+          "name": "generation.operator_response.critic-1",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "df296714a74b1d2a34b15caec6a56f2b152d3c4bb92720ea5d51c1e2af07aab9",
+          "output_sha256": "eb0b778697fd0d375354c8db6675d5986fe51c090b239dc39dc922da27886423",
+          "input_chars": 57036,
+          "output_chars": 13111,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "d692f41c-c424-4457-ab6e-284e9ca3af9c",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "bd6a60018b082058",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "81263abf61ce1589491f52906574cb177d21583b53c430cf92f15c98bc01abd7",
+          "output_sha256": "beb5a7fbe65802116d0f0c6ef15c82951da615ff51da00300b2ec62c1ca7ed36",
+          "input_chars": 95659,
+          "output_chars": 8050,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "7bf87169-ad0e-425b-887a-a9f8ef9c8491",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "2f2f2c66d6cbfe89",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "8230b5da6b6a8523a14653317d679b3463b55f693575c1c73d342b7a9953b80a",
+          "output_sha256": "0633a747bc24519df584f25c8d54e6f0de2d423800515fbedbfa8fc2ea9cb510",
+          "input_chars": 87116,
+          "output_chars": 8023,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "a0fd757c-3250-4b86-8a1e-f26999b1de85",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "aa99cc72da706ee6",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "3764bc53e25ad75b22c8c3058365b20f3aee446b29efa8179404cc73dc206ba6",
+          "output_sha256": "7a175b9388f68fea6184788f4247391e5dd8cf24ee63ddb449143d6841ff4255",
+          "input_chars": 78663,
+          "output_chars": 8122,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "8f9124d2-1af2-451d-ad05-cb5965b69be0",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "5bee3508c116bf34",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "0ed59d6b22091031a381d7ae19015467a322df17608c30d779cea82300d3f058",
+          "output_sha256": "f4ba05135fd352f4499245b03ee20d8712043a2bc6e0f8e31ba3dd45a56cb890",
+          "input_chars": 78240,
+          "output_chars": 8033,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "6507f849-fd1b-43c9-a853-e68a3fe30d38",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4307350a8d9be476",
+          "name": "generation.operator_response.critic-0",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "4b9526fd223622fda91739c2aa8e3a87401937d3475ab9392c2be918697886c9",
+          "output_sha256": "8becab80839aeabb9ae7b2a5b6bfc1080d2c1ac874098f38345d7edbacc972f7",
+          "input_chars": 56673,
+          "output_chars": 6892,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "12a14381-7aca-43f1-9224-fcf679ea6667",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "7040ab4788714beb",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "c0528cb73306a3d4a46b5e19092cf61789df48dc02cc9c7ddb6691a5d5528823",
+          "output_sha256": "e5808fca3f97774a40b921ac9ab0a34710a0ea3125088722120cc9591ffa2b42",
+          "input_chars": 94701,
+          "output_chars": 9411,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "9d19a2ba-a167-4248-9890-ca027ff9bb9f",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "378628684e4a6a9b",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "40ebc753d60ee7e1f0899f33ddd560a90021e5782e8f4f7167eb6ad49171f0c5",
+          "output_sha256": "77b6f868c1c5da3475305cd1b7d1bf73dc5cd28ed0c9881bbffe755c77563352",
+          "input_chars": 84612,
+          "output_chars": 10350,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "6d192cb5-bf2e-4bd1-91df-a445e7b5dc5f",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "88fb3410e5f81dbc",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "123d748231be259aadfee373672ea6c24d2027699d322036b7a80fc16514abe2",
+          "output_sha256": "02190c5f420dca454cb36b9e5cdc38a7ae949f726ff5daa2750dc0b220bf0c48",
+          "input_chars": 73906,
+          "output_chars": 9668,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "c0da11a8-46cb-4872-a6bd-0263270f2320",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "b3093261898860a7",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "2d55ee9f642b6b4b68197b2d7d90ef1fb43ece467f28628d2b89d74b6e9357a0",
+          "output_sha256": "a5cd0d576c44ad11b7b4b17f812ce7b54a6d74ef7ce04a683461e492adf48f3d",
+          "input_chars": 73483,
+          "output_chars": 10285,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "e51a11f3-562f-4348-97d8-0281a43959d0",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "bb82d89e7f5463c9",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "dcd8cd1b9131ec270a98f7a4f07c9c286c5f0347d5a44060497038518eae1046",
+          "output_sha256": "c09812c3047f223b448a873de4560bb80141e0d229fbff6d1b7a16ff14de357d",
+          "input_chars": 289,
+          "output_chars": 20942,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "c80601b9-6310-557d-b214-de821d82a102",
+            "role": "operator_response",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "ba1af3581a7d0558",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "2518e223ad2b44638019ec5ddcd19a32d9a751fdc761b32e43116dc38f870bb1",
+          "output_sha256": "8944a40096dd1ff52a21e9bf79c33e3a255656affbee1a89add532f82c566936",
+          "input_chars": 289,
+          "output_chars": 1712,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "65fa7c50-7ed9-55d4-8a41-f35acd707f11",
+            "role": "operator_response",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "449a402eb044b945",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "e661555da10b1dbc2dcfd11d5b928bfca0215fc652148188050ba3208624b4da",
+          "output_sha256": "71a1dc192d518fb34deb94a8a14d43cc6b9e7f9a01b8c7739a41cdc613e3e2d7",
+          "input_chars": 817,
+          "output_chars": 33422,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "5e638010-7b1d-52fa-a003-92e696cd16ba",
+            "role": "operator_response",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "65b9b8227fe6afa8",
+          "name": "tool.criteria.explain",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "5589204eda41f5a472e9d160bd2bf30e51349b69823646f2c842854ee6ea810a",
+          "input_chars": 238,
+          "output_chars": 739,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "a7d5e96d-200c-5e0a-9c31-418e1c8a1835",
+            "role": "operator_response",
+            "task_id": "9f27c3be-1266-50c9-94a5-eefc55694608"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G1",
+      "role": "sensor_quality",
+      "trace_id": "b8462e886146339868a1689077e88ab0",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "89f34ed5cffee23a",
+          "name": "generation.sensor_quality.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "9ab5e1805630d96d40a07b1ce2fcf881ffd143887a56ac1f377fbe9382920333",
+          "output_sha256": "72fc0be826c4242d76764580f3ded28dbc37c149f5b19df42a8e33f740ac9900",
+          "input_chars": 38899,
+          "output_chars": 1160,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "sensor_quality",
+            "call_id": "dcf9ecaf-1e3c-4fe0-8e4c-55a9e63030f7",
+            "task_id": "998f1e98-b30d-583f-8696-84e8a166b2bb"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "947f3dcc83c003e9",
+          "name": "tool.quality.sensor_patterns",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "db5198857770da53b89ad4c75a88f42fbaaa7098e2a8d23266cbb40f5d728d75",
+          "input_chars": 238,
+          "output_chars": 17850,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "14e3f5df-4e4e-548d-8658-346bdd9c3753",
+            "role": "sensor_quality",
+            "task_id": "998f1e98-b30d-583f-8696-84e8a166b2bb"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "0a89560e47f62387",
+          "name": "tool.quality.coverage",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "d65c664b6ab168220770a7f52a1451081a23e085fd73180603f45a838c3868fd",
+          "input_chars": 238,
+          "output_chars": 1938,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "ab6416b6-6a2b-57cc-a25b-4644d0f69b84",
+            "role": "sensor_quality",
+            "task_id": "998f1e98-b30d-583f-8696-84e8a166b2bb"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "821b5f9c50995531",
+          "name": "tool.quality.conflicts",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "594bf24086a584a3d890350139c78fac4f16055e2893f483ea603642a3034d56",
+          "input_chars": 238,
+          "output_chars": 3295,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "ff785517-994c-5e3e-925f-4fcd4dda168b",
+            "role": "sensor_quality",
+            "task_id": "998f1e98-b30d-583f-8696-84e8a166b2bb"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "96be6821f966f921",
+          "name": "tool.ontology.neighbors",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "36f5907f761cd2c643c153d2c04d28dd8889ddaeac2fcab6c71eb5b426d3e2f8",
+          "input_chars": 238,
+          "output_chars": 5238,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "8ebadad2-789b-54f1-8193-4fd6ac16607e",
+            "role": "sensor_quality",
+            "task_id": "998f1e98-b30d-583f-8696-84e8a166b2bb"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G1",
+      "role": "event_diagnosis",
+      "trace_id": "911047c03851ef6a9dff536c5babf886",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "fb76e6dda76c4667",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "3ed3ce53da0ea127059a74840862f7f8bdd8f63fdf3b3d6846d7f0b4d8f71cb0",
+          "output_sha256": "fc22594f60de5aa7afb53d760eb7253981a23fbf118eab7def0336c7f7ed52da",
+          "input_chars": 64636,
+          "output_chars": 1762,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "7fe93f25-4fd5-4955-8392-cad322a82b52",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "6c2e5f1c53df945b",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "1f317647c897b134e9e344c7b4610ea6208771c686194b0e95704d9f545b6654",
+          "output_sha256": "35e7f8c26b2894903a06b897dc34c8bcdc726123f2e2973ce90161e3df177a1f",
+          "input_chars": 327,
+          "output_chars": 6857,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_7a2e95c07ef4496a8b68461880ef4f72",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4e1d730c8e5918b6",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "0040a12cf5fec1b2a4863f99539d1162a5179a1ec29caea78280528ece60fe2c",
+          "output_sha256": "67a37bf74d7861aa74ef06c270b531ef5b991f356a043b565966c03d548e82a9",
+          "input_chars": 60087,
+          "output_chars": 464,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "87fba881-e086-4813-921a-5bd112ae66fa",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "389341498169b99e",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "904c9cd033a95b0efb0016f25bc861083097d73ef73a2bf85f02834875483bb5",
+          "output_sha256": "e1e5d1a14699aeefd47ba578b8776c3b9471fb9c035cf1e8241c9207bf52afb9",
+          "input_chars": 894,
+          "output_chars": 25327,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_3d845e00220b40b7b961bd668bb3d03e",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "160cd0a62e7c3698",
+          "name": "tool.history.read",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "02705699fd275c224c4b10722c57a7ec94b436e3393e1d9605b1398b55ac68bb",
+          "output_sha256": "5e9c9a23b89cf7dad8528b34ecd1cceef518b052dad8f34a549cc3d0f35a9a3e",
+          "input_chars": 577,
+          "output_chars": 2164,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_1cb79ba519d3444cbabc8bd0b40e3641",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "016bbaba77cec1c4",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "b15486cfec01ec7c368814476deb1fb18c98c61e3ab7b75b2c1a083c758a9b2d",
+          "output_sha256": "b1d4efcb9871ab3f2730d9eacbb5ba132911698cf8cdef12ab03fb70ff07b7b9",
+          "input_chars": 43285,
+          "output_chars": 1717,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "e84375bc-e781-4831-a119-3ca36573d623",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d5a62a89eebb1a49",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "1491272a7b85f3417e06ecf1cbdd54079728ce1245b38811463aa015e20b873c",
+          "output_sha256": "ebc5c1c87b0384792a5d3027efcd96ea89d247468c2b49cc676fea531f4611d0",
+          "input_chars": 497,
+          "output_chars": 10613,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_cfedd5e02b2948d2b775756aa6b6ac19",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d584fc4e250ccf79",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "6291c65b44cc9d9b8662ee147fb3e4dc86c17f87c142e73ed76afafdcbde01b7",
+          "output_sha256": "3b4e41efa896ea700f055ca318b9ee309ad3872d43c0a5c1af37e10d8e14a5eb",
+          "input_chars": 573,
+          "output_chars": 2456,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_464d7a3253454d7dbbde180a4399c2b4",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "dff5ef1706308d85",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c5094719675cce3268a89e6c8ac515f99090126613caeafe09a818605b889b09",
+          "output_sha256": "8edf9e6628abc6dcc0062ccd4ae1e46b6a1ceee4ceb6a506b31b44a09e7c0369",
+          "input_chars": 529,
+          "output_chars": 2412,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_0da6c305c62d4ebf97f2172944392504",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "061608b29a47f61b",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "524470b5a030bf3ae18cbf732fd0c9489358c7ffe2e6259425f204c56ec7ec18",
+          "output_sha256": "7e186482425f40836e7c5737122d119e51467a737b389ee067219db6e6026dd5",
+          "input_chars": 28953,
+          "output_chars": 1952,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "bb61ab4f-1a12-4f26-a290-9401023ff7bc",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "18601802361b8ecd",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "2518e223ad2b44638019ec5ddcd19a32d9a751fdc761b32e43116dc38f870bb1",
+          "output_sha256": "0181e7d2940733dd9e49f714d0b164c5802b2cd90bad72b9f29dcb9625514b12",
+          "input_chars": 289,
+          "output_chars": 1711,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "271ce75b-9c49-5657-bd51-52a735f4174f",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "da683014175f3d6f",
+          "name": "tool.location.fit",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "5a3af2536810e434ded8ad352038e6cec695b4aa12d384705c1afc3b9099d4b9",
+          "input_chars": 238,
+          "output_chars": 1862,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "8e2ed9d2-5c1d-5777-9526-5b346909ee20",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "f19e662f1156de78",
+          "name": "tool.event.counterevidence",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "c3b8961040259ba71ec1570e8c0d2e5f0f5265ff4ecfcf7bc36eb785e9ba020f",
+          "input_chars": 238,
+          "output_chars": 2082,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "6e209d2d-6ced-5ba3-84ca-272fc76d31f8",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "90c221799fe3abdf",
+          "name": "tool.event.assess",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "36f66e085a41643d75ffcbd83e6563c11565f89e11cd4f0f2fe2650486b7a776",
+          "output_sha256": "7ccdc676699d834c226a31b1af94bb22a6842c916c6b9fb602dd35518ae02e3e",
+          "input_chars": 238,
+          "output_chars": 2365,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d7014ea3-e430-52f5-aca9-82d1eebc9335",
+            "role": "event_diagnosis",
+            "task_id": "a62a9ea4-f1a9-528a-9715-b036ef482e37"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G1",
+      "role": "extraction",
+      "trace_id": "1bb09f82bf4b5c4809ca8d6ffd3c359e",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "7d50fc3fb8cc5fff",
+          "name": "generation.mapping",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "8ebf5c6e6b4f21a7430d59a86609747ba721290bf1914a121ec8706cb81ea315",
+          "output_sha256": "84096c80017913791724e1801fb97ad52b3f806b5045412dea0296bee84197d1",
+          "input_chars": 12559,
+          "output_chars": 524,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {},
+          "hidden_truth_absent_from_stored_input": true,
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G1",
+      "role": "judge",
+      "trace_id": "9597dafa38ea1152cddfef0459da9f82",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "543362bb2a8b16ee",
+          "name": "generation.judge",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "36cb4a0a40b3046641c9cd085ef942c00d89e346c3d3bc083d0712e7c37015a6",
+          "output_sha256": "44036f43ca70fbaba11c1d26610d4ac549bbd2d52c112eb82d95716953679716",
+          "input_chars": 62573,
+          "output_chars": 3020,
+          "observed_model": "",
+          "usage_details": {
+            "input": 3,
+            "output": 955,
+            "input_cached_tokens": 0,
+            "input_cache_creation": 26101,
+            "total": 27059
+          },
+          "public_model_metadata": {
+            "judge.outcome": "pass",
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-terra",
+            "requested_model": "gpt-6.1-terra",
+            "mode": "live"
+          },
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G2",
+      "role": "operator_response",
+      "trace_id": "bed2a54af490853418a562f4592a244c",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "999ee57d95d4b2ec",
+          "name": "generation.operator_response.critic-0",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "bba0440ac2e6dea9c4cd36467441655e8867de8b1d92d277a7c0a3e47e91ad3c",
+          "output_sha256": "223f482510a56a00dcf41d8da7c3b63189475291e537f26d7f5d2c3f7309317e",
+          "input_chars": 46613,
+          "output_chars": 15608,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "13ff7ecd-0335-46e1-9250-26c71ef836c5",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "775514a5da6fae7f",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "96cee29152a3fac0a8d012d7825b80627b2067935766c127ca0a4a54cdb1936d",
+          "output_sha256": "8b3297bc62015016fd50e35b6fe0d913d729a00c5087b77ca0ee7c496e30d890",
+          "input_chars": 70016,
+          "output_chars": 10075,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "46a2a6e1-36f1-4cff-a161-154f813b2138",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3db8bb6740986717",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "d793a14ee321beaab36105287428c013bc404dcd9e05777473d637719f7aa328",
+          "output_sha256": "ccd127da88b22513a90a42218e8e6f99af218a4d32f4c74f9e24c182a4c8160e",
+          "input_chars": 59554,
+          "output_chars": 9507,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "87744355-57ec-45ae-bbf0-bf7b10de76a3",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d3b9eaaceb032b1b",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "97e663f2d6a71403b764702f3616c88f037ea45fe825faa5c6f19bfcdad02683",
+          "output_sha256": "84a4c73a8be25ebb74228342ed827d5066085afd1c0613ac34f6511e68f66c6a",
+          "input_chars": 59131,
+          "output_chars": 10041,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "73d921d8-7313-47e2-8ded-283cd1a9ba7b",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "afceeca8ac2fb1c6",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4354876205ffc7ad7c383b4148f72b72ba46fb83d93b01f09d47f35b2d34d242",
+          "output_sha256": "5a25ac31f8989da77a17a68b61af661b47b4ddea1e8e5f8a1a9f1cbe4abd8b9b",
+          "input_chars": 289,
+          "output_chars": 20393,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "45f9082e-d6b4-59ff-a6ce-117587e1bab9",
+            "role": "operator_response",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3f7739bb0de8c6c7",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "04d0b0ab763718bed5378a69d0d8db8910b97a5fe146cc5c3f1750c4a360a2be",
+          "output_sha256": "c1b37e3f07e2a3ae657860e35078cfb9d20c2a2cb0eb5636b9e055e405d16f16",
+          "input_chars": 289,
+          "output_chars": 1128,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "2097acf6-3d8c-5638-b244-ad7348395b9c",
+            "role": "operator_response",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "2808c9cbcc0b72d5",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "5daeb47d35c5eb3c1a2c2b9a245a3989c63b4c5085461f8b022b0807116902c0",
+          "output_sha256": "09222b450a30f77d43459224e21ba078b80b2f1520fccfe0dd5d3052495c09ed",
+          "input_chars": 587,
+          "output_chars": 16277,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "7b810f57-6ded-5d94-99d5-28d70335a193",
+            "role": "operator_response",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3fd2f0d8a287072e",
+          "name": "tool.criteria.explain",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "b4ec9145bc3277e5b2747f5b6b930d2a5bcc30655367a5635a8f367a84ca9059",
+          "input_chars": 238,
+          "output_chars": 739,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "650f3e0c-6e4c-5f37-bbec-31a624ba786c",
+            "role": "operator_response",
+            "task_id": "eb8fd083-04d7-569b-996a-81751c91f799"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G2",
+      "role": "sensor_quality",
+      "trace_id": "97be00386f1a92f9f8068052bdc2dbed",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "af8b554fb694beb1",
+          "name": "generation.sensor_quality.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "bec1cec9db67c17b615bdcdcf1f950df005d0183bcb582df9d04b2ccee6219ad",
+          "output_sha256": "805dc6543f5ff1baf35be0fff6ca77160638e7c06f0b483cbaa2d884af446251",
+          "input_chars": 37827,
+          "output_chars": 531,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "sensor_quality",
+            "call_id": "1d632096-a5fc-49df-9a10-528c235c5786",
+            "task_id": "78eb56c7-4899-5493-b19f-a8c90d0b9473"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "ef03b9467d381648",
+          "name": "tool.quality.sensor_patterns",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "30a7b93ede79005f216147a96334fb485208feb468a13bbf44ec9ca453ca717a",
+          "input_chars": 238,
+          "output_chars": 17836,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "c3abc3ec-b6d3-508b-955a-27f3015a857b",
+            "role": "sensor_quality",
+            "task_id": "78eb56c7-4899-5493-b19f-a8c90d0b9473"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "bd570b17db5cc94f",
+          "name": "tool.quality.coverage",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "fb6b7d810b04fe3e28dd2722e6b101c4e36b39d0d4831bfdd59edb88f34791fb",
+          "input_chars": 238,
+          "output_chars": 1459,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "ffdbad94-e8c6-58ef-bf7f-c7e1a2c6c129",
+            "role": "sensor_quality",
+            "task_id": "78eb56c7-4899-5493-b19f-a8c90d0b9473"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "61298c6b12a72c6f",
+          "name": "tool.quality.conflicts",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "0258c78a3547c80aead69091e2abba33cdf3e2edb825c6ac01c52d37469ac206",
+          "input_chars": 238,
+          "output_chars": 2800,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "a2286bbb-3377-541c-9367-cc02e24e496a",
+            "role": "sensor_quality",
+            "task_id": "78eb56c7-4899-5493-b19f-a8c90d0b9473"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "5e2a1d1bbd0602e3",
+          "name": "tool.ontology.neighbors",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "64b597832272a31f8122c34dddfca6febc4ce52d3d987faffdef53b71dbbad13",
+          "input_chars": 238,
+          "output_chars": 5238,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "882cf2e7-2aee-5b54-aafe-4ce6eaf89d8d",
+            "role": "sensor_quality",
+            "task_id": "78eb56c7-4899-5493-b19f-a8c90d0b9473"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G2",
+      "role": "event_diagnosis",
+      "trace_id": "790020367c9023b8765a8724ff266980",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "9f949eafadc9b9b2",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "95e2bc5b4be60620b420b1b11a63f43038dfe3821f9ea1b586dfbc85403adac0",
+          "output_sha256": "3ee2efe5ce44201772e717a7f551475aeb2b90570ee34168fa7447994c875225",
+          "input_chars": 58916,
+          "output_chars": 1137,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "d40c79b1-bd1f-4c1c-808f-bd89a5395398",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "57f8fd6c97ea43ba",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7891eeff1acb8614949099769d5e2a0b00dc499fedbaca024d0d6c1b9440c8af",
+          "output_sha256": "5bc26565a34afd3b715b94878bd98d10f9be22a48470a1e7d25075a7acfb094c",
+          "input_chars": 875,
+          "output_chars": 25340,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_b505358ae0094655b7a37bafe2989513",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "e40560e6c56a8cfa",
+          "name": "tool.history.read",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "473e76d513e0d1d53a117cfa27cfbff4646abb75597e1a42e886b9d7e6148445",
+          "output_sha256": "41616068dc6c2eaea00b49a6ff1ccc5f134fb6899d5c5ac71454bbaace3165d3",
+          "input_chars": 544,
+          "output_chars": 2131,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_4b29b133da0b4745a245f09b691c2496",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "210d31413e97195b",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "4805e9f738ff3953d5faef9424c8904982485d3bfb02f0746375dc11fd22fde1",
+          "output_sha256": "78c359b3ef35f8fc0d0dd02e19a6a1c3b9421e4f75e6d10e0dce6bd2ca79c18a",
+          "input_chars": 42082,
+          "output_chars": 1665,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "460cddd8-cd8c-4664-9ae1-13f301392e75",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "bd423f08ed323dbe",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "396c296ac3b9dd6477fb74993a6dcfbe593062e9039934a4da4d47d0d348dc15",
+          "output_sha256": "ba1a2183953076f3e13984d92765a31bb723f77b9c3ae2265fdb1226ed6941ac",
+          "input_chars": 547,
+          "output_chars": 14581,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_01234c65595a4b22a514cc84603117a3",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "5a3b844901606db9",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "246b484fa571462c9e0f63cd024b55ea09de54aad6ddcc5226696f8729dc6c4e",
+          "output_sha256": "b70fb1bb43153f7aac394addb2e19a0eaf95ed53065180b25180b1eb305dc463",
+          "input_chars": 569,
+          "output_chars": 2455,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_977e275bf81c4fb2bbeab342c2988e17",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "850723a765cfd9e0",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "45be980ff95a12f1a7c9461ef979e6f6c08f7e95ab0e51aa19ed08e406f755d6",
+          "output_sha256": "bd2cb8776a01e0b3bfc931a2d3a8dd5113893c7373faba032023ad5cc46dd622",
+          "input_chars": 537,
+          "output_chars": 2420,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_4ff99a9992a7436e979eca05c5ef6fd4",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "49d1c0d1b94c44a6",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "ce5afb58cff850438e6f38e214fcd81a96cc12ea46569abd591e57102e3f400a",
+          "output_sha256": "3c80f2c2c0c0285405ad705bcd844789b96a66a46c738da58135ea65ce4b238f",
+          "input_chars": 25013,
+          "output_chars": 2006,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "ea496b2a-2685-47c7-b822-dcbb9faa3b65",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "844f00751d5954b8",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "04d0b0ab763718bed5378a69d0d8db8910b97a5fe146cc5c3f1750c4a360a2be",
+          "output_sha256": "b5493263e1146b1ec67719d65abef2cdc3bb8accad368def1488e997c0e54fb2",
+          "input_chars": 289,
+          "output_chars": 1127,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "59a2c4ec-f0ed-5208-af24-6e54d68bf431",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "96e006d37766d554",
+          "name": "tool.event.counterevidence",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "52542a270169d7316c40b0bd5bcd22979f6b8267bea6ec119781785faf939984",
+          "input_chars": 238,
+          "output_chars": 1546,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "2a2a2b31-ee47-583e-9434-92415f341301",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "fd5a3e4983fc1c54",
+          "name": "tool.event.assess",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7bc8124d2008c3f36133f3af3116dfbeb51abda65866beabcf9afd7140ef1892",
+          "output_sha256": "053ecd46b424b8dab79528b48d5dd4df8ea5fb14703ce724e5ae619ae412d6d8",
+          "input_chars": 238,
+          "output_chars": 1790,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "e01f3477-57ba-5c19-9d5e-cd136e348ec8",
+            "role": "event_diagnosis",
+            "task_id": "6a8f8038-d497-55b5-b5ff-d24c5a63564b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G2",
+      "role": "extraction",
+      "trace_id": "4ce8fe06ceb0e2370dac9af1a7da20b7",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "8dbe5b05ad4bd2cd",
+          "name": "generation.mapping",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "6dbd2f6f2cceda3521e45aa46fca22bb8d3a710323f53c107f5863002c20e2d7",
+          "output_sha256": "f9459fd0abccace1be70a61212398eedd51b65fc83ea018708fad3a68abb5b97",
+          "input_chars": 13244,
+          "output_chars": 1671,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {},
+          "hidden_truth_absent_from_stored_input": true,
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "G2",
+      "role": "judge",
+      "trace_id": "150f664afb92cc8fc1417cf6679ae394",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "9263b84f2d7b72a4",
+          "name": "generation.judge",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "56620c7727182b9ef11f4f51fcde23938dc18da3d79a5bcb3d247cc03f83ea9d",
+          "output_sha256": "3366a44cd8ea444f7fa8f2df554ca060ed9c84ebeea5a803a15ca52c983259d0",
+          "input_chars": 55032,
+          "output_chars": 2914,
+          "observed_model": "",
+          "usage_details": {
+            "input": 3,
+            "output": 1143,
+            "input_cached_tokens": 0,
+            "input_cache_creation": 24040,
+            "total": 25186
+          },
+          "public_model_metadata": {
+            "judge.outcome": "fail",
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-terra",
+            "requested_model": "gpt-6.1-terra",
+            "mode": "live"
+          },
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E5",
+      "role": "operator_response",
+      "trace_id": "a884524574af8de591e168dcba806534",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "34113c2e70826af7",
+          "name": "generation.operator_response.critic-1",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "26841f6cf6bdd00b5e3d582975d77691f4310cb582bf21e864fee29182a570ce",
+          "output_sha256": "499874ee11cf214f5e9b618298da8ad2d655cf8f9f1e7fafcf51249d342be4cb",
+          "input_chars": 57527,
+          "output_chars": 11985,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "f3be0a21-e3c7-45c1-b946-8c584d18c153",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "7ae1ddf8959b4111",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "eabe886d4bbc3d8ba38c66e23ebfc673e30f7d79140ffde4c24915977ec06a1f",
+          "output_sha256": "cdfda435aff2498dffe75078fe5c9890e5ce014f51c329309ca8532ef176b00d",
+          "input_chars": 88286,
+          "output_chars": 8532,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "da0016dc-5abe-4f41-9a36-2a5103e0cedd",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "985652d66977ae9a",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "14b8d93e61acafcf9ef7b109c174ef8d87c3bbfeea496d2fef91d184bcd01b5c",
+          "output_sha256": "02b9d04a424cfcd83610265c6d50222da6f21317fe39f87b2cbd8078f8d9d1c9",
+          "input_chars": 79561,
+          "output_chars": 8115,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "b23b9e09-007e-4c96-9e4d-1c44f043d178",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d0f0a898a4275d89",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "9beadbacc11c3c88f103ba0e09688e1e2967df4ad2fe00829577d7e7c0e7b026",
+          "output_sha256": "d1a159faf1ec8dc514a40c4f316c04ed896974fa465932848a8bc98412f8ccd5",
+          "input_chars": 79138,
+          "output_chars": 8304,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "54536965-e002-4307-a6c2-70af250f22ba",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d58a9d79b2c8925f",
+          "name": "generation.operator_response.critic-0",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "af94e001a5905c13d5275668b0bf7bedded81ebc1ababd92d893f0dd4d59ffff",
+          "output_sha256": "c7bfca8e3386129f0f85ff080b5a1069409f96502564368089da218a1e3aa817",
+          "input_chars": 57296,
+          "output_chars": 4046,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "02e6518e-efcb-46a7-9048-fcbad3f9c6ce",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "c0a6025457e8097d",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "3f03c6f144de6ec2b0f729fb0a841e26a81e563b7aa62da411266b9de4cfebac",
+          "output_sha256": "eae1f8a02031a794d35bfddf07b751eb3fce049b4ddca2682b1b78bc7220c3ac",
+          "input_chars": 84195,
+          "output_chars": 10025,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "0f2f3f66-f4ea-4cac-90c6-893b955bad9b",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "839ff4b28cfca91c",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "156724098311ed53e37c544cb8d501f9ca7e7900cc2fc232f8eab495e40dcc5e",
+          "output_sha256": "348c14bf4fcd1242ed6fd0b7d8281f499cc507efd5a47f444a20bfe565e8d336",
+          "input_chars": 73915,
+          "output_chars": 11050,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "dae92f81-8f62-4035-b0fd-d38bbecab9ed",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "a8f2f424dfbd62aa",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "e581aa14ee8a95dd854c5dbd7a74a0ec6f001a13fcb1db52a5f39b16ae78ca97",
+          "output_sha256": "e4a4ff3c00fbd970e1707ade9b5cac39ebcfc26207df85ce091705123f4ef3b4",
+          "input_chars": 73492,
+          "output_chars": 9859,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "10c83b3b-3f33-41e9-931d-e8a312a0bc76",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "731b29aa7071393d",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "b47d897da0da4495abbae9dcf2785dae848acdd811e8e77e896de8a8dace4428",
+          "output_sha256": "bc48412e7664d3f4fb2f2654e5791a8ca027b508c2c3d6fe7cd7c5771d7c4269",
+          "input_chars": 289,
+          "output_chars": 20945,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "0f1d359e-b98e-55b9-a9a9-f9e9754b4736",
+            "role": "operator_response",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "a4057101adf499ee",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "b1be23fcaaba365af620da2b67f1ddbccc40094846e0d988e7f1f29e7fcc05ee",
+          "output_sha256": "b3d7e7397dd9c55a359b25fa3dbf9e3fb54d5e78737ab5a8e2f41ba43187718f",
+          "input_chars": 289,
+          "output_chars": 1712,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "8830fb4e-d8af-5a5a-baa6-5aac7e0947f0",
+            "role": "operator_response",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "23dc8668e872389e",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "0034871d63c712360af5a366ec27dbe717dc11967809a5af918d557fd3d93679",
+          "output_sha256": "4f14e9e624ea0ef6d010d2d07ca39081b2671b7400528881cf0fcf8a0971456d",
+          "input_chars": 817,
+          "output_chars": 33434,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "6ab08c1b-0c20-5e16-8404-cde275894483",
+            "role": "operator_response",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "1173905d07653b5e",
+          "name": "tool.criteria.explain",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "1be3162cf8afe30ed99eb02f37e7d94b6a052260ccb87e14e873278c6ff2f600",
+          "input_chars": 238,
+          "output_chars": 739,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "0a8e71cc-3392-5791-bb81-7b107db11a95",
+            "role": "operator_response",
+            "task_id": "0a1c8ac3-2923-54a0-b51b-fb609c9b48a0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E5",
+      "role": "sensor_quality",
+      "trace_id": "716eb18a6e07d4089cf250c4a17bc03d",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "9384306360535318",
+          "name": "generation.sensor_quality.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "ac2293137fe43b4c96b7bbbd6c83818141c3390e444e1466ff13e2721b91d217",
+          "output_sha256": "72fc0be826c4242d76764580f3ded28dbc37c149f5b19df42a8e33f740ac9900",
+          "input_chars": 38899,
+          "output_chars": 1160,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "sensor_quality",
+            "call_id": "2255253b-8695-46f8-805c-cc115b988503",
+            "task_id": "3e654309-dca6-5cdd-bfd1-2e4f00cf0338"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "24688e9c239f8dc7",
+          "name": "tool.quality.sensor_patterns",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "355ae29f6e729c66591cd17724d49a098aa24fe1af01fee2b287f505670e01b3",
+          "input_chars": 238,
+          "output_chars": 17850,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "83711bbb-302b-5830-a42d-b2d301a76835",
+            "role": "sensor_quality",
+            "task_id": "3e654309-dca6-5cdd-bfd1-2e4f00cf0338"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "b90c421ed9ecf632",
+          "name": "tool.quality.coverage",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "671ba12b05a1a4c34f020666ba458b9a7945fbd80359f9c02d9213e320026cd4",
+          "input_chars": 238,
+          "output_chars": 1938,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "2e702df1-9593-5b2a-aaea-364e77a1fc43",
+            "role": "sensor_quality",
+            "task_id": "3e654309-dca6-5cdd-bfd1-2e4f00cf0338"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "b5f2d8e2b6a6d74a",
+          "name": "tool.quality.conflicts",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "284c5f569209abc6a2e0aff0153aadefb198ff2efc7add597ff0721bc068cdde",
+          "input_chars": 238,
+          "output_chars": 3295,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "9271ecfd-cfa9-5706-90a3-a8573540b008",
+            "role": "sensor_quality",
+            "task_id": "3e654309-dca6-5cdd-bfd1-2e4f00cf0338"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "c71f9907ab67ddf0",
+          "name": "tool.ontology.neighbors",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "45e25887523e237dc5ccbb960a83454520ec4f0745876e1ceb00283e4ecece32",
+          "input_chars": 238,
+          "output_chars": 5238,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "596d7372-fdac-53f6-91f4-92a5192d742a",
+            "role": "sensor_quality",
+            "task_id": "3e654309-dca6-5cdd-bfd1-2e4f00cf0338"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E5",
+      "role": "event_diagnosis",
+      "trace_id": "23c46e17548c20b845f6b1bb23a07339",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "684f3859aaccc014",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "e15168ce2578f94d3d7761fe6015e125ac74e5c259b552942dbfdaf44fe8380f",
+          "output_sha256": "b7613b9b49e5636880346ffe7947e098d49c70a4ec16e478cf2a5c8074187ebc",
+          "input_chars": 59751,
+          "output_chars": 1762,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "fd239a08-e23c-4cea-9e93-2a4987119ac0",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "bbe734991f966868",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "88b3579811217fe8d6f45eb6d618f98577d2012becf6c6eb611366f0b0079f75",
+          "output_sha256": "d15a8bcdbc1733522e9550018f9a1d2ef218b21aa586286abc531baa31c7874f",
+          "input_chars": 894,
+          "output_chars": 25330,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_b2c0a5a192304370912b4536526223e8",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "0baf45c0c819b86b",
+          "name": "tool.history.read",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7329b83b8de81d550317b0903ea53078babfd4f32a263fc38b0c84b5d21dad38",
+          "output_sha256": "48aa0f275fa1fc704a45e05d768b05ec28712ce07f982a59a0b182df79d33e64",
+          "input_chars": 545,
+          "output_chars": 2132,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_52349211e90f4fc3aec239317532aad7",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "5e50980a20aa0383",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "62ee63c0b25fe044e6a347b8ab17d60a30614a1de5d70f48752d4afd18d5d7e7",
+          "output_sha256": "5b0026eecb448b06263b4cf52154001cba5d0ee42a7e4e78d0285949f0fd5365",
+          "input_chars": 42946,
+          "output_chars": 1685,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "ccb6c4cb-9692-4e53-8acb-1e5271d79ef5",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "c2da0f0474276a5f",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c47b918ab2bec257ca3a5a4eb7133cc8f41ace76d5f230651e1670f480377cdf",
+          "output_sha256": "5729fe6816806a54134e0e24177837989f09fd0cfdf3b0fed691f845ef71f3b0",
+          "input_chars": 487,
+          "output_chars": 10126,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_88a8f8210d3e45b1b7684af2a3d75ece",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "48bac8b617d228cc",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "3f06f3b862e50c575abd818d2076ce3da9af9681dfe48328d6d9713bdf07d352",
+          "output_sha256": "feb61737315bab056fe700983f5c65045e68f1f4f9b5d3a01802c6e510ec6c61",
+          "input_chars": 573,
+          "output_chars": 2459,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_60e0c757954b4999b761d7883522589e",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "95f5835e3fae547a",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "223bfc67f57a19770b29c48d8750af9f615f835f0d0adc1e083185847e9b58ee",
+          "output_sha256": "7f7e954497f6627e43c303cab058dbd7191177c3fc93d1c1afa79e9a8ae60534",
+          "input_chars": 538,
+          "output_chars": 2424,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_3ebccf85e36143f9b425ca1a7749ed71",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "2523150a27e40d35",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "6c0622ab6c914d708dc6bf2a46829ebbe11f01c72147b1b4971af947982d5bd6",
+          "output_sha256": "918b93bd4a521d135d8ff8d41b4789dae920cf89c03a877ddf89c1ec606d9f93",
+          "input_chars": 28965,
+          "output_chars": 1951,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "9d805c9f-dc9f-4edd-bae2-9c1fdcbb9fc3",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "69e5657c85f59f1b",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "b1be23fcaaba365af620da2b67f1ddbccc40094846e0d988e7f1f29e7fcc05ee",
+          "output_sha256": "6dfa7ced5daaf117b25ea4cfcbae9d9b9402e584a5fad3fc24ae8e1c383af601",
+          "input_chars": 289,
+          "output_chars": 1711,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d1872dff-8266-560b-83c2-460dd837fc98",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "c6f2d3b34c895b6d",
+          "name": "tool.location.fit",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "7c43249c813b6b4a07d940429611bc08d82864fc0c726ec3ba05c1ee9e98d2a2",
+          "input_chars": 238,
+          "output_chars": 1874,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "c7299e80-08c3-5c4c-8261-9fed09357572",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "e604a17efc18c834",
+          "name": "tool.event.counterevidence",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "37e8d8fbb7a040c95e170a9a40248cecbf3039b52caad3c14de0575f6b5adbae",
+          "input_chars": 238,
+          "output_chars": 2082,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d238ba22-aaaa-5e1e-aef7-605052db4f9b",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "cf3bf3a05a3b43ab",
+          "name": "tool.event.assess",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "c988c3934245e4163835bd8965fd9484df25960e68025ca4a7a31db166e09486",
+          "output_sha256": "c6e6d6229c7d052d87c1f020fa6d8d692e9b49cdec967a8972a2e1d2a8f3e116",
+          "input_chars": 238,
+          "output_chars": 2365,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "35b5cda8-2f74-5e38-96a1-5f56137fbbfc",
+            "role": "event_diagnosis",
+            "task_id": "5555d7db-1e64-5c47-a510-0da3d779d0b1"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E5",
+      "role": "extraction",
+      "trace_id": "1897a393124207e7be942f524c125785",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "711d90695d3f5309",
+          "name": "generation.mapping",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "c87695765ef6f6bfae3d2bc91694413a2257a310d93415302734f297027027eb",
+          "output_sha256": "bcc014fb75463a53465e8fa24558a58bc1149ab6138109df6b01bdb493fdd2ab",
+          "input_chars": 13127,
+          "output_chars": 603,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {},
+          "hidden_truth_absent_from_stored_input": true,
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E5",
+      "role": "judge",
+      "trace_id": "f31166fa63043e32336ac5ed78b668ff",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "d229da1ee31bd132",
+          "name": "generation.judge",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "8ab72b12153298d0f9155f1f3ed72c6a871a7f7ab57f8ceb9782757ceaa8a6d2",
+          "output_sha256": "bd56c5d0d5e97874f467e3866540826f77ba040f30bca7998a7cf39384a533a0",
+          "input_chars": 62997,
+          "output_chars": 3116,
+          "observed_model": "",
+          "usage_details": {
+            "input": 3,
+            "output": 1211,
+            "input_cached_tokens": 0,
+            "input_cache_creation": 26133,
+            "total": 27347
+          },
+          "public_model_metadata": {
+            "judge.outcome": "fail",
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-terra",
+            "requested_model": "gpt-6.1-terra",
+            "mode": "live"
+          },
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E6",
+      "role": "operator_response",
+      "trace_id": "0695dbc13094b1bc50db15646c96dc8d",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "a73f55d4ddbd14fd",
+          "name": "generation.operator_response.critic-1",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "88bc51fb5ad0564f17a540811a2c389c759530bd40b132bb657bc15d0226ec83",
+          "output_sha256": "a78bfa2f8e37c8977e34872c1a0b298cbe902961e188e67b7f32305932c363c2",
+          "input_chars": 57619,
+          "output_chars": 11591,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "2975422d-ad26-4e46-b823-6e6965863c4b",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4ecebe62ee47f825",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "a4dc985edb3fc01b35fb7ba0b5d0b85cc40c426e6d583af7ca0371eb33f6b04e",
+          "output_sha256": "ec5e9385d427c90915e98beaafa26fc7d82b65e6dcc6631398c70752061c6187",
+          "input_chars": 87626,
+          "output_chars": 8551,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "8e7e8ad2-8ade-4932-957c-517dc339c429",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "6d94cfded78253a4",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "d086f062d06bdd5d61eb7401e23931b5b1a3ba6381055f5156a5c06a05e21198",
+          "output_sha256": "bd0132bfed13be8c535fb591d7491b8bbf5c062a21702b6959c259e4a4900711",
+          "input_chars": 78783,
+          "output_chars": 8625,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "4fb7592d-0f66-4f0d-a4c7-7c2b3a7ff064",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "54f5f0d17a2ad0ab",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "f35d7b809fb4f6511b98a4ef5433fb087b7a83e745b0a2d376b989ad56c2b0ee",
+          "output_sha256": "5a5f2d7deab602f94a0d9a3ca28359645de7a283aad2443d7f378ddfc0611dcf",
+          "input_chars": 78360,
+          "output_chars": 8422,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "42d1cd7d-fbb0-43df-bdc7-e1fef9b32873",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "fd713cd2a3853280",
+          "name": "generation.operator_response.critic-0",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "881d29001a9185b1a8c1549d153c935d1fcb96965f72a5b5b05a25948e26c3a6",
+          "output_sha256": "32ddf0a8197f2dee0574d079d8d83b5d22a0ebb6e985574852f3ee885119db5f",
+          "input_chars": 57291,
+          "output_chars": 7985,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "a1a26035-50e1-4eb8-9c40-be56a0f1ace8",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "011ebead15c34320",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "bf7c864f4b243fffd6b814916bb32cdd1d958ab88ff9554c5ea53e8d5dbd818f",
+          "output_sha256": "ac51e2c966351ff9fd90ddd23d507e05935a9efb1e9f12a2faf653e65794c935",
+          "input_chars": 83115,
+          "output_chars": 9986,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "bb2756a5-5d41-4ac5-867d-47ac672915f4",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "f5c3f135756e941d",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "36aaad135acc4221ddb9e09a808fb20d0785db81e73bd39321a2e10d3d484f30",
+          "output_sha256": "5fbc8da85557aea681a9c8dfa64e8c66c0c26946fd7ebe74883690ea20cf529d",
+          "input_chars": 72991,
+          "output_chars": 11267,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "c82f42cc-2596-468f-a24a-dd60f64dc8aa",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "ea0a77fdad15ca24",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "e8830cd4b6a03ceeda5ec87d10d8b4a59d22c562bcd10745a311c9db590d97ab",
+          "output_sha256": "114a70ea1e01bfa5e407ae6a784aa1a02f21fcc3a7b739ff344090b0beb8eacb",
+          "input_chars": 72568,
+          "output_chars": 9703,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "6ce9e959-5bc4-4e65-99f0-ce9cb5e078e4",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "98004f4b9ad2666a",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "e2b7f507da06aae8cb421bd960ff939069da31f8e9b4c907d7b0d5b1742af978",
+          "output_sha256": "79877d7d52577bc375e36d583a14be3361001473290ee53f9b56080899428eda",
+          "input_chars": 289,
+          "output_chars": 20523,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "c3bde7cd-d855-5118-b351-9ed712d1c114",
+            "role": "operator_response",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3efbd9665955c80f",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "280826ac18eb0eb33c3c6f16a74ae778cd1e9623da607cc81c67b0b32a215fe1",
+          "output_sha256": "3a96eb17d222f341ecc701e655654c0dba42654d788dd18c6ca175670cb36511",
+          "input_chars": 289,
+          "output_chars": 1749,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "e1db7fd5-76b0-5a8c-8b67-80a8c5b13c00",
+            "role": "operator_response",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "5e84945d1027e7e8",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "076ac9ddae9e67f9fb262d4e91954569d3e416f9d3ebe949ec188258b859bf77",
+          "output_sha256": "ecb0fd7103558286aedf05399909035feea4c513c302ce35f99382425ef37d55",
+          "input_chars": 817,
+          "output_chars": 33453,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d62b677f-7042-56c4-9e3b-2b96f28fa848",
+            "role": "operator_response",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "30a8d7b3d5cd2a96",
+          "name": "tool.criteria.explain",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "000262235af159208797937f93d29cadf0ca10126b4064a4a51a10787ab1aecd",
+          "input_chars": 238,
+          "output_chars": 739,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "907fbf27-ff3a-53ff-a141-90aa01bc92ce",
+            "role": "operator_response",
+            "task_id": "95aeab38-1996-5f74-b90f-c97e85db97b5"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E6",
+      "role": "sensor_quality",
+      "trace_id": "8833454513d07d939e33fd4414f6d96d",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "9d5b4d23dac3ccbc",
+          "name": "generation.sensor_quality.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "b7882dccdb9e1635cc8a29594e32242fa95bfbe9c1914e615661cf96ced94e9f",
+          "output_sha256": "d82977e443775bd6317ab6ba1da153d6a009d8b557866c098a1100524136b3b1",
+          "input_chars": 38958,
+          "output_chars": 1199,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "sensor_quality",
+            "call_id": "2a842885-74c7-40a7-9c6a-31af4b28b256",
+            "task_id": "2fe57877-6823-5213-97c3-533b76998512"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d3a6476082f8f686",
+          "name": "tool.quality.sensor_patterns",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "3ca9ac82920a354ba96b8f5b3b0da937c0ab6482839bfebac5c3fcf5533adf33",
+          "input_chars": 238,
+          "output_chars": 17846,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "2e7993b1-c903-5ed8-b0c5-98129935c438",
+            "role": "sensor_quality",
+            "task_id": "2fe57877-6823-5213-97c3-533b76998512"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4eaf56ffb7557605",
+          "name": "tool.quality.coverage",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "fef500594d480ba3492f3b2893ef033c50d6b0ed6f64339e47f109b0f7638f22",
+          "input_chars": 238,
+          "output_chars": 1970,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "e237b16e-b8b4-5d6d-8e49-992326fe8e3d",
+            "role": "sensor_quality",
+            "task_id": "2fe57877-6823-5213-97c3-533b76998512"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "0e3d152f742a2ff2",
+          "name": "tool.quality.conflicts",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "9d9680e22c94415a1fa9c7ccc8a088fd9f96bd4add28beceaa146823bd0d60cc",
+          "input_chars": 238,
+          "output_chars": 3311,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d1d8af2b-73d0-5bcb-889a-4348785f3e90",
+            "role": "sensor_quality",
+            "task_id": "2fe57877-6823-5213-97c3-533b76998512"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "68db8db5c486b013",
+          "name": "tool.ontology.neighbors",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "824620628ea0d7d1b407bf72163d504f2a8b0d4b8a065680e1a603c2094fb193",
+          "input_chars": 238,
+          "output_chars": 5238,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "8472a90f-543c-5d21-87f2-9f7ddaa3f447",
+            "role": "sensor_quality",
+            "task_id": "2fe57877-6823-5213-97c3-533b76998512"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E6",
+      "role": "event_diagnosis",
+      "trace_id": "587ccf362105b847139fca59444fdbe3",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "13faaf8e55635b54",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "c1ef3a4928bbdbd7db304c08fa0b15795b75756c13dafc263b8fa69aab0a7418",
+          "output_sha256": "94fab4858be666c762dc11c174ebd74bc1f6a343c1511559a2d8245a2b4fc27e",
+          "input_chars": 61799,
+          "output_chars": 1276,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "1bf1aaf8-5d39-475c-b1fd-f60b6e563c6d",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "825ffd794026b615",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "979c63394e11a4aa1334fb3b5dc6b9d1a80c3a7c1fe0aef2520edf240b1840a3",
+          "output_sha256": "f09bc524dd5e772e8822e819e577ac1989695ec5e19f91f32460fcc5d003a5b8",
+          "input_chars": 935,
+          "output_chars": 25395,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_bdcf12eb167d4313a4b7915c22fb3291",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "040f8607a10425b4",
+          "name": "tool.history.read",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "1d3995d05562264d2b26beab83b3e24c0e9a501ac9eb329b787f51d576944e6b",
+          "output_sha256": "4a7950516f7e4115884d6727887226d4e5d3fe281dc249b1f7e6b0a84b4a9eee",
+          "input_chars": 593,
+          "output_chars": 2180,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_a2df33f645f14adda9fca68351544bf7",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "a019fd0ad2cfb223",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "742ff5d0e450db6454a8a586ce145dae8744243f7c539aa009b9bb72d6d29ea9",
+          "output_sha256": "7af1ebf063b5eb48de81514480e6f790408923ee39316ca82579d00ca7b00a0b",
+          "input_chars": 44970,
+          "output_chars": 1774,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "a380a09e-646a-4817-8ce9-7cac0f5043e4",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "974482e4f8327211",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "1274bf62f9947e4631ecca0c1d2c1873dea93fe8115730573b9e9f39c0a795f9",
+          "output_sha256": "e8be8df1ee0b40f97bcdaa38607f22a35e9f49ad6027a8bd712bf031adb62091",
+          "input_chars": 527,
+          "output_chars": 13001,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_dc0913f8ac6b4fc7bc9a95d8ec0f039a",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "9044e82ac49dbe84",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "cd26375d81f461fe12b2dc48882ba139f4e2da88a392eb908a06a2a767387c63",
+          "output_sha256": "6701f5fd81b4028d813ec7829b990ef7b34fc622cc453d21c44b85d07590ac22",
+          "input_chars": 568,
+          "output_chars": 2451,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_a69bcd98ca794fd89402a06ba53d8a2b",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "ad23e1f069f92cd8",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "b58403ac5c80215b1ba97e1471422733732a296983baa50e1072750b27ac54ee",
+          "output_sha256": "8c4ecfb74ae3547a54275a0b37382a8a31b481bfb2bb34cbea242dab9cbc91ce",
+          "input_chars": 597,
+          "output_chars": 2480,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_b44849588a784284ab1ce59ebc0b2074",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "db98c2188dfacf65",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "b64bea4f19e5177174efc9afd128d56e680aeee095ce8dcc092cb39cc8d581c3",
+          "output_sha256": "bd140301eeecf7c3d095af2ed5bf0118ad53abc3ac8a0a739c5434f784407cc0",
+          "input_chars": 29010,
+          "output_chars": 2045,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "d2c49463-debd-4814-baf0-f7cc8cf7ec34",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "84505d08ea86a8ac",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "280826ac18eb0eb33c3c6f16a74ae778cd1e9623da607cc81c67b0b32a215fe1",
+          "output_sha256": "f9e5f1d305e182e919fcd71cffae1bf35e2722c6d22b6fc8a21f2ca9ed3cba48",
+          "input_chars": 289,
+          "output_chars": 1748,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "b807597a-2e46-52d1-b5f4-479e29486d80",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "b4be4e6d1069ebd4",
+          "name": "tool.location.fit",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "a14bc232683dc2b82948960bc5fd9ea3919fb27439e713b4db9518ffbdc3858b",
+          "input_chars": 238,
+          "output_chars": 1868,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "61d0869b-c10f-5cb5-85dc-183da229982a",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4c9b356482a3e123",
+          "name": "tool.event.counterevidence",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "7a84e60d8b06a40e8fcf7e77ad9b42d20d3ea76aeb7ab2ccdc9688a49455179e",
+          "input_chars": 238,
+          "output_chars": 2082,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "bd0b3dd5-2625-5501-9b7d-b30c6a9f70df",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "77ac708eb822f922",
+          "name": "tool.event.assess",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a52c33105910f54e07fd3b70ec03be64f0ca40d2c8541ec21ed280fca218e8cc",
+          "output_sha256": "b12d13b3d0ebd10f1829acfab1bd4083820bb11a6f892451fc58dda4af015ffb",
+          "input_chars": 238,
+          "output_chars": 2365,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "300257d9-b585-5774-9e43-2b518ed8538d",
+            "role": "event_diagnosis",
+            "task_id": "ba59b834-3cfb-598a-baef-24950fa99107"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E6",
+      "role": "extraction",
+      "trace_id": "2e5619a00cbea58b92b8c58d0cc13d00",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "1f4d1720eb4dd70c",
+          "name": "generation.mapping",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "cdb88e2d8b0c38b1fa564d4f227379152c8f16984dec957f266adc0f90a1da87",
+          "output_sha256": "5439ad445e215d4d05d6a5c9f376df3e69611506624474204025e93a1dca0ecc",
+          "input_chars": 13124,
+          "output_chars": 1770,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {},
+          "hidden_truth_absent_from_stored_input": true,
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E6",
+      "role": "judge",
+      "trace_id": "609f9e1e535daa3dc8c0a7f0ff70f1e0",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "7d7a03bb292c9d8f",
+          "name": "generation.judge",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "a427252c1ce73eb7f67cbb2121f1d3b26469a357282ace6e19ce930c054c2384",
+          "output_sha256": "465b025c063cef98f0451acfa0d5eebb1c9a4f052762dec8b633dcc4343a4d96",
+          "input_chars": 63235,
+          "output_chars": 2839,
+          "observed_model": "",
+          "usage_details": {
+            "input": 3,
+            "output": 952,
+            "input_cached_tokens": 0,
+            "input_cache_creation": 26270,
+            "total": 27225
+          },
+          "public_model_metadata": {
+            "judge.outcome": "pass",
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-terra",
+            "requested_model": "gpt-6.1-terra",
+            "mode": "live"
+          },
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E8",
+      "role": "operator_response",
+      "trace_id": "0c765a8f5a0c8d0337bf58de6c521629",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "c6987775fb70b77f",
+          "name": "generation.operator_response.critic-1",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "87244841ea603a9e7981e006065dd595b201b7ebb06fa6ad49aee9286d5fa94e",
+          "output_sha256": "5dcbb15eeb98df1264880f5f64f6588ad78e0b572eb51256f2e5517ea6b49630",
+          "input_chars": 46116,
+          "output_chars": 13960,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "03efac3e-6dd8-49bb-b945-e9cdcb6c2de4",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "20c412ba0b936291",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "83d2c2b274e741c3cb08e623d63ee2c22a27478be38f9d625a84bde81cfbdaed",
+          "output_sha256": "4a0f4adbd7f2987f3a2147b3675d7aca20c90e4ffd7ec60fac44b5a7abec3390",
+          "input_chars": 75733,
+          "output_chars": 8970,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "18aed59f-7a68-4681-8b74-127daf3131ac",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "e0d3cc2fa5c7f687",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "314dcd3e69b62e2c2757641469c6f7db71d3af10016417efe91d730865a296ea",
+          "output_sha256": "05f7e464302758c4e28957aab2f824b4d6f50869a1569b684bd0b139ed7dd3e9",
+          "input_chars": 66100,
+          "output_chars": 9260,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "16807fd4-9087-42ae-9ff5-bd553c74b6bd",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "ac5c1f0bd301fdcf",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "fbd1930b815182232f61e17718c0eb871b5f7b240210f8a75a889bfcce92af41",
+          "output_sha256": "733fa1bcf19064a9f05fa7d7b725010a37145f6b6cd3051b7546639ceeaf9f72",
+          "input_chars": 65677,
+          "output_chars": 9212,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "a952d6f1-a328-4b7b-8559-0d2411003735",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d9f0df045430c880",
+          "name": "generation.operator_response.critic-0",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "aa345a8f179edd039ba7919aa6ec4b9365a686d26d8a3cb4124dfe5e1cf03b9a",
+          "output_sha256": "9a5cc55e87dc13bcd21517e0e2342ad28c01884f1f8e2e15f572c26053bb591f",
+          "input_chars": 46203,
+          "output_chars": 9132,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "148a988a-ef5b-4803-ae0a-18bb88393adf",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "e43d4937e60b4ceb",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "68e2746b0c8e0db9df79ae84c8e0b89831863c2d9aba9ad023bd216c876c9218",
+          "output_sha256": "302f97c3e72d41645356b23626b0e36ba0019d09fe1811c22273e82fedb3b4fc",
+          "input_chars": 69108,
+          "output_chars": 10157,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "fd9c3bbd-bb57-4d04-aa28-81b6f53d685a",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "655b32551aa77b55",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "8f0fe7bfc93afc691ffc79d946129de251eeb845722801c45696ce28019c9291",
+          "output_sha256": "f39b0d344de07f5bd2de24efc2208043e2a2412ae3ca62e647fe9d2e354ea11e",
+          "input_chars": 58913,
+          "output_chars": 9100,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "15c883e0-c272-4250-bfbd-6aa10e114452",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "fda1b2826d5f4fd2",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "b1e332278f2ea6824bdfa35aa9e9732911a36f3ff63918f47b24d094e3d00e43",
+          "output_sha256": "269bf9fbd14ae0d6675d5dbe2291e30c993cfc2f85202cb8063fdf8d6d5fc24f",
+          "input_chars": 58490,
+          "output_chars": 9774,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "026408af-20d1-435a-bf37-24ce30ebc2c1",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "388dcb4712dc8ad8",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "70bc1470308143443ff7ba1ca2f67a25670c3897b59a9b928c1e8dda0a5448d1",
+          "output_sha256": "506040acc9c85e0dcf475e0013a8458d84bee5d0abfe6f5fa9787f23ddbcdbc4",
+          "input_chars": 289,
+          "output_chars": 20368,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "b4122100-655d-580e-ac2b-fa6dc80813c3",
+            "role": "operator_response",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "2901f610631e299d",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d87600bf12e6ed6a4d0974c3fa353f84f1ebc29d4715fa50198dab10173f4239",
+          "output_sha256": "34fb0407c2868521251f7d34f2cc7d9751f22d5d3aa7e00f02d86e6bc212cdfc",
+          "input_chars": 289,
+          "output_chars": 1105,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "0930f732-73ba-5852-9eea-3ed9b3c0d3f5",
+            "role": "operator_response",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "b86d33374eb9e8d4",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "602d0e883dbe9f070ef290cdcbd6d90a086741e2bccb79afc030044c1b0a4894",
+          "output_sha256": "4a38337851056ab5880813b24c345e1d6a36a6def9b56d4e05532e53eb2cc5a3",
+          "input_chars": 577,
+          "output_chars": 15492,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "a9a9a006-4448-5032-88c8-9a784860cd15",
+            "role": "operator_response",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "ee7ec633d69a269c",
+          "name": "tool.criteria.explain",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "c210156b657c782e4b22be94df271549a5f4603ca7ec6c3e1cbedbfeee48fc69",
+          "input_chars": 238,
+          "output_chars": 739,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d807f610-dcbd-562d-9a78-26cdddb806ea",
+            "role": "operator_response",
+            "task_id": "0cfdcd6f-2ed9-595e-8c6a-35c255cdad91"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E8",
+      "role": "sensor_quality",
+      "trace_id": "de2a751d6fbf89f1ce9264f1862c3cd1",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "dc7388e42601e9bc",
+          "name": "generation.sensor_quality.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "69c1c5dfe15b956b3aa5dfe176c1e2744bed55ca47d920b60e85765eaa048c06",
+          "output_sha256": "39caae7c17107ff6d315fc897ffea2b5f4b8ea5e7d4dfcaa0ed38b89febcbb32",
+          "input_chars": 37828,
+          "output_chars": 506,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "sensor_quality",
+            "call_id": "8e7ad68d-d9cd-4dd8-9a13-59f2716b54e5",
+            "task_id": "be9a4034-27d8-53e0-9e60-284810ccab0b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "eda936cd92649dd5",
+          "name": "tool.quality.sensor_patterns",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "d960a29820c7003004a31dcb10b2871e19bd8fd6f9da722742897ceb02c510c3",
+          "input_chars": 238,
+          "output_chars": 17838,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "ad7fa33c-e000-54c3-b573-06c317704ce4",
+            "role": "sensor_quality",
+            "task_id": "be9a4034-27d8-53e0-9e60-284810ccab0b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "91316a7aa5e38a93",
+          "name": "tool.quality.coverage",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "47758fee9d8532693a60484109842d0edab1873a5ec64c03b6639b50e3cdf579",
+          "input_chars": 238,
+          "output_chars": 1459,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "34614af3-b6d0-5042-a3a9-e0318dfa89b5",
+            "role": "sensor_quality",
+            "task_id": "be9a4034-27d8-53e0-9e60-284810ccab0b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "f59b59f91742e949",
+          "name": "tool.quality.conflicts",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "65a986a6693118b461e56f66aa5277667e8e992294e05f828732e19bef8f9690",
+          "input_chars": 238,
+          "output_chars": 2799,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "bd020683-36a5-588e-b103-870cf0be7979",
+            "role": "sensor_quality",
+            "task_id": "be9a4034-27d8-53e0-9e60-284810ccab0b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "d21cc3411dc95585",
+          "name": "tool.ontology.neighbors",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "eeb0bf36a743d17646be931305f30b3963c51f7a42dec88fbac4e2eedf6c0705",
+          "input_chars": 238,
+          "output_chars": 5238,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "fb16fdca-3488-52cd-8a45-1b942a44c682",
+            "role": "sensor_quality",
+            "task_id": "be9a4034-27d8-53e0-9e60-284810ccab0b"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E8",
+      "role": "event_diagnosis",
+      "trace_id": "b64d44c2ed146c5cef34dc0dbefbbb81",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "ff4949d9fc3af21c",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "c3713c0983ff0df748ec96ba4657e0a42369d35bd1751597476f526b9d37e3c8",
+          "output_sha256": "7e8610435a51a1fa2764ab88c0488fade5c72cb2affafdaddfb2c335349f260b",
+          "input_chars": 58282,
+          "output_chars": 1112,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "7e3bdb34-530c-40c0-b21f-d494c8f7a834",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "2ff3cb1cd0461db1",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "6acf1c21b3768002af498d312ce60fcf5db4251a9667a0421d3f429db8fc4b76",
+          "output_sha256": "71a310373b128b3ae69eef3da25b88bdbae3db410367c644d7b4ccd45526e171",
+          "input_chars": 879,
+          "output_chars": 25340,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_b042746bd0234f28adfacf06a564fd59",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "c415f534f9252b94",
+          "name": "tool.history.read",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "2dce4dbef5df930a47acd1982550abe961a4d7c0e7bcec2622d39dfa3b5fa684",
+          "output_sha256": "d1ece33281d171c5f143d401346d3cb3d5e1ec79349439281a81ea28ea6e3e5b",
+          "input_chars": 539,
+          "output_chars": 2126,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_47c91ada4486460d934ac1489cff1fb0",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "7d900714b7bedba0",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "2ae3480210430015738f7ae9c2d1cf08fbbb886f047bc8f634abf7c6ea9e866e",
+          "output_sha256": "04481f298a913d31f93a50af72c75e1ee924f009821bbb8061e960a2f0b02a24",
+          "input_chars": 41452,
+          "output_chars": 1664,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "f3a5f6dc-c6df-463b-bb5a-cee672c6e2db",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "47e8f33cfccfdc48",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "7c37ef20fa8adec5423aa18439ae353fa8b941650d4e5a7252b448ec071f4119",
+          "output_sha256": "602b29dc371128e89cdb0754c2b85525da810d3bf4860babd3449b963959a3c0",
+          "input_chars": 537,
+          "output_chars": 13796,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_3a0dd882a76d4006bc0ccdffe330d371",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "1f6c0ea71bd49f3f",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "bbb02964bd06091d9d4b2d14e90197f52770b81559e37ca0b13df5cd34850e9c",
+          "output_sha256": "655df85aa6e58d79216d57d1a5d7cfdff130559f882e7f32e67375f4da8983c8",
+          "input_chars": 560,
+          "output_chars": 2446,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_473b0deae7b242e2afeba8ff3e50351b",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "f741750faed3106b",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "baefcef148f15f515bbcc79ae4e0a587f14b149da407b08213844954fa88b2c9",
+          "output_sha256": "d9ea21f252d12a64b275adfedcf4302f4102ab6bdc9bb5bb941bba2e818e773d",
+          "input_chars": 511,
+          "output_chars": 2391,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_49a62cfe80c0456aa8a117e79f9efd89",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "9d67960ef297c1e0",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "7a16879f9058f31c5f93db1399d691a23f02e2beae34498b7406cb4c661af219",
+          "output_sha256": "6460514e72a0acba7c618ce478ebd8a85338e673223be0b065b950965349c630",
+          "input_chars": 24967,
+          "output_chars": 1961,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "41546cf4-9b2d-41b8-a1e5-c8126e217915",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4a6dbeed19f52c3f",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d87600bf12e6ed6a4d0974c3fa353f84f1ebc29d4715fa50198dab10173f4239",
+          "output_sha256": "52da031bfa520fb55526bbf15257ab36d7773ac1ea6c54c17c6f022568d5da16",
+          "input_chars": 289,
+          "output_chars": 1104,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "5c997f9e-fecb-5b6c-a9f5-a7b93a198b73",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3583361da00b72d5",
+          "name": "tool.event.counterevidence",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "005aad0522bc1622e03d24be15b059a1be90d061efe0be2f9e8cdcc8e9e8a340",
+          "input_chars": 238,
+          "output_chars": 1546,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "74f747ac-7508-5e30-8f3e-166f35e23f15",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "21ad4bc4eca8d3c1",
+          "name": "tool.event.assess",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "4ee08e9eac5f095757507b5cf314ca215f0f012448ef3885bc8aedc8c6764a05",
+          "output_sha256": "0469ee44ba89625c3c185cf35afa54e33733a9f58ccd37abf9fb36a46179c7a3",
+          "input_chars": 238,
+          "output_chars": 1790,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "e7818093-7e15-5f5f-9991-b940c88739be",
+            "role": "event_diagnosis",
+            "task_id": "46382332-b9c0-5d68-9be3-73cf04247bf4"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E8",
+      "role": "extraction",
+      "trace_id": "7e08c14ac8c0a2ab97a041d49fe75dc8",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "254aedd5a60ca60c",
+          "name": "generation.mapping",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "24d1857a60aca079691fe2596a27f067424d81479fbe770ab79aa6a0644cd7fe",
+          "output_sha256": "ebaf2b2048bda28489724fab408f0972a14d140c9f8531fff111eb815f6d863e",
+          "input_chars": 13424,
+          "output_chars": 1137,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {},
+          "hidden_truth_absent_from_stored_input": true,
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "case_id": "E8",
+      "role": "judge",
+      "trace_id": "d19eb9c1f0cb0c4ec746cdbccfc7d8aa",
+      "passed": true,
+      "required_content_types": [
+        "generation"
+      ],
+      "observations": [
+        {
+          "observation_id": "dce0483e4b85bf98",
+          "name": "generation.judge",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "9d642dfcf913cfbb27dd82edd73d2e3733e058c779a425f9b086dafdd093eb84",
+          "output_sha256": "ad22276aded7ec706857b4cf21283157c724cb7923e8877ab23b88d5652616f5",
+          "input_chars": 54519,
+          "output_chars": 2652,
+          "observed_model": "",
+          "usage_details": {
+            "input": 3,
+            "output": 755,
+            "input_cached_tokens": 0,
+            "input_cache_creation": 23861,
+            "total": 24619
+          },
+          "public_model_metadata": {
+            "judge.outcome": "pass",
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-terra",
+            "requested_model": "gpt-6.1-terra",
+            "mode": "live"
+          },
+          "input_matches_submitted_judge_packet": true,
+          "output_matches_recorded_verdict": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    }
+  ]
+}

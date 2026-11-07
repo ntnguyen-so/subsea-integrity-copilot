@@ -23,6 +23,13 @@ def validate_interpretation(
         raise ValidationError("interpretation_authority", "Only the response role interprets RCA.")
     review = result.investigation
     allowed = set(result.claim_refs)
+    read_evidence = {
+        reference
+        for receipt in receipts or []
+        if receipt["name"] == "evidence.get" and not receipt.get("error")
+        for reference in (receipt.get("result") or {}).get("evidence", {})
+    }
+    allowed.update(set(result.evidence_ids) & read_evidence)
     if review:
         allowed.update(review.document_ids)
         allowed.update(review.comparison_call_ids)

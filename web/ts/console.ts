@@ -2,6 +2,7 @@ import { box, bounds, button, element, friendly, node, svg, text, time } from ".
 import { renderCharts } from "./charts";
 import { renderCasefile, renderWorkflowComparison } from "./casefile";
 import { agentName, renderAgentWork, renderIdleAgentWork } from "./agentwork";
+import { renderEvaluation, type EvaluationReport } from "./evaluation";
 import type { AgentTask, CanonicalObservation, ConsoleEvent, InvestigationCase, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
@@ -43,6 +44,9 @@ let questionRetry: { bodyKey: string; id: string } | null = null;
 let createRetry: { bodyKey: string; id: string } | null = null;
 let controlRetry: { bodyKey: string; id: string } | null = null;
 let activeTab = "live";
+let evaluationLoading = false;
+let evaluationKey = "";
+let evaluationError = false;
 let comparisonWindowId: string | null = null;
 let mapSegment = "";
 let comparisonToken = 0;
@@ -140,6 +144,24 @@ function switchTab(name: string, focus = false): void {
     box(`panel-${tab.dataset.tab}`).hidden = !selected;
     if (selected && focus) tab.focus();
   }
+  if (name === "evaluation") void loadEvaluation();
+}
+async function loadEvaluation(): Promise<void> {
+  if (evaluationLoading) return;
+  if (!session.authenticated) {
+    box("evaluation-results").replaceChildren(node("p", "Sign in to view recorded evaluation results.", "empty"));
+    return;
+  }
+  evaluationLoading = true;
+  try {
+    const report = await request<EvaluationReport>("/api/evaluation");
+    const key = JSON.stringify(report);
+    if (key !== evaluationKey || evaluationError) renderEvaluation(report);
+    evaluationKey = key; evaluationError = false;
+  } catch (error) {
+    evaluationError = true;
+    box("evaluation-results").replaceChildren(node("p", `Evaluation unavailable: ${errorMessage(error)}. No accuracy score is inferred.`, "error"));
+  } finally { evaluationLoading = false; }
 }
 function bindTabs(): void {
   const tabs = [...document.querySelectorAll<HTMLButtonElement>("[role=tab]")];
@@ -761,7 +783,7 @@ function renderAutomaticInvestigation(): void {
   const accepted = (root.state === "SUCCEEDED" || root.state === "ABSTAINED") && root.result !== null && root.answer !== null;
   const failed = !accepted && !["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state);
   const pending = Boolean(incident?.pending_window_id);
-  const state = accepted ? `${modeName(root.mode)} · ${root.state === "ABSTAINED" ? "ABSTENTION" : "REPORT AVAILABLE"}`
+  const state = accepted ? `${modeName(root.mode)} · REPORT AVAILABLE${root.state === "ABSTAINED" ? " · FURTHER EVIDENCE NEEDED" : ""}`
     : failed ? `${modeName(root.mode)} · REPORT WITHHELD (${root.error_code || root.state})`
       : `${modeName(root.mode)} · ${friendly(root.state)}`;
   text("agent-stage", `${state}${pending ? " · newer warning awaiting analysis" : ""}`);
@@ -1380,5 +1402,6 @@ setInterval(() => {
   renderMonitoringWarning();
   renderClocks();
 }, 250);
+setInterval(() => { if (activeTab === "evaluation" && session.authenticated) void loadEvaluation(); }, 5000);
 updateControls();
 void initialize();

@@ -1,6 +1,101 @@
 # Qualification results
 
-## Fresh hosted golden-data qualification
+## Deterministic reference evaluation
+
+The frozen implementation passed its **first held-out measurement cohort**,
+run `fa4b73b3265642a8be83d73145e1376a`, seed `20261108`. All eight datasets
+were frozen before inference, with new telemetry hashes relative to development.
+The package Python files and agent prompts remained unchanged from the qualified
+development run through held-out completion:
+`21e9abc9ab1246637c38e4a710147983f61894cbcf681a7b635fd2e222eb95f5`.
+
+The production monitor admitted six fresh pressure-triggered investigations.
+Three real hosted agents investigated measurements and records without source
+labels. A separate truth-blind `gpt-6.1-terra` extractor received only public
+agent text and the instrument catalog, then mapped quoted statements to labels.
+**Python, not the judge, computes precision, recall, F1 and localization
+containment against generator-source truth.** The separate Terra explanation
+judge checks grounding and readability; the runtime agents used `gpt-6.1-sol`.
+Requested and observed model identities are preserved.
+
+| Deterministic agent task | Precision | Recall | F1 | TP / FP / FN |
+|---|---:|---:|---:|---:|
+| Leak-pattern recognition | 100% | 100% | 100% | 4 / 0 / 0 |
+| Affected-pipeline identification | 100% | 100% | 100% | 4 / 0 / 0 |
+| Instrumentation concerns | 100% | 100% | 100% | 4 / 0 / 0 |
+| Suspect-instrument identification | 100% | 100% | 100% | 9 / 0 / 0 |
+| Instrument/issue-type mapping | 100% | 100% | 100% | 13 / 0 / 0 |
+
+Numerical detector precision, recall and F1 were also 100%: 22 pressure-anomaly
+and 31 missing/invalid sensor-window labels. These are separate detector results,
+not credit for agent RCA. All four known leak sources were contained in
+agent-proposed 400 m inspection intervals. Mean interval-midpoint error was
+12.5 m; this is **not** an exact leak-point prediction. Accepted report coverage
+and external explanation-judge pass rate were both 6/6. Four non-leak cases
+correctly withheld inspection intervals, including two stable/missing-only
+controls that made zero agent calls. No confirmed-cause assertion was extracted.
+All four extraction and both judge calibration controls passed.
+
+| Case | Source labels | Agent calls | Agent elapsed | Agent-proposed inspection |
+|---|---|---:|---:|---|
+| G1 | P1 leak, 400 m | 12 | 499.125 s | P1 200-600 m |
+| G2 | Three scattered spikes, invalid readings and missing readings | 9 | 348.484 s | None |
+| G3 | P1 leak, 425 m, with independent spike/invalid/missing issues | 7 | 234.781 s | P1 200-600 m |
+| G4 | Missing-only outage | 0 | No agent run | None |
+| E5 | P2 leak, 400 m | 10 | 376.750 s | P2 200-600 m |
+| E6 | P3 leak, 425 m, with independent spike/invalid/missing issues | 9 | 336.703 s | P3 200-600 m |
+| E7 | Stable complete pressure | 0 | No agent run | None |
+| E8 | One drifting instrument, stable paired reference and separate missing readings | 7 | 223.422 s | None |
+
+The cohort used 54 actual agent model calls; mean agent latency was 336.544 s.
+Extractor, judge and calibration calls are additional; monetary cost is not
+measured. Accelerated source playback does not accelerate hosted inference.
+
+**Development failures remain published, not selected away.** The first three
+development cohorts did not meet the target. Root causes included mapping valid
+pressure anomalies as instrument problems, omission of measured baseline
+contrasts, missing original pressure sources in grounding, and terminal handling
+of repairable read arguments. Corrections preserve source telemetry, numerical
+thresholds, metric denominators and scope/role/operating guards. The fourth
+development cohort met all point-metric targets; prompts and implementation were
+then frozen for the new held-out seed. Internal bounded repairs count as calls;
+failed first roots in prior cohorts remain failures.
+
+**All 36 held-out Langfuse trees were checked in stored observations:** 18 agent
+trees, six extractors, six explanation judges and six calibration controls.
+Every extractor/judge original input and output hash matched storage. Runtime
+verification checks public generation/tool IO presence and hidden-label absence,
+not completeness certification. Development storage separately discloses two
+privacy-sanitizer transformations of the benign phrase `desk-review`; the
+original input-hash mismatches are retained, and sanitized-source comparisons
+were verified without changing results or weakening redaction.
+
+The Evaluation tab displays labels, exact mapping quotations, complete accepted
+reports, metrics, model identities, trace links, immutable hashes and prior
+cohorts. Authentication and keyboard access were checked in the real browser;
+viewing recordings made no inference submission. The committed receipt provides
+the same read-only view on a clean clone.
+
+These are **small-sample synthetic reference point estimates**, not 95% field
+reliability. Wilson intervals and their independence assumption are displayed;
+for example, four correct leak cases still have a roughly 51% lower bound.
+Held-out seeds change measurement noise within known pattern families, not
+unseen hydraulic conditions or arbitrary S7 windows. The pressure model is not
+field-calibrated, and model extraction/judging can still err. No threshold claim
+replaces operator verification or authorizes a physical action.
+
+Receipts: [held-out results](evidence/evaluation-report.json),
+[held-out storage](evidence/reference-held-out-storage.json),
+[qualified development](evidence/reference-development-20261107-v4.json),
+[development storage](evidence/reference-development-v4-storage.json),
+and retained development failures
+[v1](evidence/reference-development-20261107-v1.json),
+[v2](evidence/reference-development-20261107-v2.json),
+[v3](evidence/reference-development-20261107-v3.json).
+The [same-evidence S7 briefing](evidence/detailed-engineering-briefing.json)
+also records the expanded calm explanation and verified three-agent storage.
+
+## Earlier hosted golden-data qualification
 
 Three selected substantive synthetic cases passed the external LLM judge and
 the independent code-owned evidence/localization contracts. Classification

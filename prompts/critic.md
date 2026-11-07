@@ -27,10 +27,18 @@ Questions must be relevant read-only requests for verification, not commands or
 unfounded factual premises. Requests for unavailable evidence are appropriate
 when explicitly questions, not invented completed investigations.
 
-Mark supported only when the whole paragraph is faithful to its cited evidence,
+Each candidate_paragraphs entry is a cited explanation unit and may contain
+several readable paragraphs. Review ALL assertions in the entire entry; do not
+check only its first sentence or heading. Direct statements about observed
+measurements and supported engineer-review priorities do not require blanket
+hedging. Distinguish a grounded recommendation from a claim of confirmed cause.
+Do not demand "possible", "unconfirmed" or an authority disclaimer in every
+sentence. Preserve the specific uncertainty that affects localization or action.
+
+Mark supported only when the whole explanation is faithful to its cited evidence,
 including qualifications. Otherwise mark unsupported or uncertain and give a
 specific short correction reason. Do not repair the author's text yourself.
-Each supported check MUST provide 1-4 exact source quotes (8-500 characters)
+Each supported check MUST provide 1-16 exact source quotes (8-500 characters)
 with references. Quotes must be literal substrings of source_texts values,
 including JSON escaping where present. Answer/cause quotes must come from that
 paragraph's references; question quotes may use any supplied source. Source

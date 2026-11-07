@@ -91,6 +91,14 @@ def main() -> None:
     golden.add_argument("--retry-output", type=Path)
     golden.add_argument("--output", type=Path, default=Path("eval") / "results" / "golden")
     ingest = subparsers.add_parser("ingest", help="Create a paused named synthetic replay")
+    reference = subparsers.add_parser(
+        "reference-evaluation", help="Live agents, truth-blind mapping and deterministic scores"
+    )
+    reference.add_argument("--seed", type=int, default=20261108)
+    reference.add_argument("--split", choices=["development", "held_out"], required=True)
+    reference.add_argument("--agent-model", default="gpt-6.1-sol")
+    reference.add_argument("--evaluator-model", default="gpt-6.1-terra")
+    reference.add_argument("--output", type=Path, required=True)
     ingest.add_argument("--fixture-set", choices=["interview"], default="interview")
     ingest.add_argument(
         "--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6", "S7"], default="S1"
@@ -167,6 +175,19 @@ def main() -> None:
                 )
             print(json.dumps(report, indent=2))
             if not report.get("passed"):
+                raise SystemExit(1)
+        elif args.command == "reference-evaluation":
+            from .reference_evaluation import run_reference_evaluation
+
+            report = run_reference_evaluation(
+                args.output, seed=args.seed, split=args.split,
+                agent_model=args.agent_model, evaluator_model=args.evaluator_model,
+            )
+            print(json.dumps({
+                "run_id": report["run_id"], "status": report["status"],
+                "metrics": report["metrics"],
+            }, indent=2))
+            if not report["metrics"]["target_met"]:
                 raise SystemExit(1)
         elif args.command == "knowledge":
             from .contracts import utc_now

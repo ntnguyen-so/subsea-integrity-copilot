@@ -33,6 +33,84 @@ Reviewers need repository access before the interview.
 
 ## Golden-data qualification
 
+### Deterministic agent evaluation
+
+The **Evaluation** workspace displays labelled, recorded reference cases for
+leaks on P1/P2/P3, scattered spikes, an isolated drifting instrument, invalid
+readings, missing readings, mixed leak/measurement issues, and stable pressure.
+Labels include the injected source's pipe and distance along it, instrument
+IDs and issue types. They are evaluation truth, never runtime agent inputs.
+
+Accuracy is **not an LLM judge's opinion**. A separate, truth-blind extractor
+translates only the agents' public briefing and regional explanations into
+pipeline, inspection-interval and instrument/type labels. It has the instrument
+catalog, but no measurements or hidden truth. Code checks exact supporting
+quotations, known IDs, schema and duplicate labels, then computes precision,
+recall, F1 and localization containment against the declared source labels.
+Healthy comparison partners must not be mapped as faulty. Missing readings
+remain unknown rather than normal pressure or confirmed hardware failure.
+
+The extractor is calibrated against joint pressure anomalies without instrument
+faults, coexistence, negation/healthy-partner and deliberately incorrect-confirmation
+controls. It must faithfully map a wrong
+answer, not repair it before grading. Original answers, mappings and quotations
+are visible for human audit: quote membership alone cannot prove semantic
+correctness. A **separate** external judge grades explanation grounding and
+readability, with adequate and incorrect/injection controls. The default agent
+is `gpt-6.1-sol`; extractor/judge is `gpt-6.1-terra`, verified available through
+the same owned CLI transport. Requested and observed identities are retained.
+Different models are not proof of independence.
+
+```powershell
+. .\tools\load-environment.ps1
+$env:SUBSEA_TRACE_CONTENT='1'
+$env:SUBSEA_SYNTHETIC_ONLY='1'
+uv run subsea reference-evaluation --split development --seed 20261107 --output eval\results\reference-development
+# Freeze prompts after development; do not tune on this measurement seed.
+uv run subsea reference-evaluation --split held_out --seed 20261108 --output eval\results\reference-held-out
+```
+
+Each command freezes eight content-addressed datasets before inference and uses
+the production sliding-window monitor, pressure-only automatic admission and
+three persisted agents. It does not submit prewritten specialist answers.
+Each case gets one initial root; internal repairs remain actual recorded calls.
+No output directory can be reused. Failed roots, failed extractions, no reports
+and withheld leak intervals remain in the appropriate denominators. Missing-only
+and stable controls are scored for zero automatic agent invocations, not counted
+as successful agent answers. Agent and numerical detector metrics are separate.
+
+The implementation hashes all package Python files and agent prompts before
+execution and verifies that they remain unchanged. For smaller networks,
+diagnosis intake supplies measured normal-pressure summaries for priority and
+quiet instruments. The coordinator may cite their original evidence only after
+an audited read, and the reviewer receives those same source bodies. Invalid
+read arguments are recorded and can be corrected within the existing budgets;
+foreign scope, role violations and operating actions still fail closed.
+
+The dashboard reads `runtime\evaluation-report.json` without inference; each
+cohort's receipt and audits remain under its output directory. Langfuse records
+agent tool/model work, the truth-blind extractor packet/output and the separate
+judge packet/verdict. Trace IDs and content hashes link the records.
+
+**Strictly over 95% is a reference qualification target, not a promised result.**
+The dashboard shows denominators, failures and Wilson intervals, including
+unmeasurable rates. Held-out seeds vary noise within the same known pattern
+families. This small, original 24-instrument topology cohort neither validates
+field hydraulics nor establishes 95% reliability on arbitrary S7 windows.
+Inspection containment is bounded to an agent-proposed interval of at most
+400 m; midpoint error is not an exact leak-point prediction.
+
+The frozen held-out cohort (seed `20261108`) achieved **100% precision, recall
+and F1** for leak recognition, affected pipelines, instrumentation concerns,
+suspect instruments and issue types. All four leak sources were contained in
+agent-proposed inspection intervals; all six pressure-triggered reports passed
+the separate explanation judge. Stable and missing-only controls invoked no
+agents. This is one eight-case reference cohort, not field certification.
+The [recorded results](docs/RESULTS.md) retain the three failed development
+cohorts, the qualified development cohort and the untouched held-out result.
+The committed [evaluation receipt](docs/evidence/evaluation-report.json) also
+serves as the read-only dashboard fallback on a clean clone.
+
 Versioned synthetic cases and hidden evaluation labels live in
 `fixtures\golden\cases-v1.json`; the judge rubric is
 `fixtures\golden\judge-rubric-v1.json`. Qualification tests coordinated leak
@@ -148,6 +226,16 @@ application-required intake separately from model-requested investigation.
 Drafts are not accepted findings and cannot release map overlays. Saved runs
 restore their persisted journal; older recordings without this history say so.
 These are public explanations and evidence, **not private model chain-of-thought**.
+
+Hosted engineering briefings lead with a supported review priority, then explain
+the measured pattern, competing explanations and useful next checks in calm,
+plain language. They normally use 250-450 words in short, separated paragraphs,
+with technical terms explained where needed. The main answer can use up to
+6,000 characters; causal and regional explanations up to 2,400 each. Grounding
+still checks every assertion in each complete cited explanation, including its
+later paragraphs, with up to sixteen exact-source anchors. Confidence in a review
+priority is not a claim of confirmed leakage, field calibration or operating
+authority. Existing recordings retain their original wording.
 
 The shared map initially shows only pressure anomalies and missing values. Pattern and
 inspection overlays require an accepted agent handoff matching the displayed

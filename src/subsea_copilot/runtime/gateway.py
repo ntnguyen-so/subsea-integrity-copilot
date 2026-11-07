@@ -156,12 +156,34 @@ class ToolGateway:
         return []
 
     def _authorize(self, name: str, arguments: dict[str, Any]) -> None:
-        schemas = {
-            s["function"]["name"]: s["function"]["parameters"] for s in tool_schemas(self.task.role)
-        }
         if name not in REGISTRY[self.task.role].tools:
             raise ValidationError("tool_authority", "Tool is not allowed for this role.")
-        self._validate_arguments(name, arguments, schemas)
+        self._validate_scope(arguments)
+
+    def _argument_schemas(self) -> dict[str, Any]:
+        return {
+            schema["function"]["name"]: schema["function"]["parameters"]
+            for schema in tool_schemas(self.task.role)
+        }
+
+    def _validate_scope(self, arguments: dict[str, Any]) -> None:
+        bound = {
+            "site_id": self.snapshot.site_id,
+            "snapshot_id": self.snapshot.id,
+            "pack_version": self.snapshot.pack_version,
+            "baseline_version": self.snapshot.baseline_version,
+            "parameter_version": self.snapshot.parameter_version,
+        }
+        if (
+            not isinstance(arguments, dict)
+            or not set(bound) <= set(arguments)
+            or any(arguments.get(key) != value for key, value in bound.items())
+        ):
+            raise ValidationError(
+                "tool_scope", "Tool scope or version differs from pinned evidence."
+            )
+
+    def _validate_knowledge_check(self, name: str, arguments: dict[str, Any]) -> None:
         if name.startswith("history.") and self.task.knowledge_packet:
             applicable = {
                 card.id for card in self.task.knowledge_packet.cards if self.task.role in card.roles
@@ -194,17 +216,6 @@ class ToolGateway:
             or not set(schema["required"]) <= set(arguments)
         ):
             raise ValidationError("tool_arguments", "Tool argument fields do not match the schema.")
-        bound = {
-            "site_id": self.snapshot.site_id,
-            "snapshot_id": self.snapshot.id,
-            "pack_version": self.snapshot.pack_version,
-            "baseline_version": self.snapshot.baseline_version,
-            "parameter_version": self.snapshot.parameter_version,
-        }
-        if any(arguments.get(k) != v for k, v in bound.items()):
-            raise ValidationError(
-                "tool_scope", "Tool scope or version differs from pinned evidence."
-            )
         if "ids" in arguments:
             ids = arguments["ids"]
             if (
@@ -433,6 +444,10 @@ class ToolGateway:
             },
         ) as span:
             try:
+                self._validate_arguments(
+                    name, arguments, self._argument_schemas(),
+                )
+                self._validate_knowledge_check(name, arguments)
                 result = self._read(name, arguments)
                 if name.startswith("history."):
                     result["investigation_step"] = self.task.tool_calls

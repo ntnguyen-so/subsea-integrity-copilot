@@ -1,0 +1,769 @@
+{
+  "new_task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0",
+  "replay_id": "replay-4819bddef25866b224e17db3",
+  "snapshot_id": "window-0b0661d5676fad2fd519da3c082b6c1a4acc1e151a94f5918a8e7afe4764592d",
+  "input_hash": "b3a197ddbb0c67096cc94190fa7a0dae35af33c273a91442882b791c25c804bf",
+  "same_evidence": true,
+  "state": "ABSTAINED",
+  "error_code": null,
+  "elapsed_seconds": 255.735,
+  "traces": [
+    {
+      "role": "operator_response",
+      "trace": {
+        "trace_id": "e46f6a326f391f8ac3a4b00ba6b7f085",
+        "span_id": "ba2bf7a8d987c495",
+        "attempt_id": "ebd65bd8-f943-4841-a760-3f521080fa84",
+        "session_id": "78e613ae05b492c0f22905b5f0f072d13b0b690b46fb4a7ae868a100e751fda2"
+      }
+    },
+    {
+      "role": "sensor_quality",
+      "trace": {
+        "trace_id": "0dbb27845ec82bd4dabb6cc2e201b2da",
+        "span_id": "328e6d3577eb9ca6",
+        "attempt_id": "dd05f231-cfad-492d-90b6-19de0d151869",
+        "session_id": "0e4daf50f58c80d8112faba0e11ce483a8ce87782332e9b074d2ef3d68436922"
+      }
+    },
+    {
+      "role": "event_diagnosis",
+      "trace": {
+        "trace_id": "975644184ca280942676a0094c374fd7",
+        "span_id": "ca9b0de880534803",
+        "attempt_id": "08186598-d8fe-4025-a827-0257ffcae2d5",
+        "session_id": "0e4daf50f58c80d8112faba0e11ce483a8ce87782332e9b074d2ef3d68436922"
+      }
+    }
+  ],
+  "scope": "Fresh same-evidence hosted S7 briefing; accepted abstention with a measured review priority, not a qualified inspection interval.",
+  "interpretation": {
+    "focus": "inspection_rationale",
+    "answer": {
+      "text": "Recommended next step\nPrioritize the integrity engineer's review of pipeline P5 around stations ST3, ST4 and ST5. Both sensors at each station decline together across two shared data connections, with larger changes centrally than at the pipe's ends. This makes P5 a supported investigation priority for a possible physical pressure event, not a confirmed leak. A qualified physical inspection interval remains withheld; these stations are a review focus, not a leak boundary, consistent with KN-LOCALIZATION-R1.\n\nWhat the readings show\nDuring 90-94 seconds elapsed in the monitored recording, P5 ST3-ST5 pressures were approximately 0.18-0.30 bar below their earlier typical pressure; bar is a pressure unit. In the final one-second period, 94-95 seconds, the reductions reached approximately 0.43-0.62 bar. P5's end stations changed less, and the compared P4 and P6 locations showed much smaller changes. The final period contains only one reading per sensor, so the recording cannot establish whether the decline continued.\n\nWhy this matters\nThe observed patterns warrant different investigations rather than one explanation for the whole network. P2 pressures rose approximately 0.35-0.43 bar during 90-94 seconds. P7's two sensors at each of ST1, ST3, ST5 and ST7 fell approximately 0.72-0.84 bar, while intervening stations stayed near their earlier pressure. That every-other-station pattern contrasts with P5's central decline across consecutive stations. The operating and calibration records discussed below offer competing explanations, but do not establish P5's cause.\n\nOther instruments to check\nTreat P7's eight odd-station readings as suspect for a shared measurement offset, not eight independently confirmed faulty sensors. Review P3-ST2-A on pipeline P3: it fell approximately 0.95 bar while the second sensor at that station remained nearly unchanged. P2-ST2-A on pipeline P2 also needs review because consecutive readings differed by 2.93 bar despite its broader upward pressure profile. Overall usable sample coverage was 99.45%, but the health review was partial. High aggregate coverage does not establish every instrument's accuracy, as KN-QUALITY-R1 explains.\n\nWhat would resolve the remaining question\nRequest longer synchronized P5 records, independent pressure and flow measurements, and incident-time operating records. These read-only checks would test whether the central decline persists and has an independent physical explanation. Independent pressure references and calibration outcomes would help assess P7's offset and P3's paired disagreement before attributing sensor faults or proposing a physical inspection interval.",
+      "references": [
+        "subsea_41b5e48f30c44994898ee7e06bce11e0",
+        "subsea_076c06d51f9842afbb998fb7cfc0cbb5",
+        "subsea_8f6bfef4dbfc42fe8baaafa6a1d80b99",
+        "claim-112",
+        "KN-QUALITY-R1",
+        "KN-LOCALIZATION-R1"
+      ]
+    },
+    "competing_causes": [
+      {
+        "text": "P5's paired sensors show a growing negative pressure pattern across distinct stations and both data connections, with larger reductions around ST3-ST5 and smaller changes at the ends. KN-INDEPENDENCE-R1 supports reviewing this connected pattern rather than counting alert flags. However, the recording ends during the decline, compared P4/P6 changes are small, and independent pressure and flow confirmation is absent. A leak remains a possible explanation, not an established cause. Request longer synchronized measurements and independent process evidence before proposing a qualified inspection interval.",
+        "references": [
+          "subsea_41b5e48f30c44994898ee7e06bce11e0",
+          "KN-INDEPENDENCE-R1",
+          "KN-LOCALIZATION-R1"
+        ],
+        "cause": "leak",
+        "stance": "possible"
+      },
+      {
+        "text": "P7's odd-station sensors change together through one shared pressure-conversion connection, while intervening stations do not show a comparable drop. The revised calibration record describes a test beginning at 90 seconds elapsed that may introduce approximately the observed offset. P3-ST2-A's disagreement with its paired sensor and P2-ST2-A's large adjacent-reading jump provide separate reasons to check measurement quality. KN-QUALITY-R1 and KN-INDEPENDENCE-R1 caution that association and unusual readings do not prove hardware failure. Review calibration results, connection assignments and independent pressure references; this explanation does not by itself account for P5's pattern across both connections.",
+        "references": [
+          "subsea_076c06d51f9842afbb998fb7cfc0cbb5",
+          "subsea_8f6bfef4dbfc42fe8baaafa6a1d80b99",
+          "MAINT-P7-GW-002",
+          "KN-QUALITY-R1",
+          "KN-INDEPENDENCE-R1"
+        ],
+        "cause": "instrumentation_or_telemetry",
+        "stance": "possible"
+      },
+      {
+        "text": "P2's broad positive shift begins in the period containing the logged pressure-setting transition at 90 seconds elapsed. Its approximately 0.4-bar magnitude agrees with the approved record, making an operating explanation plausible there. KN-OPERATING-R1 requires comparing sign, timing and affected assets, not assuming that a log explains every anomaly. The P5 comparison instead shows declining pressures, and the log coverage record supplies no verified P5 operation. The available log is incomplete, so an unrecorded operation remains unresolved. Request incident-time upstream and branch records to test whether they account for P5's sign and timing.",
+        "references": [
+          "subsea_8f6bfef4dbfc42fe8baaafa6a1d80b99",
+          "subsea_41b5e48f30c44994898ee7e06bce11e0",
+          "OP-P2-EXTENDED-001",
+          "LOG-EXTENDED-COVERAGE-001",
+          "KN-OPERATING-R1"
+        ],
+        "cause": "operating_change",
+        "stance": "possible"
+      }
+    ],
+    "regional_assessments": [
+      {
+        "text": "P5 ST3-ST5 show paired reductions of approximately 0.43-0.62 bar in the final one-second period, compared with approximately 0.10-0.16 bar at ST1/ST8 and smaller changes at the compared P4/P6 locations. The central pattern crosses both shared data connections, supporting a physical-event review under KN-INDEPENDENCE-R1. Nevertheless, distinct connections do not rule out a shared operating cause, and the short ending cannot establish sustained behavior or a leak. Separately, health claims identify one spike each at P5-ST2-A, P5-ST7-A and P5-ST7-B; these flags do not establish hardware failure. Request review of their raw readings alongside longer synchronized records and independent pressure/flow evidence. These stations identify a review focus, not a qualified inspection bracket, consistent with KN-LOCALIZATION-R1.",
+        "references": [
+          "subsea_41b5e48f30c44994898ee7e06bce11e0",
+          "claim-066",
+          "claim-076",
+          "claim-077",
+          "KN-INDEPENDENCE-R1",
+          "KN-LOCALIZATION-R1"
+        ],
+        "sensor_ids": [
+          "P5-ST1-A",
+          "P5-ST1-B",
+          "P5-ST2-A",
+          "P5-ST2-B",
+          "P5-ST3-A",
+          "P5-ST3-B",
+          "P5-ST4-A",
+          "P5-ST4-B",
+          "P5-ST5-A",
+          "P5-ST5-B",
+          "P5-ST6-A",
+          "P5-ST6-B",
+          "P5-ST7-A",
+          "P5-ST7-B",
+          "P5-ST8-A",
+          "P5-ST8-B",
+          "P4-ST3-A",
+          "P4-ST4-A",
+          "P6-ST3-A",
+          "P6-ST4-A"
+        ],
+        "hypothesis": "leak_pattern"
+      },
+      {
+        "text": "During 90-94 seconds elapsed, P7's paired sensors at ST1, ST3, ST5 and ST7 fall approximately 0.72-0.84 bar through gateway-P7-0, their shared data connection. Every other station and the compared P1 locations remain near their earlier typical pressure. The revised calibration record describes a test beginning at 90 seconds that may introduce a roughly 0.75-bar negative offset, supporting a shared-instrumentation explanation. KN-INDEPENDENCE-R1 cautions against treating these eight readings as independent confirmation of a physical event. Missing observations remain unknown, and the record cannot prove every sensor faulty or exclude a concurrent leak. Request comparison with an independent pressure reference and verification of gateway assignments and calibration outcomes.",
+        "references": [
+          "subsea_076c06d51f9842afbb998fb7cfc0cbb5",
+          "MAINT-P7-GW-002",
+          "KN-INDEPENDENCE-R1",
+          "KN-QUALITY-R1"
+        ],
+        "sensor_ids": [
+          "P7-ST1-A",
+          "P7-ST1-B",
+          "P7-ST2-A",
+          "P7-ST2-B",
+          "P7-ST3-A",
+          "P7-ST3-B",
+          "P7-ST4-A",
+          "P7-ST4-B",
+          "P7-ST5-A",
+          "P7-ST5-B",
+          "P7-ST6-A",
+          "P7-ST6-B",
+          "P7-ST7-A",
+          "P7-ST7-B",
+          "P7-ST8-A",
+          "P7-ST8-B",
+          "P1-ST1-A",
+          "P1-ST2-A"
+        ],
+        "hypothesis": "instrumentation_or_telemetry"
+      },
+      {
+        "text": "Across both P2 data connections, pressures rise approximately 0.35-0.43 bar during 90-94 seconds elapsed, consistent with the approved pressure-setting transition and KN-OPERATING-R1. Compared P1 locations and most compared P3 sensors do not show that rise. P3-ST2-A instead drops approximately 0.95 bar while its paired B sensor stays nearly unchanged, suggesting a separate measurement-quality question rather than agreement with P2. P2-ST2-A also has a 2.93-bar adjacent-reading jump that its regional profile does not explain. Request verification of the operating response against independent measurements and review of these two instruments' raw records; neither anomaly establishes hardware failure.",
+        "references": [
+          "subsea_8f6bfef4dbfc42fe8baaafa6a1d80b99",
+          "OP-P2-EXTENDED-001",
+          "KN-OPERATING-R1",
+          "KN-QUALITY-R1"
+        ],
+        "sensor_ids": [
+          "P2-ST1-A",
+          "P2-ST1-B",
+          "P2-ST2-A",
+          "P2-ST2-B",
+          "P2-ST3-A",
+          "P2-ST3-B",
+          "P2-ST4-A",
+          "P2-ST4-B",
+          "P2-ST5-A",
+          "P2-ST5-B",
+          "P2-ST6-A",
+          "P2-ST6-B",
+          "P2-ST7-A",
+          "P2-ST7-B",
+          "P2-ST8-A",
+          "P2-ST8-B",
+          "P3-ST1-A",
+          "P3-ST2-A",
+          "P3-ST2-B",
+          "P3-ST3-A",
+          "P1-ST1-A",
+          "P1-ST2-A"
+        ],
+        "hypothesis": "operating_change"
+      }
+    ],
+    "follow_up_questions": [
+      "Do longer synchronized P5 pressure records and independent flow measurements confirm the decline around ST3-ST5 and show related changes on connected pipes?",
+      "Do independent pressure references and calibration results explain the P7 odd-station offset and P3-ST2-A's disagreement with its paired sensor?",
+      "Do raw P2-ST2-A readings and incident-time upstream/P5 operating records explain its jump and P5's separate pressure decline?"
+    ]
+  },
+  "checked_contract": {
+    "persisted_results_revalidated": true,
+    "specialist_collaboration": true,
+    "scope_and_reuse": true,
+    "model_receipt_accounting": true,
+    "tool_receipt_accounting": true,
+    "read_only_role_authority": true,
+    "pinned_tool_scope": true,
+    "incident_time_sources": true,
+    "observe_before_followup": true,
+    "bounded_execution": true,
+    "critic_and_reflection": true,
+    "review_attestation": true
+  },
+  "stored_content": [
+    {
+      "role": "operator_response",
+      "trace_id": "e46f6a326f391f8ac3a4b00ba6b7f085",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "f25ef8e18629a81e",
+          "name": "generation.operator_response.critic-1",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "d365057206f07a9cff498cd3397fa7a0f4abcd34de1e7b0f196a7e3e6ad9cebf",
+          "output_sha256": "43455c7a8a28c076dce61e48cc9c2ee28c435ba04b806de5b154831d6b8cb3b3",
+          "input_chars": 88010,
+          "output_chars": 12958,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "4a174266-5731-4e23-9325-47dc3c573b6e",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "45edf6b088e72301",
+          "name": "generation.operator_response.reflection",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "2c6d9c3311f851f680473fa4b7e59ce67898d04ceb638c5139916d9725a0efa3",
+          "output_sha256": "0117c03a070e12438351d8e9a1582aeb4df8fbd6255026fd2d4a1f333c8b8c03",
+          "input_chars": 92198,
+          "output_chars": 9845,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "3d656c9e-2ad5-42df-a76e-f7713487f025",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3e5bccb0566e45b6",
+          "name": "generation.operator_response.critic-0",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "cfed326cef542652f9d7b1191d84e574e3a66ab1da245e54806cbd1e03e00ae3",
+          "output_sha256": "74623e4fb6151306bb505005d940a1521bb07e407bafc2bc33f534e49ccc8ff3",
+          "input_chars": 87534,
+          "output_chars": 9578,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "f548faae-c4d3-49e7-9d02-ef93b0b1b69a",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "742d46332fb819f5",
+          "name": "generation.operator_response.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "24559b65293c2fbe597fc77dc91ad8fb9c92acebd5683104d115da17d401ecb2",
+          "output_sha256": "e904cfa6deb5587c744668657f1e5fe98a8421d64bffbf2d1a3b866f61a1bcee",
+          "input_chars": 85434,
+          "output_chars": 10950,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "30991b95-481a-46ae-8f41-9426afc13371",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "b3fb2061a1ed26b2",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d1cac42e65ac5574570ac6351e4072cb7a190028817264f42e1d609d665e4aa6",
+          "output_sha256": "6bb45bbe00804804c1cae661b525c477296f4e9ce1b8b948a0931508dd9352e9",
+          "input_chars": 298,
+          "output_chars": 49550,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "af69ec91-ca94-559f-b4b7-4515200fe32e",
+            "role": "operator_response",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "09ddb6efc56e3b13",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "0f3592783244a1b1f5ffec17020701c4642d0b47cb19f449bb680d26d424488a",
+          "output_sha256": "8a8731d2184f3c4fa3af4f8b8b0679026b285e1e439c2083e79d87e21d1c8517",
+          "input_chars": 298,
+          "output_chars": 1646,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "63df7763-a013-56a2-aa24-a98a72a394b2",
+            "role": "operator_response",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "a618d0d83ed4b04d",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "634e53205611afc5cabd9d356e4216ac9d1d3f1ef394c04e83324c0f21ba2123",
+          "output_sha256": "564c30a7aa81047b3007693fc93a925402dab85114cf3c6068df9bddaa5ab734",
+          "input_chars": 546,
+          "output_chars": 21037,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "884dc0ba-ad7c-54d1-a6ff-1b5ff296b326",
+            "role": "operator_response",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "81b27c11389631bc",
+          "name": "tool.criteria.explain",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "17c2d82e009cd0fa9a06f50504189f052469e194fd628b969ea6c92a3a3aa7dd",
+          "input_chars": 247,
+          "output_chars": 748,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "ef4ba488-611b-5985-abe9-c18b922a1a75",
+            "role": "operator_response",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "c3fa39fed5b3435f",
+          "name": "generation.operator_response.plan",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "79ca4a4dd34fd3248242430778e7f0cf3dea3bd2778a1a6e89fc10b54ae9abd3",
+          "output_sha256": "2e623bb22476183bee6bf08373e60c5722eaabd25450b98e391b921f8a6d0f66",
+          "input_chars": 16098,
+          "output_chars": 170,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "operator_response",
+            "call_id": "e20462f0-b425-4a4f-8430-060f2b60007f",
+            "task_id": "5d11c8e1-2b0f-5629-b6b4-ae00fafc81e0"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "role": "sensor_quality",
+      "trace_id": "0dbb27845ec82bd4dabb6cc2e201b2da",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "32e58a775cc348b6",
+          "name": "generation.sensor_quality.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "efedf5a37c2c2a2bc65386085193c8e5661e62e3c687dc56091cf7906755e8c5",
+          "output_sha256": "5fd1f45b1fd11d189e94360eb809a9a327d980af3a1ada79d9a1b69a20a5095f",
+          "input_chars": 53405,
+          "output_chars": 1091,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "sensor_quality",
+            "call_id": "9e6fa5cb-380c-48bd-971d-48cdb3183a4b",
+            "task_id": "e9e85c69-6abb-5dc2-bfa7-d6e0b2e893b3"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3825ae21ac017d8d",
+          "name": "tool.quality.sensor_patterns",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "3873104ff2ac0f0eedec08b7ee2df04f07075761d8710edbbcc0f37f97fd48b7",
+          "input_chars": 247,
+          "output_chars": 17832,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "c27a81f8-f85e-5995-b777-a2bc773148c4",
+            "role": "sensor_quality",
+            "task_id": "e9e85c69-6abb-5dc2-bfa7-d6e0b2e893b3"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "25435918ffd9172e",
+          "name": "tool.quality.coverage",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "b7cfa22007c856d4ddfca7ebe0d0f184eaba468eee9c0fa95f678eb63cecc668",
+          "input_chars": 247,
+          "output_chars": 1643,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "0f53b55d-6ba0-54b8-9900-4e57a4cd9349",
+            "role": "sensor_quality",
+            "task_id": "e9e85c69-6abb-5dc2-bfa7-d6e0b2e893b3"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "27164cf05906b56b",
+          "name": "tool.quality.conflicts",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "f2f9e37b10279942fab9cd913f4001d1302bac166c2eedc32e79de9de3aad201",
+          "input_chars": 247,
+          "output_chars": 8438,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "614824e1-b6a2-5766-8ef9-4f93751019e2",
+            "role": "sensor_quality",
+            "task_id": "e9e85c69-6abb-5dc2-bfa7-d6e0b2e893b3"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "fff1cb78e51b5475",
+          "name": "tool.ontology.neighbors",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "93f9d6bfaeb2ad0c5a40f481890fb17d7d7b33f9f76760f2aea3d01d48da9df7",
+          "input_chars": 247,
+          "output_chars": 14448,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "d47e2dba-7740-501a-a8e4-039f4765ac5d",
+            "role": "sensor_quality",
+            "task_id": "e9e85c69-6abb-5dc2-bfa7-d6e0b2e893b3"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    },
+    {
+      "role": "event_diagnosis",
+      "trace_id": "975644184ca280942676a0094c374fd7",
+      "passed": true,
+      "required_content_types": [
+        "generation",
+        "tool"
+      ],
+      "observations": [
+        {
+          "observation_id": "a0d934c4104a23d5",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "5f851172b8f99de5e9b7446e30c0e8fd6aa1945e16ea22f4d7945e1920cb2652",
+          "output_sha256": "994b001b95e9d52d7c87d319477a4d3dd98deac6e85d35f2766cb0a6b0729135",
+          "input_chars": 91954,
+          "output_chars": 1598,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "7c2bc3ba-7ed8-4f08-86ba-328a4d65cab6",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "50e1b0da75e6d564",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "873d1ee8e7f892cd35ed2e942457679bf86550cfb83659665655259351505cb8",
+          "output_sha256": "0214eed206ff1540a2a89ce735d8e4666d71f7c691da7e78907a436ac7fd1fff",
+          "input_chars": 885,
+          "output_chars": 19760,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_41b5e48f30c44994898ee7e06bce11e0",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "03fbb65fb524a47e",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "2123912ca28d30f74889ae741ba04d9f6bf5552323635e40c4cade30c58ed03a",
+          "output_sha256": "84ff86f8566e0505e81870c46d494353b0ca4fb7f585c1f07c02526eef93fb53",
+          "input_chars": 881,
+          "output_chars": 22301,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_8f6bfef4dbfc42fe8baaafa6a1d80b99",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "acaae2adceb64528",
+          "name": "tool.history.compare",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "27f24befaa9d2673fca9b46d294223c70904fb73086256bc985cd3b1ddff5c99",
+          "output_sha256": "0039f6fa5859f472ba422e808b279d42470f431126e1d4f6422713a043eeecd8",
+          "input_chars": 847,
+          "output_chars": 22473,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_076c06d51f9842afbb998fb7cfc0cbb5",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "3bec99bee716a0a6",
+          "name": "tool.history.read",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "286df8f12ad3f89c43644002417a9c13fb17866938fd86d6f202f5f983092fb6",
+          "output_sha256": "f4d772ba87702b04d21be295a809321857101b65898f08547bf2d6d4a032c835",
+          "input_chars": 671,
+          "output_chars": 5645,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_809e058f7ea543c6bfdfbe16c7b03662",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "a7473046a31a5a42",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "c5288e76cde0cca62132ea521ab4d96ab6c1988a1202659a0dc26dafd8753594",
+          "output_sha256": "cfcb3a737413dc3c68b8060bdf7e2ca8a5f2857f1175d6bc5f6673210c2e6c83",
+          "input_chars": 49458,
+          "output_chars": 3748,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "405db021-9918-4201-942e-95c037448d58",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "4e485e0fccbb5a6a",
+          "name": "tool.evidence.get",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "2732b9553f4002ddf652353c9c6e67cf7bd924a70d4ef8977c8c5c919d52b31f",
+          "output_sha256": "1a6c00a800a358d40652bf08bb7d36a1381046b4b53f69fe5bede838ce5ca9c3",
+          "input_chars": 506,
+          "output_chars": 19901,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_f4019a0974064faebfaa63f130133531",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "8ef3eed5770d26b0",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "264e20f4429ac1ab06ca5681ad0681aa9a3cfdf866cfaa58a857c0ad5cf02d34",
+          "output_sha256": "ae6078f008ad005500ffc4748be106fbe1e1c3ce01c2057a0342e166faa03dee",
+          "input_chars": 609,
+          "output_chars": 5161,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_f8cb5bd1b9ef474bae0767c3c24e9c11",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "1fda15cc70f971cb",
+          "name": "tool.history.search",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "a19206d48eb3f2a4548ed53c121074315a2ff07fd53eac34e138183f12583482",
+          "output_sha256": "17a2e4db891e961e67fd18ade780c985da3f64c95147a73ef78738d129b50a97",
+          "input_chars": 566,
+          "output_chars": 4920,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "subsea_b4649b01ce804367bd8d57ea87cb08bb",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "5f674c0a92b00e36",
+          "name": "generation.event_diagnosis.answer",
+          "type": "generation",
+          "stored_input_present": true,
+          "input_sha256": "d9d0d4ca68102fc55355b636ff85823afb14b1fa55efeb65317a078d322d4f42",
+          "output_sha256": "6c8b87cb6596156884e4b76e17c7037b6b881312a77aee2185643e480d7a3576",
+          "input_chars": 27921,
+          "output_chars": 2034,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "model_identity_source": "cli_event",
+            "observed_model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "mode": "live",
+            "role": "event_diagnosis",
+            "call_id": "9decd4dc-53f2-44f9-a8ff-7fd09c75990d",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "96668c0774bbc300",
+          "name": "tool.task.result",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "0f3592783244a1b1f5ffec17020701c4642d0b47cb19f449bb680d26d424488a",
+          "output_sha256": "82b98a000cb9de424d06f46e25ae9e1ed5af324957bed997e45b0cdd9bdb0e03",
+          "input_chars": 298,
+          "output_chars": 1645,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "cb63af5a-07bf-5279-b6b7-a31226f1bca0",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "56d60845432381b2",
+          "name": "tool.event.counterevidence",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "d24b89709accffdc1e8d270f8c9f7fdb08ebfb13db5bf8c177813de422872a72",
+          "input_chars": 247,
+          "output_chars": 1695,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "1f130485-840b-5d44-b28e-8b6a03e58c04",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        },
+        {
+          "observation_id": "87a9515a08472431",
+          "name": "tool.event.assess",
+          "type": "tool",
+          "stored_input_present": true,
+          "input_sha256": "d2c3c28f393eb4a2fadac39688a5e77e07278e9eaae5703ae41267cbf00108e7",
+          "output_sha256": "1b61217abb186528ff8e4d7d130d25e8a74b813043032f72d8a21e2e59c4a9f3",
+          "input_chars": 247,
+          "output_chars": 1935,
+          "observed_model": "",
+          "usage_details": {},
+          "public_model_metadata": {
+            "call_id": "eaf64711-3272-5c78-8818-461ede030dae",
+            "role": "event_diagnosis",
+            "task_id": "cf23e05e-3e6c-5ef1-8170-8e3fbfaafb83"
+          },
+          "hidden_truth_absent_from_stored_input": true
+        }
+      ],
+      "scope": "Reads stored io fields. External judge input/verdict must match complete hashes. Runtime content is verified present, not independently certified complete."
+    }
+  ]
+}
