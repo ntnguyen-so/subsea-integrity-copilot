@@ -5,7 +5,12 @@ from test_agents import snapshot as snapshot_fixture
 
 from subsea_copilot.contracts import AgentResult, AgentTask, Claim, utc_now
 from subsea_copilot.runtime.registry import REGISTRY
-from subsea_copilot.validation import ValidationError, render_result, validate_result
+from subsea_copilot.validation import (
+    ValidationError,
+    bind_read_claim_evidence,
+    render_result,
+    validate_result,
+)
 
 
 @pytest.fixture(name="snapshot")
@@ -50,6 +55,49 @@ def receipts():
         }
         for name in REGISTRY["sensor_quality"].required
     ]
+
+
+def test_claim_evidence_binding_completes_only_read_sources_without_changing_the_draft(snapshot):
+    draft = valid_result().model_copy(update={"evidence_ids": ["health-e"]})
+    observed = [{
+        "name": "evidence.get", "error": None, "result": {"evidence": snapshot.evidence},
+    }]
+    bound = bind_read_claim_evidence(draft, snapshot, observed)
+    assert bound.evidence_ids == ["health-e", "coverage-e", "limit-e"]
+    assert draft.evidence_ids == ["health-e"]
+    assert bound.model_dump(exclude={"evidence_ids"}) == draft.model_dump(exclude={"evidence_ids"})
+    with pytest.raises(ValidationError) as error:
+        validate_result(draft, quality_task(snapshot), snapshot, receipts())
+    assert error.value.code == "evidence"
+    validate_result(bound, quality_task(snapshot), snapshot, receipts())
+
+
+@pytest.mark.parametrize("error", [None, "context_budget_exceeded"])
+def test_claim_evidence_binding_rejects_unread_or_failed_source_receipts(snapshot, error):
+    observed = [{
+        "name": "evidence.get", "error": error,
+        "result": {"evidence": snapshot.evidence if error else {}},
+    }]
+    with pytest.raises(ValidationError) as rejected:
+        bind_read_claim_evidence(valid_result(), snapshot, observed)
+    assert rejected.value.code == "evidence_receipts"
+
+
+def test_claim_evidence_binding_does_not_legitimize_fabricated_claims_or_sources(snapshot):
+    observed = [{
+        "name": "evidence.get", "error": None, "result": {"evidence": snapshot.evidence},
+    }]
+    with pytest.raises(ValidationError) as rejected:
+        bind_read_claim_evidence(
+            valid_result().model_copy(update={"claim_refs": ["fabricated"]}), snapshot, observed
+        )
+    assert rejected.value.code == "citations"
+    bound = bind_read_claim_evidence(
+        valid_result().model_copy(update={"evidence_ids": ["foreign"]}), snapshot, observed
+    )
+    with pytest.raises(ValidationError) as rejected:
+        validate_result(bound, quality_task(snapshot), snapshot, receipts())
+    assert rejected.value.code == "evidence"
 
 
 def test_context_budget_denial_must_remain_an_explicit_report_limitation(snapshot):

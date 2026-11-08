@@ -1,5 +1,52 @@
 # Qualification results
 
+## Live coordinator citation-binding correction
+
+The live S7 report at 110 seconds failed with `ValidationError: evidence` after
+both specialists succeeded. All 146 requested sources had been read, but each
+of four coordinator drafts recopied only 145 IDs and omitted a source required
+by one of its selected claims. The original failed root
+`0e93d268-323f-5a4c-a7df-2e13a4e13a6b` remains failed.
+
+The application now binds selected claims to their immutable source dependencies,
+requiring successful source-read receipts before completing the ID list. It
+preserves authored claims, interpretations and additional citations. Foreign or
+unread sources, unauthorized references and unsupported explanations still fail;
+the independent grounding pass is not bypassed. Exact invalid reference IDs are
+included in repair feedback.
+
+Replaying the four captured drafts completes their source bookkeeping. Two pass
+the full result validator; the other two still correctly fail because they cite
+ordinary tool-call UUIDs as narrative evidence. This is not four accepted reports.
+
+A real hosted coordinator/reviewer retry used the exact original question and
+immutable 110-second input, reusing the two successful compatible specialists.
+Root `99f81e5c-cf0b-5cc5-874e-e25a8de6b423` succeeded in 667.375 seconds with
+10 fresh model calls and 13 fresh tool calls. The final grounding round accepted
+all 10 explanation entries after two revisions. The binding audit added 34
+required source IDs; all were actually read. A denied additional tool request
+remained explicit, and the report narrowed an unsupported paired stuck-reading
+diagnosis to observed flatness rather than inventing the missing comparison.
+
+The accepted answer prioritizes P5-ST4/ST5 using quantified central-versus-neighbor
+pressure losses and separates P2's operating rise, P7's shared calibration offset
+and individual measurement discrepancies. This original snapshot's accepted
+alert-bracketing claim supplies no qualified interval; the report retains that
+limit rather than borrowing the 120-second recording's 600-1000 m interval.
+
+All three stored agent trace trees passed public-content checks. Three browser
+checks reopened the accepted report, agent outputs and consistent maps without
+new inference. The focused Python suite passed 57 tests, with two optional
+PostgreSQL tests skipped; Ruff and targeted mypy passed.
+An export of the exact staged revision, excluding concurrent uncommitted work,
+also passed its 55 focused tests, with two optional PostgreSQL tests skipped,
+plus Ruff and targeted mypy.
+The [sanitized correction receipt](evidence/coordinator-evidence-binding.json)
+records the original failure, captured-draft outcomes and successful retry.
+This one reused-specialist development regression is not a new accuracy cohort,
+a frozen whole-workspace qualification or evidence of universal field reliability.
+Earlier benchmark outcomes remain unchanged.
+
 ## Quantitatively grounded reporting revision
 
 All 13 saved report cases were reviewed: the six development and six previously

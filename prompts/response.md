@@ -10,8 +10,14 @@ Answer from audited application_intake: specialist task.result, evidence.get
 and criteria.explain are already executed. Submit FINAL without repeating reads;
 reserve any remaining turn for repair. Follow final_only and result_schema.
 
-Return AgentResult with empty summary, exact reviewed claim/evidence references,
-all specialist limitations, permitted read-only recommendations, and the accepted
+Return AgentResult with empty summary and exact reviewed claim references.
+The application binds each cited claim to its immutable source IDs only after
+verifying successful evidence.get receipts. Do not recopy a long source-ID list:
+evidence_ids may be empty unless you cite additional reviewed snapshot evidence
+not already attached to your selected claims. Interpretation references still
+need exact claim/evidence IDs, executed history-comparison IDs, reviewed record
+IDs or pinned guidance. Ordinary tool-call receipt IDs are not evidence citations.
+Retain all specialist limitations, permitted read-only recommendations, and the accepted
 diagnosis investigation copied unchanged. Do not invent documents or comparisons.
 The checked hypothesis is a numerical screening claim, NOT your causal judgment.
 Failed specialists block synthesis; abstention requires insufficient_evidence,

@@ -77,8 +77,9 @@ def test_detailed_engineering_briefing_preserves_paragraphs_and_citation_checks(
     validate_interpretation(result, task)
     assert result.model_dump()["interpretation"]["answer"]["text"] == briefing
     result.interpretation.answer.references = ["invented-evidence"]
-    with pytest.raises(ValidationError, match="accepted claims"):
+    with pytest.raises(ValidationError, match="accepted claims") as rejected:
         validate_interpretation(result, task)
+    assert "invented-evidence" in str(rejected.value)
 
 
 def test_baseline_citations_require_a_successful_read_and_reach_the_reviewer(snapshot):

@@ -14,7 +14,7 @@ from uuid import NAMESPACE_URL, uuid4, uuid5
 
 import psycopg
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.types import Command
 from pydantic import BaseModel
@@ -63,6 +63,7 @@ from subsea_copilot.runtime.registry import LIMITATIONS, REGISTRY, tool_schemas
 from subsea_copilot.validation import (
     ValidationError,
     abstention_claim_allowed,
+    bind_read_claim_evidence,
     compatible,
     parse_json,
     quality_facts_available,
@@ -287,11 +288,19 @@ class AgentService:
         snapshot: WindowSnapshot,
         gateway: ToolGateway,
     ) -> AgentResult:
+        receipts = self.store.tool_receipts(task.id)
+        candidate = (
+            bind_read_claim_evidence(
+                AgentResult.model_validate(parse_json(value)), snapshot, receipts
+            )
+            if task.role == "operator_response"
+            else value
+        )
         return validate_result(
-            value,
+            candidate,
             task,
             snapshot,
-            self.store.tool_receipts(task.id),
+            receipts,
             gateway.dependencies(),
         )
 
@@ -1206,6 +1215,19 @@ class AgentService:
             raise ValidationError(
                 output["failure"], "Structured output repair allowance exhausted."
             )
+        if task.role == "operator_response" and phase == "answer":
+            assert isinstance(resumed, AIMessage) and isinstance(resumed.content, str)
+            authored = AgentResult.model_validate(parse_json(resumed.content))
+            added = set(output["parsed"]["evidence_ids"]) - set(authored.evidence_ids)
+            if added:
+                self._event(
+                    task,
+                    "evidence.bound",
+                    {
+                        "added_evidence_ids": sorted(added),
+                        "authority": "immutable claim ledger and successful evidence.get receipts",
+                    },
+                )
         return output["parsed"], task
 
     def _review_interpretation(

@@ -1,0 +1,101 @@
+{
+  "scope": "Same-snapshot live coordinator development correction; not field qualification",
+  "case_id": "S7-live@110",
+  "snapshot_id": "window-afcc0f5146b4d55c562efdd0a86a4fd7e0bb9e22bc66035671731027b95d1b8d",
+  "input_hash": "9cb2ffd2ed28941ba03ed49c12b520bf999ff03d7ed06edc15d0482dbf7ee9f6",
+  "original": {
+    "root_id": "0e93d268-323f-5a4c-a7df-2e13a4e13a6b",
+    "state": "FAILED",
+    "error_code": "evidence",
+    "successfully_read_source_count": 146,
+    "authored_source_count_per_draft": 145,
+    "captured_drafts": [
+      {
+        "observation_id": "93e7d96a4db2b867",
+        "added_source_id": "ev-097",
+        "full_result_validation_after_binding": true
+      },
+      {
+        "observation_id": "5469800692bf9849",
+        "added_source_id": "ev-097",
+        "full_result_validation_after_binding": true
+      },
+      {
+        "observation_id": "bfaeab3281f88dd3",
+        "added_source_id": "ev-141",
+        "full_result_validation_after_binding": false,
+        "remaining_error": "interpretation_citations"
+      },
+      {
+        "observation_id": "fc9c71158e1e5872",
+        "added_source_id": "ev-063",
+        "full_result_validation_after_binding": false,
+        "remaining_error": "interpretation_citations"
+      }
+    ]
+  },
+  "retry": {
+    "root_id": "99f81e5c-cf0b-5cc5-874e-e25a8de6b423",
+    "state": "SUCCEEDED",
+    "error_code": null,
+    "same_original_question": true,
+    "same_immutable_input": true,
+    "reused_specialist_count": 2,
+    "fresh_model_calls": 10,
+    "fresh_tool_calls": 13,
+    "elapsed_seconds": 667.375,
+    "selected_claim_count": 34,
+    "final_source_count": 51,
+    "successfully_read_source_count": 146,
+    "binding_added_source_count": 34,
+    "required_sources_read": true,
+    "all_final_sources_resolve": true,
+    "evidence_validation_errors": 0,
+    "grounding_round_decisions": ["revise", "revise", "accept"],
+    "final_grounding_supported_entries": 10,
+    "physical_decision": "suspected_leak",
+    "station_focus": ["P5-ST4", "P5-ST5"],
+    "qualified_inspection_interval": null,
+    "additional_tool_denials": ["context_budget_exceeded"],
+    "source_period_for_final_pressure_comparison_seconds": [105, 110],
+    "pressure_deficits_bar": {
+      "P5-ST4-A": 1.2205840723941463,
+      "P5-ST5-A": 1.1732769526145717,
+      "P5-ST3-A": 0.9255569092938316,
+      "P5-ST6-A": 0.8551703397752988
+    },
+    "audit_checks_passed": [
+      "persisted_results_revalidated",
+      "specialist_collaboration",
+      "scope_and_reuse",
+      "model_receipt_accounting",
+      "tool_receipt_accounting",
+      "read_only_role_authority",
+      "pinned_tool_scope",
+      "incident_time_sources",
+      "observe_before_followup",
+      "bounded_execution",
+      "critic_and_reflection",
+      "review_attestation"
+    ]
+  },
+  "verification": {
+    "stored_agent_trees_checked": 3,
+    "stored_agent_trees_passed": 3,
+    "browser_checks_passed": 3,
+    "browser_checks_submit_new_questions": false,
+    "python_tests_passed": 57,
+    "isolated_staged_python_tests_passed": 55,
+    "optional_postgresql_tests_skipped": 2,
+    "ruff_passed": true,
+    "targeted_mypy_passed": true
+  },
+  "limitations": [
+    "The original failed run is preserved, not relabelled successful.",
+    "Source binding does not approve narrative claims or bypass grounding review.",
+    "Two captured drafts still fail unauthorized narrative-citation checks.",
+    "The retry reused successful specialists rather than independently rerunning them.",
+    "Concurrent workspace changes prevent a frozen whole-workspace qualification claim.",
+    "This correction does not change historical benchmark scores or establish field reliability."
+  ]
+}

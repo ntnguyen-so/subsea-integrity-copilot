@@ -4,7 +4,7 @@ from typing import Any
 
 from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
 from subsea_copilot.profiles import comparison_sensors
-from subsea_copilot.validation import ValidationError
+from subsea_copilot.validation import ValidationError, read_pinned_evidence
 
 
 def validate_interpretation(
@@ -23,12 +23,7 @@ def validate_interpretation(
         raise ValidationError("interpretation_authority", "Only the response role interprets RCA.")
     review = result.investigation
     allowed = set(result.claim_refs)
-    read_evidence = {
-        reference
-        for receipt in receipts or []
-        if receipt["name"] == "evidence.get" and not receipt.get("error")
-        for reference in (receipt.get("result") or {}).get("evidence", {})
-    }
+    read_evidence = read_pinned_evidence(receipts or [])
     allowed.update(set(result.evidence_ids) & read_evidence)
     if review:
         allowed.update(review.document_ids)
@@ -42,13 +37,16 @@ def validate_interpretation(
     allowed.update(guidance)
     paragraphs = interpretation.cited_paragraphs()
     for paragraph in paragraphs:
-        if (
-            len(set(paragraph.references)) != len(paragraph.references)
-            or not set(paragraph.references) <= allowed
-        ):
+        invalid = set(paragraph.references) - allowed
+        duplicates = {
+            ref for ref in paragraph.references if paragraph.references.count(ref) > 1
+        }
+        if invalid or duplicates:
             raise ValidationError(
                 "interpretation_citations",
-                "Use accepted claims, reviewed history and pinned applicable guidance.",
+                "Use accepted claims, reviewed history and pinned applicable guidance. "
+                f"Invalid references: {sorted(invalid)}. "
+                f"Duplicate references: {sorted(duplicates)}.",
             )
         if set(paragraph.references) & guidance and not set(paragraph.references) & evidence:
             raise ValidationError(

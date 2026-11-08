@@ -93,6 +93,10 @@ source periods and numerical comparison readings, including secondary branches
 and each named suspect instrument. Logged settings and asset IDs are not sensor
 evidence. Missing comparative measurements must limit the conclusion explicitly;
 neither invented numbers nor unsupported confidence percentages are acceptable.
+The coordinator's claim-to-source citations are bound by application code from
+the immutable ledger and successful source-read receipts, rather than asking
+the model to recopy long ID lists. Unread or foreign sources remain rejected;
+this binding does not approve the prose or bypass the grounding reviewer.
 
 Location explanations connect the stronger central paired readings to their
 weaker neighboring stations and the actual fit's boundary rule. Instrument

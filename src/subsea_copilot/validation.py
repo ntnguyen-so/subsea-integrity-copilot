@@ -29,6 +29,35 @@ def parse_json(value: str) -> Any:
     return json.loads(value, object_pairs_hook=pairs, parse_constant=constant)
 
 
+def read_pinned_evidence(receipts: list[dict[str, Any]]) -> set[str]:
+    return {
+        ref
+        for receipt in receipts
+        if receipt["name"] == "evidence.get" and not receipt.get("error")
+        for ref in (receipt.get("result") or {}).get("evidence", {})
+    }
+
+
+def bind_read_claim_evidence(
+    result: AgentResult, snapshot: WindowSnapshot, receipts: list[dict[str, Any]]
+) -> AgentResult:
+    """Bind existing claim sources without authorizing unread or foreign evidence."""
+    required: set[str] = set()
+    for ref in result.claim_refs:
+        claim = snapshot.claims.get(ref)
+        if claim is None or claim.id != ref:
+            raise ValidationError("citations", "Claim not in the immutable snapshot.")
+        required.update(claim.evidence_ids)
+    if not required <= snapshot.evidence.keys():
+        raise ValidationError("evidence", "Claim evidence does not resolve in the snapshot.")
+    if not required <= read_pinned_evidence(receipts):
+        raise ValidationError("evidence_receipts", "Claim evidence must have been read.")
+    missing = required - set(result.evidence_ids)
+    return result.model_copy(
+        update={"evidence_ids": [*result.evidence_ids, *sorted(missing)]}
+    )
+
+
 def question_requires_location(question: str) -> bool:
     """Conservative request gate; the model still proposes the semantic work plan."""
     return bool(
@@ -261,12 +290,7 @@ def _validate_with_policy(
     if any(ref not in snapshot.evidence for ref in result.evidence_ids):
         reject("evidence", "Evidence does not resolve in the immutable snapshot.")
     if specialist_contract and task.role == "operator_response":
-        read_evidence = {
-            ref
-            for r in receipts
-            if r["name"] == "evidence.get" and not r.get("error")
-            for ref in (r.get("result") or {}).get("evidence", {})
-        }
+        read_evidence = read_pinned_evidence(receipts)
         if not set(result.evidence_ids) <= read_evidence:
             reject("evidence_receipts", "Response must read the cited pinned evidence.")
     ledger_codes = {
