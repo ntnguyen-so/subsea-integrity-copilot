@@ -1,4 +1,5 @@
 import { bounds, button, friendly, node } from "./dom";
+import { reportText } from "./presentation";
 import type { AgentTask, InvestigationCase, Json, WindowSnapshot } from "./types";
 
 function display(value: Json | undefined): string {
@@ -96,20 +97,28 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
   card.id = "investigation-case";
   card.dataset.snapshot = file.snapshot_id;
   card.dataset.task = file.task_id;
-  card.append(node("h3", "Investigation handoff - for engineer review"));
-  card.append(node("p", file.disposition, "case-disposition"));
-  card.append(node("p", `Question: ${file.question}`));
-  if (file.inspection) card.append(node("p",
+  card.append(node("h3", "Incident assessment"));
+  const audit = node("details", "", "case-audit");
+  audit.append(node("summary", "Evidence and agent-run audit"));
+  audit.append(node("p", file.disposition, "case-disposition"));
+  audit.append(node("p", `Question: ${file.question}`));
+  if (file.inspection) audit.append(node("p",
     `${file.inspection.segment_id}: ${file.inspection.start_m}-${file.inspection.end_m} m supported inspection interval. Not an exact leak position.`,
     "case-interval"));
-  else card.append(node("p", "Inspection location withheld / not established by this answer.", "case-interval"));
-  card.append(node("p", `Next review step: ${file.next_action}`, "case-next-action"));
-  card.append(node("p", file.authority, "muted"));
+  else audit.append(node("p", "Inspection location withheld / not established by this answer.", "case-interval"));
+  audit.append(node("p", `Recorded workflow recommendation: ${file.next_action}`, "case-next-action"));
+  audit.append(node("p", file.authority, "muted"));
+  if (!file.interpretation) {
+    card.append(node("p", file.disposition));
+    card.append(node("p", file.inspection
+      ? `${file.inspection.segment_id}: ${file.inspection.start_m}-${file.inspection.end_m} m inspection interval, not an exact leak point.`
+      : "No supported inspection interval in this recorded result."));
+  }
   const references = (ids: string[]): HTMLElement => {
     const chips = node("div", "", "chips");
     for (const id of ids) chips.append(button(id, () => {
       const target = [...card.querySelectorAll<HTMLElement>("[data-case-reference]")].find(item => item.dataset.caseReference === id);
-      if (target instanceof HTMLDetailsElement) { target.open = true; target.scrollIntoView({ block: "center" }); target.focus(); }
+      if (target instanceof HTMLDetailsElement) { audit.open = true; target.open = true; target.scrollIntoView({ block: "center" }); target.focus(); }
       else actions.claim(id);
     }, "chip rule"));
     return chips;
@@ -128,25 +137,36 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
         }
       }
       review.append(node("p", "Separate critic context, same underlying model. Exact quotes and review coverage checked by code; humans retain review authority.", "muted"));
-      card.append(review);
-    } else card.append(node("p", "Archived explanation: predates independent grounding review. Do not treat it as reviewed by the current protocol.", "summary"));
-    card.append(node("h3", "Engineering briefing"));
-    card.append(node("p", file.interpretation.answer.text));
-    card.append(references(file.interpretation.answer.references));
+      audit.append(review);
+    } else audit.append(node("p", "Archived explanation: predates independent grounding review. Do not treat it as reviewed by the current protocol.", "summary"));
+    card.append(node("p", reportText(file.interpretation.answer.text, file.interpretation.answer.references), "case-assessment"));
+    audit.append(node("h4", "Assessment references"), references(file.interpretation.answer.references));
     const causes = node("div", "", "case-causes");
     for (const cause of file.interpretation.competing_causes) {
       const panel = node("article");
-      panel.append(node("h4", `${friendly(cause.cause)}: ${friendly(cause.stance)}`), node("p", cause.text), references(cause.references));
+      panel.append(node("h4", cause.cause === "instrumentation_or_telemetry"
+        ? "Instrument and connection assessment" : cause.cause === "operating_change"
+          ? "Operating-change assessment" : "Leak assessment"), node("p", reportText(cause.text, cause.references)));
+      audit.append(node("h4", `${friendly(cause.cause)}: ${friendly(cause.stance)} references`), references(cause.references));
       causes.append(panel);
     }
-    card.append(causes, node("h3", "Questions to resolve with the engineer"));
+    card.append(causes);
+    for (const region of file.interpretation.regional_assessments || []) {
+      const detail = node("details", "", "case-region");
+      const pipes = [...new Set(region.sensor_ids.map(id => id.split("-")[0]))];
+      detail.append(node("summary", `${pipes.join(" / ")}: detailed assessment`),
+        node("p", reportText(region.text, region.references)));
+      card.append(detail);
+      audit.append(node("h4", `${pipes.join(" / ")} regional references`), references(region.references));
+    }
+    audit.append(node("h3", "Optional additional questions"));
     const followups = node("div", "", "case-followups");
     for (const question of file.interpretation.follow_up_questions) {
       const item = node("div");
       item.append(node("p", question), button("Draft this follow-up on the same evidence", () => actions.draft(question)));
       followups.append(item);
     }
-    card.append(followups, node("p", "Drafting does not run inference. Review the question, then explicitly submit. External evidence may still be unavailable.", "muted"));
+    audit.append(followups, node("p", "Drafting does not run inference. Review the question, then explicitly submit. External evidence may still be unavailable.", "muted"));
   }
   const trail = node("details", "", "case-trail");
   trail.append(node("summary", "Executed investigation checks (public actions, not hidden thoughts)"));
@@ -157,7 +177,7 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
     trail.append(row);
   }
   if (!file.steps.length) trail.append(node("p", "No historical tool steps in this archived answer."));
-  card.append(trail);
+  audit.append(trail);
   const sources = node("section", "", "case-sources");
   sources.append(node("h3", "Reviewed historical sources"));
   for (const source of file.sources) {
@@ -171,7 +191,7 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
     sources.append(item);
   }
   if (!file.sources.length) sources.append(node("p", "No fully read historical documents cited. Missing records do not establish absence of an event.", "muted"));
-  card.append(sources);
+  audit.append(sources);
   for (const comparison of file.comparisons) {
     const item = node("details", "", "case-comparison");
     item.dataset.caseReference = display(comparison.call_id); item.tabIndex = -1;
@@ -192,19 +212,19 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
       ]) row.append(node("td", value));
       table.append(row);
     }
-    const wrapper = node("div", "", "table-wrap"); wrapper.append(table); item.append(wrapper); card.append(item);
+    const wrapper = node("div", "", "table-wrap"); wrapper.append(table); item.append(wrapper); audit.append(item);
   }
   const checked = node("details");
   checked.append(node("summary", "Checked numerical claims and unresolved limitations"));
   checked.append(node("p", file.limitations.map(friendly).join("; "), "case-limitations"));
   for (const claim of file.checked_claims) checked.append(button(`${claim.id}: ${friendly(claim.kind)}`, () => actions.claim(claim.id), "chip rule"));
-  card.append(checked);
-  card.append(node("p",
+  audit.append(checked);
+  audit.append(node("p",
     `${file.fresh_model_calls} fresh ${file.mode === "scripted" ? "SCRIPTED adapter calls (no hosted inference)" : "hosted model calls"} / ${file.fresh_tool_calls} fresh tool calls; recorded task span ${file.recorded_elapsed_seconds.toFixed(1)}s including queue. ${file.reused_task_ids.length} reused specialists (prior calls excluded from fresh counts). Provider monetary cost unknown.`,
     "case-work-summary"));
-  card.append(node("p", `${file.report_target_seconds}s report-processing target: ${file.report_target_met ? "MET" : "MISSED"}. Measured from question admission to accepted result, not sensor onset or browser receipt. Correctness checks are not relaxed.`, "case-report-target"));
-  card.append(node("p", `Evidence basis: ${file.snapshot_id}; ${file.window_start} to ${file.window_end}; ${file.mode.toUpperCase()}. Synthetic evidence; not field reliability.`, "muted"));
+  audit.append(node("p", `${file.report_target_seconds}s report-processing target: ${file.report_target_met ? "MET" : "MISSED"}. Measured from question admission to accepted result, not sensor onset or browser receipt. Correctness checks are not relaxed.`, "case-report-target"));
+  audit.append(node("p", `Evidence basis: ${file.snapshot_id}; ${file.window_start} to ${file.window_end}; ${file.mode.toUpperCase()}. Synthetic evidence; not field reliability.`, "muted"));
   const download = node("a", "Download this investigation handoff (JSON)");
   download.href = `/api/tasks/${encodeURIComponent(file.task_id)}/casefile`; download.download = `investigation-${file.task_id}.json`;
-  download.id = "download-casefile"; card.append(download); container.append(card);
+  download.id = "download-casefile"; audit.append(download); card.append(audit); container.append(card);
 }

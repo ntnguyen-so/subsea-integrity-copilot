@@ -1,0 +1,41 @@
+{
+  "scope": "development correction; not a replacement qualification result",
+  "case_id": "N2@360",
+  "original_root_id": "047f10b6-f4da-56bc-8b6c-6f26302e89a7",
+  "root_id": "a5dba0a0-284a-56ec-afa6-efce0b77fa9a",
+  "generation_id": "golden-ab80b33e048a4a59ab7ca2765bf35e75",
+  "input_hash": "1ea5b0797c4d8fd60a7a0e8b1b0553697f2906dae92fab385e292d98ae53ff93",
+  "state": "SUCCEEDED",
+  "error_code": null,
+  "traces": [
+    {
+      "task_id": "a5dba0a0-284a-56ec-afa6-efce0b77fa9a",
+      "trace": {
+        "trace_id": "45bd382ed6631d92322c5ce580395027",
+        "span_id": "be8777e082585065",
+        "attempt_id": "70d83aa6-d08a-4ffe-96e0-b871ae318e35",
+        "session_id": "4955b7ad0aa2e9aea414446edc901e25665938e1bc2497aea9e14c90f4f16a4d"
+      }
+    },
+    {
+      "task_id": "1c3d3e17-bae3-5d83-a9d4-e22a45cdea3e",
+      "trace": {
+        "trace_id": "5e96c55040dce1a6b3e43a3e075cf9dc",
+        "span_id": "2f45a6a23042cee0",
+        "attempt_id": "f30ffbd7-580b-4c98-afb3-99b2ce745294",
+        "session_id": "4955b7ad0aa2e9aea414446edc901e25665938e1bc2497aea9e14c90f4f16a4d"
+      }
+    },
+    {
+      "task_id": "d9e4dbb0-443d-51f2-84ca-79ec4e771958",
+      "trace": {
+        "trace_id": "c7cec228fcd36a43b6f2df6d4bdbb96b",
+        "span_id": "2fd4ae22bddde937",
+        "attempt_id": "139f5eb1-c6f1-46d2-b817-98bdaab8bd4e",
+        "session_id": "4955b7ad0aa2e9aea414446edc901e25665938e1bc2497aea9e14c90f4f16a4d"
+      }
+    }
+  ],
+  "elapsed_seconds": 300.0,
+  "answer": "Leak assessment\nLeak pattern detected on P6. Its 800-1200 m section, measured along the pipe, is the best-supported first integrity inspection area. P6 has a persistent, concentrated pressure loss measured by agreeing sensors on separate data connections, unlike the isolated instrument discrepancies elsewhere. P7 instead supports a shared measurement-connection offset, and P2's broad pressure rise matches its recorded operating transition. P1 and P3 have isolated drift, P4 has brief spikes, and P5 has a stuck reading; these do not establish additional leak sources.\n\nWhy this location\nIn the final five seconds, elapsed recording time 355-360 seconds, P6-ST5-A at 900 m was 1.402 bar below the supplied normal reference, and P6-ST6-A at 1100 m was 1.413 bar below it; bar is a pressure unit. Their immediately neighboring stations were much weaker: P6-ST4-A at 700 m was 0.377 bar below reference and P6-ST7-A at 1300 m was 0.404 bar below. The second sensor at each station agrees with this central-versus-neighbor contrast. The numerical method places boundaries halfway between 700 and 900 m, and between 1100 and 1300 m, yielding 800-1200 m rather than the whole affected branch.\n\nP6's central paired profiles fell together in the 90-135-second period and remained depressed through 360 seconds; all eight sensors at stations 4-7 retained sustained screening deficits throughout 300-360 seconds. Stations 5 and 6 use different gateways, meaning different shared data connections. That persistence, paired agreement and spatial concentration support a leak diagnosis better than an isolated sensor problem or P7's single-connection error. The interval is a pressure-supported inspection focus, not a confirmed physical leak point or a hydraulic location calculation.\n\nInstrument findings\nOn P7, both sensors at stations 1, 3, 5 and 7 show a persistent downward offset on gateway-P7-0 beginning around 90 seconds. P7-ST1-A remains 0.824 bar below reference in the final five seconds, versus only 0.092 bar at P7-ST2-A on the other connection. The recorded calibration test allows approximately a 0.75-bar downward offset on exactly those eight taps, making the shared conversion path the supported problem rather than a localized P7 leak. This identifies suspect readings, not eight confirmed hardware failures.\n\nP1-ST6-A gradually rises while P1-ST6-B stays stable; P3-ST7-A gradually falls much more than P3-ST7-B. These disagreements fit isolated measurement drift because a shared pressure change would normally affect both sensors at the same station. P2-ST3-A and P4-ST7-B have brief large excursions absent from their partners. P5-ST8-B becomes unchanging over 180-360 seconds while P5-ST8-A still varies, supporting a flatline or stuck reading. P6's screening spike flags do not establish unreliable instruments against its coherent paired profiles.\n\nOperating and other pressure changes\nP2's paired readings rise by approximately 0.4 bar during 90-145 seconds, matching the operating record's sign, magnitude and timing; measured profiles at 150-180 seconds are again close to their pre-transition levels. Its isolated ST3-A spikes are a separate instrument finding. There is no supported joint leak pattern on P2 in this window. Smaller paired changes away from P6's center broaden its pressure-event footprint without independently locating another leak source.\n\nLimits of this result\nCurrent usable coverage is 99.18%, but P1-ST7-B and P3-ST5-B each lack 20 of 60 expected readings; P4-ST8-A has 15 invalid received readings out of 60. Missing or invalid values are unavailable observations, not proof of hardware failure. Health review is partial. Operating logs are incomplete, and independent physical pressure/flow confirmation remains the boundary to confirming a leak. Sustained losses outside P7's shared connection, renewed P2 changes beyond its recorded transition, or deterioration of P6's pressure focus would change the assessment."
+}

@@ -15,3 +15,20 @@ export function productText(value: string): string {
     .replace(/ENGINEERING INTERPRETATION - MODEL-WRITTEN, FOR HUMAN REVIEW/g, "ENGINEERING ASSESSMENT")
     .replace(/COMPETING CAUSES - NOT CONFIRMED ROOT CAUSES/g, "COMPETING EXPLANATIONS");
 }
+
+/** Hide citation notation only in presented prose; retain source data and audit IDs. */
+export function reportText(value: string, references: readonly string[] = []): string {
+  return productText(value)
+    .replace(/[\[(]([^[\]()\n]+)[\])]/g, (notation: string, body: string) => {
+      const internal = body.split(/[;,]/).every(part => {
+        const id = part.trim();
+        return references.includes(id)
+          || /^(?:ev-\d+|claim-\d+|(?:KN|OP|MAINT|LOG|PROC)-[\w-]+|subsea_[a-f0-9]+|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(id)
+          || /^(?:(?:the|both|reviewed|executed)\s+)*(?:comparisons|comparison calls|executed comparisons)$/i.test(id);
+      });
+      return internal ? "" : notation;
+    })
+    .replace(/[ \t]+([.,;:])/g, "$1")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}

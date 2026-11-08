@@ -1,0 +1,11 @@
+{
+  "scope": "Report regression on immutable recordings; compatible specialists may be reused.",
+  "cases": [
+    "N2@360",
+    "N3@360",
+    "S7@120"
+  ],
+  "implementation_sha256": "1967d2a22b96aff4967b0cbeafc571cefe45c6e7e2020775d4c039b277b36b80",
+  "implementation_unchanged": false,
+  "failed_reports": []
+}

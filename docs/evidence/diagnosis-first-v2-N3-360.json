@@ -1,0 +1,41 @@
+{
+  "scope": "development correction; not a replacement qualification result",
+  "case_id": "N3@360",
+  "original_root_id": "08f03676-fd0d-5eaf-9a68-2eed84b5747e",
+  "root_id": "a21970ee-1e51-5b21-bc54-94905cc48cf9",
+  "generation_id": "golden-a699ea2e281c4c5d89dfaa09106b6545",
+  "input_hash": "f823b2b08f0850829817193d46eebc2539856945d768067f91f7db8580aa7292",
+  "state": "ABSTAINED",
+  "error_code": null,
+  "traces": [
+    {
+      "task_id": "a21970ee-1e51-5b21-bc54-94905cc48cf9",
+      "trace": {
+        "trace_id": "7d86d1b7c7756976f8504eaa67416f1d",
+        "span_id": "626f112a80c4b2e3",
+        "attempt_id": "cb43bca2-1239-412e-afdb-55c226a0db9f",
+        "session_id": "fb9d4e1490a34b385e3b79b0e2cdad25a492c360d4a70862138f82d57905f670"
+      }
+    },
+    {
+      "task_id": "f63ebd91-034c-5db8-97f2-2da0b429a94e",
+      "trace": {
+        "trace_id": "c0881cc6f829a8576a21d34fedb5406d",
+        "span_id": "e23a9ea172dc9829",
+        "attempt_id": "71ed42bd-002d-4ab9-be10-844656ebace0",
+        "session_id": "fb9d4e1490a34b385e3b79b0e2cdad25a492c360d4a70862138f82d57905f670"
+      }
+    },
+    {
+      "task_id": "5aa8cb0d-2d56-50c1-bf88-367e51c24c39",
+      "trace": {
+        "trace_id": "9736f59fc5944d580e03bb35293be30b",
+        "span_id": "991d2c869d683928",
+        "attempt_id": "5f6689eb-97e5-453a-83fd-d47ee09a5366",
+        "session_id": "fb9d4e1490a34b385e3b79b0e2cdad25a492c360d4a70862138f82d57905f670"
+      }
+    }
+  ],
+  "elapsed_seconds": 361.31199999991804,
+  "answer": "Leak assessment\nThe supported explanation is a shared measurement-connection offset on P7, not a localized leak pattern. No pipeline section has a qualified leak inspection interval in this result; P7's shared connection, gateway-P7-0, is the strongest supported instrumentation review focus. P1 and P3 show isolated sensor drift, while P4 and P6 contain brief spikes and P6 also has a stuck reading. P2 has a recorded operating pressure rise, but its historical measurement match is not established by the supplied evidence.\n\nWhy this location\nOn P7, both sensors at stations ST1, ST3, ST5 and ST7 shifted down together around 90 seconds elapsed in the recording. Comparing elapsed 60\u201390 with 90\u2013120 seconds shows reductions of 0.710\u20130.755 bar, a pressure unit, matching the calibration record's approximately 0.75-bar negative offset on exactly these eight taps. At nearby ST2, the two sensors instead changed upward by only 0.027 and 0.014 bar on a different shared data connection. This contrast follows measurement infrastructure rather than a continuous localized pressure-loss region. In the final five seconds, elapsed 355\u2013360 seconds, ST1-A and ST1-B remain 0.720 and 0.714 bar below the supplied typical-pressure reference. The offset persists, but agreement among eight taps sharing one conversion channel is not independent leak corroboration. A qualified interval is withheld because independent observers do not support a localized leak source.\n\nInstrument findings\nP1-ST6-A gradually rises while its co-located reference P1-ST6-B stays nearly steady; their changes between the recording's first and second 180-second periods are +2.482 and +0.004 bar. In the final five seconds, A reads 3.772 bar above its reference, whereas B is only 0.055 bar above. P3-ST7-A gradually falls while P3-ST7-B remains nearly steady: corresponding historical changes are \u22122.404 and \u22120.004 bar, and final-five-second readings are 3.737 bar below reference for A versus 0.055 bar above for B. A shared pipeline-pressure change would normally affect both sensors at the same station; these divergent profiles support suspect measurement paths, not joint leak diagnoses.\n\nP4-ST7-B and P6-ST3-A show brief positive spikes, with abrupt steps of approximately 2.61 bar, unlike their stable paired references P4-ST7-A and P6-ST3-B. P6-ST8-B becomes flat after the early recording periods, while P6-ST8-A continues varying. These are observed reading problems, not confirmed hardware failures. The eight affected P7 taps share a suspect conversion path; the evidence does not establish eight separate faulty sensors.\n\nOperating and other pressure changes\nThe P2 record describes an expected 0.4-bar rise during elapsed 90\u2013145 seconds. The supplied P2 measurements describe the current window, not a time-aligned historical transition, so its historical sign, magnitude and timing cannot be matched to that record here. The operating explanation remains contextual rather than a demonstrated cause, and incomplete logs cannot exclude other operations or a concurrent leak.\n\nLimits of this result\nCurrent usable coverage is 99.18%, but P1-ST7-B and P3-ST5-B each lack 20 of 60 expected readings; P4-ST8-A has 15 invalid received readings and only 45 usable readings. Missing or invalid readings are unavailable observations, not measured pressure losses. Health review is partial, so aggregate coverage does not establish that every instrument is reliable. A sustained pressure loss outside P7's shared connection would change the leak assessment; independent pressure and flow measurements remain the boundary for physical confirmation."
+}

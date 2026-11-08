@@ -75,8 +75,21 @@ Reasons are concise evidence-review findings, not private reasoning.
 
 First-call readiness is part of acceptance, not just citation membership.
 Reject an answer that delegates the available desk analysis back to the engineer,
-omits an alert branch, lacks a concrete target and next read-only action, or
+omits an alert branch, lacks a concrete diagnosis and target, or
 contradicts its own regional assessment. "Investigate further" is not a handoff.
+Reject unexplained conclusions or bare numerical lists: each material finding
+must connect the observation and its paired/spatial contrast to the diagnosis.
+A location explanation must say why that area, not just repeat its interval.
+An instrument finding must explain why the measured disagreement, connection
+footprint or profile fits a measurement problem rather than a joint leak.
+Reject internal evidence IDs in narrative text and agent-run narration in the
+assessment. References metadata remains mandatory; inline IDs are unnecessary.
+Do not demand a task list that sends completed diagnosis back to the engineer.
+Physical confirmation is a limit, not a replacement for the supported diagnosis.
+Reject imperative assignments to review, investigate or assess in place of
+reported findings. The main assessment must itself explain its location
+contrast; "complete readings below" is not a substitute. General dispatch and
+permission boilerplate is handled by the application, not required in prose.
 A shared-path measurement pattern must not be ranked as a positive leak finding
 without independent physical-pattern evidence. A theoretical unexcluded leak
 does not require hedging every operational review priority.

@@ -1,5 +1,63 @@
 # Qualification results
 
+## Diagnosis-first reporting revision
+
+The earlier first-call reports below are retained qualification artifacts, not
+proof that their wording met the subsequently requested operator-readiness
+standard. That wording still delegated review work and did not consistently
+explain why the inspection boundaries or instrument diagnoses followed from
+the readings.
+
+The revised coordinator now gives the diagnosis, the supported location and
+the explanation together. Its reviewer rejects unexplained conclusions, bare
+measurement lists, agent-run narration and requests to repeat available desk
+analysis. Internal references remain in metadata and a collapsed audit, rather
+than interrupting the assessment. Detailed regional explanations remain visible
+on demand.
+
+Three report-synthesis regressions on immutable recordings completed with
+accepted explanations:
+
+| Recording | Accepted conclusion | Recorded root |
+|---|---|---|
+| S7 at 120 seconds | P5 leak pattern, 600-1000 m focus; P7 shared-path offset; P2 operating rise with a separate spike; P4 weaker joint change | `95178929-c75b-5f84-9507-d9195a336311` |
+| N2 at 360 seconds | P6 leak pattern, 800-1200 m focus; P7 shared-path offset; named drift, spike and stuck readings | `a5dba0a0-284a-56ec-afa6-efce0b77fa9a` |
+| N3 at 360 seconds | P7 shared-path offset and isolated instrument problems; no qualified leak interval | `a21970ee-1e51-5b21-bc54-94905cc48cf9` |
+
+S7's main explanation gives central ST4/ST5 deficits of 1.327/1.319 bar,
+compared with neighboring ST3/ST6 deficits of 1.005/0.922 bar, over source
+seconds 115-120. Agreeing paired profiles across different connections support
+the pressure-loss diagnosis. Midpoints between station positions 500/700 m
+and 900/1100 m explain the 600-1000 m boundaries; affected neighbors are not
+mistaken for separate leak sources. Instrument discrepancies are explained
+against their paired references, and P7's affected taps are explained against
+the quieter separate connection and calibration record.
+
+These are **report-only regressions**, reusing two compatible specialists per
+recording, not new accuracy cohorts or independent operator trials. N3's
+numerical task remains `ABSTAINED` while its accepted interpretation explains
+the measurement-path diagnosis and withholding reason. Its retained evidence
+does not establish a historical P2 operating-transition match, and the report
+does not fabricate one. Concurrent workspace changes altered the global
+implementation fingerprint during execution; this run is not claimed as a
+frozen-implementation benchmark. Earlier deterministic and external-judge
+scores below are unchanged.
+
+All nine runtime-agent trace trees passed stored public-IO presence checks.
+The real S7 browser check reopened the exact recorded assessment, retained
+audit references, hid citations and follow-up assignments from the report,
+and submitted no new inference. The three focused report presentation tests
+passed. Synthesis took 300.000-674.125 seconds; physical confirmation remains
+outside the pressure-pattern diagnosis.
+
+Original [scope receipt](evidence/diagnosis-first-v2-scope.json), report manifests
+([S7](evidence/diagnosis-first-v2-S7-120.json),
+[N2](evidence/diagnosis-first-v2-N2-360.json),
+[N3](evidence/diagnosis-first-v2-N3-360.json)) and storage receipts
+([S7](evidence/diagnosis-first-v2-S7-120-storage.json),
+[N2](evidence/diagnosis-first-v2-N2-360-storage.json),
+[N3](evidence/diagnosis-first-v2-N3-360-storage.json)) are retained.
+
 ## Extended-network evaluation: development and held-out targets met
 
 The S7-scale development cohort comprises three 360-second recordings, each with

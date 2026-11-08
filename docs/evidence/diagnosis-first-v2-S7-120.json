@@ -1,0 +1,41 @@
+{
+  "scope": "development correction; not a replacement qualification result",
+  "case_id": "S7@120",
+  "original_root_id": "defd2476-aa92-5101-bf2c-2e3d1f5ea51b",
+  "root_id": "95178929-c75b-5f84-9507-d9195a336311",
+  "generation_id": "replay-27bf0db6470a179bfb70f864",
+  "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+  "state": "SUCCEEDED",
+  "error_code": null,
+  "traces": [
+    {
+      "task_id": "95178929-c75b-5f84-9507-d9195a336311",
+      "trace": {
+        "trace_id": "0cd3469098b34d4ef8578696644f0753",
+        "span_id": "1b21dc1c61f3c28c",
+        "attempt_id": "4c78c50b-81ab-4022-80ea-d32a6ad92e73",
+        "session_id": "893a000ff519ce5004190e12e692ee6cfdbbb2af66976507889e42e22e6f6d31"
+      }
+    },
+    {
+      "task_id": "04b39924-c303-5ac7-ba38-6828a491efc4",
+      "trace": {
+        "trace_id": "ee7bde8cb9e105e618bd05e98ef6081e",
+        "span_id": "d161e6510c3b2df7",
+        "attempt_id": "41050ab3-a6a1-4fa3-a807-4f910a7d1f52",
+        "session_id": "d1aaeda4d31a2cd9aacd22250063f12e95d5aa2fb22d2cf2bc523e0386a37989"
+      }
+    },
+    {
+      "task_id": "bd030d76-5e2e-5fdc-b65e-44a1c8a27f60",
+      "trace": {
+        "trace_id": "d937869fbe9d2455511b9f3292ae24b4",
+        "span_id": "c983ec2e593f335d",
+        "attempt_id": "8b1b68eb-6e69-4412-b7f4-e37ff3eefa22",
+        "session_id": "d1aaeda4d31a2cd9aacd22250063f12e95d5aa2fb22d2cf2bc523e0386a37989"
+      }
+    }
+  ],
+  "elapsed_seconds": 674.125,
+  "answer": "Leak assessment\nLeak pattern detected on P5. Its 600-1000 m section, measured along the pipe, is the best-supported first integrity inspection area: persistent losses agree between paired sensors across separate data connections and concentrate centrally. P7 instead shows a shared measurement-path offset; P2 matches a recorded operating pressure increase, with a separate instrument spike. P4 has weaker joint pressure losses plus isolated instrument discrepancies, not another supported leak source. P1, P3 and P6 show isolated suspect readings rather than a supported joint leak pattern in this window.\n\nWhy this location\nIn the final five seconds, 115-120 seconds elapsed in the recording, P5-ST4-A at 700 m is 1.327 bar below the supplied normal reference and P5-ST5-A at 900 m is 1.319 bar below it; bar is a pressure unit. Immediately neighboring P5-ST3-A at 500 m is 1.005 bar below reference and P5-ST6-A at 1100 m is 0.922 bar below it. Two sensors at each station follow closely agreeing profiles, and central losses deepen from 90-105 to 105-120 seconds. The central stations use different shared data connections, making a single-connection error a poorer explanation.\n\nThe accepted peak-focus method places boundaries halfway between the central stations and their weaker neighbors: halfway between 500 and 700 m is 600 m, and between 900 and 1100 m is 1000 m. This bounded area contains the strongest supported pressure-loss focus, rather than treating the whole anomalous branch equally. The neighbors are also affected. This spatial pressure heuristic identifies an inspection area, not a confirmed physical leak point or a confidence interval.\n\nInstrument findings\nP7-ST1-A/B, P7-ST3-A/B, P7-ST5-A/B and P7-ST7-A/B develop a persistent downward offset around 90 seconds. All eight share gateway-P7-0, their data connection; nearby P7-ST2-A/B on another connection lack the step. The approximately 0.75 bar offset matches the current calibration record, supporting the shared conversion channel as the problem rather than localized leakage. Agreement among these eight taps is not independent confirmation.\n\nP1-ST6-A drifts upward while P1-ST6-B remains comparatively steady; P3-ST7-A drifts downward while P3-ST7-B does not. P4-ST3-B drifts upward while P4-ST3-A falls slightly. P3-ST2-A has brief downward excursions; P2-ST2-A, P4-ST7-B and P6-ST3-A have isolated upward spikes absent from their partners. Shared pipe-pressure changes would normally affect both co-located sensors, so these discrepancies identify suspect readings, not confirmed hardware causes.\n\nOperating and other pressure changes\nP2's paired rise begins around 90 seconds, with sign and approximate magnitude matching the recorded pressure-setting transition lasting to 145 seconds. The current recording ends at 120 seconds, so it does not establish recovery. P4-ST1-A/B and P4-ST2-A/B instead decline together after 90 seconds, more strongly at station 1. Their coherent profiles support a joint pressure change rather than isolated instrument spikes. These weaker changes belong to the pressure-event footprint, but their relationship to P5 remains unresolved; neither hydraulic propagation nor a second leak source is established.\n\nLimits of this result\nUsable coverage is 98.56%, but health review is partial and does not establish that every instrument is reliable. Of 60 expected current-window readings, P1-ST7-B, P3-ST5-B and P6-ST6-A each lack 10 received readings. P4-ST8-A has eight unavailable received values. These gaps do not prove hardware failure; additional single-reading gaps are identified in the instrument assessment. Independent pressure and flow measurements remain the physical-confirmation boundary. Sustained P7 loss outside its shared connection, P2 departures beyond its recorded transition, or deterioration of P5's pressure focus would change this assessment."
+}

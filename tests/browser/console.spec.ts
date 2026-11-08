@@ -82,6 +82,7 @@ test("real replay, sensor evidence, pinned questions and keyboard navigation", a
   await expect(page.locator(".case-disposition")).toHaveText("Review supported inspection interval");
   await expect(page.locator(".case-interval")).toContainText("P1: 200-600 m");
   const handoffBasis = await page.locator("#investigation-case").getAttribute("data-snapshot");
+  await page.locator(".case-audit > summary").click();
   const downloadEvent = page.waitForEvent("download");
   await page.locator("#download-casefile").click();
   const download = await downloadEvent;
@@ -198,6 +199,7 @@ for (const [scenario, expected, counterevidence] of [
       await expect(page.locator(".case-disposition")).toContainText("Resolve evidence gaps");
       await expect(page.locator(".case-interval")).toContainText("withheld");
       const source = page.locator('.case-source[data-case-reference="OP-VALVE-001"]');
+      await page.locator(".case-audit > summary").click();
       await source.locator("summary").click();
       await expect(source.locator(".case-source-body")).toBeVisible();
       await expect(source).toContainText("current authority: true");
@@ -329,6 +331,7 @@ test("LIVE engineer question, source review, follow-up and downloaded handoff", 
     expect(file.report_target_met).toBe(true);
     expect(file.interpretation_review.rounds.at(-1).assessment.decision).toBe("accept");
     await expect(page.locator(".case-grounding-review")).toContainText("Independent grounding review accepted");
+    await page.locator(".case-audit > summary").click();
     if (turn === 0) {
       expect(file.steps.map((step: { tool: string }) => step.tool)).toEqual(
         expect.arrayContaining(["history.search", "history.read", "history.compare"]),

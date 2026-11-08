@@ -3,6 +3,7 @@ import { renderCharts } from "./charts";
 import { renderCasefile, renderWorkflowComparison } from "./casefile";
 import { agentName, renderAgentWork, renderIdleAgentWork } from "./agentwork";
 import { renderEvaluation, type EvaluationReport } from "./evaluation";
+import { reportText } from "./presentation";
 import type { AgentTask, CanonicalObservation, ConsoleEvent, InvestigationCase, Json, Mode, MonitoringEpisode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
@@ -811,7 +812,7 @@ function renderAutomaticInvestigation(): void {
       : projection.replay.investigation_window_id
         ? "Investigating the pinned alert evidence. Simulated ingestion is paused while real agent checks run; detector warnings remain active."
         : "Investigating the pinned alert evidence. Sensor ingestion, numerical warnings and manual trends continue independently.";
-  text("automatic-conclusion", conclusion);
+  text("automatic-conclusion", reportText(conclusion, root.result?.interpretation?.answer.references));
   const freshness = node("p", `${latest?.id !== root.snapshot_id ? "Historical analysis: newer monitoring evidence exists; this report is not rebased." : "Analysis uses the latest completed monitoring snapshot."}${pending ? ` New material warning is pending${unavailable ? `: ${unavailable}` : " until the active investigation finishes and admission permits"}.` : ""}`, "muted");
   freshness.id = "automatic-freshness"; actions.append(freshness);
   const open = button(accepted ? "Review evidence" : "View investigation", () => {
@@ -1243,13 +1244,15 @@ function renderAnswer(): void {
   container.dataset.snapshot = task.snapshot_id;
   const basis = windows.find(window => window.id === task.snapshot_id) || (selectedWindow?.id === task.snapshot_id ? selectedWindow : null);
   const newer = projection?.latest_window?.id !== task.snapshot_id;
-  container.append(node("strong", `${modeName(task.mode)} · ${task.state} · analysis as of ${basis ? time(basis.window_end) : `snapshot ${task.snapshot_id}`}`));
+  container.append(node("strong", `Assessment as of ${basis ? time(basis.window_end) : `snapshot ${task.snapshot_id}`}`));
   const terminal = !["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(task.state);
-  container.append(node("p", `Analysis queued: ${time(task.created_at)}. ${terminal ? "Result recorded" : "Last task update"}: ${time(task.updated_at)}. These are actual processing timestamps, not the simulated sensor clock.`, "answer-timestamps"));
   if (selectedWindow?.id !== task.snapshot_id) container.append(node("p", "Historical task explicitly selected: this answer does not match the visible window. Open its exact basis before using it.", "summary"));
   container.append(node("p", newer ? "Newer monitoring evidence is available. This answer has not been silently rebased." : "Answer basis matches the current monitoring snapshot."));
   const handoff = taskDetail?.task.id === task.id ? taskDetail.casefile : null;
-  if (basis && projection) renderWorkflowComparison(container, basis, task, handoff, projection.replay.scenario, () => {
+  const workflowAudit = node("details", "", "workflow-audit");
+  workflowAudit.append(node("summary", "Monitoring and agent-work comparison"));
+  workflowAudit.append(node("p", `${modeName(task.mode)} · ${task.state}. Analysis queued: ${time(task.created_at)}. ${terminal ? "Result recorded" : "Last task update"}: ${time(task.updated_at)}. These are actual processing timestamps, not the simulated sensor clock.`, "answer-timestamps"));
+  if (basis && projection) renderWorkflowComparison(workflowAudit, basis, task, handoff, projection.replay.scenario, () => {
     void chooseWindow(task.snapshot_id).then(() => {
       if (selectedWindow?.id === task.snapshot_id) switchTab("live");
     });
@@ -1266,12 +1269,13 @@ function renderAnswer(): void {
     },
     claim: id => { void chooseWindow(task.snapshot_id).then(() => inspectEvidence(id)); },
   });
+  container.append(workflowAudit);
   if (task.answer) {
     const full = node("details", "", "checked-answer");
     full.append(node("summary", "Full recorded answer and checked evidence"), node("p", task.answer));
     container.append(full);
   } else container.append(node("p", "No accepted operator answer; investigation pending or failed."));
-  if (task.result?.limitations.length) container.append(node("p", `Limitations: ${task.result.limitations.join("; ")}`));
+  if (task.result?.limitations.length) workflowAudit.append(node("p", `Limitations: ${task.result.limitations.join("; ")}`));
   container.append(button("Open investigation handoff and exact evidence basis", () => { void loadTask(task.id); }));
 }
 function renderFeed(): void {

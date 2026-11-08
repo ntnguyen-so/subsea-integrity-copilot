@@ -83,12 +83,21 @@ in [qualification results](docs/RESULTS.md).
 
 ### First-on-call handoff
 
-The coordinator must state the first priority, exact pipe/stations or shared
-measurement connection, and the attention track for every pressure-alert branch.
-It completes the available pressure comparisons and record checks before giving
-two to four specific, read-only next actions. A broad operating pressure rise,
-a shared connection offset and a joint pressure-loss pattern require different
-responses; anomaly counts alone do not determine integrity priority.
+The coordinator produces a diagnosis-first assessment: leak pattern or measurement
+problem, the supported inspection area, and named instrument findings. Each
+conclusion explains the observed change, its paired or spatial contrast, and
+why that contrast supports the diagnosis. A pressure list or a request to repeat
+the available analysis is not a completed assessment.
+
+Location explanations connect the stronger central paired readings to their
+weaker neighboring stations and the actual fit's boundary rule. Instrument
+explanations distinguish one disagreeing tap or a shared-connection offset from
+a pressure loss observed across independent connections. Operating changes and
+weaker secondary pressure changes remain separate from unsupported leak sources.
+Internal citations, run statistics, source quotes and optional follow-up questions
+are retained in a collapsed audit view, not printed throughout the assessment.
+The report diagnoses the supplied readings; it does not claim a physically
+confirmed defect or replace site authorization.
 
 New assisted recordings acquire up to 30 additional source seconds before
 pausing for investigation, stopping earlier when independent pressure evidence
