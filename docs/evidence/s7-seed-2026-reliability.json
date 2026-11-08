@@ -1,0 +1,75 @@
+{
+  "schema_version": "seeded-agent-reliability-v1",
+  "scope": "Fresh hosted S7 development regression, not field or frozen-release qualification",
+  "scenario": "S7",
+  "seed": 2026,
+  "sensor_count": 112,
+  "station_count": 56,
+  "segment_count": 7,
+  "duration_seconds": 360,
+  "dataset_sha256": "935e7fd76c7a94e20baa6e73f55c634555c06b1a29df31ffc00e14e31b0f3396",
+  "all_dataset_hashes_equal": true,
+  "implementation_unchanged": false,
+  "specialist_reuse_count": 0,
+  "agent_tasks_succeeded": 18,
+  "accepted_reports": 6,
+  "operational_checks_passed": 72,
+  "stored_public_io_observations_checked": 262,
+  "original_outcomes_preserved": [
+    {"source_seconds": 100, "state": "ABSTAINED", "root_id": "f99efcb6-56f2-5c68-a3cd-84c141c9f419"},
+    {"source_seconds": 110, "state": "SUCCEEDED", "root_id": "871450b8-eddb-50a2-aa6f-d4b7f3c00cc4"},
+    {"source_seconds": 120, "state": "SUCCEEDED", "root_id": "af5ec9fa-8ef5-5ec4-af0e-ac620c3760e6"},
+    {"source_seconds": 150, "state": "ABSTAINED", "root_id": "d269a5e2-bb78-5dd6-8b17-a15ced360ef0", "accepted_report": true, "additional_audit_failure": "indexed_reflections_not_counted"},
+    {"source_seconds": 180, "state": "FAILED", "root_id": "c4bd7d3c-8f76-5da9-bb0a-b990b6de2bb3", "error_code": "deadline_exceeded", "historical_trace_complete": false},
+    {"source_seconds": 360, "state": "FAILED", "root_id": "47520043-32a3-5d29-b9d2-69c7b9f884e7", "error_code": "grounding_rejected"}
+  ],
+  "fresh_successful_reruns": [
+    {"source_seconds": 100, "root_id": "7f197a92-ccd3-5055-81b8-14c17ccfb958", "all_agents": "SUCCEEDED", "screening": "insufficient_evidence", "elapsed_seconds": 401.438, "model_calls": 8, "tool_calls": 29, "audit_checks_passed": 12, "stored_io_checked": 37, "review": ["revise", "accept"]},
+    {"source_seconds": 110, "root_id": "87fd9bde-2a49-50d7-b5a2-c03e4b0142c2", "all_agents": "SUCCEEDED", "screening": "suspected_leak", "elapsed_seconds": 483.516, "model_calls": 12, "tool_calls": 36, "audit_checks_passed": 12, "stored_io_checked": 48, "review": ["revise", "accept"]},
+    {"source_seconds": 120, "root_id": "60195dcd-198d-5704-b943-fc5225a08e72", "all_agents": "SUCCEEDED", "screening": "suspected_leak", "elapsed_seconds": 497.375, "model_calls": 12, "tool_calls": 41, "audit_checks_passed": 12, "stored_io_checked": 53, "review": ["revise", "accept"], "accepted_inspection": {"segment_id": "P5", "start_m": 600, "end_m": 1000}},
+    {"source_seconds": 150, "root_id": "5dad43db-e050-522c-9770-78ada43c697b", "all_agents": "SUCCEEDED", "screening": "insufficient_evidence", "elapsed_seconds": 652.437, "model_calls": 11, "tool_calls": 31, "audit_checks_passed": 12, "stored_io_checked": 42, "review": ["revise", "revise", "accept"]},
+    {"source_seconds": 180, "root_id": "222eafb4-42c0-58bd-aefc-c6b834b5fd4e", "all_agents": "SUCCEEDED", "screening": "insufficient_evidence", "elapsed_seconds": 400.500, "model_calls": 8, "tool_calls": 30, "audit_checks_passed": 12, "stored_io_checked": 38, "review": ["revise", "accept"]},
+    {"source_seconds": 360, "root_id": "ebc97a65-6111-52d0-9005-422e4742de2e", "all_agents": "SUCCEEDED", "screening": "suspected_leak", "elapsed_seconds": 617.968, "model_calls": 12, "tool_calls": 32, "audit_checks_passed": 12, "stored_io_checked": 44, "review": ["revise", "revise", "accept"]}
+  ],
+  "isolated_staged_checks": {
+    "tests_passed": 194,
+    "lint_passed": true,
+    "type_checks_passed": true,
+    "fresh_360_second_run": {
+      "root_id": "5015c725-1717-5448-9cd2-c02a80aef55e",
+      "all_agents": "SUCCEEDED",
+      "all_audit_checks_passed": true,
+      "elapsed_seconds": 559.578,
+      "model_calls": 9,
+      "tool_calls": 32,
+      "review": ["revise", "accept"],
+      "implementation_unchanged": true,
+      "implementation_sha256": "b0714aeb84a4d3afd9796e3d1d64c3ff2850ca8be6d6313ca6ea025745a46ab6",
+      "stored_trace_checks_passed": 3,
+      "stored_io_observations_checked": 40
+    },
+    "fresh_automatic_100_second_run": {
+      "root_id": "26779f71-7522-5064-8739-b5053c293239",
+      "automatic_admission_verified": true,
+      "episode_and_held_window_verified": true,
+      "all_agents": "SUCCEEDED",
+      "all_audit_checks_passed": true,
+      "elapsed_seconds": 518.297,
+      "model_calls": 10,
+      "tool_calls": 30,
+      "review": ["revise", "accept"],
+      "implementation_unchanged": true,
+      "implementation_sha256": "b0714aeb84a4d3afd9796e3d1d64c3ff2850ca8be6d6313ca6ea025745a46ab6",
+      "stored_trace_checks_passed": 3,
+      "stored_io_observations_checked": 39,
+      "real_recorded_browser_checks_passed": 2
+    }
+  },
+  "safety": {
+    "numeric_screening_not_overwritten": true,
+    "no_runtime_budget_increase": true,
+    "successful_read_authority_required": true,
+    "independent_grounding_retained": true,
+    "no_universal_zero_error_or_field_accuracy_claim": true
+  }
+}

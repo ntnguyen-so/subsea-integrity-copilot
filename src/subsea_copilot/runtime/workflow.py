@@ -65,9 +65,11 @@ from subsea_copilot.validation import (
     abstention_claim_allowed,
     bind_read_claim_evidence,
     compatible,
+    investigation_facts_available,
     parse_json,
     quality_facts_available,
     question_requires_location,
+    read_evidence_reference,
     render_result,
     validate_result,
 )
@@ -546,7 +548,22 @@ class AgentService:
                 child_abstained
                 or assesses_event
                 and snapshot.event.hypothesis == "insufficient_evidence"
+                and not investigation_facts_available(task, snapshot)
             )
+            if (
+                not child_abstained
+                and assesses_event
+                and investigation_facts_available(task, snapshot)
+            ):
+                result_schema["properties"]["outcome"] = {
+                    "type": "string", "const": "supported",
+                }
+                result_schema["properties"]["hypothesis"] = {
+                    "type": "string", "const": "insufficient_evidence",
+                }
+                result_schema["properties"]["limitations"]["contains"] = {
+                    "const": "insufficient_evidence",
+                }
             if must_abstain:
                 result_schema["properties"]["outcome"] = {
                     "type": "string",
@@ -586,6 +603,10 @@ class AgentService:
             "question": task.question,
             "task_id": task.id,
             "plan": task.plan,
+            "read_evidence_reference": (
+                read_evidence_reference(task.snapshot_id, self.store.tool_receipts(task.id))
+                if phase != "plan" else None
+            ),
             "compatible_tasks": [
                 {
                     "id": t.id,

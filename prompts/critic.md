@@ -21,6 +21,15 @@ evidence_shared_values and evidence_value_columns before checking each row.
 Use it to check the complete measured range, not just the author's selected
 examples. It is review context, not a new citation ID: exact supporting quotes
 still require the paragraph's individual original-source references.
+An individually cited read-evidence-* source is an application-bound collection
+of successfully read immutable evidence, not an invented observation or tool
+receipt UUID. It is an authorized original source for its encoded measurements
+and period metadata. Decode its lossless fields and quote exact substrings from
+that cited source; do not demand redundant individual ev-* IDs for the same
+readings. Records, historical comparisons and guidance remain separate sources.
+Each evidence_groups entry in that bundle uses its own lossless evidence
+encoding. Reconstruct that group's shared fields and value columns before
+interpreting its records; no readings are removed by grouping.
 Trace each numerical pressure assertion to its exact field and period:
 recent_5s_pressure_drop_bar is final-five-second normal-relative pressure,
 recent_pressure_drop_bar is twenty-second normal-relative pressure, and

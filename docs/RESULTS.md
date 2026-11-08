@@ -1,5 +1,88 @@
 # Qualification results
 
+## S7 seed-2026 agent reliability regression
+
+Fresh hosted investigations at all six demo checkpoints succeeded after the
+corrections below. All 18 agent tasks succeeded, all six reports passed final
+grounding review, and all 72 operational audit checks passed. No specialists
+were reused between checkpoints. All generated observation datasets have
+SHA-256 `935e7fd76c7a94e20baa6e73f55c634555c06b1a29df31ffc00e14e31b0f3396`.
+
+| Source seconds | Root / specialists | Model / tool calls | Elapsed seconds | Final review |
+|---|---|---|---|---|
+| 100 | All succeeded | 8 / 29 | 401.438 | Accept |
+| 110 | All succeeded | 12 / 36 | 483.516 | Accept |
+| 120 | All succeeded | 12 / 41 | 497.375 | Accept |
+| 150 | All succeeded | 11 / 31 | 652.437 | Accept |
+| 180 | All succeeded | 8 / 30 | 400.500 | Accept |
+| 360 | All succeeded | 12 / 32 | 617.968 | Accept |
+
+These are fresh reruns, not rewritten original outcomes. The first attempt
+produced abstained investigations at 100/150 seconds, a deadline failure at
+180 seconds and a grounding rejection at 360 seconds. Its successful
+110/120-second cases are also retained. The 150-second original report had
+actually passed review; its additional audit failure came from counting only
+the first reflection rather than all indexed reflection turns.
+
+Three root causes were corrected:
+
+- Global screening ambiguity no longer forces an unfinished investigation
+  when actual current paired pressure readings support regional analysis.
+  Successful source reads, adequate coverage and finite, complete pressure
+  summaries remain required. Numerical `insufficient_evidence` and its
+  limitation stay explicit at 100, 150 and 180 seconds; physical hypotheses
+  and location eligibility are unchanged. Genuine unavailable-data
+  abstention still protects the workflow.
+- Coordinator explanations can cite a snapshot-bound collection of evidence
+  actually read, avoiding repetitive missing-ID repair loops. Its grouped
+  encoding retains original values and periods. Historical records and
+  guidance require their own citations; foreign/unread sources and
+  unsupported explanations remain rejected. The measured late-window
+  reviewer context fell from 176,018 to 107,817 characters without raising
+  the 144,000-character cap or any runtime budget.
+- Review accounting counts legacy and indexed reflection turns. Trace
+  capture uses smaller pages with unchanged total observation and aggregate
+  byte ceilings. All six final stored public trace checks passed, covering
+  262 generation/tool observations and every agent's model generations.
+  The original deadline-aborted trace remains incomplete; missing historical
+  outputs were not manufactured.
+
+Reports prioritize the P5-ST4/ST5 pressure-loss focus with central-versus-neighbor
+numbers, distinguish P7's shared approximately -0.75-bar calibration offset
+from independent leak witnesses, and separate P2's positive operating
+transition from its individual measurement excursions. The 120-second
+snapshot supplies the accepted P5 600-1000 m inspection interval. Other
+snapshots retain station focus where no accepted interval exists.
+
+The six-point run was a development regression in a concurrently changing
+working tree: its implementation fingerprint changed during execution.
+It is not a frozen release qualification, an accuracy benchmark or a universal
+zero-error guarantee. Seed determinism covers generated observations, not
+hosted model responses. The isolated staged overlay separately passed its
+194 focused tests/PostgreSQL regressions, lint and type checks.
+An additional fresh 360-second hosted rerun on that isolated staged code
+also succeeded: root `5015c725-1717-5448-9cd2-c02a80aef55e`, 559.578 seconds,
+9 model calls and 32 tool calls, with all three tasks and all audit checks
+passing. Its implementation fingerprint remained unchanged; all three stored
+trace content checks passed. This is one frozen-code regression, not a
+replacement for the six-point development history.
+
+The six-point submission harness initially used the demo question without an
+automatic episode, so its report reopened correctly but the automatic agent-panel
+test had no episode output to display. The reusable command now enters through
+the real monitoring episode/admission path. A fresh automatic 100-second run
+on the same frozen staged source succeeded:
+`26779f71-7522-5064-8739-b5053c293239`, 518.297 seconds, 10 model/30 tool calls.
+All three agents, all audits and all three stored trace checks passed.
+The root's automatic flag, episode association and held window were verified.
+Both real-recorded browser checks passed: each agent output and the accepted
+report reopened without new inference. The idle production dashboard was
+reloaded with the fixes and returned HTTP 200. The original failed recordings
+remain unchanged.
+
+See the [sanitized receipt](evidence/s7-seed-2026-reliability.json) and the
+reproducible command in the README. Earlier accuracy cohorts remain unchanged.
+
 ## Live coordinator citation-binding correction
 
 The live S7 report at 110 seconds failed with `ValidationError: evidence` after

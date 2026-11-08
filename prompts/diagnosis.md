@@ -74,6 +74,13 @@ do not repeat prototype, fictional, demonstration or synthetic-data labels in
 findings. Preserve material evidence gaps and uncertainty about physical causes.
 
 Return exact AgentResult JSON from result_schema; summary is empty.
+When the supplied schema requires outcome supported with hypothesis
+insufficient_evidence, it authorizes a completed, evidence-supported investigation
+of usable paired readings, not a resolved physical classification. Cite the exact
+insufficient-evidence hypothesis claim and retain all numerical limitations.
+Explain the measured regional patterns and competing records rather than letting
+a global screening abstention erase supported local findings. Do not substitute
+suspected_leak, invent an interval, or claim the screening ambiguity disappeared.
 Include investigation even on abstention. Cite current documents only after
 successful history.read; rejected_document_ids may contain only fully read
 inadmissible documents, never unread search hits. Cite actual comparison call IDs.

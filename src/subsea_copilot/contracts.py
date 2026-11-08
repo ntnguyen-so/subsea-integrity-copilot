@@ -246,7 +246,7 @@ class ReplaySession(Contract):
     pause_on_anomaly: bool = False
     investigation_context_seconds: int = Field(default=0, ge=0, le=60)
     investigation_context_policy: Literal[
-        "pressure-persistence-v1", "inspection-context-v2"
+        "pressure-persistence-v1", "inspection-context-v2", "early-pressure-context-v3"
     ] = "pressure-persistence-v1"
     pending_pressure_alert_seconds: int | None = Field(default=None, ge=0)
     investigation_window_id: str | None = None

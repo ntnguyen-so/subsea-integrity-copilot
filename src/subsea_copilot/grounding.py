@@ -12,7 +12,7 @@ from .contracts import (
 )
 from .knowledge import KnowledgePacket
 from .profiles import compact_evidence
-from .validation import ValidationError, parse_json
+from .validation import ValidationError, parse_json, read_evidence_reference
 
 
 def candidate_hash(result: AgentResult) -> str:
@@ -117,7 +117,23 @@ def source_texts(
         if reference in snapshot.evidence
         and snapshot.evidence[reference].kind == "channel_summary"
     }
-    if pressure:
+    bundle = read_evidence_reference(snapshot.id, receipts)
+    if bundle and bundle in cited:
+        if not read_evidence <= snapshot.evidence.keys():
+            raise ValidationError(
+                "grounding_sources", "Read evidence must resolve in the snapshot.",
+            )
+        groups: dict[str, dict[str, Any]] = {}
+        for ref in sorted(read_evidence):
+            item = snapshot.evidence[ref]
+            groups.setdefault(item.kind, {})[ref] = item.model_dump(mode="json")
+        sources[bundle] = json.dumps({
+            "evidence_groups": {
+                kind: compact_evidence({"evidence": items, "claims": {}})
+                for kind, items in groups.items()
+            },
+        }, sort_keys=True)
+    elif pressure:
         sources["audited_pressure_summaries"] = json.dumps(
             compact_evidence({"evidence": pressure, "claims": {}}),
             sort_keys=True, separators=(",", ":"),

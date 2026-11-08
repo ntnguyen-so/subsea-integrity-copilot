@@ -130,6 +130,23 @@ specific reason an interval was withheld. Independent physical pressure/flow
 confirmation remains necessary before intervention; engineers should not need
 to reconstruct analysis already completed by the agents.
 
+To check hosted agent execution on the demo's **S7 seed 2026**, use fresh,
+isolated investigations at 100, 110, 120, 150, 180 and 360 source seconds:
+
+```powershell
+. .\tools\load-environment.ps1
+$env:SUBSEA_TRACE_CONTENT='1'
+$env:SUBSEA_SYNTHETIC_ONLY='1'
+uv run python tools\verify-s7-agents.py --output runtime\s7-check --workers 2
+```
+
+Choose a new output directory for each attempt. The command preserves each
+run's report, validation/audit results and trace references, and exits unsuccessfully
+if any agent fails or abstains, a report is withheld, or an audit fails.
+It uses the production agent stack,
+without specialist reuse across checkpoints. Passing sampled runs cannot
+guarantee zero future model/provider errors; numerical warnings remain independent.
+
 ### Historical 24-instrument deterministic agent evaluation
 
 The **Evaluation** workspace displays labelled, recorded reference cases for

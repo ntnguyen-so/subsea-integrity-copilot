@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import time
 from collections import Counter
+from collections.abc import Sequence
 from datetime import datetime, timedelta
 from typing import Any
 from uuid import NAMESPACE_URL, uuid5
@@ -170,6 +171,17 @@ def deterministic_report(
     }
 
 
+def review_sequence_complete(decisions: Sequence[str], phases: Counter[str]) -> bool:
+    return bool(
+        decisions and decisions[-1] == "accept"
+        and len(decisions) <= REVIEW_ROUND_LIMIT
+        and all(decision == "revise" for decision in decisions[:-1])
+        and all(phases[f"critic-{index}"] >= 1 for index in range(len(decisions)))
+        and sum(count for phase, count in phases.items()
+                if phase == "reflection" or phase.startswith("reflection-")) >= len(decisions) - 1
+    )
+
+
 def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) -> dict[str, Any]:
     fresh = [t for t in store.list_tasks(root.generation_id) if t.root_id == root.id]
     dependency_map: dict[str, list[AgentTask]] = {}
@@ -258,13 +270,7 @@ def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) ->
     phases = Counter(str(metadata.get("phase")) for metadata in models[root.id])
     record = root.interpretation_review
     decisions = [r.assessment.decision for r in record.rounds] if record else []
-    critic_sequence = bool(
-        decisions and decisions[-1] == "accept"
-        and len(decisions) <= REVIEW_ROUND_LIMIT
-        and all(decision == "revise" for decision in decisions[:-1])
-        and all(phases[f"critic-{index}"] >= 1 for index in range(len(decisions)))
-        and phases["reflection"] >= len(decisions) - 1
-    )
+    critic_sequence = review_sequence_complete(decisions, phases)
     links_consumed = all(
         any(
             receipt["name"] == "task.result"

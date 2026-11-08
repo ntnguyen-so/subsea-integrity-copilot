@@ -144,9 +144,10 @@ def fetch_stored_observations(trace_id: str) -> list[dict[str, Any]]:
     opener = urllib.request.build_opener(NoRedirect, urllib.request.ProxyHandler({}))
     all_observations = []
     cursor = None
-    for _ in range(5):
+    captured_bytes = 0
+    for _ in range(50):
         query = {
-            "traceId": trace_id, "fields": "core,basic,io,model,usage,metadata", "limit": "50",
+            "traceId": trace_id, "fields": "core,basic,io,model,usage,metadata", "limit": "5",
         }
         if cursor:
             query["cursor"] = cursor
@@ -156,9 +157,12 @@ def fetch_stored_observations(trace_id: str) -> list[dict[str, Any]]:
             raw = response.read(2_000_001)
         if len(raw) > 2_000_000:
             raise ValueError("Stored observation response exceeds bounded capture")
+        captured_bytes += len(raw)
+        if captured_bytes > 10_000_000:
+            raise ValueError("Stored trace responses exceed bounded aggregate capture")
         value = json.loads(raw)
         observations = value.get("data") if isinstance(value, dict) else None
-        if not isinstance(observations, list) or len(observations) > 50 or any(
+        if not isinstance(observations, list) or len(observations) > 5 or any(
             not isinstance(item, dict) or item.get("traceId") != trace_id for item in observations
         ):
             raise ValueError("Stored trace observations are absent or incorrectly scoped")

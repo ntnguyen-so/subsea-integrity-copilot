@@ -8,7 +8,9 @@ from subsea_copilot.runtime.registry import REGISTRY
 from subsea_copilot.validation import (
     ValidationError,
     bind_read_claim_evidence,
+    investigation_facts_available,
     render_result,
+    validate_grounded_result,
     validate_result,
 )
 
@@ -114,6 +116,96 @@ def test_context_budget_denial_must_remain_an_explicit_report_limitation(snapsho
         validate_result(result, quality_task(snapshot), snapshot, observed)
     result.limitations.append("context_budget_exceeded")
     validate_result(result, quality_task(snapshot), snapshot, observed)
+
+
+@pytest.fixture
+def unresolved_pressure():
+    from subsea_copilot.diagnostics import analyze_window
+    from subsea_copilot.ingest import normalize_records
+    from subsea_copilot.synthetic import generate_scenario
+
+    source = generate_scenario("S7", 2026)
+    snapshot = analyze_window(
+        source.pack, normalize_records(source.baseline, source.pack),
+        normalize_records(source.records, source.pack),
+        generation_id="unresolved-pressure", end_seconds=150, clock_seconds=155,
+        epoch=source.epoch,
+    )
+    task = AgentTask(
+        id="investigation", root_id="investigation", tenant_id=snapshot.tenant_id,
+        site_id=snapshot.site_id, generation_id=snapshot.generation_id,
+        snapshot_id=snapshot.id, role="operator_response",
+        purpose="evaluate_single_agent_baseline", question="Where is the pressure focus?",
+        mode="live", history_version="reviewed-history",
+        deadline=utc_now() + timedelta(seconds=300),
+    )
+    return task, snapshot
+
+
+def test_completed_unresolved_investigation_keeps_the_numerical_abstention(unresolved_pressure):
+    task, snapshot = unresolved_pressure
+    hypothesis = next(c for c in snapshot.claims.values() if c.kind == "hypothesis")
+    observed = [{"name": "evidence.get", "result": {"evidence": snapshot.evidence}}]
+    result = AgentResult(
+        outcome="supported", hypothesis="insufficient_evidence",
+        claim_refs=[hypothesis.id], evidence_ids=hypothesis.evidence_ids,
+        limitations=[
+            "location_withheld", "insufficient_evidence",
+            *[
+                str(c.value["code"]) if isinstance(c.value, dict) else str(c.value)
+                for c in snapshot.claims.values() if c.kind == "limitation"
+            ],
+        ],
+    )
+    assert investigation_facts_available(task, snapshot, observed)
+    validate_grounded_result(
+        result, task, snapshot, observed, claim_kinds=frozenset({"hypothesis"}),
+    )
+    assert snapshot.event.hypothesis == "insufficient_evidence"
+    assert snapshot.location is None
+    with pytest.raises(ValidationError, match="screening abstention"):
+        validate_grounded_result(
+            result.model_copy(update={
+                "limitations": [code for code in result.limitations
+                                if code != "insufficient_evidence"],
+            }),
+            task, snapshot, observed, claim_kinds=frozenset({"hypothesis"}),
+        )
+    with pytest.raises(ValidationError) as rejected:
+        validate_grounded_result(
+            result.model_copy(update={"hypothesis": "suspected_leak"}),
+            task, snapshot, observed, claim_kinds=frozenset({"hypothesis"}),
+        )
+    assert rejected.value.code == "hypothesis"
+
+
+@pytest.mark.parametrize("error", [None, "context_budget_exceeded"])
+def test_unresolved_investigation_cannot_use_unread_pressure_data(unresolved_pressure, error):
+    task, snapshot = unresolved_pressure
+    observed = [{
+        "name": "evidence.get", "error": error,
+        "result": {"evidence": snapshot.evidence if error else {}},
+    }]
+    assert not investigation_facts_available(task, snapshot, observed)
+
+
+@pytest.mark.parametrize("status", ["WARMING_UP", "COVERAGE_LOST"])
+def test_unresolved_investigation_preserves_real_data_abstention(unresolved_pressure, status):
+    task, snapshot = unresolved_pressure
+    snapshot.quality.status = status
+    assert not investigation_facts_available(task, snapshot)
+
+
+def test_legacy_complete_twenty_seconds_proves_current_coverage(unresolved_pressure):
+    task, snapshot = unresolved_pressure
+    for evidence in snapshot.evidence.values():
+        if evidence.kind == "channel_summary":
+            evidence.value.pop("recent_5s_usable_samples", None)
+    assert investigation_facts_available(task, snapshot)
+    for evidence in snapshot.evidence.values():
+        if evidence.kind == "channel_summary":
+            evidence.value["recent_usable_samples"] = 0
+    assert not investigation_facts_available(task, snapshot)
 
 
 @pytest.mark.parametrize(

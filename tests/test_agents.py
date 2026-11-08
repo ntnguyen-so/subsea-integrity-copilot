@@ -1390,3 +1390,61 @@ def test_actual_s2_quality_decline_is_repaired_without_relaxing_event_abstention
     answer = store.get_task(root.id)
     assert answer.state == "SUCCEEDED"
     assert answer.result.hypothesis == "sensor_or_telemetry_issue"
+
+
+def test_read_evidence_bundle_is_scoped_and_contains_only_successful_reads(snapshot):
+    import json
+
+    from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
+    from subsea_copilot.grounding import source_texts
+    from subsea_copilot.interpretation import validate_interpretation
+    from subsea_copilot.profiles import expanded_evidence
+    from subsea_copilot.runtime.registry import REGISTRY
+    from subsea_copilot.validation import read_evidence_reference
+
+    pressure = EvidenceItem(
+        id="pressure-bundle-e", kind="channel_summary", sensor_id="sensor",
+        value={"recent_5s_pressure_drop_bar": 1.1, "recent_5s_period_seconds": [95, 100]},
+    )
+    unread = pressure.model_copy(update={"id": "unread-pressure-bundle-e"})
+    snapshot.evidence.update({pressure.id: pressure, unread.id: unread})
+    receipts = [{
+        "name": "evidence.get", "result": {"evidence": {
+            pressure.id: pressure.model_dump(mode="json"),
+        }},
+    }]
+    task = AgentTask(
+        id="bundle", root_id="bundle", generation_id=snapshot.generation_id,
+        snapshot_id=snapshot.id, site_id=snapshot.site_id, role="operator_response",
+        purpose=REGISTRY["operator_response"].purpose, question="What changed?",
+        mode="live", deadline=utc_now(), response_protocol="engineer-v2",
+    )
+    reference = read_evidence_reference(snapshot.id, receipts)
+    assert reference is not None
+    result = AgentResult(
+        outcome="supported", claim_refs=["health"], evidence_ids=["health-e"], limitations=[],
+        interpretation=EngineerInterpretation(
+            focus="root_cause",
+            answer={"text": "The final five-second deficit is 1.1 bar.",
+                    "references": [reference]},
+            competing_causes=[{
+                "cause": "leak", "stance": "possible",
+                "text": "Pressure loss alone does not confirm a physical leak.",
+                "references": [reference],
+            }],
+            follow_up_questions=["Is an independent pressure measurement available?"],
+        ),
+    )
+    validate_interpretation(result, task, receipts)
+    sources = source_texts(result, snapshot, receipts)
+    original = {
+        ref: item
+        for group in json.loads(sources[reference])["evidence_groups"].values()
+        for ref, item in expanded_evidence(group)["evidence"].items()
+    }
+    assert original[pressure.id] == pressure.model_dump(mode="json")
+    assert unread.id not in original
+    assert read_evidence_reference(snapshot.id + "-other", receipts) != reference
+    for failed in ([], [{**receipts[0], "error": "context_budget_exceeded"}]):
+        with pytest.raises(ValidationError, match="accepted claims"):
+            validate_interpretation(result, task, failed)

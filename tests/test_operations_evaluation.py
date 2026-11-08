@@ -1,3 +1,4 @@
+from collections import Counter
 from copy import deepcopy
 
 import pytest
@@ -8,8 +9,27 @@ from subsea_copilot.operations_evaluation import (
     EXPECTED_CONTEXT,
     EXPECTED_RECORDS,
     report_rubric,
+    review_sequence_complete,
     summarize,
 )
+
+
+def test_review_audit_counts_indexed_reflections_and_still_requires_each_critic():
+    phases = Counter({"critic-0": 1, "critic-1": 1, "critic-2": 1,
+                      "reflection": 1, "reflection-1": 1})
+    assert review_sequence_complete(["revise", "revise", "accept"], phases)
+    phases["critic-1"] = 0
+    assert not review_sequence_complete(["revise", "revise", "accept"], phases)
+    phases["critic-1"] = 1
+    phases["reflection-1"] = 0
+    assert not review_sequence_complete(["revise", "revise", "accept"], phases)
+
+
+def test_review_audit_preserves_legacy_repeated_reflections():
+    phases = Counter({"critic-0": 1, "critic-1": 1, "critic-2": 1, "reflection": 2})
+    assert review_sequence_complete(["revise", "revise", "accept"], phases)
+    phases["reflection"] = 1
+    assert not review_sequence_complete(["revise", "revise", "accept"], phases)
 
 
 def report(scenario="S1"):

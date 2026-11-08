@@ -4,7 +4,11 @@ from typing import Any
 
 from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
 from subsea_copilot.profiles import comparison_sensors
-from subsea_copilot.validation import ValidationError, read_pinned_evidence
+from subsea_copilot.validation import (
+    ValidationError,
+    read_evidence_reference,
+    read_pinned_evidence,
+)
 
 
 def validate_interpretation(
@@ -25,6 +29,9 @@ def validate_interpretation(
     allowed = set(result.claim_refs)
     read_evidence = read_pinned_evidence(receipts or [])
     allowed.update(set(result.evidence_ids) & read_evidence)
+    bundle = read_evidence_reference(task.snapshot_id, receipts or [])
+    if bundle:
+        allowed.add(bundle)
     if review:
         allowed.update(review.document_ids)
         allowed.update(review.comparison_call_ids)

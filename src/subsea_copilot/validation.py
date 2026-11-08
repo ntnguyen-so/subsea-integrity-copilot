@@ -1,10 +1,11 @@
 """Fail-closed claim gates and application-owned factual rendering."""
 
 import json
+import math
 import re
 from typing import Any, NoReturn
 
-from subsea_copilot.contracts import AgentResult, AgentTask, Claim, WindowSnapshot
+from subsea_copilot.contracts import AgentResult, AgentTask, Claim, WindowSnapshot, content_hash
 from subsea_copilot.runtime.registry import LIMITATIONS, RECOMMENDATIONS, REGISTRY, RolePolicy
 
 
@@ -36,6 +37,15 @@ def read_pinned_evidence(receipts: list[dict[str, Any]]) -> set[str]:
         if receipt["name"] == "evidence.get" and not receipt.get("error")
         for ref in (receipt.get("result") or {}).get("evidence", {})
     }
+
+
+def read_evidence_reference(snapshot_id: str, receipts: list[dict[str, Any]]) -> str | None:
+    read = read_pinned_evidence(receipts)
+    if not read:
+        return None
+    return "read-evidence-" + content_hash({
+        "snapshot_id": snapshot_id, "evidence_ids": [*sorted(read)],
+    })[:24]
 
 
 def bind_read_claim_evidence(
@@ -81,6 +91,68 @@ def quality_facts_available(snapshot: WindowSnapshot) -> bool:
         and all(ref in snapshot.evidence for ref in claim.evidence_ids)
         for claim in snapshot.claims.values()
     )
+
+
+def investigation_facts_available(
+    task: AgentTask, snapshot: WindowSnapshot, receipts: list[dict[str, Any]] | None = None,
+) -> bool:
+    """Usable paired readings support an investigation, not a resolved physical cause."""
+    if (
+        task.mode != "live"
+        or not task.history_version
+        or snapshot.event.hypothesis != "insufficient_evidence"
+        or snapshot.quality.status in {"WARMING_UP", "COVERAGE_LOST"}
+    ):
+        return False
+    from subsea_copilot.synthetic import generate_pack
+
+    pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
+    if snapshot.quality.coverage < pack.min_coverage:
+        return False
+    sensors = {sensor.id: sensor for sensor in pack.sensors}
+    read = read_pinned_evidence(receipts) if receipts is not None else None
+    complete: set[str] = set()
+    for evidence in snapshot.evidence.values():
+        value = evidence.value
+        if (
+            evidence.kind != "channel_summary" or not isinstance(value, dict)
+            or read is not None and evidence.id not in read
+        ):
+            continue
+        quantities = [value.get("baseline_median"), value.get("recent_5s_pressure_drop_bar")]
+        complete_recent = (
+            value.get("recent_5s_usable_samples") == 5 / pack.sample_seconds
+            if "recent_5s_usable_samples" in value
+            else (
+                value.get("recent_usable_samples") == 20 / pack.sample_seconds
+                and value.get("recent_period_seconds") == [
+                    snapshot.end_seconds - 20, snapshot.end_seconds,
+                ]
+            )
+        )
+        if (
+            evidence.sensor_id in sensors
+            and value.get("recent_5s_period_seconds") == [snapshot.end_seconds - 5,
+                                                        snapshot.end_seconds]
+            and complete_recent
+            and all(
+                isinstance(number, (int, float)) and not isinstance(number, bool)
+                and math.isfinite(number) for number in quantities
+            )
+        ):
+            assert evidence.sensor_id is not None
+            complete.add(evidence.sensor_id)
+    paired_stations = {
+        (sensor.segment_id, sensor.station_id)
+        for sensor in sensors.values()
+        if sensor.id in complete
+        and len([
+            other for other in sensors.values()
+            if other.segment_id == sensor.segment_id
+            and other.station_id == sensor.station_id and other.id in complete
+        ]) >= 2
+    }
+    return len(paired_stations) >= pack.min_stations
 
 
 def compatible(task: AgentTask, other: AgentTask, snapshot: WindowSnapshot) -> bool:
@@ -351,6 +423,17 @@ def _validate_with_policy(
             reject("hypothesis_claim", "Hypothesis must reference its ledger claim.")
     if result.outcome == "supported" and not result.claim_refs:
         reject("claims", "Supported findings require ledger claims.")
+    if (
+        result.outcome == "supported"
+        and result.hypothesis == "insufficient_evidence"
+    ):
+        if "insufficient_evidence" not in result.limitations:
+            reject("limitations", "Numerical screening abstention must remain explicit.")
+        if not investigation_facts_available(task, snapshot, receipts):
+            reject(
+                "investigation_outcome",
+                "Completed unresolved investigations need usable current paired pressure evidence.",
+            )
     if (
         (task.role == "event_diagnosis" or not specialist_contract)
         and result.outcome == "supported"

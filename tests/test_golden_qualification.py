@@ -707,3 +707,42 @@ def test_public_metadata_retains_stored_error_without_credentials(encoding):
     )
     selected = public_observation_metadata(json.dumps(metadata))
     assert selected == {"error.code": "invalid_judge_output", "observed_model": "test-model"}
+
+
+def test_stored_trace_pages_keep_large_unified_observations_within_capture(monkeypatch):
+    import json
+    from contextlib import contextmanager
+    from types import SimpleNamespace
+    from urllib.parse import parse_qs, urlsplit
+
+    from subsea_copilot.golden_evidence import fetch_stored_observations
+
+    trace = "a" * 32
+    observations = [
+        {"id": str(index), "traceId": trace, "type": "GENERATION",
+         "input": "x" * 210_000, "output": "checked"}
+        for index in range(10)
+    ]
+    page_sizes = []
+
+    @contextmanager
+    def open_page(request, timeout):
+        query = parse_qs(urlsplit(request.full_url).query)
+        limit = int(query["limit"][0])
+        page_sizes.append(limit)
+        start = int(query.get("cursor", ["0"])[0])
+        next_start = start + limit
+        payload = json.dumps({
+            "data": observations[start:next_start],
+            "meta": {"cursor": str(next_start) if next_start < len(observations) else None},
+        }).encode()
+        yield SimpleNamespace(read=lambda maximum: payload[:maximum])
+
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "test-public")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "test-secret")
+    monkeypatch.setattr(
+        "urllib.request.build_opener", lambda *args: SimpleNamespace(open=open_page),
+    )
+    actual = fetch_stored_observations(trace)
+    assert len(actual) == len(observations)
+    assert page_sizes == [5, 5]

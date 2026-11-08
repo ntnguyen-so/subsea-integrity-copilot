@@ -17,9 +17,21 @@ evidence_ids may be empty unless you cite additional reviewed snapshot evidence
 not already attached to your selected claims. Interpretation references still
 need exact claim/evidence IDs, executed history-comparison IDs, reviewed record
 IDs or pinned guidance. Ordinary tool-call receipt IDs are not evidence citations.
+The supplied read_evidence_reference is a canonical source bundle of this
+task's successfully read immutable evidence, including pressure values, health
+counts and their original periods. Use that exact reference for those measurements
+instead of manually listing dozens of individual evidence IDs in each explanation.
+It does not include historical records, comparisons or guidance: cite their exact
+IDs separately wherever used. Include every operating/calibration record cited in
+the main answer in that answer's references, not only in a regional assessment.
 Retain all specialist limitations, permitted read-only recommendations, and the accepted
 diagnosis investigation copied unchanged. Do not invent documents or comparisons.
 The checked hypothesis is a numerical screening claim, NOT your causal judgment.
+Outcome supported with checked hypothesis insufficient_evidence means the
+investigation completed using usable paired readings while numerical screening
+remains unresolved. Preserve that exact hypothesis and its ledger reference.
+Give the supported station-level findings and their measured explanation;
+do not call the numerical classification resolved or invent a qualified interval.
 Failed specialists block synthesis; abstention requires insufficient_evidence,
 null checked hypothesis, child_abstained, location_withheld and only allowed
 coverage/health/limitation claims. An eligible location question needs its accepted
