@@ -1,5 +1,56 @@
 # Qualification results
 
+## Quantitatively grounded reporting revision
+
+All 13 saved report cases were reviewed: the six development and six previously
+held-out 150/360-second cases, plus S7 at 120 seconds. Each selected report has
+an accepted interpretation, and every main answer, competing explanation and
+regional assessment was read. The six original clean 60-second controls were
+not rerun and remain no-agent controls.
+
+The report contract now requires measured magnitudes, units, actual source
+periods and paired or spatial comparison readings beside each finding.
+This includes operating rises, shared calibration offsets, secondary pressure
+footprints and each individually diagnosed drift, spike or stuck instrument.
+Main conclusions cannot redirect readers to regional detail instead of giving
+the numerical explanation themselves. Missing and invalid readings use counts,
+not invented pressures; unavailable comparisons limit the claim.
+
+For example, the revised S7 main answer compares P7-ST1-A/B departures of
+-0.787/-0.777 bar against P7-ST2-A/B's -0.033/-0.030 bar during source seconds
+90-105, and relates that contrast to the recorded approximately -0.75 bar
+calibration offset. It quantifies P2's paired positive transition and smaller
+far-end rise against the +0.4 bar operating record. P4's 0.156/0.172 bar
+final-five-second deficits are compared with P5-ST4-A's 1.327 bar deficit over
+the same 115-120-second period, rather than merely calling P4 "secondary".
+Each isolated instrument explanation likewise gives its partner's readings.
+Long decimal values are rounded only for display; original values, sources and
+exports remain unchanged.
+
+Verification retained eight database failures before agent execution, two
+executed prompt-size failures and two executed deadline failures. Repeated
+schema repairs had retained older invalid drafts in subsequent model prompts.
+The projection now removes all such drafts while preserving source/tool
+messages, all validation feedback and the complete checkpoint audit, without
+raising any budget. An accepted S7 draft that relegated P2/P7 numbers to regional
+detail was also retained and superseded after tightening main-answer review.
+No failed or superseded attempt was rewritten as a success.
+
+The final 13 interpretations were accepted; all 39 runtime-agent trace trees
+passed stored public-IO checks. Synthesis took 440.188-803.359 seconds, including
+484.343 seconds for the final S7 report. Actual S7 browser checks reopened that
+recorded answer, its individual agent outputs and matching map without new
+inference. These are report-development regressions with compatible specialist
+reuse, not a frozen new accuracy cohort or evidence of field reliability.
+Prompts changed during development, and concurrent workspace changes altered
+the implementation fingerprint. Previously held-out recordings were inspected
+for this revision; they are not a new blind qualification set. Earlier benchmark
+scores below remain unchanged.
+
+The [coverage and report receipt](evidence/quantitative-report-revision.json)
+contains the selected roots, complete authored explanations, sanitized public
+trace hashes, original attempt outcomes and prompt-change receipts.
+
 ## Diagnosis-first reporting revision
 
 The earlier first-call reports below are retained qualification artifacts, not

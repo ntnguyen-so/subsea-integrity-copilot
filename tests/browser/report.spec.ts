@@ -10,6 +10,13 @@ test("report prose hides internal citations without removing measurements or ord
   expect(reportText("Offset [custom-source].", ["custom-source"])).toBe("Offset.");
 });
 
+test("long decimal measurements are readable without rounding tiny changes to zero or editing source text", () => {
+  const source = "P6 loses 1.4278944857561129 bar versus 0.000000123456789 bar. Step -2.608612345678 bar.";
+  expect(reportText(source)).toBe("P6 loses 1.428 bar versus 1.23e-7 bar. Step -2.609 bar.");
+  expect(source).toContain("1.4278944857561129");
+  expect(reportText("Reference [measurement-1.234567891].", ["measurement-1.234567891"])).toBe("Reference.");
+});
+
 test("assessment is readable without run evidence while its original audit remains available", async ({ page }) => {
   const file: InvestigationCase = {
     schema_version: "investigation-v1", task_id: "fixture", generation_id: "fixture",

@@ -118,6 +118,16 @@ for a shared-path footprint. Use those executed profiles, extrema and adjacent
 steps to describe observed patterns. Do not ask an engineer to redo them or
 repeat an equivalent comparison. Read an additional period only when it resolves
 a distinct remaining question.
+Supply numerical comparisons for every causal finding, including secondary
+pressure branches and each isolated suspect instrument, not only localization.
+An operating/calibration record used to explain a pressure change needs its
+asset's measured profile over the observed portion of the recorded period.
+If existing intake lacks that comparison, read the missing period before
+handoff even when that branch's current alerts have ended. Never request future
+source time. Retain the actual paired changes, pressure extrema, adjacent steps
+and usable ranges so the coordinator can quantify drift, spikes and flatlines.
+If a needed measurement cannot be acquired within scope, state the precise gap;
+do not treat the expected logged setting as a measured pressure change.
 The required paired-only comparisons retain every selected sensor's time
 profile and actual within-station paired measurements. They do not supply
 cross-station correlation matrices. Use the qualified joint-event evidence

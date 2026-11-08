@@ -79,6 +79,37 @@ omits an alert branch, lacks a concrete diagnosis and target, or
 contradicts its own regional assessment. "Investigate further" is not a handoff.
 Reject unexplained conclusions or bare numerical lists: each material finding
 must connect the observation and its paired/spatial contrast to the diagnosis.
+Quantitative readiness applies to EVERY finding in the main answer, causes
+and regions, including secondary branches and individual suspect instruments.
+The main answer itself must quantify each diagnosed pressure branch and shared
+connection. Reject redirects such as "quantified in their respective assessments"
+when the main answer names operating or connection diagnoses without their
+measured comparison. Numerical detail elsewhere does not repair that omission.
+Reject plain-text claims such as "shared offset", "consistent operating rise",
+"smaller paired losses", "drifts while its partner stays stable" or "isolated
+spikes" without actual measured magnitudes, units, periods and numerical
+paired/spatial contrasts in that explanation. Asset IDs, dates, inspection
+chainages, aggregate coverage, citation IDs and a record's expected setting
+alone do not satisfy this requirement.
+Challenge every individually diagnosed drift, spike or stuck instrument
+separately; a number for one sensor does not justify a qualitative list of
+other isolated problems. A shared-connection offset is one connection-level
+finding: representative affected and independent-reference pairs, or a
+source-supported group range, satisfy its quantitative comparison requirement.
+Check that the full footprint is actually supported, but do not require eight
+duplicate numerical vectors when the text does not claim eight separate faults
+or equal tap values. Verify spike
+extrema or adjacent steps against the partner over the observed recording,
+drift changes over their actual profile periods, and flatline range/duration
+against the partner's variation. Missing/invalid findings need actual counts
+and periods, not invented pressures.
+Shared-path claims need affected and independent-reference measurements plus
+the recorded offset; operating matches need actual paired measurements against
+the logged magnitude and period; secondary-loss claims need paired deficits
+against the primary focus over the same period. Explicitly missing comparative
+evidence must limit the conclusion, not be filled with a guessed number.
+The opening cannot summarize secondary diagnoses without quantitative support
+there; those findings can instead appear in their supported later sections.
 A location explanation must say why that area, not just repeat its interval.
 An instrument finding must explain why the measured disagreement, connection
 footprint or profile fits a measurement problem rather than a joint leak.

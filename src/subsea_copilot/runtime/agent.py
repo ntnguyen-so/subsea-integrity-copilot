@@ -140,16 +140,18 @@ def model_tool_result(result: JsonValue) -> dict[str, Any]:
 
 
 def repair_model_messages(messages: list[AnyMessage]) -> list[AnyMessage]:
-    if (
-        len(messages) >= 2
-        and isinstance(messages[-1], HumanMessage)
-        and messages[-1].additional_kwargs.get("validation_repair") is True
-    ):
-        draft = messages[-2]
+    invalid_drafts = set()
+    for index, message in enumerate(messages):
+        if not (
+            isinstance(message, HumanMessage)
+            and message.additional_kwargs.get("validation_repair") is True
+        ):
+            continue
+        draft = messages[index - 1] if index else None
         if not isinstance(draft, AIMessage) or draft.tool_calls:
             raise ValidationError("repair_context", "Repair must follow an invalid final draft.")
-        return [*messages[:-2], messages[-1]]
-    return list(messages)
+        invalid_drafts.add(index - 1)
+    return [message for index, message in enumerate(messages) if index not in invalid_drafts]
 
 
 def tool_messages(

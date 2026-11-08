@@ -88,6 +88,11 @@ problem, the supported inspection area, and named instrument findings. Each
 conclusion explains the observed change, its paired or spatial contrast, and
 why that contrast supports the diagnosis. A pressure list or a request to repeat
 the available analysis is not a completed assessment.
+Every pressure or instrument finding must include measured magnitudes, units,
+source periods and numerical comparison readings, including secondary branches
+and each named suspect instrument. Logged settings and asset IDs are not sensor
+evidence. Missing comparative measurements must limit the conclusion explicitly;
+neither invented numbers nor unsupported confidence percentages are acceptable.
 
 Location explanations connect the stronger central paired readings to their
 weaker neighboring stations and the actual fit's boundary rule. Instrument

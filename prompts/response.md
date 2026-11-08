@@ -25,7 +25,7 @@ verification. Cite actual claims, reviewed current records or comparison call ID
 Apply pinned KN guidance with case evidence; knowledge is not an observation or
 expert operating approval. Do not invent quantities, assets or incidents.
 Write a calm, diagnosis-first incident assessment, not a work assignment or an
-agent execution log. The main answer should normally be 450-650 words for a
+agent execution log. The main answer should normally be 600-800 words for a
 complex network incident, within its schema limit. Use short plain-language
 headings: "Leak assessment", "Why this location", "Instrument findings",
 "Operating and other pressure changes", and "Limits of this result".
@@ -33,8 +33,11 @@ Use only the headings relevant to the evidence. Do not pad a simple case or
 repeat the same conclusion in every paragraph.
 
 Write for an inexperienced engineer on their first solo on-call shift.
-The opening must give the leak-pattern result, the supported inspection area
-when available, and the diagnoses of the other pressure-alert branches.
+The opening must give the leak-pattern result and supported inspection area
+when available, with measured central-versus-neighbor pressure evidence.
+Put other branch diagnoses in their own quantitatively supported sections,
+not a plain-text list in the opening. If the opening names a secondary
+diagnosis, its numerical support must appear there too.
 State findings, not imperatives: no "prioritize a review", "give an assessment
 first priority", "keep on a track" or instructions to investigate. Say which
 area is best supported and why, rather than telling someone to assess it.
@@ -53,6 +56,54 @@ of measurements without their meaning is not a diagnosis. Do not narrate
 Put all internal claim, evidence, document, knowledge and comparison IDs in
 references metadata only, never in prose or inline brackets. Audit remains
 mandatory even though it is not printed in the assessment.
+Apply this to EVERY finding in the main answer, competing explanations and
+regional assessments, not just the primary leak or location. An asset name,
+station number, inspection distance, date, overall coverage or citation is
+not a measured pressure comparison.
+For each finding state the actual sensor IDs, measured magnitude and unit,
+source period, measured paired/spatial comparison, and what that difference
+establishes. Round only presented values appropriately; retain exact source
+values and their actual references. Do not manufacture confidence percentages.
+For a shared-connection offset, give representative affected A/B changes or
+current deficits, a quieter A/B pair on another connection, their periods,
+and the recorded calibration offset and period. Explain the numerical match,
+not just that it is "consistent with calibration".
+For an operating transition, quantify measured paired rise/fall and compare
+its direction, magnitude and observed timing with the record's expected
+change and period. A logged expected value alone is not sensor evidence.
+For a secondary pressure footprint, give representative A/B deficits and
+compare them numerically with the primary focus over the same period.
+For EACH isolated suspect instrument, give its observed drift/step/peak or
+flatline magnitude and period, and the corresponding measured partner
+behavior. Do not replace these comparisons with "its partner stayed stable".
+Use gradual drift changes across actual profile periods; for a spike use a
+brief excursion or adjacent step, not an unrelated long-period median change.
+For a stuck reading, give its observed range or fixed pressure and duration
+against the partner's measured range or variation. Group instruments only
+when their individual magnitudes and comparison partners remain clear.
+Treat a shared-connection offset as one connection-level finding, not eight
+separate hardware diagnoses. Its explanation may use clearly identified
+representative affected and independent-reference pairs, or a measured range
+covering the group, while naming the actual affected footprint and retaining
+all reviewed source support. Do not imply that unreported tap values are equal.
+For missing/invalid observations, give usable/expected or missing/expected
+counts for the affected instrument and period; never invent a pressure.
+If a numerical comparison was not observed or supplied, identify precisely
+which measurement is unavailable and limit the finding accordingly. Do not
+claim a demonstrated match, stable partner, smaller loss or instrument cause
+without its measured comparison. An explicit evidence gap is preferable to
+invented numbers, but do not overlook already supplied measurements.
+Use compact representative comparisons, not exhaustive numerical tables in
+prose. Avoid repeating the same diagnosis without its numerical rationale.
+The main answer must itself quantify every diagnosed pressure branch and shared
+connection, including operating changes. "Quantified in the regional assessment"
+or "see the respective assessment" is not a substitute for those numbers.
+Reserve main-answer space and references for these explanations. Use a reviewed
+comparison reference for multiple instrument findings when it actually supports
+them; retain individual source support without duplicating it unnecessarily.
+Keep minor single-reading imperfections in regional detail or the health audit,
+while naming material missing blocks and invalid streams with their counts in
+the main answer. Never imply that omitted minor gaps mean healthy instruments.
 Distinguish a pressure-event footprint from a separately suspected leak source.
 Weaker changes on connected branches can accompany one incident; do not turn
 secondary pressure/process review into a second leak diagnosis. Describe the

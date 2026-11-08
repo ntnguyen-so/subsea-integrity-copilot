@@ -231,6 +231,34 @@ def test_repair_projection_retains_source_receipts_and_audited_invalid_draft():
     ]
 
 
+def test_repeated_repairs_keep_evidence_and_feedback_without_accumulating_invalid_drafts():
+    import json
+
+    source = SystemMessage(content="Complete scoped source context")
+    request = AIMessage(
+        content="", tool_calls=[{"id": "read-1", "name": "history.read", "args": {}}]
+    )
+    receipt = ToolMessage(content='{"pressure": [null, 79.5]}', tool_call_id="read-1")
+    messages = [source, request, receipt]
+    repairs = []
+    for error in ("regional_evidence", "evidence", "interpretation_citations"):
+        repair = HumanMessage(
+            content=json.dumps({"repair": error}),
+            additional_kwargs={"validation_repair": True},
+        )
+        repairs.append(repair)
+        messages.extend([AIMessage(content="invalid result " * 1000), repair])
+    original = list(messages)
+    assert repair_model_messages(messages) == [source, request, receipt, *repairs]
+    assert messages == original
+
+
+def test_repair_projection_rejects_malformed_historical_repair_pair():
+    repair = HumanMessage(content="repair", additional_kwargs={"validation_repair": True})
+    with pytest.raises(ValidationError, match="Repair must follow"):
+        repair_model_messages([repair, AIMessage(content="later final")])
+
+
 @pytest.mark.parametrize("detail", ["Use only fully reviewed current sources.", "x" * 1500])
 def test_reflection_receives_bounded_specific_criticism_and_cannot_retry_forever(detail):
     import json

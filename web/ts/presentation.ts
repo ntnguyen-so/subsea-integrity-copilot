@@ -16,7 +16,7 @@ export function productText(value: string): string {
     .replace(/COMPETING CAUSES - NOT CONFIRMED ROOT CAUSES/g, "COMPETING EXPLANATIONS");
 }
 
-/** Hide citation notation only in presented prose; retain source data and audit IDs. */
+/** Format report prose only; retain recorded measurements, sources and exports. */
 export function reportText(value: string, references: readonly string[] = []): string {
   return productText(value)
     .replace(/[\[(]([^[\]()\n]+)[\])]/g, (notation: string, body: string) => {
@@ -27,6 +27,10 @@ export function reportText(value: string, references: readonly string[] = []): s
           || /^(?:(?:the|both|reviewed|executed)\s+)*(?:comparisons|comparison calls|executed comparisons)$/i.test(id);
       });
       return internal ? "" : notation;
+    })
+    .replace(/(?<![\w./:-])-?\d+\.\d{8,}(?![\w./:-])/g, token => {
+      const measured = Number(token);
+      return Math.abs(measured) < 0.01 ? measured.toPrecision(3) : measured.toFixed(3);
     })
     .replace(/[ \t]+([.,;:])/g, "$1")
     .replace(/[ \t]{2,}/g, " ")
