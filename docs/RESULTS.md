@@ -41,6 +41,76 @@ Those proposals are not customer agreements, a vendor quote, measured ROI or fie
 certification. Insufficient independent labeled cases means extend by agreement or
 stop, never automatic acceptance.
 
+## Why some live investigations exceed six minutes
+
+A read-only timing audit compared **eleven original Langfuse traces**: the eight
+selected library checkpoints and the three frozen rehearsals above. It made no
+new model calls or changes to recorded outcomes. The
+[sanitized timing evidence](evidence/agent-latency-analysis.json) distinguishes
+the whole trace envelope from the shorter first root activation and uses unions
+of model/tool intervals rather than adding overlapping spans.
+
+The three frozen rehearsals break down as follows. Manifest elapsed time includes
+a small admission/audit interval outside the stored trace envelope.
+
+| Source time | Manifest elapsed | CLI/model spans | Numerical/tools | Other trace work |
+|---|---:|---:|---:|---:|
+| +95s | 526.5s | 356.1s | 63.7s | 98.4s |
+| +120s | 538.4s | 385.3s | 61.9s | 86.2s |
+| +180s | 596.0s | 457.4s | 62.2s | 73.5s |
+
+The largest actionable finding is the **per-turn CLI lifecycle**, not simulation
+speed. The adapter launches a fresh owned CLI process/session for every model
+call. Aligning all 26 original calls with their owned `session.start` and
+`session.usage_record` timestamps shows **150.4/165.9/191.8 seconds before session
+start**, plus **41.9/41.9/53.3 seconds after usage**, per root respectively.
+That is 192.3-245.1 seconds around the observed session-processing intervals.
+These are lifecycle boundaries, **not proof that all that time is OS process
+startup**, nor proof a warm transport would remove it all. Session processing
+itself took 163.8/177.5/212.3 seconds; provider queueing and inference are not
+separately instrumented in these historical records.
+
+Several design choices then multiply that cost:
+
+- The workflow is serial: plan, quality, diagnosis, synthesis, grounding review
+  and, when needed, revision/review. Diagnosis actually consumes quality's
+  result; these specialists cannot simply be run independently without changing
+  the evidence contract. Parallel checkpoints improve throughput, not the
+  critical path of one report.
+- The frozen runs used 8/8/10 model calls, all on `gpt-6.1-sol`. Quality prompts
+  were about 64,000 characters; diagnosis/coordinator prompts were approximately
+  116,000-132,000, and reviewer/revision prompts approximately 98,000-106,000.
+  At +120s, the coordinator's answer read 50,230 input tokens but only 1,337
+  cache-read tokens. Repeated large payloads are not free just because they
+  refer to the same snapshot.
+- All three needed a revise-to-accept cycle, spending 97.6-101.5 seconds on
+  review/revision model calls. This overlaps the model/lifecycle figures above;
+  it must not be added again. One selected library +120s run made 14 model calls,
+  including 174.3 seconds deciding extra reads and 41.9 seconds repairing a
+  specialist-claim contract error, reaching a 544.8-second trace envelope.
+- History comparisons alone consumed 27.2-33.9 seconds in the frozen runs.
+  The remaining 73.5-98.4 seconds outside tool/model spans includes validation,
+  context preparation, checkpoints and persistence; it is not established idle
+  time or evidence of a particular database bottleneck.
+
+**Optimization order:** benchmark a long-lived CLI/SDK transport with fresh,
+isolated per-request sessions first; then remove redundant model turns and batch
+independent evidence requests, compact repeated context losslessly, and profile
+the uninstrumented handoff/persistence gaps. The
+[official Python SDK](https://github.com/github/copilot-sdk/blob/main/python/README.md)
+supports a client lifecycle separate from session creation; integrating it would
+require explicit deny-by-default tool permissions, the same scope isolation,
+timeouts, cleanup, provenance and validation. Do not copy its approve-all example.
+The automatic fresh-run plan currently has only one allowed sequence, so an
+application-owned plan is also a candidate to remove a 35-40-second planning
+turn, but that is a deliberate orchestration/provenance change, not a prompt tweak.
+
+Do not remove the grounding reviewer, force acceptance, kill a CLI as soon as
+usage appears, or label playback as a faster live investigation. No faster
+transport or sub-six-minute live SLO is claimed here. Any implementation needs
+frozen, same-window before/after runs at both one-root and representative
+concurrency, with equal grounding/citation checks and failures retained.
+
 ## S7 seed-2026 agent reliability regression
 
 Fresh hosted investigations at all six demo checkpoints succeeded after the

@@ -1,0 +1,78 @@
+{
+  "scope": "Read-only analysis of eleven original synthetic hosted investigations; no new inference and no changed outcomes.",
+  "analysis_date": "2026-11-10",
+  "method": {
+    "trace_wall": "Earliest stored span start through latest stored span end; the first root activation alone does not cover the whole investigation.",
+    "model_and_tool_time": "Union of completed GENERATION or TOOL intervals; overlapping intervals are not double counted.",
+    "other_time": "Trace wall time outside both model and tool intervals; includes validation, orchestration, context preparation and persistence, not proven idle time.",
+    "lifecycle_boundaries": "Original owned session.start and session.usage_record timestamps aligned to their original GENERATION spans. Before/after these boundaries is not a pure process-start, provider-queue or network measurement.",
+    "qualification": "Historical development evidence, not a new speed benchmark or field qualification."
+  },
+  "selected_library": [
+    {"source_seconds": 95, "trace_id": "ddd7fbe01c59c501fab5afff2086a3c0", "trace_wall_seconds": 319.474, "model_seconds": 278.240, "tool_seconds": 19.856, "other_seconds": 21.378, "model_calls": 8},
+    {"source_seconds": 100, "trace_id": "5f6894109574f50ad1f9eebe732297b2", "trace_wall_seconds": 361.545, "model_seconds": 275.634, "tool_seconds": 36.855, "other_seconds": 49.056, "model_calls": 8},
+    {"source_seconds": 105, "trace_id": "a19d88fc587e7fb64fbc97456f02d18b", "trace_wall_seconds": 410.275, "model_seconds": 367.538, "tool_seconds": 19.985, "other_seconds": 22.752, "model_calls": 8},
+    {"source_seconds": 110, "trace_id": "a3a0fbd746534e409b0306db22c7fedc", "trace_wall_seconds": 410.120, "model_seconds": 340.867, "tool_seconds": 30.475, "other_seconds": 38.778, "model_calls": 10},
+    {"source_seconds": 120, "trace_id": "0ac4e3a1954f9894dbbccd8419b093f6", "trace_wall_seconds": 544.813, "model_seconds": 469.275, "tool_seconds": 34.258, "other_seconds": 41.280, "model_calls": 14},
+    {"source_seconds": 150, "trace_id": "ab013ee475ce756b187e0f1c17e37990", "trace_wall_seconds": 358.944, "model_seconds": 274.444, "tool_seconds": 33.801, "other_seconds": 50.699, "model_calls": 8},
+    {"source_seconds": 180, "trace_id": "c57c22607b8806a473a44a02e7835fe7", "trace_wall_seconds": 276.458, "model_seconds": 197.274, "tool_seconds": 31.517, "other_seconds": 47.667, "model_calls": 6},
+    {"source_seconds": 360, "trace_id": "75bc0bf2cc1b85fd3228442612fbb6f3", "trace_wall_seconds": 321.260, "model_seconds": 260.663, "tool_seconds": 33.274, "other_seconds": 27.323, "model_calls": 8}
+  ],
+  "frozen_rehearsals": [
+    {
+      "source_seconds": 95,
+      "root_id": "6fd90596-d36b-5cfd-90c2-4b6e1193935e",
+      "trace_id": "765da70ceac8f4b23b34d8dcb5b8e788",
+      "manifest_elapsed_seconds": 526.532,
+      "trace_wall_seconds": 518.110,
+      "model_seconds": 356.055,
+      "tool_seconds": 63.651,
+      "other_seconds": 98.404,
+      "model_calls": 8,
+      "calls_with_owned_timing": 8,
+      "before_session_start_seconds": 150.398,
+      "session_start_to_usage_seconds": 163.777,
+      "after_usage_seconds": 41.880,
+      "review_and_revision_seconds": 100.602
+    },
+    {
+      "source_seconds": 120,
+      "root_id": "8e424970-ce71-5b59-b6ac-75c06450c4ac",
+      "trace_id": "85b76e275e4a9ffcd7e8b3ea00372303",
+      "manifest_elapsed_seconds": 538.375,
+      "trace_wall_seconds": 533.443,
+      "model_seconds": 385.274,
+      "tool_seconds": 61.929,
+      "other_seconds": 86.240,
+      "model_calls": 8,
+      "calls_with_owned_timing": 8,
+      "before_session_start_seconds": 165.857,
+      "session_start_to_usage_seconds": 177.497,
+      "after_usage_seconds": 41.920,
+      "review_and_revision_seconds": 101.511
+    },
+    {
+      "source_seconds": 180,
+      "root_id": "28ed28fc-7d03-5ab4-a4bf-431fb087d52e",
+      "trace_id": "a3dbb1c5d9e64b9b8b54389a01b0b710",
+      "manifest_elapsed_seconds": 595.968,
+      "trace_wall_seconds": 593.119,
+      "model_seconds": 457.389,
+      "tool_seconds": 62.204,
+      "other_seconds": 73.526,
+      "model_calls": 10,
+      "calls_with_owned_timing": 10,
+      "before_session_start_seconds": 191.767,
+      "session_start_to_usage_seconds": 212.319,
+      "after_usage_seconds": 53.303,
+      "review_and_revision_seconds": 97.592
+    }
+  ],
+  "limitations": [
+    "Model span time includes CLI lifecycle, authentication, transport and inference; it is not pure model reasoning time.",
+    "Review/revision time is a subset of model time, not an additional disjoint cost.",
+    "The three frozen rehearsals overlapped; there is no controlled serial-versus-parallel or warm-versus-cold transport comparison.",
+    "Historical session boundaries do not isolate OS startup, CLI initialization, authentication, network or provider queueing individually.",
+    "A faster persistent transport has not been implemented or qualified by this analysis."
+  ]
+}
