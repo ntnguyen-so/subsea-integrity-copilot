@@ -10,6 +10,16 @@ from .contracts import AgentTask, Contract, SitePack, WindowSnapshot, content_ha
 from .synthetic import ReplayDataset
 
 
+class RecordedTrace(Contract):
+    task_id: str
+    snapshot_id: str
+    trace_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+    span_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{16}$")
+    session_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    attempt_id: str | None = None
+    trace_layout: Literal["investigation-v1"] | None = None
+
+
 class Recording(Contract):
     """A saved root and its exact measurement basis, including abstentions/failures."""
 
@@ -22,6 +32,7 @@ class Recording(Contract):
     children: list[AgentTask]
     casefile: InvestigationCase | None
     execution_usage: dict[str, object] | None = None
+    trace_metadata: RecordedTrace | None = None
     base_playback_speed: Literal[5] = 5
 
     @model_validator(mode="after")
@@ -35,6 +46,10 @@ class Recording(Contract):
             or self.task.snapshot_id != self.snapshot.id
             or self.snapshot.pack_version != self.pack.version
             or self.task.generation_id != self.snapshot.generation_id
+            or self.trace_metadata is not None and (
+                self.trace_metadata.task_id != self.task.id
+                or self.trace_metadata.snapshot_id != self.snapshot.id
+            )
             or self.task.state == "SUCCEEDED" and (
                 self.casefile is None or self.task.result is None
             )

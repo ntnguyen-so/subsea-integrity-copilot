@@ -71,7 +71,25 @@ test("S7 walkthrough renders preserved outputs next to their exact map without i
   await expect(page.locator("#channel-charts")).toHaveAttribute("data-snapshot", snapshot!);
   await expect(page.locator("#automatic-progress")).toContainText("Why this location");
   await expect(page.locator("#automatic-state")).toContainText("RECORDED");
+  await expect(page.locator('#topology [data-issue-kinds]:not([data-issue-kinds=""])').first())
+    .toHaveAttribute("aria-label", /Agent instrument finding:/);
+  await expect(page.locator("#simulation-policy")).toContainText("checkpoints");
+  await expect(page.locator("#simulation-policy")).toContainText("preserved attempts");
+  await page.getByRole("tab", { name: "Inspect", exact: true }).click();
+  await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "matched");
+  await expect(page.locator(".inspection-agent")).toContainText("Compatible saved investigation");
+  await expect(page.locator(".inspection-trends svg")).toHaveCount(2);
+  await page.getByRole("button", { name: "Review this saved report and its quoted findings" }).click();
+  await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#automatic-title")).toBeFocused();
+  await page.getByRole("tab", { name: "Evaluation", exact: true }).click();
+  await page.locator("#review-agent-findings").click();
+  await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#automatic-title")).toBeFocused();
   await selectCheckpoint(page, 115);
+  await page.getByRole("tab", { name: "Inspect", exact: true }).click();
+  await expect(page.locator(".inspection-agent")).not.toHaveAttribute("data-status", "matched");
+  await page.getByRole("tab", { name: "Live", exact: true }).click();
   await expect(page.locator("#topology")).toHaveAttribute("data-source-seconds", "115");
   await expect(page.locator("#topology .inspection-interval")).toHaveCount(0);
   await expect(map).toHaveAttribute("data-source-seconds", "110");
@@ -125,7 +143,81 @@ test("default S7 timeline selects genuinely accepted reports at every saved chec
     await selectCheckpoint(page, point);
     await expect(page.locator("#automatic-state")).toHaveAttribute("data-task", selected.task_id);
     await expect(page.locator("#automatic-state")).toContainText("SUCCEEDED");
+    const traceResponse = await page.request.get(`${endpoint}/${selected.task_id}/trace`);
+    expect(traceResponse.ok()).toBeTruthy();
+    const trace = await traceResponse.json();
+    expect(trace.task_id).toBe(selected.task_id);
+    expect(trace.snapshot_id).toBe(snapshot.id);
+    expect(trace.trace_id).toMatch(/^[a-f0-9]{32}$/);
+    await expect(page.locator("#automatic-langfuse")).toBeVisible();
+    await expect(page.locator("#automatic-langfuse")).toHaveAttribute("data-task", selected.task_id);
+    await expect(page.locator("#automatic-langfuse")).toHaveAttribute("href",
+      new RegExp(trace.trace_layout === "investigation-v1" ? trace.trace_id : trace.session_id));
+    await expect(page.locator("#trace-view")).toHaveAttribute("data-task", selected.task_id);
   }
+});
+
+test("recorded trace selection rejects late and mismatched traces without withholding the report", async ({ page }) => {
+  test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned demo.");
+  await page.request.post("/api/login", { data: {
+    username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
+  } });
+  const { replays } = await (await page.request.get("/api/replays")).json();
+  const replay = replays.find((row: { scenario: string; seed: number; state: string }) =>
+    row.scenario === "S7" && row.seed === 2026 && row.state === "PAUSED");
+  expect(replay).toBeDefined();
+  const endpoint = `/api/replays/${replay.id}/recordings`;
+  const { recordings }: { recordings: SavedInvestigation[] } =
+    await (await page.request.get(endpoint)).json();
+  const first = availableRecording(recordings, 100)!;
+  const second = availableRecording(recordings, 105)!;
+  expect(first.task_id).not.toBe(second.task_id);
+  let release = (): void => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let started = false, wrongScope = false;
+  const trace = (row: SavedInvestigation, id: string) => ({
+    task_id: row.task_id, snapshot_id: row.snapshot_id, trace_id: id,
+    trace_layout: "investigation-v1", stored_trace_visible: true,
+    langfuse_url: `http://localhost:3001/project/subsea-copilot/traces/${id}`,
+  });
+  await page.route(`**${endpoint}/${first.task_id}/trace`, async route => {
+    started = true;
+    await gate;
+    await route.fulfill({ json: trace(first, "1".repeat(32)) });
+  });
+  await page.route(`**${endpoint}/${second.task_id}/trace`, route => route.fulfill({
+    json: { ...trace(second, "2".repeat(32)), task_id: wrongScope ? "wrong-run" : second.task_id },
+  }));
+  const writes: string[] = [];
+  page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
+  await page.goto("/?replay=" + encodeURIComponent(replay.id));
+  try {
+    await selectCheckpoint(page, 100);
+    await expect.poll(() => started).toBe(true);
+    await expect(page.locator("#automatic-langfuse")).toBeHidden();
+    await selectCheckpoint(page, 105);
+    await expect(page.locator("#automatic-langfuse")).toHaveAttribute("data-task", second.task_id);
+  } finally {
+    release();
+  }
+  await expect(page.locator("#automatic-langfuse")).toHaveAttribute("href", /2{32}$/);
+  await page.locator("#investigation-technical > summary").click();
+  await page.getByRole("button", { name: "View Langfuse run", exact: true }).click();
+  await expect(page.locator("#trace-view")).toHaveAttribute("data-task", second.task_id);
+  await page.getByRole("switch", { name: /Recorded results/ }).click();
+  await expect(page.locator("#trace-view")).not.toHaveAttribute("data-task", second.task_id);
+  await expect(page.locator("#trace-view")).not.toHaveAttribute("data-recorded");
+  await page.getByRole("switch", { name: /Live investigation/ }).click();
+  await expect(page.locator("#trace-view")).toHaveAttribute("data-task", second.task_id);
+  await selectCheckpoint(page, 0);
+  await expect(page.locator("#automatic-langfuse")).toBeHidden();
+  await expect(page.locator("#trace-view")).not.toHaveAttribute("data-task");
+  wrongScope = true;
+  await selectCheckpoint(page, 105);
+  await expect(page.locator("#automatic-trace-status")).toContainText("scope mismatch");
+  await expect(page.locator("#automatic-langfuse")).toBeHidden();
+  await expect(page.locator("#automatic-state")).toContainText("SUCCEEDED");
+  expect(writes).toEqual([]);
 });
 
 test("empty recording timeline remains usable without substituting future results", async ({ page }) => {

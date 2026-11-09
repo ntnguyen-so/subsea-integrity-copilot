@@ -52,8 +52,6 @@ def _pressure_alert_keys(snapshot: WindowSnapshot) -> list[str]:
             f"{finding.sensor_id}:pressure"
             for finding in snapshot.quality.findings
             if finding.anomaly_count > 0
-            or finding.missing > finding.expected * 0.1
-            or finding.hard_excluded > 0
         }
     )
 
@@ -558,8 +556,10 @@ class Monitor:
             material = True
         else:
             old = self.store.get_window(episode.current_window_id)
+            pack = load_pack(session.site_id)
             material = (
                 _pressure_alert_keys(old) != _pressure_alert_keys(snapshot)
+                or instrument_signals(old, pack) != instrument_signals(snapshot, pack)
                 or (
                     old.quality.status != snapshot.quality.status
                     and "COVERAGE_LOST" in (old.quality.status, snapshot.quality.status)
@@ -576,7 +576,7 @@ class Monitor:
                 episode.segment_ids = []
             elif (
                 snapshot.end_seconds - episode.last_qualified_seconds
-                >= load_pack(session.site_id).quiet_seconds
+                >= pack.quiet_seconds
             ):
                 episode.state = "QUIET"
             if material:

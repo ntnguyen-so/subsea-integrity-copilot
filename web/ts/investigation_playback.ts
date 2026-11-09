@@ -174,8 +174,9 @@ export class InvestigationPlayback {
   render(): void {
     if (!this.enabled) return;
     const row = availableRecording(this.rows, this.seconds);
+    const counts = `${new Set(this.rows.map(item => item.source_seconds)).size} checkpoints · ${this.rows.length} preserved attempts`;
     this.description = row
-      ? `5× base recording · ${this.rows.length} preserved runs · showing ${row.state} +${row.source_seconds}s evidence. Between checkpoints the original evidence time is retained. Playback makes no model calls.`
+      ? `5× base recording · ${counts} · showing ${row.state} +${row.source_seconds}s evidence. Between checkpoints the original evidence time is retained. Playback makes no model calls.`
       : `No saved investigation at or before +${this.seconds.toFixed(1)}s. Later findings are withheld. Playback makes no model calls.`;
     if (row) {
       void this.show(row);

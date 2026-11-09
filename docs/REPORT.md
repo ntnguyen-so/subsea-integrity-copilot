@@ -22,7 +22,7 @@ stand-in: fit on verified-normal pre-roll, normalize pressure to bar, then score
 both upward and downward excursions. Its center and scale are visible beside
 the sensor chart. Neither fitting nor numerical diagnosis uses an LLM.
 
-The pressure-v3 source uses the brief's upright Y: Trunk P1 below the junction,
+The historical three-segment pressure-v3 reference uses an upright Y: Trunk P1 below the junction,
 Branch A P2 upper-left, Branch B P3 upper-right. Each segment is 800m, with
 stations at 100/300/500/700m. Paired A/B instruments sit on opposite walls of an
 assumed 0.6m pipe, for 24 instruments at 12 stations. Mixed bar/kPa/MPa, explicit UTC/local
@@ -63,16 +63,20 @@ time and pressure axes, including representative faults across all three segment
 
 ### Brief-to-demo customer walkthrough
 
-The brief's diagram is not a separate story: `export-brief-evidence.py` runs the
-actual pressure pipeline for S1/S2 seed 2026, onset-visible window [80,140), then the
-renderer draws that pack and those observations. Frozen-evidence regression tests
-compare hashes, quality, event and inspection results against a fresh computation.
+Use **S7, seed 2026**, for the canonical buyer walkthrough. The brief's selected
+dashboard crops share source +50 to +110 seconds and the same measurements/alerts.
+Those are evidence-window bounds, not established physical onset or report-delivery
+times. The selected recording reports a P5 700–900 m inspection priority; do not
+transfer that interval to another snapshot. The later +120 checkpoint in
+`RESULTS.md` reports 600–1000 m. Interval eligibility and width are snapshot-specific.
+The older S1/S2 exporter and three-segment examples below are historical reference
+derivations, not the current brief's capture provenance.
 
 | Brief question | What to demonstrate | Acceptance evidence |
 |---|---|---|
-| Leak or faulty sensors? | S1's four corroborating instruments at two stations/two gateway domains, alongside an independent fault; contrast S2's scattered defects. | Same-window pressure comparisons, quality findings and checked diagnosis claims. Suspected, not confirmed, leak. |
-| Where should we inspect, and why? | P1 affected stations 300/500m bracketed by unaffected 100/700m: midpoint boundaries 200/600m. | Actual station bracket and immutable interval claim; no exact source prediction. Withhold in S2/S4/S5. |
-| What evidence supports this, and what remains unknown? | Open raw/canonical observations, historical documents, chosen comparisons and specialist receipts. | Incident-time sources, checked numerical changes and rejected stale records; plausible operating context does not rule out a concurrent leak. |
+| Leak, instrument error or operating change? | In the selected S7 recording, review the P5 pressure-loss focus separately from P7 shared instrument effects and P2 operating/process review. | Open the exact-window measurements, failure domains, counterevidence and cited records. These are hypotheses, not confirmed physical causes. |
+| Where and when should we investigate? | Show P5, the selected source window, affected/neighbor stations and the accepted interval or withholding reason. | Distinguish evidence window, observed change timing, unknown physical onset and wall-clock completion. No exact source prediction or dispatch authorization. |
+| What remains for the engineer? | Inspect sources, test competing explanations, obtain missing operating/field evidence and approve the handoff. | A plausible operating change does not clear a concurrent leak; partial health review does not certify every instrument. |
 
 ### Adaptive, history-grounded investigation
 
@@ -96,8 +100,11 @@ Mandatory quality/event intake remains application-owned. After observing it,
 the diagnosis model chooses search terms, documents, sensors, ranges and bounded
 investigation intents. It can stop unresolved when evidence is absent. This is
 adaptive evidence gathering, not access to arbitrary tools or unbounded reasoning.
-Four diagnosis model turns include the final result; the existing root limits
-remain two children, ten model calls, eighteen tool calls and 300 seconds.
+The original history-loop qualification used four diagnosis turns including the
+final result, two children, ten model calls, eighteen tool calls and 300 seconds.
+These are historical qualification settings, not the current resource contract.
+The current root elapsed deadline is 900 seconds; actual calls and elapsed times
+must be read from each receipt rather than inferred from those older limits.
 Compact serialization avoids duplicate schema input. A finite 48,000-character
 prompt envelope replaces the earlier 32,000-character pressure-only envelope;
 it accommodates retrieved evidence without increasing call budgets. Actual
@@ -133,11 +140,15 @@ integrity experts. The demo has fictional versioned records and criteria; expert
 elicitation, approval/change management and measured onboarding benefit are
 customer-pilot work, not implemented automatic knowledge acquisition.
 
-The assumed manual investigation takes ten minutes. The agreed planning budget
-for an LLM investigation is **five minutes**, with accuracy and reliability taking
-priority over speed. These are customer-discovery assumptions, not measured human
-performance or proof of time savings. The existing root deadline is 300 seconds;
-late/failed work must be reported, not omitted from the denominator.
+Ten minutes for manual investigation is an unmeasured discovery assumption.
+**Five minutes is an unmet planning aspiration, not a customer-agreed SLO.**
+The current root elapsed deadline is **900 seconds**, not a response-time promise.
+The latest frozen-code S7 rehearsal completed three fresh roots in
+526.532/538.375/595.968 seconds (8.8–9.9 minutes), each after revision and review.
+All exceeded five minutes; none proves a labor saving or future acceptance.
+Queueing, report completion, retries and human handling must be recorded separately,
+with late, rejected and failed work retained in the denominator. See the latest
+rehearsal note in `RESULTS.md`; older 300-second cohorts retain their original scope.
 
 Warnings have a different clock. The numerical loop publishes a possible-leak,
 coverage, instrumentation or unresolved warning without waiting for any model.
@@ -198,8 +209,9 @@ this failure must not be hidden behind passing schema or workflow tests.
 `grounding.py`, `prompts\critic.md` and the response workflow implement the new
 gate. The response's per-role model allowance is six only for `engineer-v2`;
 PostgreSQL enforces this protocol-bound allowance and immutable protocol identity.
-The shared root limits remain ten model calls, eighteen tools, two children and
-300 seconds. A full revision can exhaust those limits if specialist work was
+The original qualification used ten model calls, eighteen tools, two children and
+300 seconds; the current root deadline is 900 seconds. A full revision can exhaust
+the applicable receipt's resource allowances if specialist work was
 expensive; failure is explicit, never a fallback to unchecked prose.
 `scripts\qualify-grounding.py` replays authored adversarial paragraphs through the
 same production critic prompt, context builder, graph and validator. It preserves
@@ -486,8 +498,9 @@ a quality specialist from abstaining merely because the parent asks about a leak
 Actual specialist abstention still propagates explicitly; insufficient physical
 evidence cannot carry categorical event or location claims.
 
-A root has at most two children, ten model calls, eighteen tool calls and a
-300-second elapsed bound. Automatic roots are episode-triggered/coalesced, not
+The current root elapsed bound is 900 seconds. Older cohorts used a 300-second
+bound and older call/tool allowances; do not apply those counts to newer receipts.
+Automatic roots are episode-triggered/coalesced, not
 scheduled every hop. Manual admission is scoped across generations. These are demo
 resource guards, not an HA distributed scheduler.
 
@@ -548,23 +561,79 @@ Auth/quota failure preserves monitoring and returns explicit unavailable status.
 
 ## Commercial and meeting contract
 
-**Proposed:** week 1 connector/schema/security review; week 2 shadow replay and
-expert adjudication; week 3 operator workflow; week 4 joint gate review.
-Compare reviewed false alarms and median triage effort with the existing workflow;
-assess missed-event sensitivity separately where labels or validated tests exist.
-Track coverage and latency, with inadequate coverage explicitly unknown rather
-than healthy. Agree safety and commercial gates before the pilot; do not optimize
-away alarms at the expense of missed releases. Stop or revise when acceptance is
-not met.
+**Decision now:** pilot-design discussion only. Pilot authorization requires signed
+scope, data/security approval, accountable owners, gates and a total-spend cap.
+The following is a **proposed negotiation starting point, not customer-agreed
+acceptance, a statistical power calculation or a production qualification plan**.
 
-Illustrative capacity value: `120 alerts/month x 0.25h x USD100/h x 12 = USD36,000/year`.
-This is not verified savings or a vendor quote. Pilot scope/pricing needs approval;
-inspection avoidance must not be sold as guaranteed cash savings.
+### Proposed shadow-pilot scorecard
 
-60-minute choreography: 5m problem/unsigned objections; 10m S1/S2/S5 live console
-and one raw defect; 30m numerical derivation, role authority, PostgreSQL recovery,
-checked answers and real trace; 10m bounded pilot economics/risk; 5m out-of-role
-questions about FDE ownership, deployment constraints and customer adoption.
+Evaluate one pipeline for four weeks **after readiness acceptance**: week 1 replay
+and data checks; week 2 independent expert adjudication; week 3 operator comparison;
+week 4 joint review. Integration/discovery precedes this evaluation clock.
+
+| Proposed gate | Measurement and decision |
+|---|---|
+| Cases and labels | At least 20 distinct event-level cases, including at least five independently adjudicated examples each of observable leak, instrument error and benign operating change; include inadequate-coverage cases. Different checkpoints, seeds or reruns of one event do not supply independent field cases. Cases need approved independent labels or validated tests; synthetic cases remain separately labeled. This floor is not enough to certify field sensitivity. |
+| Blinded comparator | Run manual, strong-fixed and agent workflows on matched evidence, randomize/counterbalance operator assignment, and conceal workflow identity from outcome adjudicators where feasible. Record unavoidable unblinding and avoid repeat-case learning. Time preparation, waiting that blocks other work, evidence review, corrections, retries and handoff separately; report elapsed completion as well as total active human handling. |
+| Useful incremental value | At least 20% lower median active human handling than the stronger comparator, with no increase in adjudicated missed/false findings, unsafe recommendations or incorrect clearance. Report case counts and uncertainty; a small zero-error set is not proof of non-inferiority. Prefer fixed workflow if equivalent. |
+| Safety/evidence | Zero observed unsupported safety-critical claims, leak clearances or unauthorized actions in released reports; every released location has snapshot-bound support. All inadequate coverage remains unknown, not healthy; withheld reports and uncovered leaks remain counted. An observed safety-critical breach stops the pilot for review, not threshold tuning. |
+| Completion and timing | At least 90% of all admitted first attempts yield reviewable reports within 900s; disclose every retry and failure. Report median/p95 end-to-end completion and warning delivery separately. Five minutes remains a stretch target, not a passed gate. Production warning timing requires customer-defined acquisition/network budgets. |
+| Cost and exit | Actual total spend stays within the signed cap; no automatic paid extension. Review handling-time benefit, error quality and total cost jointly. Too few independent cases, missing labels or inconclusive comparisons means explicitly extend by agreement or stop—not pass. No production-safety rollout follows automatically. |
+
+### Readiness, ownership and effort
+
+Before scheduling, name a customer integrity lead (labels, safety and approval),
+instrumentation/historian owner (feeds, units, clock/arrival semantics and normal
+reference), operations SME (valve/compressor context and shared failure domains),
+knowledge owner (approved procedures, versions and contradictions), security/data
+owner (hosted inference, access, retention and deletion), delivery lead (connectors,
+identity, deployment, recovery and support), and sponsor (cap and exit decision).
+One person may hold multiple roles, but none is implicitly supplied by the demo.
+
+Require topology/chainage and sensor/gateway metadata, synchronized event histories,
+quality flags and known gaps, independently labeled cases, current operating and
+maintenance records, read-only access, identity/approval workflow, hosting capacity,
+and data-export/retention terms. Connectors and production identity are not supplied.
+Knowledge onboarding requires expert elicitation, approval/change control and a
+newcomer-versus-expert transfer exercise, not merely importing documents.
+
+**Discovery-only effort estimate:** allow 5–10 delivery person-days for schema/
+connector/security mapping plus 3–5 customer SME person-days for data and case
+readiness, before the evaluation. This is an unvalidated planning allowance, not
+a quote, staffing commitment or connector-completion guarantee; gaps may require
+materially more effort. Re-estimate deployment, identity, integration and ongoing
+review/support after inspecting the actual site. Owners must accept the revised
+effort, schedule and cap before work proceeds.
+
+### Transparent total cost; no invented savings
+
+`Pilot TCO = attributable actual Copilot entitlement + actual incremental usage/
+overages + hosting/storage/network/observability + implementation/deployment labor
++ customer expert/reviewer labor + support/maintenance + agreed contingency`.
+
+All monetary inputs, approved commercial entitlement, usage allowances/overages,
+attribution of existing subscriptions, infrastructure sizing and labor rates remain
+**unknown**. Obtain the actual Copilot plan/organization entitlement and provider
+usage/billing records; validate permitted deployment and service use. Model/tool
+counts are workload counters, not a bill. Record failed/revised calls too. A
+hypothetical `input tokens × assumed rate + output tokens × assumed rate` scenario
+is a sensitivity estimate only: do not substitute it for actual Copilot accounting,
+add it again to that bill, or claim absent token telemetry is measured usage.
+No contractual dollar quotation exists here; signed total-spend cap, allocation of
+customer effort and pause/overage approval rules are prerequisites.
+
+Capacity-value hypothesis: `eligible cases × measured active human hours saved per
+case × agreed loaded hourly rate`, less full TCO. The ten-minute manual baseline is
+unmeasured; the former 15-minute-saving illustration is withdrawn as inconsistent.
+Freed capacity is not necessarily cash savings; no avoided inspection or field ROI
+is established.
+
+**30-minute buying conversation:** 5m problem and objections; 10m the canonical
+recorded S7 investigation (measurements, competing explanations, where/when and
+remaining engineer actions); 10m readiness, TCO and proposed scorecard; 5m agree
+owners and the conditional next decision. Label recorded results and actual timing;
+do not promise a fresh accepted answer within the meeting.
 
 **Not implemented/supported:** live historian ingestion, production multi-user
 identity, certified leak protection, plant control, DanaOS integration, local-only

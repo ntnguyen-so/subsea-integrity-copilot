@@ -19,6 +19,7 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 from pydantic import Field
 
 from subsea_copilot.profiles import comparison_documents, comparison_sensors, expanded_evidence
+from subsea_copilot.runtime.provenance import RUNTIME_ENVELOPE
 
 
 def decoded_output(content: str) -> dict[str, Any]:
@@ -413,7 +414,39 @@ class ScriptedChatModel(BaseChatModel):
             or not context.get("history_version")
         ):
             return None, None
+        runtime = next((
+            json.loads(message.content.removeprefix(RUNTIME_ENVELOPE))
+            for message in messages
+            if isinstance(message, SystemMessage) and isinstance(message.content, str)
+            and message.content.startswith(RUNTIME_ENVELOPE)
+        ), {})
+        references = runtime.get("history_reference_ids") or {}
+        archives = [
+            reference for message in messages
+            if isinstance(message, HumanMessage) and isinstance(message.content, str)
+            and '"archived_receipts":' in message.content
+            for reference in json.loads(message.content)["archived_receipts"]
+        ]
         data = [output.get("result") or {} for output in outputs]
+        dependency = next((entry for entry in archives if entry["tool"] == "task.result"), None)
+        if (
+            context.get("decision_policy") == "llm-diagnosis-v1" and dependency
+            and not any("task_id" in row and "result" in row for row in data)
+        ):
+            return AIMessage(content="", tool_calls=[{
+                "id": uuid4().hex, "name": "evidence.get",
+                "args": {
+                    **context["scope"], "ids": [], "receipt_id": dependency["receipt_id"],
+                },
+            }]), None
+        if (
+            context.get("decision_policy") == "llm-diagnosis-v1" and archives
+            and references.get("document_ids") and references.get("comparison_call_ids")
+        ):
+            # Compaction retains read identities, not enough content for causal fixture rules.
+            return None, {
+                "assessment": "unresolved", **references, "next_action": "human_review",
+            }
         assessment: dict[str, Any] = next(
             (row["assessment"] for row in data if "assessment" in row), {}
         )

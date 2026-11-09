@@ -4,7 +4,93 @@
  * Requires local credentials/backend; saved monitoring inspection submits no questions.
  */
 import { test, expect } from "@playwright/test";
-import type { ReplaySession } from "../../web/ts/types";
+import type { Projection, ReplaySession } from "../../web/ts/types";
+
+test("recovery clears only obsolete connection errors after coherent state reload", async ({ page }) => {
+  test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires the owned local operator environment.");
+  await page.request.post("/api/login", {
+    data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD },
+  });
+  const { replays }: { replays: ReplaySession[] } = await (await page.request.get("/api/replays")).json();
+  const replay = replays.find(row => row.latest_window_id && row.source_version === "pressure-v3");
+  expect(replay).toBeDefined();
+  let disconnected = true;
+  await page.route(`**/api/replays/${replay!.id}/events?*`, route =>
+    disconnected ? route.abort("failed") : route.continue());
+  await page.goto("/?replay=" + encodeURIComponent(replay!.id) + "&view=live");
+  await expect(page.locator("#notice")).toContainText("Event stream disconnected");
+  disconnected = false;
+  await expect(page.locator("#connection-state")).toHaveText("Connected · SSE", { timeout: 30000 });
+  await expect(page.locator("#notice")).toBeEmpty();
+  const windowsRoute = `**/api/replays/${replay!.id}/windows`;
+  await page.route(windowsRoute, route => route.fulfill({
+    status: 503, json: { detail: "Injected window history failure" },
+  }));
+  await page.locator("#reconnect").click();
+  await expect(page.locator("#notice")).toContainText("Injected window history failure");
+  await page.unroute(windowsRoute);
+  await page.locator("#reconnect").click();
+  await expect(page.locator("#connection-state")).toHaveText("Connected · SSE", { timeout: 30000 });
+  await expect(page.locator("#notice")).toContainText("Injected window history failure");
+});
+
+test("projection refreshes do not starve a slow selected investigation read", async ({ page }) => {
+  test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires the owned local operator environment.");
+  const login = await page.request.post("/api/login", {
+    data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD },
+  });
+  expect(login.ok()).toBeTruthy();
+  const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
+  const created = await page.request.post("/api/replays", { headers, data: {
+    scenario: "S1", seed: 2026, mode: "scripted", workflow: "agent_assisted",
+    pause_on_anomaly: false, idempotency_key: crypto.randomUUID(),
+  } });
+  expect(created.ok()).toBeTruthy();
+  const replay: ReplaySession = await created.json();
+  const id = replay.id;
+  for (let index = 0; index < 20; index++) {
+    const stepped = await page.request.post(`/api/replays/${id}/control`, {
+      headers, data: { action: "step", idempotency_key: `slow-receipt-${index}` },
+    });
+    expect(stepped.ok()).toBeTruthy();
+  }
+  await expect.poll(async () => {
+    const current: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+    return current.tasks.some(task => task.role === "sensor_quality" && task.state === "SUCCEEDED");
+  }, { timeout: 60000 }).toBe(true);
+  const current: Projection = await (await page.request.get(`/api/replays/${id}/projection`)).json();
+  const child = current.tasks.find(task => task.role === "sensor_quality" && task.state === "SUCCEEDED");
+  expect(child).toBeDefined();
+  await page.route(`**/api/replays/${id}/recordings`, route => route.fulfill({ json: { recordings: [] } }));
+  const writes: string[] = [];
+  page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
+  await page.goto("/?replay=" + encodeURIComponent(id) + "&view=live");
+  await page.locator("#investigation-technical > summary").click();
+  let release = (): void => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let reads = 0;
+  await page.route(`**/api/tasks/${child!.id}`, async route => {
+    reads++;
+    await gate;
+    await route.continue();
+  });
+  try {
+    await page.locator(`#task-tree button[data-task="${child!.id}"]`).click();
+    await expect.poll(() => reads).toBe(1);
+    for (let index = 0; index < 3; index++) {
+      const refreshed = page.waitForResponse(response =>
+        new URL(response.url()).pathname === `/api/replays/${id}/windows` && response.ok());
+      await page.locator("#reconnect").click();
+      await refreshed;
+      await page.waitForTimeout(200);
+    }
+    expect(reads).toBe(1);
+  } finally {
+    release();
+  }
+  await expect(page.locator("#task-detail")).toContainText(child!.id, { timeout: 30000 });
+  expect(writes).toEqual([]);
+});
 
 test("recorded monitoring, sensor evidence and keyboard navigation work without question submission", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires the owned local operator environment.");

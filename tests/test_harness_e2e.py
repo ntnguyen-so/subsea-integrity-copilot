@@ -15,6 +15,7 @@ import pytest
 
 from subsea_copilot.config import Settings
 from subsea_copilot.contracts import content_hash
+from subsea_copilot.prompts import prompt_manifest
 from subsea_copilot.runtime.checkpointer import postgres_checkpointer
 from subsea_copilot.store import Store
 
@@ -101,10 +102,16 @@ def test_http_investigation_compacts_repairs_and_preserves_harness_and_sources(t
                     "What caused the event and where should we inspect?", "repair",
                 )
                 assert accepted["task"]["state"] == "SUCCEEDED", {
-                    "task": accepted["task"],
-                    "children": [(c["role"], c["state"], c["error_code"])
-                                 for c in accepted["children"]],
-                    "server_log": (tmp_path / "server.log").read_text(),
+                    "error": accepted["task"]["error_message"],
+                    "children": [{
+                        "role": c["role"], "state": c["state"], "error": c["error_code"],
+                        "model_calls": c["model_calls"], "tool_calls": c["tool_calls"],
+                        "tools": [
+                            receipt["name"] for receipt in
+                            client.get(f"/api/tasks/{c['id']}").json()["receipts"]
+                        ],
+                    } for c in accepted["children"]],
+                    "server_log": str(tmp_path / "server.log"),
                 }
                 task_id = accepted["task"]["id"]
                 response = client.get(f"/api/tasks/{task_id}/casefile")
@@ -170,7 +177,8 @@ def test_http_investigation_compacts_repairs_and_preserves_harness_and_sources(t
                         assert manifests
                         assert all(
                             manifest["prompt_catalog_sha256"] == catalog_hash
-                            and manifest["prompt_asset"]["version"] == "1.0.0"
+                            and manifest["prompt_catalog"] == prompt_manifest()
+                            and manifest["prompt_asset"] in prompt_manifest().values()
                             for manifest in manifests.values()
                         )
                         for call in store.list_model_calls(detail["task"]["id"]):

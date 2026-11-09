@@ -14,21 +14,30 @@ from fastapi.testclient import TestClient
 from subsea_copilot.casefile import InvestigationCase
 from subsea_copilot.config import Settings
 from subsea_copilot.contracts import SitePack
-from subsea_copilot.playback import Recording, RecordingLibrary, load_library, save_library
+from subsea_copilot.playback import (
+    RecordedTrace,
+    Recording,
+    RecordingLibrary,
+    load_library,
+    save_library,
+)
 from subsea_copilot.recorded_console import create_recorded_console
 from subsea_copilot.store import Store
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--runs", type=Path, required=True)
+    parser.add_argument("--runs", type=Path)
+    parser.add_argument("--refresh-traces", action="store_true")
     args = parser.parse_args()
+    if args.runs is None and not args.refresh_traces:
+        parser.error("Provide --runs or --refresh-traces")
     settings = Settings.from_env()
     destination = settings.runtime_dir / "agent-playback.json"
     # Merge, do not erase other published checkpoints when exporting a subset.
     recordings = {row.task.id: row for row in load_library(destination).recordings}
-    manifests = sorted(args.runs.glob(r"S7-2026-*\manifest.json"))
-    if not manifests:
+    manifests = sorted(args.runs.glob(r"S7-2026-*\manifest.json")) if args.runs else []
+    if args.runs is not None and not manifests:
         parser.error("No preserved S7 checkpoint manifests found")
     for path in manifests:
         manifest = json.loads(path.read_text(encoding="utf-8"))
@@ -56,6 +65,7 @@ def main() -> None:
                     child for child in store.list_tasks(manifest["generation_id"])
                     if child.parent_id == task.id
                 ]
+                trace_metadata = store.latest_task_trace(task.id)
             row = Recording(
                 scenario=manifest["scenario"], seed=manifest["seed"],
                 dataset_sha256=manifest["dataset_sha256"],
@@ -64,8 +74,36 @@ def main() -> None:
                 casefile=InvestigationCase.model_validate(detail["casefile"])
                 if detail["casefile"] else None,
                 execution_usage=detail.get("execution_usage"),
+                trace_metadata=RecordedTrace.model_validate({
+                    **trace_metadata, "task_id": task.id, "snapshot_id": snapshot.id,
+                }) if trace_metadata else None,
             )
+            if row.trace_metadata is None:
+                print(f"No original trace metadata recorded for {task.id}.")
             recordings[row.task.id] = row
+    if args.refresh_traces:
+        for task_id, row in recordings.items():
+            with Store(
+                settings.database_dsn, row.task.tenant_id, row.task.site_id,
+                settings.tools_dsn, qualification=True,
+            ) as store:
+                task = store.get_task(task_id)
+                snapshot = store.get_window(task.snapshot_id)
+                if (
+                    task.snapshot_id != row.task.snapshot_id
+                    or task.generation_id != row.task.generation_id
+                    or task.state != row.task.state or task.updated_at != row.task.updated_at
+                    or snapshot.input_hash != row.snapshot.input_hash
+                ):
+                    raise ValueError(f"Original recording identity changed: {task_id}")
+                trace_metadata = store.latest_task_trace(task_id)
+            if trace_metadata is None:
+                raise ValueError(f"No original trace metadata recorded for {task_id}")
+            recordings[task_id] = row.model_copy(update={
+                "trace_metadata": RecordedTrace.model_validate({
+                    **trace_metadata, "task_id": task_id, "snapshot_id": row.snapshot.id,
+                }),
+            })
     save_library(destination, RecordingLibrary(recordings=list(recordings.values())))
     print(
         f"Preserved {len(recordings)} terminal investigations for playback. No inference executed."

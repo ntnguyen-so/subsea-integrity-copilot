@@ -81,7 +81,7 @@ def test_agent_banner_counts_unique_sensors_and_handles_no_alerts(count):
     if count:
         assert warning.title == "1 sensor flagged by monitoring"
         assert warning.kind == "sensor_alerts"
-        assert warning.severity == "attention"
+        assert warning.severity == "warning"
     else:
         assert warning.title == "No sensors flagged in the latest monitoring window"
         assert warning.kind == "no_sensor_alerts"

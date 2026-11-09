@@ -15,7 +15,7 @@ import threading
 import time
 from bisect import bisect_right
 from collections import defaultdict, deque
-from collections.abc import AsyncIterator, Callable, Iterator
+from collections.abc import AsyncIterator, Callable, Iterator, Mapping
 from contextlib import AbstractContextManager, asynccontextmanager, contextmanager
 from datetime import timedelta
 from pathlib import Path
@@ -514,13 +514,53 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             and start <= parse_timestamp(row.observed_at) < end
         ], source.dataset.pack)
 
-    def display_window(snapshot_id: str) -> WindowSnapshot:
+    def timeline_frame(replay: ReplaySession, source_seconds: int) -> WindowSnapshot | None:
+        source = monitor_service()._source(replay)
+        pack = source.dataset.pack
+        if not 0 <= source_seconds <= replay.duration_seconds or source_seconds % pack.hop_seconds:
+            raise HTTPException(status_code=422, detail="Choose a source-window endpoint")
+        if source_seconds == 0:
+            return None
+        with timeline_lock:
+            cached = next((
+                frame for frame in timeline_frames.values()
+                if frame.generation_id == replay.id and frame.end_seconds == source_seconds
+            ), None)
+        if cached is None:
+            clock = source_seconds + pack.lateness_seconds
+            cached = analyze_window(
+                pack, source.baseline,
+                timeline_observations(replay, source_seconds, clock),
+                generation_id=replay.id, end_seconds=source_seconds,
+                clock_seconds=clock, epoch=replay.epoch, tenant_id=replay.tenant_id,
+                screening_only=True,
+            )
+            with timeline_lock:
+                timeline_frames[cached.id] = cached
+                if len(timeline_frames) > 128:
+                    del timeline_frames[next(iter(timeline_frames))]
+        return cached
+
+    def display_window(
+        snapshot_id: str, generation_id: str | None = None, source_seconds: int | None = None,
+    ) -> tuple[WindowSnapshot, bool]:
+        if generation_id is not None or source_seconds is not None:
+            if generation_id is None or source_seconds is None:
+                raise HTTPException(
+                    status_code=422, detail="Provide replay and source endpoint together",
+                )
+            reconstructed = timeline_frame(store.get_replay(generation_id), source_seconds)
+            if reconstructed is None or reconstructed.id != snapshot_id:
+                raise HTTPException(
+                    status_code=409, detail="Timeline source does not match this snapshot",
+                )
+            return reconstructed, True
         with timeline_lock:
             cached = timeline_frames.get(snapshot_id)
         if cached is not None:
             store.get_replay(cached.generation_id)
-            return cached
-        return store.get_window(snapshot_id)
+            return cached, True
+        return store.get_window(snapshot_id), False
 
     @app.get("/api/replays/{generation_id}/timeline-window")
     def timeline_window(
@@ -529,33 +569,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         """Build a bounded measurement-only display frame without creating agent work."""
         principal(request)
         replay = store.get_replay(generation_id)
-        source = monitor_service()._source(replay)
-        pack = source.dataset.pack
-        if not 0 <= source_seconds <= replay.duration_seconds or source_seconds % pack.hop_seconds:
-            raise HTTPException(status_code=422, detail="Choose a source-window endpoint")
-        if source_seconds == 0:
-            return {
-                "snapshot": None,
-                "warning": monitoring_warning(None, workflow=replay.workflow),
-            }
-        with timeline_lock:
-            cached = next((
-                frame for frame in timeline_frames.values()
-                if frame.generation_id == generation_id and frame.end_seconds == source_seconds
-            ), None)
-        if cached is None:
-            clock = source_seconds + pack.lateness_seconds
-            cached = analyze_window(
-                pack, source.baseline,
-                timeline_observations(replay, source_seconds, clock),
-                generation_id=generation_id, end_seconds=source_seconds,
-                clock_seconds=clock, epoch=replay.epoch, tenant_id=replay.tenant_id,
-                screening_only=True,
-            )
-            with timeline_lock:
-                timeline_frames[cached.id] = cached
-                if len(timeline_frames) > 128:
-                    del timeline_frames[next(iter(timeline_frames))]
+        cached = timeline_frame(replay, source_seconds)
         return {
             "snapshot": cached,
             "warning": monitoring_warning(cached, workflow=replay.workflow),
@@ -614,6 +628,15 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
                 assert isinstance(detail, dict)
                 detail["output_mapping"] = report_labels(row.task, row.pack)
                 return payload
+        task, snapshot, pack = stored_recording(generation_id, task_id)
+        return {
+            "pack": pack, "snapshot": snapshot,
+            "detail": task_detail(task.id, accepted_casefile_only=True),
+        }
+
+    def stored_recording(
+        generation_id: str, task_id: str,
+    ) -> tuple[AgentTask, WindowSnapshot, SitePack]:
         replay = store.get_replay(generation_id)
         task = store.get_task(task_id)
         original = store.get_replay(task.generation_id)
@@ -628,10 +651,19 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             or recording_dataset_hash(original.id) != recording_dataset_hash(generation_id)
         ):
             raise HTTPException(status_code=404, detail="No compatible recorded investigation")
-        return {
-            "pack": pack, "snapshot": snapshot,
-            "detail": task_detail(task_id, accepted_casefile_only=True),
-        }
+        return task, snapshot, pack
+
+    @app.get("/api/replays/{generation_id}/recordings/{task_id}/trace")
+    def recorded_trace(generation_id: str, task_id: str, request: Request) -> dict[str, object]:
+        principal(request)
+        for row in compatible_recordings(generation_id):
+            if row.task.id == task_id:
+                metadata = (
+                    row.trace_metadata.model_dump(exclude_none=True) if row.trace_metadata else {}
+                )
+                return trace_payload(row.task, metadata)
+        task, _, _ = stored_recording(generation_id, task_id)
+        return trace_payload(task, store.latest_task_trace(task.id) or {})
 
     @app.post("/api/replays/{generation_id}/investigate-here")
     def investigate_here(
@@ -737,21 +769,25 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             ) from exc
 
     @app.get("/api/windows/{snapshot_id}")
-    def window(snapshot_id: str, request: Request) -> object:
+    def window(
+        snapshot_id: str, request: Request,
+        generation_id: str | None = None, source_seconds: int | None = None,
+    ) -> object:
         principal(request)
-        return display_window(snapshot_id)
+        return display_window(snapshot_id, generation_id, source_seconds)[0]
 
     @app.get("/api/windows/{snapshot_id}/sensors/{sensor_id}")
-    def sensor_details(snapshot_id: str, sensor_id: str, request: Request) -> dict[str, object]:
+    def sensor_details(
+        snapshot_id: str, sensor_id: str, request: Request,
+        generation_id: str | None = None, source_seconds: int | None = None,
+    ) -> dict[str, object]:
         principal(request)
-        snapshot = display_window(snapshot_id)
+        snapshot, reconstructed = display_window(snapshot_id, generation_id, source_seconds)
         pack = monitor_service().pack_for(snapshot.generation_id)
         sensor = next((row for row in pack.sensors if row.id == sensor_id), None)
         if sensor is None:
             raise HTTPException(status_code=404, detail="Sensor not found in this site")
         replay = store.get_replay(snapshot.generation_id)
-        with timeline_lock:
-            reconstructed = snapshot_id in timeline_frames
         if reconstructed:
             return {"sensor": sensor, "observations": timeline_observations(
                 replay, snapshot.end_seconds, snapshot.clock_seconds, sensor_id,
@@ -888,10 +924,12 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def trace_view(task_id: str, request: Request) -> dict[str, object]:
         principal(request)
         task = store.get_task(task_id)
-        metadata = store.latest_task_trace(task_id) or {}
+        return trace_payload(task, store.latest_task_trace(task_id) or {})
+
+    def trace_payload(task: AgentTask, metadata: Mapping[str, object]) -> dict[str, object]:
         visible: bool | None = None
         trace_id = metadata.get("trace_id")
-        if task.state in ("SUCCEEDED", "ABSTAINED") and isinstance(trace_id, str):
+        if task.state in ("SUCCEEDED", "ABSTAINED", "FAILED") and isinstance(trace_id, str):
             telemetry.flush()
             visible = telemetry.verify_trace(
                 trace_id, required_types=["agent", "generation", "tool", "guardrail"]

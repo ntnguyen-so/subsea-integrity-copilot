@@ -18,15 +18,13 @@ const { chromium, expect } = require("@playwright/test");
     const page = await context.newPage();
     const failures = [];
     page.on("pageerror", error => failures.push(error.message));
-    await page.goto(url);
-    await page.locator("#replay-history").selectOption(replayId);
-    await page.locator("#tab-agents").click();
-    await page.locator("#execution-details > summary").click();
+    await page.goto(new URL(`/?replay=${encodeURIComponent(replayId)}&view=live`, url).href);
+    await page.locator("#investigation-technical > summary").click();
     await Promise.all([
       page.waitForResponse(response =>
         response.url() === new URL(`/api/tasks/${taskId}`, url).href
           && response.status() === 200),
-      page.locator(`[data-task="${taskId}"]`).click(),
+      page.locator(`#task-tree button[data-task="${taskId}"]`).click(),
     ]);
     await expect(page.locator("#history-investigation")).toBeVisible({ timeout: 15000 });
     await expect(page.locator("#history-investigation")).toContainText("Executed evidence checks");
@@ -35,8 +33,6 @@ const { chromium, expect } = require("@playwright/test");
     expect(detail.task.state).toBe("SUCCEEDED");
     expect(detail.harness_events.some(event => event.type === "harness.started")).toBeTruthy();
     expect(detail.harness_events.some(event => event.type === "validation.repair_requested")).toBeTruthy();
-    await page.locator("#tab-audit").click();
-    await page.locator("#event-filter").selectOption("answer");
     const denied = await context.request.post(`${url}/api/replays/${replayId}/questions`, {
       headers: { "X-CSRF-Token": session.csrf_token },
       data: {
@@ -45,12 +41,17 @@ const { chromium, expect } = require("@playwright/test");
       },
     });
     expect(denied.status()).toBe(200);
-    await expect(page.locator("#event-feed")).toContainText("validation.rejected", {
-      timeout: 15000,
-    });
-    await expect(page.locator("#event-feed")).toContainText("validation.repair_requested", {
-      timeout: 15000,
-    });
+    const deniedTask = await denied.json();
+    await expect.poll(async () => {
+      const current = await context.request.get(`${url}/api/tasks/${deniedTask.id}`);
+      expect(current.ok()).toBeTruthy();
+      const record = await current.json();
+      const types = record.harness_events.map(event => event.type);
+      return types.includes("validation.rejected") && types.includes("validation.repair_requested");
+    }, { timeout: 30000 }).toBe(true);
+    await page.locator(`#task-tree button[data-task="${deniedTask.id}"]`).click();
+    await expect(page.locator("#task-detail")).toContainText(deniedTask.id);
+    await expect(page.locator("#tab-audit, #tab-agents, #event-feed")).toHaveCount(0);
     expect(failures).toEqual([]);
     await context.close();
   } finally {

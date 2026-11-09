@@ -98,6 +98,15 @@ at every five-second window. Playback selects the latest compatible terminal tri
 at or before the selected time, including failed and abstained attempts; those
 outcomes never imply an accepted report or safety clearance.
 
+Each selected recording exposes **Open whole investigation in Langfuse** and
+**View Langfuse run**, bound to its original task and evidence snapshot. The link
+and trace details follow the timeline without launching inference; late responses
+cannot replace a newer selection. Missing metadata or unverifiable stored traces
+are explicitly labelled, without substituting another run or hiding the report.
+The eight selected library checkpoints have verified original stored traces.
+The older database-only +135s checkpoint retains its original trace ID, but that
+trace is currently absent from Langfuse storage; its link is marked unverified.
+
 After generating the S7 investigations with the verification command below,
 export their immutable snapshots and reports without new model calls:
 
@@ -106,6 +115,12 @@ export their immutable snapshots and reports without new model calls:
 uv run python tools\verify-s7-agents.py --output runtime\s7-check
 uv run python tools\prepare-agent-playback.py --runs runtime\s7-check
 ```
+
+Exports preserve original trace metadata. To backfill an existing library from
+its original scoped task stores, stop the dashboard first, then run
+`.\.venv\Scripts\python.exe tools\prepare-agent-playback.py --refresh-traces`
+with the owned environment loaded, and restart the dashboard. This updates trace
+metadata only and performs no inference; missing original metadata is an error.
 
 The recording library persists in the configured runtime directory, outside
 source control. Checkpoints run in parallel by default; `--workers` can limit
@@ -125,8 +140,11 @@ With the dashboard running and the generated S7 recording library present:
 ```powershell
 . .\tools\load-environment.ps1
 npx playwright test investigation-playback.spec.ts console.spec.ts --reporter=line
-uv run subsea provider-check --mode live --model gpt-6.1-sol
+uv run --no-sync subsea provider-check --mode live --model gpt-6.1-sol
 ```
+
+Install dependencies before starting the server. On Windows, auxiliary probes
+use `--no-sync` to avoid replacing an executable held open by the running server.
 
 The browser checks include every default S7 checkpoint's accepted casefile,
 input hash, final grounding acceptance and specialist states, plus warnings,
@@ -137,6 +155,52 @@ including corrections and any failures. Export only after reviewing its completi
 result, then prepare the report mappings as described below. Keep failed attempts
 in the audit history. Several accepted synthetic runs do not establish a production
 success rate, physical accuracy or guaranteed future acceptance.
+
+#### Buyer acceptance review
+
+The buyer walkthrough uses S7: distinguish a localized pressure pattern from
+instrument concerns and operating changes, inspect the quoted P5 interval, and
+check the original readings. The displayed UTC window is **not** an established
+event-onset time. An inspection interval is a verification priority, not an exact
+leak coordinate or authorization.
+
+| Observed gap | Correction |
+|---|---|
+| An old disconnection warning remained beside `Connected / SSE`. | Connection notices clear only after a coherent projection reload; unrelated errors remain visible. |
+| Agent findings and run cost were difficult to discover below the measurement panels. | A keyboard-accessible link opens the Live workspace and focuses the agent findings. |
+| Preserved attempts looked like distinct evaluation cases. | The timeline distinguishes unique source checkpoints from preserved attempts. Neither is an independent-event reliability denominator. |
+| Main-map accessible labels omitted quoted instrument findings. | Labels distinguish agent instrument concerns from leak-pattern findings and numerical flags. |
+| Recorded Inspect omitted a saved report that was visible in Live. | Inspect receives the compatible recording, retaining its original identity and requiring matching input hash, source window, arrival cutoff and numerical versions. Intermediate windows do not inherit an older report. |
+| Frequent live updates could repeatedly invalidate a slow manually selected investigation read, leaving its report/trace loading. | Duplicate reads for the same selected task and generation now share the in-flight selection instead of cancelling it. Changing task or generation still invalidates stale responses. A delayed-read/reconnect regression checks that three projection refreshes issue only one specialist read and the public result becomes visible. |
+| A reconstructed measurement window could disappear from the bounded display cache. | Sensor reads carry replay/endpoint provenance so the server can reconstruct the exact frame after cache loss. Mismatched source hints are rejected; reads create no observations, persisted windows or agent tasks. |
+| Missing-only coverage loss could incorrectly pause the simulation and dispatch pressure investigations. | Initial admission now requires measured pressure anomalies. Missing and invalid readings still produce immediate coverage warnings without becoming a leak trigger or a safety clearance. Within an existing pressure episode, changed instrument-quality signals still queue a source-bound reassessment. |
+| A legacy numerical hypothesis could alter generic warning severity in just one workflow. | Generic sensor warnings use the same severity regardless of causal hypotheses; numerical legacy evaluation remains separately labeled. |
+| The offline contract transport could repeat archived history reads until its bounded runtime failed. | It rehydrates archived specialist receipts and honors executed history identities, preserving limitations and returning an explicitly unresolved fixture result rather than inventing a diagnosis. The HTTP/PostgreSQL/checkpoint/browser regression also verifies prompt provenance, repairs and denied tool access. |
+| Five-minute latency and savings illustrations overstated the evidence. | The brief, report and results separate aspirations, measured latency and the 900-second root deadline, and remove inconsistent savings arithmetic. |
+| The purchase case lacked a complete cost/acceptance agreement. | The report now supplies a TCO framework, proposed blinded manual/fixed/agent pilot gates, readiness owners and a 30-minute buying agenda. These are proposals, not a quotation or customer agreement. |
+| Some acceptance probes still assumed removed tabs, numerical causal overlays, fixed case counts or a hardcoded prompt version. | Probes now use supported controls, all returned case identities and the exact current prompt catalog. Raw audits are opened explicitly; asynchronous completion is bounded separately from UI responsiveness. Review gates and runtime budgets were not relaxed. |
+| Python static type checking is blocked by Windows Application Control. | The installed `mypy` executable cannot load its compiled module. This remains an environment prerequisite: run it in an approved environment before promotion. No Python static typing pass is claimed. |
+
+Use the browser regressions for recorded/live navigation, loading barriers,
+warnings, inspection, mapping, evaluation, source audit and usage; use the
+PostgreSQL integration checks for immutable scope and reconstruction after cache
+loss. Scripted and failure-injection checks do not constitute fresh hosted trials.
+The [report](REPORT.md) and [results](RESULTS.md) retain the historical failures
+and describe the limited synthetic hosted evidence.
+
+Final local qualification: **625 backend tests passed**, in disjoint runs of all
+41 monitoring integration tests and the remaining 584 tests. The clean full Chrome
+sweep passed **91 tests, with 11 explicit opt-in checks skipped and no failures**.
+TypeScript checking, the production frontend build and Ruff passed. A real
+`gpt-6.1-sol` provider-availability probe passed; this sweep did not launch a new
+full hosted investigation. Python static checking remains blocked as noted above.
+These results establish local regression coverage, not field efficacy or ROI.
+
+**Buying decision:** consider a capped, read-only shadow pilot only after agreeing
+the actual commercial terms, hosted-data approval, integration scope and
+independently adjudicated case set. Production approval, field accuracy, reduced
+engineer burnout and positive ROI remain unproven. Prefer the cheaper fixed
+workflow if agents do not improve total handling time without degrading quality.
 
 Switch **Recorded results** to **Live investigation**, then select **Run agents
 at +Xs** to start fresh hosted agents in a separate replay at the selected

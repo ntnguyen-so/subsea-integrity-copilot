@@ -15,10 +15,17 @@ from langgraph.checkpoint.memory import InMemorySaver
 from subsea_copilot import monitoring as monitoring_module
 from subsea_copilot.api import create_app
 from subsea_copilot.config import Settings
-from subsea_copilot.contracts import AgentRole, Mode, ReplaySession
+from subsea_copilot.contracts import AgentRole, Mode, ReplaySession, WindowSnapshot
 from subsea_copilot.diagnostics import analyze_window
 from subsea_copilot.ingest import normalize_records, parse_timestamp
 from subsea_copilot.monitoring import UNAVAILABLE_DISPATCH, Monitor
+from subsea_copilot.playback import (
+    RecordedTrace,
+    Recording,
+    RecordingLibrary,
+    dataset_hash,
+    save_library,
+)
 from subsea_copilot.runtime.scripted import ScriptedChatModel
 from subsea_copilot.runtime.workflow import AgentService
 from subsea_copilot.store import Conflict, Store
@@ -114,21 +121,36 @@ def test_outage_windows_progress_when_provider_is_unavailable(
     assert snapshot.end_seconds == 65
     assert snapshot.quality.status == "COVERAGE_LOST"
     assert snapshot.event.hypothesis == "insufficient_evidence"
+    assert monitoring_warning(snapshot, sensor_alerts_only=True).kind == "coverage_lost"
     assert not monitor.store.list_tasks(replay.id)
-    episodes = monitor.store.list_episodes(replay.id)
+    assert not monitor.store.list_episodes(replay.id)
+
+    pressure = monitor.create("S1", 2026, "live", "pressure-unavailable")
+    for index in range(20):
+        monitor.control(pressure.id, "step", None, f"pressure-{index}")
+    episodes = monitor.store.list_episodes(pressure.id)
     assert episodes
     assert all(episode.dispatch_status == "agent_unavailable" for episode in episodes)
     assert all(not episode.segment_ids for episode in episodes)
+    assert not monitor.store.list_tasks(pressure.id)
 
     # Availability can change between checking health and admitting a task.
     monkeypatch.setattr(monitor.agents, "health", lambda: {"available": True})
 
+    attempted: list[bool] = []
+
     def unavailable(*_args: object, **_kwargs: object) -> None:
+        attempted.append(True)
         raise ValidationError(failure, "Provider became unavailable during admission")
 
     monkeypatch.setattr(monitor.agents, "submit_question", unavailable)
-    monitor.control(replay.id, "step", None, "race-step")
-    assert monitor.store.get_replay(replay.id).clock_seconds == 75
+    monitor.control(pressure.id, "step", None, "race-step")
+    assert attempted
+    assert monitor.store.get_replay(pressure.id).clock_seconds == 105
+    expected = (
+        "knowledge_unavailable" if failure == "knowledge_unavailable" else "agent_unavailable"
+    )
+    assert monitor.store.list_episodes(pressure.id)[0].dispatch_status == expected
     assert monitor.error is None
 
 
@@ -262,7 +284,7 @@ def test_monitor_query_excludes_idle_history_but_keeps_clock_backlog(
 
 
 @pytest.mark.parametrize("pause_on_anomaly", [False, True])
-def test_missing_only_outage_requests_review_without_inventing_a_hardware_verdict(
+def test_missing_only_outage_warns_without_automatic_review_or_hardware_verdict(
     monitor: Monitor, monkeypatch: pytest.MonkeyPatch, pause_on_anomaly: bool
 ) -> None:
     def forbidden(*_args: object, **_kwargs: object) -> None:
@@ -273,9 +295,7 @@ def test_missing_only_outage_requests_review_without_inventing_a_hardware_verdic
     replay = monitor.create("S3", 2026, "live", "missing-only", pause_on_anomaly=pause_on_anomaly)
     for index in range(37):
         current = monitor.control(replay.id, "step", None, f"missing-step-{index}")
-        if current.investigation_window_id:
-            current = monitor.control(replay.id, "play", None, f"continue-missing-{index}")
-            monitor.control(replay.id, "pause", None, f"pause-missing-{index}")
+        assert current.investigation_window_id is None
     snapshot = monitor.store.get_window(current.latest_window_id)
     assert 185 <= current.clock_seconds < 190
     assert snapshot.quality.status == "COVERAGE_LOST"
@@ -283,10 +303,7 @@ def test_missing_only_outage_requests_review_without_inventing_a_hardware_verdic
     assert not any(finding.anomaly_count for finding in snapshot.quality.findings)
     assert monitoring_warning(snapshot, sensor_alerts_only=True).kind == "coverage_lost"
     assert not monitor.store.list_tasks(replay.id)
-    episodes = monitor.store.list_episodes(replay.id)
-    assert episodes
-    assert all(episode.hypothesis == "insufficient_evidence" for episode in episodes)
-    assert all(not episode.segment_ids for episode in episodes)
+    assert not monitor.store.list_episodes(replay.id)
 
 
 def test_missing_invalid_flags_wait_for_context_not_a_numerical_fault_label(
@@ -310,7 +327,7 @@ def test_missing_invalid_flags_wait_for_context_not_a_numerical_fault_label(
     assert not monitor.store.list_tasks(replay.id)
 
 
-def test_recovered_missing_only_hold_reports_unavailable_review_and_can_continue(
+def test_recovered_missing_only_hold_reports_no_pressure_trigger_and_can_continue(
     monitor: Monitor, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(monitor.agents, "health", lambda: {"available": False})
@@ -323,7 +340,7 @@ def test_recovered_missing_only_hold_reports_unavailable_review_and_can_continue
     )
     monitor._episode(current, monitor.store.get_window(current.latest_window_id))
     assert not monitor.store.list_tasks(replay.id)
-    assert monitor.store.list_episodes(replay.id)[0].dispatch_status == "agent_unavailable"
+    assert monitor.store.list_episodes(replay.id)[0].dispatch_status == "no_pressure_anomaly"
     resumed = monitor.control(replay.id, "play", None, "continue-legacy")
     assert resumed.state == "PLAYING"
     assert resumed.investigation_window_id is None
@@ -615,11 +632,55 @@ def test_playback_live_override_preserves_recordings_and_retries_exact_window(
         assert saved.status_code == 200
         assert saved.json()["snapshot"]["input_hash"] == snapshot["input_hash"]
         assert saved.json()["detail"]["casefile"] is None
+        trace_path = f"{manifest_url}/{task['id']}/trace"
+        assert client.get(trace_path).json()["langfuse_url"] is None
+        monkeypatch.setattr(Telemetry, "trace_url", lambda _, value:
+                            f"http://localhost:3001/project/subsea-copilot/traces/{value}")
+        monkeypatch.setattr(Telemetry, "verify_trace", lambda *_args, **_kwargs: True)
+        app.state.store.publish_event(replay["id"], "task.started", {
+            "trace_id": "a" * 32, "trace_layout": "investigation-v1",
+        }, task_id=task["id"], snapshot_id=task["snapshot_id"])
+        traced = client.get(trace_path)
+        assert traced.status_code == 200
+        assert traced.json()["task_id"] == task["id"]
+        assert traced.json()["snapshot_id"] == task["snapshot_id"]
+        assert traced.json()["trace_id"] == "a" * 32
+        assert traced.json()["stored_trace_visible"] is True
+        archived_id = "archived-" + uuid.uuid4().hex
+        archived = app.state.store.get_task(task["id"]).model_copy(update={
+            "id": archived_id, "root_id": archived_id, "generation_id": "archived-generation",
+            "snapshot_id": "archived-snapshot", "tenant_id": "original-archive-tenant",
+        })
+        source = generate_scenario("S7", 2026, site_id=settings.site_id)
+        archived_snapshot = WindowSnapshot.model_validate(snapshot).model_copy(update={
+            "id": archived.snapshot_id, "generation_id": archived.generation_id,
+        })
+        save_library(settings.runtime_dir / "agent-playback.json", RecordingLibrary(recordings=[
+            Recording(
+                scenario="S7", seed=2026, dataset_sha256=dataset_hash(source), pack=source.pack,
+                snapshot=archived_snapshot, task=archived, children=[], casefile=None,
+                trace_metadata=RecordedTrace(
+                    task_id=archived.id, snapshot_id=archived.snapshot_id,
+                    trace_id="b" * 32, trace_layout="investigation-v1",
+                ),
+            ),
+        ]))
+        archived_trace = client.get(f"{manifest_url}/{archived.id}/trace")
+        assert archived_trace.status_code == 200
+        assert archived_trace.json()["trace_id"] == "b" * 32
+        assert archived_trace.json()["task_id"] == archived.id
+        assert archived_trace.json()["snapshot_id"] == archived.snapshot_id
         other = client.post("/api/replays", headers=headers, json={
             "scenario": "S7", "seed": 2027, "mode": "scripted",
             "idempotency_key": "unrelated-timeline",
         }).json()
         assert client.get(f"/api/replays/{other['id']}/recordings").json()["recordings"] == []
+        assert client.get(
+            f"/api/replays/{other['id']}/recordings/{archived.id}/trace"
+        ).status_code == 404
+        assert len(app.state.store.list_tasks(replay["id"])) == 1
+        client.cookies.clear()
+        assert client.get(f"{manifest_url}/{archived.id}/trace").status_code == 401
 
 
 def test_timeline_map_uses_received_measurements_without_advancing_or_writing(
@@ -679,6 +740,33 @@ def test_timeline_map_uses_received_measurements_without_advancing_or_writing(
                 assert row["sensor_id"] == sensor.id
                 assert row["unit"] == "bar"
             assert client.get(f"/api/windows/{frame['id']}").json()["id"] == frame["id"]
+        sensor_uri = f"/api/windows/{snapshot['id']}/sensors/{sensor.id}"
+        original_readings = client.get(sensor_uri).json()
+        # A fresh app has no display cache, as after restart or frame eviction.
+        with TestClient(create_app(settings, start_workers=False)) as restored:
+            restored.post("/api/login", json={
+                "username": "operator", "password": settings.operator_password,
+            })
+            assert restored.get(sensor_uri).status_code == 404
+            scope = {"generation_id": replay.id, "source_seconds": 120}
+            restored_readings = restored.get(sensor_uri, params=scope)
+            assert restored_readings.status_code == 200
+            assert restored_readings.json() == original_readings
+            rebuilt = restored.get(f"/api/windows/{snapshot['id']}", params=scope)
+            assert rebuilt.status_code == 200
+            assert rebuilt.json()["input_hash"] == snapshot["input_hash"]
+            assert restored.get(sensor_uri, params={
+                **scope, "source_seconds": 125,
+            }).status_code == 409
+            assert restored.get(sensor_uri, params={
+                **scope, "source_seconds": 0,
+            }).status_code == 409
+            assert restored.get(sensor_uri, params={
+                "generation_id": replay.id,
+            }).status_code == 422
+            assert restored.get(sensor_uri, params={
+                "source_seconds": 120,
+            }).status_code == 422
         store = client.app.state.store
         assert store.get_replay(replay.id).model_dump(mode="json") == original
         assert store.list_tasks(replay.id) == []
@@ -769,7 +857,7 @@ def test_both_api_workflows_share_detector_evidence_with_workflow_specific_copy(
         assert warnings[0]["kind"] == warnings[1]["kind"]
         assert warnings[1]["severity"] == "warning"
         assert warnings[0]["kind"] == "sensor_alerts"
-        assert warnings[0]["severity"] == "attention"
+        assert warnings[0]["severity"] == "warning"
         assert "engineer review required" in warnings[0]["title"]
         assert "does not classify" in warnings[0]["message"]
         assert "sensors flagged by monitoring" in warnings[1]["title"]

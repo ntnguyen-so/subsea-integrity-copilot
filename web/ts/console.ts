@@ -33,6 +33,7 @@ let selectedEpisodeId: string | null = null;
 let selectedEvidenceId: string | null = null;
 let selectedTaskId: string | null = null;
 let taskDetail: TaskDetail | null = null;
+let taskRead: { id: string; generation: number; token: number } | null = null;
 let automaticDetail: TaskDetail | null = null;
 let automaticReadKey: string | null = null;
 let automaticReading = false;
@@ -120,9 +121,10 @@ const eventTypes = [
 const publicReceiptFields = ["id", "call_id", "name", "task_id", "tool", "tool_name", "action", "status", "summary", "validation", "outcome", "evidence_ids", "claim_refs", "duration_ms", "error", "error_code", "snapshot_id", "created_at"];
 const publicTraceFields = ["trace_id", "span_id", "attempt_id", "session_id", "trace_layout", "task_id", "status", "mode", "model", "model_calls", "tool_calls", "usage", "duration_ms", "export_status", "stored", "stored_trace_visible", "content_capture", "langfuse_url", "url"];
 
-function notify(message: string, error = false): void {
+function notify(message: string, error = false, kind: "general" | "connection" = "general"): void {
   text("notice", message);
   box("notice").classList.toggle("error", error);
+  box("notice").dataset.kind = kind;
 }
 function errorMessage(error: unknown): string { return error instanceof Error ? error.message : "Unexpected backend response"; }
 function showError(error: unknown): void { notify(errorMessage(error), true); }
@@ -536,7 +538,10 @@ async function runProjection(): Promise<void> {
         selectedSensorId ||= data.pack.sensors[0]?.id || null;
         if (!cursorInitialized) { cursor = data.cursor; cursorInitialized = true; }
         projectionReceivedAt = Date.now();
-        if (source?.readyState === EventSource.OPEN) setConnection("Connected · SSE");
+        if (source?.readyState === EventSource.OPEN) {
+          setConnection("Connected · SSE");
+          if (box("notice").dataset.kind === "connection") notify("");
+        }
         replays = replays.map(replay => replay.id === id ? data.replay : replay);
         if (!replays.some(replay => replay.id === id)) replays.unshift(data.replay);
         if (followCurrent && !selectedWindow) selectedWindow = data.latest_window;
@@ -594,7 +599,7 @@ function connectStream(id: string, token: number): void {
   stream.onmessage = handle;
   stream.addEventListener("resync_required", () => {
     if (token !== generationToken) return;
-    notify("Live event updates were interrupted. Refreshing the dashboard from the current server state.", true);
+    notify("Live event updates were interrupted. Refreshing the dashboard from the current server state.", true, "connection");
     setConnection("Resync required");
     stream.close();
     void refreshProjection().then(() => {
@@ -608,7 +613,7 @@ function connectStream(id: string, token: number): void {
     if (token !== generationToken) return;
     stream.close();
     setConnection("Disconnected / reconnecting · stale");
-    notify("Event stream disconnected. Retrying with the durable cursor and refreshing actual backend state; the source clock is not extrapolated.", true);
+    notify("Event stream disconnected. Retrying with the durable cursor and refreshing actual backend state; the source clock is not extrapolated.", true, "connection");
     reconnectTimer = setTimeout(() => {
       if (token !== generationToken) return;
       void refreshProjection();
@@ -966,7 +971,8 @@ function renderMap(): void {
       issue: flags.assessed && issues.some(item => item.kind !== "missing") ? "agent" : undefined });
     if (selected) { group.classList.add("selected"); group.querySelector(".eval-selection")?.classList.add("selection-ring"); }
     group.setAttribute("role", "button"); group.setAttribute("tabindex", "0");
-    group.setAttribute("aria-label", `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Agent-reviewed pressure pattern; cause unconfirmed." : "No agent-reviewed pattern recorded."}`);
+    const agentIssues = issues.map(issue => `${issue.kind} (${issue.assertion})`).join(", ");
+    group.setAttribute("aria-label", `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Agent-reviewed pressure pattern; cause unconfirmed." : "No agent leak-pattern finding recorded."}${agentIssues ? ` Agent instrument finding: ${agentIssues}.` : ""}`);
     group.setAttribute("aria-pressed", String(selectedSensorId === sensor.id)); group.dataset.sensor = sensor.id;
     group.dataset.issueKinds = issues.map(item => item.kind).join(",");
     const labelOnLeft = sensor.segment_id === "P2" || sensor.segment_id === "P4";
@@ -1069,37 +1075,56 @@ function investigationViewerUrl(trace: Record<string, Json>): URL | null {
   url.search = ""; url.hash = "";
   return url;
 }
-function refreshHeaderTrace(task: AgentTask | null): void {
+function refreshHeaderTrace(task: AgentTask | null, recordedReplayId?: string): void {
   const link = element("automatic-langfuse", HTMLAnchorElement);
-  if (task && link.dataset.task === task.id && !link.hidden) return;
   const generation = generationToken;
-  const key = task ? `${generation}|${task.id}|${task.updated_at}` : null;
+  const recorded = recordedReplayId !== undefined;
+  const viewer = box("trace-view");
+  if (!recorded && viewer.dataset.recorded === "true") {
+    delete viewer.dataset.recorded; delete viewer.dataset.task;
+    viewer.replaceChildren(node("p", "Select a live investigation to view its Langfuse run.", "muted"));
+  }
+  const key = `${generation}|${recordedReplayId || "live"}|${task?.id || "none"}|${task?.updated_at || ""}`;
   if (key === automaticTraceKey) return;
   automaticTraceKey = key;
   link.hidden = true; link.removeAttribute("href"); delete link.dataset.task;
   text("automatic-trace-status", task ? "Loading Langfuse link..." : "");
+  if (recorded) {
+    viewer.dataset.recorded = "true"; delete viewer.dataset.task;
+    viewer.replaceChildren(node("p", task
+      ? "Loading the original recorded investigation trace..."
+      : "No recorded investigation selected; no trace substituted.", "muted"));
+  }
   if (!task) return;
-  void request<Record<string, Json>>(`/api/tasks/${enc(task.id)}/trace`).then(trace => {
+  const path = recorded
+    ? `/api/replays/${enc(recordedReplayId)}/recordings/${enc(task.id)}/trace`
+    : `/api/tasks/${enc(task.id)}/trace`;
+  void request<Record<string, Json>>(path).then(trace => {
     if (generation !== generationToken || automaticTraceKey !== key) return;
+    if (recorded && (trace.task_id !== task.id || trace.snapshot_id !== task.snapshot_id))
+      throw new Error("Recorded trace scope mismatch; no trace substituted.");
     const url = investigationViewerUrl(trace);
+    if (recorded) renderTrace(trace, true);
     if (!url) {
       text("automatic-trace-status", "Langfuse investigation session not yet recorded.");
       return;
     }
     link.href = url.href;
     link.dataset.task = task.id; link.hidden = false;
-    text("automatic-trace-status", "");
+    text("automatic-trace-status", recorded && trace.stored_trace_visible === false
+      ? "Original trace link · stored trace could not be verified" : "");
   }).catch(error => {
     if (generation === generationToken && automaticTraceKey === key) {
       text("automatic-trace-status", `Langfuse link unavailable: ${errorMessage(error)}`);
+      if (recorded) box("trace-view").replaceChildren(node("p",
+        `Recorded trace unavailable: ${errorMessage(error)}. Saved report remains available.`, "summary"));
     }
   });
 }
 function renderAutomaticInvestigation(): void {
   if (!projection) return;
   if (liveSelection !== null && !playback.enabled && !automaticRoot()) {
-    element("automatic-langfuse", HTMLAnchorElement).hidden = true;
-    text("automatic-trace-status", "");
+    refreshHeaderTrace(null);
     text("automatic-state", `LIVE · no investigation at +${liveSelection}s`);
     delete box("automatic-state").dataset.task;
     executionMetrics.set(null, null, false, projection.server_time);
@@ -1111,9 +1136,8 @@ function renderAutomaticInvestigation(): void {
     return;
   }
   if (playback.enabled) {
-    element("automatic-langfuse", HTMLAnchorElement).hidden = true;
-    text("automatic-trace-status", "Preserved investigation · original source time");
     playback.render();
+    refreshHeaderTrace(playback.currentFrame()?.detail.task || null, projection.replay.id);
     return;
   }
   const { replay, latest_window: latest, pack } = projection;
@@ -1222,7 +1246,7 @@ async function compareSensors(): Promise<void> {
   text("comparison-basis", `${bounds(window.window_start, window.window_end)} · ${short(window.id)} · pinned comparison`);
   try {
     const results = await Promise.all(ids.map(async id => {
-      const data = await request<{ sensor: Sensor; observations: CanonicalObservation[] }>(`/api/windows/${enc(window.id)}/sensors/${enc(id)}`);
+      const data = await request<{ sensor: Sensor; observations: CanonicalObservation[] }>(sensorReadPath(window, id));
       if (data.sensor.id !== id || data.observations.some(row => row.sensor_id !== id || row.unit !== "bar")) throw new Error("Comparison sensor or unit scope mismatch.");
       return data;
     }));
@@ -1251,6 +1275,12 @@ function selectSensor(id: string): void {
   selectedSensorId = id; selectedEvidenceId = null;
   text("evidence-detail", `${id} · choose an optional calculation reference below to inspect its source.`);
   renderMap(); renderSensorList(); renderEvidenceChips(); void loadSensor(); renderInspectionWorkspace();
+}
+function sensorReadPath(window: WindowSnapshot, sensorId: string): string {
+  const uri = `/api/windows/${enc(window.id)}/sensors/${enc(sensorId)}`;
+  return timelineWarning?.snapshot_id === window.id
+    ? `${uri}?generation_id=${enc(window.generation_id)}&source_seconds=${window.end_seconds}`
+    : uri;
 }
 /** Read canonical received observations for the selected immutable window; stale replies are ignored. */
 async function loadSensor(): Promise<void> {
@@ -1288,7 +1318,7 @@ async function loadSensor(): Promise<void> {
   box("channel-charts").setAttribute("aria-busy", "true");
   renderInspectionWorkspace();
   try {
-    const data = await request<{ sensor: Sensor; observations: CanonicalObservation[] }>(`/api/windows/${enc(window.id)}/sensors/${enc(id)}`);
+    const data = await request<{ sensor: Sensor; observations: CanonicalObservation[] }>(sensorReadPath(window, id));
     const adoptLiveWindow = live && followCurrent;
     if (token !== sensorToken || generation !== generationToken || selectedSensorId !== id || (!adoptLiveWindow && selectedWindow?.id !== window.id)) return;
     if (data.sensor.id !== id || data.observations.some(record => record.sensor_id !== id)) throw new Error("Sensor response scope mismatch.");
@@ -1372,7 +1402,7 @@ function renderInspectionWorkspace(): void {
     inspectionPeerLoading = true;
     void loadInspectionPeer(window, peerSensor, peerKey, inspectionPeerToken);
   }
-  if (activeTab === "evidence" && projection && window) {
+  if (activeTab === "evidence" && !playback.enabled && projection && window) {
     const accepted = [...projection.tasks].filter(task => task.parent_id === null && task.result && task.answer
       && ["SUCCEEDED", "ABSTAINED"].includes(task.state)).sort((a, b) => b.created_at.localeCompare(a.created_at));
     const candidate = accepted.find(task => task.snapshot_id === window.id) || accepted[0];
@@ -1387,18 +1417,26 @@ function renderInspectionWorkspace(): void {
   const root = automaticRoot();
   const container = box("sensor-inspection-workspace");
   const reports = [inspectionReport, automaticDetail, taskDetail];
-  const pending = Boolean(root && root.snapshot_id === window?.id && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state));
+  const recordedReport = playback.enabled ? playback.currentFrame() : null;
+  const pending = Boolean(!playback.enabled && root && root.snapshot_id === window?.id && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state));
   const renderKey = JSON.stringify([window?.id, sensor?.id, sensorLoadedKey, sensorReadError,
     peerKey, Boolean(inspectionPeer), inspectionPeerLoading, inspectionPeerError, inspectionReportError, pending,
-  reports.map(detail => [detail?.task.id, detail?.task.updated_at, detail?.task.state, detail?.output_mapping])]);
+    recordedReport?.snapshot.id, recordedReport?.detail.task.id,
+    reports.map(detail => [detail?.task.id, detail?.task.updated_at, detail?.task.state, detail?.output_mapping])]);
   if (container.dataset.renderKey === renderKey) return;
   renderSensorInspection(container, {
     pack, window, sensor, readings: key === sensorLoadedKey ? observations : [],
     loading: Boolean(key && key !== sensorLoadedKey && !sensorReadError),
     error: sensorReadError, peer: inspectionPeer, peerSensor, peerLoading: inspectionPeerLoading,
     peerError: inspectionPeerError, reportError: inspectionReportError,
-    reports, pending,
-    openReport: id => { void loadTask(id); },
+    reports, pending, recordedReport,
+    openReport: id => {
+      if (recordedReport?.detail.task.id === id) {
+        switchTab("live");
+        box("automatic-title").focus();
+        box("automatic-title").scrollIntoView({ block: "start" });
+      } else void loadTask(id);
+    },
     inspectWindow: id => { void chooseWindow(id); },
   });
   container.dataset.renderKey = renderKey;
@@ -1406,7 +1444,7 @@ function renderInspectionWorkspace(): void {
 async function loadInspectionPeer(window: WindowSnapshot, sensor: Sensor, key: string, token: number): Promise<void> {
   const generation = generationToken;
   try {
-    const data = await request<InspectionReadings>(`/api/windows/${enc(window.id)}/sensors/${enc(sensor.id)}`);
+    const data = await request<InspectionReadings>(sensorReadPath(window, sensor.id));
     if (generation !== generationToken || token !== inspectionPeerToken || key !== inspectionPeerKey) return;
     if (data.sensor.id !== sensor.id || data.observations.some(row => row.sensor_id !== sensor.id
       || row.channel === "pressure" && row.unit !== "bar")) throw new Error("Comparison sensor or unit scope mismatch.");
@@ -1526,7 +1564,7 @@ function renderTasks(): void {
   const focusedId = document.activeElement?.getAttribute("data-task");
   container.replaceChildren();
   const tasks = [...projection.tasks];
-  controlButton("view-langfuse").disabled = !tasks.length;
+  controlButton("view-langfuse").disabled = playback.enabled ? !playback.currentFrame() : !tasks.length;
   const renderTask = (task: AgentTask, child = false): void => {
     const card = node("article", "", `task${child ? " child" : ""}`);
     card.append(node("h3", `${agentName(task.role)} · ${task.state}`), node("p", `${short(task.id)} · ${modeName(task.mode)} · basis ${short(task.snapshot_id)}`), node("p", `${task.purpose} · ${task.model_calls} model calls / ${task.tool_calls} tool calls`));
@@ -1591,15 +1629,21 @@ function refreshAutomaticDetail(root: AgentTask): void {
   });
 }
 async function loadTask(id: string, focus = true): Promise<void> {
-  const changed = selectedTaskId !== id;
-  selectedTaskId = id;
-  if (changed) { taskDetail = null; renderAnswer(); }
-  const token = ++taskToken, generation = generationToken;
-  box("trace-view").replaceChildren(node("p", "Loading Langfuse run for the selected investigation...", "muted"));
+  const generation = generationToken;
   if (focus) {
     switchTab("live");
     element("investigation-technical", HTMLDetailsElement).open = true;
   }
+  if (taskRead?.id === id && taskRead.generation === generation && taskRead.token === taskToken) {
+    if (focus) box("answer-preview").scrollIntoView({ block: "start" });
+    return;
+  }
+  const changed = selectedTaskId !== id;
+  selectedTaskId = id;
+  if (changed) { taskDetail = null; renderAnswer(); }
+  const token = ++taskToken;
+  taskRead = { id, generation, token };
+  if (!playback.enabled) box("trace-view").replaceChildren(node("p", "Loading Langfuse run for the selected investigation...", "muted"));
   try {
     const detail = await readTaskDetail(id, generation);
     if (!detail || token !== taskToken || generation !== generationToken) return;
@@ -1608,17 +1652,21 @@ async function loadTask(id: string, focus = true): Promise<void> {
     renderTaskDetail();
     renderAnswer();
     if (focus) box("answer-preview").scrollIntoView({ block: "start" });
-    try {
-      const trace = await request<Record<string, Json>>(`/api/tasks/${enc(id)}/trace`);
-      if (token === taskToken && generation === generationToken) renderTrace(trace);
-    } catch (error) {
-      if (token === taskToken && generation === generationToken) box("trace-view").replaceChildren(node("p", `Trace unavailable: ${errorMessage(error)}. Task result remains visible.`, "summary"));
+    if (!playback.enabled) {
+      try {
+        const trace = await request<Record<string, Json>>(`/api/tasks/${enc(id)}/trace`);
+        if (token === taskToken && generation === generationToken && !playback.enabled) renderTrace(trace);
+      } catch (error) {
+        if (token === taskToken && generation === generationToken && !playback.enabled) box("trace-view").replaceChildren(node("p", `Trace unavailable: ${errorMessage(error)}. Task result remains visible.`, "summary"));
+      }
     }
   } catch (error) {
     if (token === taskToken && generation === generationToken) {
-      box("trace-view").replaceChildren(node("p", `Trace unavailable: ${errorMessage(error)}.`, "summary"));
+      if (!playback.enabled) box("trace-view").replaceChildren(node("p", `Trace unavailable: ${errorMessage(error)}.`, "summary"));
       showError(error);
     }
+  } finally {
+    if (taskRead?.token === token) taskRead = null;
   }
 }
 function renderTaskDetail(): void {
@@ -1676,8 +1724,12 @@ function renderTaskDetail(): void {
     container.append(node("div", summary.join("\n") || "Receipt exists; no supported public summary fields reported.", "public-record"));
   }
 }
-function renderTrace(trace: Record<string, Json>): void {
+function renderTrace(trace: Record<string, Json>, recorded = false): void {
   const container = box("trace-view");
+  if (recorded) container.dataset.recorded = "true";
+  else delete container.dataset.recorded;
+  if (typeof trace.task_id === "string") container.dataset.task = trace.task_id;
+  else delete container.dataset.task;
   container.replaceChildren(node("h3", "Langfuse run"));
   try {
     const sessionUrl = investigationViewerUrl(trace);
@@ -1801,6 +1853,12 @@ async function command(action: "play" | "pause" | "step" | "speed", speed?: Spee
   finally { commandBusy = false; updateControls(); }
 }
 controlButton("view-langfuse").addEventListener("click", () => {
+  if (playback.enabled) {
+    switchTab("live");
+    element("investigation-technical", HTMLDetailsElement).open = true;
+    box("trace-view").scrollIntoView({ block: "center" });
+    return;
+  }
   const task = projection?.tasks.find(item => item.id === selectedTaskId)
     || automaticRoot()
     || [...projection?.tasks || []].filter(item => !item.parent_id)
@@ -1836,6 +1894,13 @@ controlButton("investigation-mode").addEventListener("click", () => {
 });
 controlButton("load-recording").addEventListener("click", () => {
   void loadScenarioRecording().catch(showError);
+});
+element("review-agent-findings", HTMLAnchorElement).addEventListener("click", event => {
+  event.preventDefault();
+  switchTab("live");
+  const heading = box("automatic-title");
+  heading.focus();
+  heading.scrollIntoView({ block: "start" });
 });
 input("investigation-time").addEventListener("input", () => {
   const seconds = Number(input("investigation-time").value);

@@ -63,10 +63,14 @@ const report: TaskDetail = { task, casefile: file, children: [], receipts: [], i
     sensor_issues: [{ sensor_id: sensor.id, kind: "offset", assertion: "suspected", quote: { path: "answer.text", text: answer } }],
     instrumentation_concern: true } } };
 
-test("readings distinguish unreceived and unusable data, compare one scale, and attach only matching accepted findings", async ({ page }) => {
-  const bundle = buildSync({ stdin: {
+function inspectionBundle(): string {
+  return buildSync({ stdin: {
     contents: 'export { renderSensorInspection } from "./web/ts/sensor_inspection";', resolveDir: process.cwd(), loader: "ts" },
     bundle: true, write: false, format: "iife", globalName: "InspectionFixture" }).outputFiles[0].text;
+}
+
+test("readings distinguish unreceived and unusable data, compare one scale, and attach only matching accepted findings", async ({ page }) => {
+  const bundle = inspectionBundle();
   const state: Omit<SensorInspection, "openReport" | "inspectWindow"> = { pack, window, sensor,
     readings: [reading(sensor.id, 0, 70), reading(sensor.id, 1, null)],
     loading: false, error: null, peer: { sensor: peer, observations: [reading(peer.id, 0, 80), reading(peer.id, 1, 80.1)] },
@@ -123,6 +127,46 @@ test("readings distinguish unreceived and unusable data, compare one scale, and 
   await expect(page.locator("#inspection")).not.toHaveAttribute("data-sensor");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test("compatible recorded findings accompany reconstructed readings only with the exact original evidence", async ({ page }) => {
+  const displayed: WindowSnapshot = { ...window, id: "display-snapshot", generation_id: "display-generation" };
+  const state: Omit<SensorInspection, "openReport" | "inspectWindow"> = {
+    pack, window: displayed, sensor, readings: [reading(sensor.id, 0, 70)],
+    loading: false, error: null, peer: null, peerSensor: null, peerLoading: false,
+    peerError: null, reportError: null, reports: [], pending: false,
+    recordedReport: { snapshot: window, detail: report },
+  };
+  await page.setContent('<main><div id="inspection"></div></main>');
+  await page.addScriptTag({ content: `${inspectionBundle()}
+    window.inspectionState = ${JSON.stringify(state)};
+    window.renderInspection = () => InspectionFixture.renderSensorInspection(document.getElementById("inspection"),
+      { ...window.inspectionState, openReport: () => {}, inspectWindow: () => {} });
+    window.renderInspection();` });
+  await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "matched");
+  await expect(page.locator(".inspection-agent")).toContainText("Compatible saved investigation");
+  await expect(page.locator(".inspection-agent-quote")).toHaveCount(2);
+  const mismatches: Partial<WindowSnapshot>[] = [
+    { input_hash: "different" }, { site_id: "different" }, { window_start: "2025-01-01T00:00:00Z" },
+    { window_end: "2027-01-01T00:00:00Z" }, { end_seconds: 5 }, { clock_seconds: 5 },
+    { pack_version: "different" }, { baseline_version: "different" }, { parameter_version: "different" },
+  ];
+  for (const mismatch of mismatches) {
+    await page.evaluate(selected => {
+      const fixture = window as typeof window & { inspectionState: SensorInspection; renderInspection: () => void };
+      fixture.inspectionState.window = selected; fixture.renderInspection();
+    }, { ...displayed, ...mismatch });
+    await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "unavailable");
+    await expect(page.locator(".inspection-agent-quote")).toHaveCount(0);
+  }
+  await page.evaluate(selected => {
+    const fixture = window as typeof window & { inspectionState: SensorInspection; renderInspection: () => void };
+    fixture.inspectionState.window = selected;
+    fixture.inspectionState.recordedReport!.detail.casefile!.input_hash = "invalid-original";
+    fixture.renderInspection();
+  }, displayed);
+  await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "unavailable");
+  await expect(page.locator(".inspection-agent-quote")).toHaveCount(0);
 });
 
 test("a novice can choose a sensor, compare readings and inspect the report window without navigating internal IDs", async ({ page }) => {

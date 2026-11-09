@@ -1,22 +1,23 @@
 {
   "mode": "scripted",
   "passed": true,
-  "replay_id": "replay-d2c6d791ae70b37d05bc2379",
+  "replay_id": "replay-b2a7e6828a0fccd331b68ee6",
   "replay_speed": 1,
   "known_source_onset_seconds": 90,
   "play_start_source_seconds": 80,
-  "warning_snapshot_id": "window-368de7988f70dd66ffa95fbb3be7859d9915fa73008f29d78e4ba82bcfd1a90f",
-  "source_onset_to_warning_basis_seconds": 27.093999999924563,
-  "wall_play_request_to_observed_warning_seconds": 40.19302179999999,
+  "warning_snapshot_id": "window-30701fda08671dcae113e8d7e43de2e7be51117a446fa2b137dd63889fe955d1",
+  "source_onset_to_warning_basis_seconds": 10.046999999787658,
+  "wall_play_request_to_observed_warning_seconds": 23.053540700000013,
   "estimated_wall_onset_to_observed_warning_bounds_seconds": [
-    28.48131500000006,
-    30.19302179999999
+    12.606906399999978,
+    13.053540700000013
   ],
   "target_seconds": 120,
   "limitations": [
     "One local 1x synthetic replay; warm-up preloaded through second 80.",
     "Onset wall time bounded by the play request interval; DOM assertion includes observation overhead.",
     "SCRIPTED agents, not hosted report latency; no physical sensor, external notification or human acknowledgement.",
+    "The observed warning is a numerical pressure anomaly, not a detected or confirmed leak.",
     "Not a load test or field latency SLO."
   ]
 }

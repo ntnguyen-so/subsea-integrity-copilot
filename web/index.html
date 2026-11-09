@@ -46,7 +46,7 @@
     </nav>
     <main id="workspace" tabindex="-1">
       <section id="monitoring-warning" class="monitoring-warning info" role="alert" aria-atomic="true">No current monitoring assessment. Warnings do not wait for an AI report.</section>
-      <p class="muted">Decision support only. Engineer review remains required; no safety clearance is implied.</p>
+      <p class="muted">Decision support only. Engineer review remains required; no safety clearance is implied. <a id="review-agent-findings" href="#automatic-title">Review agent findings and run cost ↓</a></p>
       <section id="investigation-hold" class="monitoring-warning info" role="status" hidden></section>
       <div id="evidence-selection" class="selection-strip"><div class="selection-text"><strong id="selected-basis">No window selected</strong><span id="basis-warning">Choose a sensor and a received measurement window to inspect.</span></div><div class="control"><label for="window-history">View a past window</label><select id="window-history"><option value="">Follow current window</option></select></div><button id="follow-live" type="button">Follow current</button></div>
       <!-- Monitoring warnings remain separate from report acceptance. The map and
@@ -76,7 +76,7 @@
         <!-- Tasks/events supply progress; accepted reports and saved quoted mappings
              supply agent findings. Execution usage is real time, not source time. -->
         <section class="panel agent-status-panel" aria-labelledby="automatic-title">
-          <div class="panel-heading"><h2 id="automatic-title">Agents · investigation beyond the detector</h2><a id="automatic-langfuse" target="_blank" rel="noopener noreferrer" hidden>Open whole investigation in Langfuse ↗</a><span id="automatic-trace-status" class="muted" role="status"></span><span id="automatic-state" class="badge">Waiting for telemetry</span></div>
+          <div class="panel-heading"><h2 id="automatic-title" tabindex="-1">Agents · investigation beyond the detector</h2><a id="automatic-langfuse" target="_blank" rel="noopener noreferrer" hidden>Open whole investigation in Langfuse ↗</a><span id="automatic-trace-status" class="muted" role="status"></span><span id="automatic-state" class="badge">Waiting for telemetry</span></div>
           <section id="execution-summary" class="execution-summary" aria-label="Investigation runtime and usage" hidden>
             <div><small>ELAPSED SINCE QUEUED · REAL TIME</small><strong id="execution-elapsed"></strong><span class="muted">Independent of simulation speed</span></div>
             <div><small>REPORTED TOKEN USAGE</small><strong id="execution-tokens"></strong><span id="execution-token-detail" class="muted"></span></div>

@@ -437,7 +437,7 @@ def test_operations_audit_checks_actual_handoffs_review_and_provenance(investiga
         history = [step for step in audit["tool_receipts"] if step["name"].startswith("history.")]
         assert history
         intake = [step for step in history if step["origin"] == "application_required_intake"]
-        assert len(intake) == 1 and intake[0]["name"] == "history.search"
+        assert {step["name"] for step in intake} == {"history.search", "history.read"}
         assert all(
             step["origin"] == "model_requested"
             for step in history if step not in intake

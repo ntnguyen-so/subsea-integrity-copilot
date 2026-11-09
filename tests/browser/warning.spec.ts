@@ -16,7 +16,8 @@ test("1x replay delivers a clear warning independently of the pinned investigati
   expect(login.status()).toBe(200);
   const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
   const created = await page.context().request.post("/api/replays", {
-    headers, data: { scenario: "S1", mode: "scripted", seed: 2026, idempotency_key: `timing-${Date.now()}` },
+    headers, data: { scenario: "S1", mode: "scripted", seed: 2026, pause_on_anomaly: false,
+      idempotency_key: `timing-${Date.now()}` },
   });
   expect(created.status()).toBe(200);
   const replay = await created.json();
@@ -30,7 +31,7 @@ test("1x replay delivers a clear warning independently of the pinned investigati
   await expect(page.locator("#create-replay")).toBeEnabled();
   await page.goto("/?replay=" + encodeURIComponent(replay.id) + "&view=live");
   await expect(page.locator("#source-clock")).toContainText("80.0");
-  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "no_qualifying_event");
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", /sensor_alerts/);
   const playing = page.waitForResponse(response => response.request().method() === "POST"
     && response.url().endsWith("/control") && response.request().postDataJSON().action === "play");
   const started = performance.now();
@@ -41,9 +42,17 @@ test("1x replay delivers a clear warning independently of the pinned investigati
   const acknowledged = performance.now();
   expect(running.speed).toBe(1);
   expect(running.clock_seconds).toBe(80);
-  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak", { timeout: 75_000 });
+  await expect.poll(async () => {
+    const snapshotId = await page.locator("#monitoring-warning").getAttribute("data-snapshot");
+    if (!snapshotId) return false;
+    const response = await page.request.get(`/api/windows/${snapshotId}`);
+    if (!response.ok()) return false;
+    const window = await response.json();
+    return window.quality.findings.some((finding: { anomaly_count: number }) => finding.anomaly_count > 0);
+  }, { timeout: 75000, intervals: [1000, 2000] }).toBe(true);
   const observed = performance.now();
-  await expect(page.locator("#monitoring-warning")).toContainText("Do not wait for the AI report");
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
+  await expect(page.locator("#monitoring-warning")).toContainText("do not wait for AI");
   const basis = await page.locator("#monitoring-warning").getAttribute("data-snapshot");
   const snapshotResponse = await page.context().request.get(`/api/windows/${basis}`);
   expect(snapshotResponse.status()).toBe(200);
@@ -59,12 +68,12 @@ test("1x replay delivers a clear warning independently of the pinned investigati
   const history = await page.context().request.get(`/api/replays/${replay.id}/windows`);
   const previous = (await history.json()).windows.find((window: { end_seconds: number }) => window.end_seconds === 75);
   await page.locator("#window-history").selectOption(previous.id);
-  await expect(page.locator("#event-summary")).toContainText("no event");
-  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "possible_leak");
+  await expect(page.locator("#selected-basis")).toContainText("PINNED");
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   await expect(page.locator("#monitoring-warning")).not.toHaveAttribute("data-snapshot", previous.id);
   await page.context().setOffline(true);
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "unavailable", { timeout: 15_000 });
-  await expect(page.locator("#monitoring-warning")).toContainText("Last recorded assessment: POSSIBLE LEAK");
+  await expect(page.locator("#monitoring-warning")).toContainText("Last recorded assessment:");
   await writeFile("docs\\evidence\\warning-browser-timing.json", JSON.stringify({
     mode: "scripted", passed: true, replay_id: replay.id, replay_speed: 1,
     known_source_onset_seconds: 90, play_start_source_seconds: 80,
@@ -76,6 +85,7 @@ test("1x replay delivers a clear warning independently of the pinned investigati
       "One local 1x synthetic replay; warm-up preloaded through second 80.",
       "Onset wall time bounded by the play request interval; DOM assertion includes observation overhead.",
       "SCRIPTED agents, not hosted report latency; no physical sensor, external notification or human acknowledgement.",
+      "The observed warning is a numerical pressure anomaly, not a detected or confirmed leak.",
       "Not a load test or field latency SLO.",
     ],
   }, null, 2) + "\n");

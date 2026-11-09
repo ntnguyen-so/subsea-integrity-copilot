@@ -527,11 +527,18 @@ def test_normal_monitor_reopens_identical_frozen_snapshot_without_new_inference(
     source = monitor._source(session)
     monitor._release(session, source)
     reopened = monitor._snapshot(session, source, 60)
+    expected = analyze_window(
+        data.pack, normalize_records(data.baseline, data.pack),
+        normalize_records(data.records, data.pack), session.id, 60, 65, data.epoch,
+        screening_only=True,
+    )
     assert source.dataset == data
     assert reopened.input_hash == original.input_hash
-    assert reopened.evidence == original.evidence
-    assert reopened.event == original.event
-    assert reopened.location == original.location
+    assert reopened.evidence == expected.evidence
+    assert reopened.event == expected.event
+    assert reopened.location == expected.location
+    assert reopened.parameter_version == expected.parameter_version
+    assert reopened.event.hypothesis == "insufficient_evidence"
     monitor.agents.submit_question.assert_not_called()
     monitor.agents.run_once.assert_not_called()
     forbidden.assert_not_called()

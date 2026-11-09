@@ -627,7 +627,8 @@ test("a recorded failure is admitted explicitly before synchronized playback con
   row.investigation_elapsed_seconds = 10;
   delete row.extraction;
   await page.route("**/api/evaluation", route => route.fulfill({ json: report }));
-  await page.clock.install();
+  await page.clock.install({ time: new Date("2026-01-01T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-01-01T01:00:00Z"));
   await page.goto("/");
   await page.getByRole("tab", { name: "Evaluation" }).click();
   await page.getByRole("button", { name: "2:30 review · failed" }).click();

@@ -9,6 +9,7 @@ import { reportText } from "./presentation";
 import type { CanonicalObservation, Sensor, SitePack, TaskDetail, WindowSnapshot } from "./types";
 
 export interface InspectionReadings { sensor: Sensor; observations: CanonicalObservation[] }
+interface RecordedInspection { snapshot: WindowSnapshot; detail: TaskDetail }
 export interface SensorInspection {
   pack: SitePack | null;
   window: WindowSnapshot | null;
@@ -22,6 +23,7 @@ export interface SensorInspection {
   peerError: string | null;
   reportError: string | null;
   reports: (TaskDetail | null)[];
+  recordedReport?: RecordedInspection | null;
   pending: boolean;
   openReport(taskId: string): void;
   inspectWindow(snapshotId: string): void;
@@ -37,6 +39,16 @@ export function inspectionReportMatches(detail: TaskDetail, window: WindowSnapsh
     && task.site_id === window.site_id && task.generation_id === window.generation_id && file.generation_id === window.generation_id
     && file.input_hash === window.input_hash && file.pack_version === window.pack_version
     && file.baseline_version === window.baseline_version && file.parameter_version === window.parameter_version);
+}
+
+function recordedReportMatches(recorded: RecordedInspection, window: WindowSnapshot): boolean {
+  const original = recorded.snapshot;
+  return inspectionReportMatches(recorded.detail, original)
+    && original.site_id === window.site_id && original.input_hash === window.input_hash
+    && original.window_start === window.window_start && original.window_end === window.window_end
+    && original.end_seconds === window.end_seconds && original.clock_seconds === window.clock_seconds
+    && original.pack_version === window.pack_version && original.baseline_version === window.baseline_version
+    && original.parameter_version === window.parameter_version;
 }
 
 function pressureReadings(rows: CanonicalObservation[], window: WindowSnapshot): CanonicalObservation[] {
@@ -56,12 +68,17 @@ function agentCompanion(container: HTMLElement, state: SensorInspection): void {
   if (state.reportError) panel.append(node("p", `Report lookup unavailable: ${state.reportError}. No agent findings are substituted.`, "summary"));
   const matching = state.pending ? [] : state.reports.filter((detail): detail is TaskDetail =>
     detail !== null && inspectionReportMatches(detail, window));
+  const recording = !state.pending && state.recordedReport && recordedReportMatches(state.recordedReport, window)
+    ? state.recordedReport : null;
+  if (recording) matching.unshift(recording.detail);
   const matched = matching.find(detail => detail.output_mapping?.status === "completed") || matching[0];
   const report = matched?.casefile;
   if (matched && report?.interpretation) {
     panel.dataset.status = "matched"; panel.dataset.snapshot = window.id; panel.dataset.task = matched.task.id;
     panel.append(node("p", `Report and readings use the same window: ${bounds(window.window_start, window.window_end)} · revision ${window.revision}.`,
       "inspection-report-basis"));
+    if (recording && matched === recording.detail) panel.append(node("p",
+      "Compatible saved investigation: the original input hash, source window, arrival cutoff and numerical versions match these reconstructed readings. This is recorded evidence, not a fresh investigation.", "muted"));
     if (!report.interpretation_review) panel.append(node("p", "Archived report: no current-protocol grounding review.", "muted"));
     const mapping = matched.output_mapping?.status === "completed" ? matched.output_mapping.mapping : null;
     const issues = mapping?.sensor_issues.filter(item => item.sensor_id === sensor.id) || [];
@@ -78,7 +95,9 @@ function agentCompanion(container: HTMLElement, state: SensorInspection): void {
     const full = node("details");
     full.append(node("summary", "Read the accepted incident report"),
       node("p", reportText(report.interpretation.answer.text, report.interpretation.answer.references), "inspection-report-text"));
-    panel.append(full, button("Review this report's sources and execution", () => state.openReport(matched.task.id)));
+    panel.append(full, button(recording && matched === recording.detail
+      ? "Review this saved report and its quoted findings"
+      : "Review this report's sources and execution", () => state.openReport(matched.task.id)));
   } else {
     panel.dataset.status = state.pending ? "pending" : "unavailable";
     panel.append(node("p", state.pending

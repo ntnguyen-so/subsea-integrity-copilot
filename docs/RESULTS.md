@@ -1,5 +1,46 @@
 # Qualification results
 
+## Latest frozen-code S7 rehearsal: three fresh roots
+
+The local session artifact `files\demo-reliability-hardening-20261109\report.json`
+and its three `S7-2026-{95,120,180}\manifest.json` receipts record fresh S7 seed-2026
+roots at source +95/+120/+180 seconds. This artifact is session-local, not a
+repository-published evidence link; publication/provenance review remains necessary
+before external buyers are asked to reproduce it. The implementation fingerprint
+stayed unchanged: `de141d5e78b1dae1dfaaefc5da8d66448b7fffbb3c888b72d97eda46d851721b`.
+
+| Source checkpoint | Root | Elapsed seconds | Fresh model/tool calls | Review |
+|---|---|---:|---|---|
+| +95s | `6fd90596-d36b-5cfd-90c2-4b6e1193935e` | 526.532 | 8 / 34 | revise → accept |
+| +120s | `8e424970-ce71-5b59-b6ac-75c06450c4ac` | 538.375 | 8 / 37 | revise → accept |
+| +180s | `28ed28fc-7d03-5ab4-a4bf-431fb087d52e` | 595.968 | 10 / 45 | revise → accept |
+
+All three roots and their quality/diagnosis/response tasks succeeded; manifests
+contain no validation errors or reused task IDs. Each required revision before
+acceptance. These are separate fresh executions, **not independent event trials**:
+all share the same S7 synthetic dataset hash
+`935e7fd76c7a94e20baa6e73f55c634555c06b1a29df31ffc00e14e31b0f3396`.
+They establish this bounded frozen-code rehearsal, not field qualification,
+population accuracy, human-effort savings or acceptance of every future fresh run.
+
+The current root elapsed deadline is **900 seconds**. These reports took
+8.8–9.9 minutes: within that deadline but all above the **five-minute aspiration**.
+Ten minutes for manual investigation remains an unmeasured assumption; no saving
+can be inferred by subtracting model elapsed time from it. Warning delivery,
+queueing, report completion and active human handling are separate clocks.
+Historical sections below preserve their original 300-second budgets, implementation
+versions, successes and failures; wording such as “current” or “now” within those
+sections describes that recorded revision, not this latest deadline or a new release
+qualification. The earlier cohorts have not been rerun or retrospectively upgraded.
+
+Buyer decision remains **pilot-design discussion**, conditional on a signed scope,
+readiness owners, total-spend cap and negotiated gates. The proposed event-level,
+blinded manual/strong-fixed/agent scorecard and actual-entitlement-versus-hypothetical-
+token cost distinction are in [the commercial contract](REPORT.md#commercial-and-meeting-contract).
+Those proposals are not customer agreements, a vendor quote, measured ROI or field
+certification. Insufficient independent labeled cases means extend by agreement or
+stop, never automatic acceptance.
+
 ## S7 seed-2026 agent reliability regression
 
 Fresh hosted investigations at all six demo checkpoints succeeded after the

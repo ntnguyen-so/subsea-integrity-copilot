@@ -8,7 +8,13 @@ from test_agents import snapshot as snapshot_fixture
 
 from subsea_copilot.casefile import InvestigationCase
 from subsea_copilot.contracts import AgentResult, AgentTask, utc_now
-from subsea_copilot.playback import Recording, RecordingLibrary, load_library, save_library
+from subsea_copilot.playback import (
+    RecordedTrace,
+    Recording,
+    RecordingLibrary,
+    load_library,
+    save_library,
+)
 from subsea_copilot.synthetic import generate_pack
 
 
@@ -92,3 +98,27 @@ def test_successful_recording_requires_its_accepted_report(recording):
     payload["casefile"] = None
     with pytest.raises(ValidationError, match="immutable investigation basis"):
         Recording.model_validate(payload)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("task_id", "another-run"), ("snapshot_id", "another-window"), ("trace_id", "not-a-trace"),
+])
+def test_recorded_trace_must_retain_its_own_run_identity(recording, field, value):
+    payload = recording.model_dump()
+    payload["trace_metadata"] = {
+        "task_id": recording.task.id, "snapshot_id": recording.snapshot.id,
+        "trace_id": "a" * 32, field: value,
+    }
+    with pytest.raises(ValidationError):
+        Recording.model_validate(payload)
+
+
+def test_original_trace_survives_export_without_saving_a_viewer_or_credentials(recording, tmp_path):
+    trace = RecordedTrace(
+        task_id=recording.task.id, snapshot_id=recording.snapshot.id,
+        trace_id="a" * 32, span_id="b" * 16, trace_layout="investigation-v1",
+    )
+    saved = recording.model_copy(update={"trace_metadata": trace})
+    path = tmp_path / "traced-recording.json"
+    save_library(path, RecordingLibrary(recordings=[saved]))
+    assert load_library(path).recordings[0].trace_metadata == trace

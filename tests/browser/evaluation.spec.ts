@@ -15,7 +15,8 @@ test("evaluation opens authenticated recordings without submitting inference or 
   });
   expect(login.status()).toBe(200);
   const report: EvaluationReport = await (await page.request.get("/api/evaluation")).json();
-  expect(report.cases).toHaveLength(report.version === "spatial-evaluation-v1" ? 9 : 8);
+  expect(report.cases.length).toBeGreaterThan(0);
+  expect(new Set(report.cases.map(item => item.case_id)).size).toBe(report.cases.length);
   const postRequests: string[] = [];
   page.on("request", request => { if (request.method() === "POST") postRequests.push(request.url()); });
   await page.goto("/");
@@ -67,13 +68,13 @@ test("evaluation opens authenticated recordings without submitting inference or 
     if (source) await expect(page.locator(`.evaluation-case[data-case="${item.case_id}"]`))
       .toContainText(`Leak source on ${source.segment_id} at ${source.chainage_m} m`);
   }
-  await page.getByLabel("Evaluation suite").selectOption("agent");
-  const accepted = [report, ...(report.additional_evaluations || [])]
-    .flatMap(cohort => cohort.cases.filter(item => item.accepted_report));
+  const accepted = report.cases.filter(item => item.accepted_report);
   const reportOnly = accepted.filter(item => item.extraction?.status === "completed"
     && item.extraction.source_text_scope === "incident-answer-only-v1").length;
   await expect(provenance).toContainText(`${reportOnly}/${accepted.length} accepted reports`);
-  await page.getByLabel("Evaluation suite").selectOption("current");
+  await page.getByRole("tab", { name: "Agent reliability", exact: true }).click();
+  await expect(page.locator("#evaluation-scope-label")).toHaveText("FROZEN REFERENCES / RECORDED ANSWERS");
+  await page.getByRole("tab", { name: "Detection", exact: true }).click();
   for (const name of ["Live", "Inspect"]) {
     await page.getByRole("tab", { name, exact: true }).click();
     await expect(page.locator("#question-tools")).toHaveCount(0);

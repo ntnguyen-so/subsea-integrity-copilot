@@ -67,8 +67,6 @@ def monitoring_warning(
             }
         )
         kind, severity = ("sensor_alerts", "warning") if count else ("no_sensor_alerts", "info")
-        if workflow != "agent_assisted" and count and snapshot.event.hypothesis == "suspected_leak":
-            severity = "attention"
         title = f"{count} SENSOR ALERTS: engineer review required" if count else "No sensor alerts"
         message = (
             "Review sensor histories, joint timing and independent observations promptly. "
