@@ -85,7 +85,8 @@ test("topology depicts the source pack's connectivity, station distribution and 
   }));
   expect(clippedLabels).toBe(false);
   const briefSource = readFileSync(path.join(process.cwd(), "docs", "ONE_PAGE_BRIEF.md"), "utf8");
-  expect(briefSource).toContain("(assets/pressure-leak-vs-sensor-faults.svg)");
+  expect(briefSource).toContain("(assets/brief-sensor-alerts.png)");
+  expect(briefSource).toContain("(assets/brief-agent-assisted.png)");
   await page.goto(pathToFileURL(path.join(process.cwd(), "docs", "assets", "pressure-leak-vs-sensor-faults.svg")).href);
   const evidence = JSON.parse(readFileSync(path.join(process.cwd(), "fixtures", "synthetic", "brief-evidence.json"), "utf8"));
   for (const scenario of ["S1", "S2"]) {

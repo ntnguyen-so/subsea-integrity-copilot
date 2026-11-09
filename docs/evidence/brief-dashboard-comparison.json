@@ -1,0 +1,82 @@
+{
+  "captured_at": "2026-11-09T15:56:11.841Z",
+  "kind": "Unmodified dashboard crops of a same-input workflow comparison",
+  "scenario": "S7",
+  "seed": 2026,
+  "source_version": "pressure-v3",
+  "source_window": {
+    "start_seconds": 50,
+    "end_seconds": 110
+  },
+  "network": {
+    "segments": 7,
+    "instruments": 112
+  },
+  "flagged_instruments": 69,
+  "input_hash": "9cb2ffd2ed28941ba03ed49c12b520bf999ff03d7ed06edc15d0482dbf7ee9f6",
+  "alert_signature_sha256": "41610b9b6700ff8a460f75097ff7007ef592003ad6c229e17629a82d273b954d",
+  "baseline": {
+    "replay_id": "replay-1c25cec7b8de0b450dd7f427",
+    "snapshot_id": "window-7a2223e128c355698c0202ea45a29b3636197cf7ce244e944e60dffdf481570a",
+    "view": "Read-only timeline measurements; no agent execution"
+  },
+  "agent": {
+    "replay_id": "replay-5ac4528d60b97f231f51a933",
+    "task_id": "24097867-4bb5-5aa5-876f-6e944ac26fcf",
+    "snapshot_id": "window-ec0dcb176f3a582dc18fa5526dbd6faa7a139d53113a2746c796d652a96cbf6a",
+    "mode": "live",
+    "decision_policy": "llm-diagnosis-v1",
+    "mapping_protocol": "agent-output-mapping-v1",
+    "mapping_ground_truth_supplied": false,
+    "reported_inspection": [
+      {
+        "segment_id": "P5",
+        "assertion": "suspected",
+        "interval": {
+          "start_m": 700,
+          "end_m": 900
+        },
+        "quote": {
+          "path": "answer.text",
+          "text": "Leak assessment\nThe evidence supports a possible P5 leak pattern alongside separate instrumentation problems—not an instrumentation-only explanation. Prioritize integrity-engineer inspection planning on P5 between P5-ST4 and P5-ST5, chainage 700–900 m. This is a pressure-deficit focus, not a confirmed physical leak bracket."
+        }
+      }
+    ]
+  },
+  "new_inference_calls": 0,
+  "measurements_and_detector_alerts_match": true,
+  "recorded_execution_counters_unchanged": true,
+  "captures": [
+    {
+      "file": "docs/assets/brief-sensor-alerts.png",
+      "selector": ".topology-panel .map-wrap",
+      "sha256": "5a058e186a828b3a2f1c1159cb4073ec5e94be9781dc29fba9104e93d980f6b8",
+      "crop": {
+        "x": 123,
+        "y": 787.921875,
+        "width": 512.0625,
+        "height": 302
+      },
+      "browser_errors": [],
+      "post_requests_after_login": 0
+    },
+    {
+      "file": "docs/assets/brief-agent-assisted.png",
+      "selector": "#agent-investigation-map > svg",
+      "sha256": "8edc8306e48a7a668479a5395857f5f215eb22800397d29e13e47821df553fb7",
+      "crop": {
+        "x": 136,
+        "y": 389.65625,
+        "width": 467.640625,
+        "height": 319.953125
+      },
+      "browser_errors": [],
+      "post_requests_after_login": 0
+    }
+  ],
+  "limitations": [
+    "Selected synthetic demonstration, not field validation or aggregate evaluation.",
+    "Pressure-deficit focus is an inspection priority, not a confirmed physical leak bracket.",
+    "No measured engineer-time savings or superiority over a fixed workflow is established."
+  ]
+}

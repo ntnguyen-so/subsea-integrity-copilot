@@ -19,6 +19,17 @@ async function renderBrief(name) {
   const inline = value => escape(value)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
+  async function imageMarkup(value) {
+    const image = value.match(/^!\[([^\]]+)\]\(([^)]+)\)$/);
+    if (!image) return null;
+    const imagePath = path.resolve(docs, ...image[2].split("/"));
+    const mime = { ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(imagePath).toLowerCase()];
+    if (!imagePath.startsWith(docs + path.sep) || !mime) {
+      throw new Error("Brief illustrations must be local SVG or PNG files inside docs.");
+    }
+    const bytes = await fs.readFile(imagePath);
+    return `<img alt="${escape(image[1])}" src="data:${mime};base64,${bytes.toString("base64")}">`;
+  }
   const paragraphs = source.trim().split(/\r?\n\s*\r?\n/);
   const title = paragraphs.shift().replace(/^#\s+/, "");
   const parts = [];
@@ -32,21 +43,18 @@ async function renderBrief(name) {
       const rows = lines.map(line => line.slice(1, -1).split("|").map(cell => cell.trim()));
       if (rows[1].every(cell => /^:?-+:?$/.test(cell)) &&
           rows.every(row => row.length === rows[0].length)) {
+        const bodyRows = await Promise.all(rows.slice(2).map(async row =>
+          `<tr>${(await Promise.all(row.map(async cell =>
+            `<td>${await imageMarkup(cell) || inline(cell)}</td>`))).join("")}</tr>`));
         parts.push(`<table><thead><tr>${rows[0].map(cell => `<th>${inline(cell)}</th>`).join("")}</tr></thead><tbody>${
-          rows.slice(2).map(row => `<tr>${row.map(cell => `<td>${inline(cell)}</td>`).join("")}</tr>`).join("")
+          bodyRows.join("")
         }</tbody></table>`);
         continue;
       }
     }
-    const image = paragraph.match(/^!\[([^\]]+)\]\(([^)]+)\)$/);
+    const image = await imageMarkup(paragraph);
     if (image) {
-      const imagePath = path.resolve(docs, ...image[2].split("/"));
-      const mime = { ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(imagePath).toLowerCase()];
-      if (!imagePath.startsWith(docs + path.sep) || !mime) {
-        throw new Error("Brief illustrations must be local SVG or PNG files inside docs.");
-      }
-      const bytes = await fs.readFile(imagePath);
-      parts.push(`<figure><img alt="${escape(image[1])}" src="data:${mime};base64,${bytes.toString("base64")}"></figure>`);
+      parts.push(`<figure>${image}</figure>`);
     } else {
       parts.push(`<p>${inline(paragraph.replace(/\r?\n/g, " "))}</p>`);
     }
@@ -60,8 +68,9 @@ async function renderBrief(name) {
       body{font:10pt/1.25 Arial,sans-serif;color:#17212b}
       h1{font-size:18pt;margin:0 0 8pt}p{margin:0 0 6pt;break-inside:avoid}
       figure{margin:0 0 6pt;break-inside:avoid}figure img{display:block;width:100%;height:auto}
-      table{width:100%;border-collapse:collapse;margin:0 0 6pt;table-layout:fixed}
+      table{width:100%;border-collapse:collapse;margin:0 0 6pt;table-layout:fixed;break-inside:avoid}
       th,td{border:1px solid #c9d6e2;padding:6pt;text-align:left;vertical-align:top}
+      td img{display:block;width:100%;height:auto}
       th{background:#edf3f8;color:#173c4b}tr{break-inside:avoid}
       .page-break{break-before:page}a{color:#174c79;overflow-wrap:anywhere}
       </style><h1>${escape(title)}</h1>${body}</html>`);
