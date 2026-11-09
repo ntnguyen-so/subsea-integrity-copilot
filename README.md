@@ -49,6 +49,15 @@ Wait for the site and timeline to load before starting a run.
 The server builds the frontend automatically. First-time dependency/image downloads
 need internet; fresh inference uses your own Copilot entitlement and quota.
 
+Fresh inference now reuses one owned CLI runtime through the pinned Python SDK,
+but creates and deletes a separate, tool-disabled session for every model call.
+It uses the installed authenticated CLI, not an automatically downloaded runtime.
+Application tools, evidence scope, call budgets and grounding review are unchanged.
+For explicit transport troubleshooting only, set
+`$env:SUBSEA_COPILOT_TRANSPORT = 'cli'` before starting the server to use the older
+per-call subprocess transport. There is no automatic transport fallback or replay
+of a failed model call.
+
 ## Interview walkthrough
 
 ### 30-minute technical code route

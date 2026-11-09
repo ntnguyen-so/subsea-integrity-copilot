@@ -25,7 +25,7 @@ import time
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from langchain_core.language_models import BaseChatModel, LanguageModelInput
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
@@ -642,6 +642,10 @@ class CopilotCLIChatModel(BaseChatModel):
 
     runtime_dir: Path
     model_id: str | None = None
+    transport: Literal["cli", "sdk"] = Field(
+        default_factory=lambda: os.environ.get("SUBSEA_COPILOT_TRANSPORT", "sdk"),
+        validate_default=True,
+    )
     timeout_seconds: float = Field(default=180, gt=0)
     # Input/final limits are characters; pipe capture limits are bytes, not token allowances.
     max_prompt_chars: int = Field(default=144000, gt=0)
@@ -660,7 +664,10 @@ class CopilotCLIChatModel(BaseChatModel):
 
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
-        return {"model_id": self.model_id, "timeout_seconds": self.timeout_seconds}
+        return {
+            "model_id": self.model_id, "timeout_seconds": self.timeout_seconds,
+            "transport": self.transport,
+        }
 
     def bind_tools(
         self,
@@ -681,6 +688,10 @@ class CopilotCLIChatModel(BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         """Make one inference attempt under one deadline, including version lookup and cleanup."""
+        if self.transport == "sdk":
+            from .copilot_sdk import generate
+
+            return generate(self, messages, stop, kwargs)
         started = time.monotonic()
         if stop or set(kwargs) - {"tools", "timeout"}:
             raise ProviderError("unsupported_request")

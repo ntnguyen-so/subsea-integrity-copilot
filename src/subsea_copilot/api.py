@@ -284,8 +284,13 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             finally:
                 monitor.close()
                 worker.close()
-                telemetry.close()
-                store.close()
+                from .llm.copilot_sdk import close_hosts
+
+                try:
+                    close_hosts()
+                finally:
+                    telemetry.close()
+                    store.close()
 
     app = FastAPI(title="Subsea Integrity Copilot", lifespan=lifespan)
     app.state.store = store

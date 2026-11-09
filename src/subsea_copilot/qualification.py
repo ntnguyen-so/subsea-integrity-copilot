@@ -48,6 +48,8 @@ MODEL_METADATA_KEYS = (
     "cli_version",
     "cli_version_source",
     "transport_protocol",
+    "transport",
+    "runtime_ready_ms",
     "response_validation_stage",
     "transport_retry_scheduled",
     "usage",

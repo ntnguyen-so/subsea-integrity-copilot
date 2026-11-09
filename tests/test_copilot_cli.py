@@ -20,6 +20,11 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, Tool
 from subsea_copilot.llm import copilot_cli as cli
 
 
+@pytest.fixture(autouse=True)
+def legacy_transport(monkeypatch):
+    monkeypatch.setenv("SUBSEA_COPILOT_TRANSPORT", "cli")
+
+
 @pytest.fixture
 def runtime():
     path = Path.cwd() / ".test-artifacts" / uuid.uuid4().hex

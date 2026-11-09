@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "scenario": "S7",
+  "seed": 2026,
+  "implementation_sha256": "9f87f8c9170c992d1db5c8835903c0edd656f4818e42c0844c5d47d22744e993",
+  "transport": "persistent-sdk",
+  "sdk_version": "1.0.30",
+  "observed_model": "gpt-6.1-sol",
+  "cli_version": "1.0.107",
+  "execution": "sequential single-root runs; fresh process per root, isolated session per model call",
+  "elapsed_scope": "reviewed investigation completion, excluding separate report-to-map callback",
+  "cases": [
+    {
+      "source_seconds": 120,
+      "root_id": "0bbd3468-f0a2-5fcd-aefe-42f8a3eefa13",
+      "trace_id": "66c1b3960bd63035ba0e08078ef5adf0",
+      "state": "SUCCEEDED",
+      "elapsed_seconds": 149.328,
+      "fresh_model_calls": 8,
+      "fresh_tool_calls": 45,
+      "critic_decisions": ["accept"],
+      "validation_errors": [],
+      "all_specialists_succeeded": true,
+      "operational_checks_passed": 12,
+      "implementation_unchanged": true,
+      "all_model_identities_and_usage_observed": true,
+      "stored_observation_tree_verified": true,
+      "first_runtime_ready_ms": 625.0,
+      "historical_root_id": "8e424970-ce71-5b59-b6ac-75c06450c4ac",
+      "historical_elapsed_seconds": 538.375
+    },
+    {
+      "source_seconds": 180,
+      "root_id": "77e15881-2662-5937-8752-6097918bab8a",
+      "trace_id": "d30cda109fa5abf6c4a9a158c7302a0d",
+      "state": "SUCCEEDED",
+      "elapsed_seconds": 167.812,
+      "fresh_model_calls": 8,
+      "fresh_tool_calls": 36,
+      "critic_decisions": ["revise", "accept"],
+      "validation_errors": [],
+      "all_specialists_succeeded": true,
+      "operational_checks_passed": 12,
+      "implementation_unchanged": true,
+      "all_model_identities_and_usage_observed": true,
+      "stored_observation_tree_verified": true,
+      "first_runtime_ready_ms": 985.0,
+      "historical_root_id": "28ed28fc-7d03-5ab4-a4bf-431fb087d52e",
+      "historical_elapsed_seconds": 595.968
+    }
+  ],
+  "limitations": [
+    "Historical comparison used concurrent roots and CLI 1.0.105; current runs used sequential roots and CLI 1.0.107.",
+    "Model decisions and tool counts vary; improvement is not attributed solely to transport.",
+    "Both windows share one synthetic scenario, not independent event trials.",
+    "No latency percentile, field reliability or sub-six-minute guarantee is established.",
+    "SDK parses raw JSON-RPC before application event capture limits apply."
+  ]
+}

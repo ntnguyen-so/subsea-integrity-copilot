@@ -175,4 +175,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    from subsea_copilot.llm.copilot_sdk import close_hosts
+
+    try:
+        main()
+    finally:
+        close_hosts()

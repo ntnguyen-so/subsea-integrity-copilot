@@ -351,6 +351,10 @@ def main() -> None:
     except (ValueError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc
+    finally:
+        from .llm.copilot_sdk import close_hosts
+
+        close_hosts()
 
 
 if __name__ == "__main__":

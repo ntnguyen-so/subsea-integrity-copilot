@@ -1,6 +1,46 @@
 # Qualification results
 
-## Latest frozen-code S7 rehearsal: three fresh roots
+## Persistent-runtime optimization: two fresh accepted investigations
+
+The default hosted transport now retains one owned, installed Copilot CLI process
+through `github-copilot-sdk==1.0.30`. Every inference still creates and deletes its
+own session; conversation, native tools and memory are not shared. Application tool
+scope, evidence validation, root deadlines and the grounding reviewer are unchanged.
+There is no automatic legacy fallback or hidden replay of failed inference.
+
+Two sequential, single-root S7 seed-2026 rehearsals completed on the frozen
+implementation `9f87f8c9170c992d1db5c8835903c0edd656f4818e42c0844c5d47d22744e993`.
+Both used observed `gpt-6.1-sol` through CLI 1.0.107.
+The [sanitized optimization receipt](evidence/agent-latency-optimization.json)
+preserves identities, timings and qualification outcomes.
+
+| Source checkpoint | Previous elapsed | New elapsed | New model/tool calls | Review |
+|---|---:|---:|---|---|
+| +120s | 538.375s | **149.328s** | 8 / 45 | accept |
+| +180s | 595.968s | **167.812s** | 8 / 36 | revise → accept |
+
+Both roots and all specialists succeeded, with no validation errors or reused
+prior model calls. All twelve operational checks passed for each root. Every
+model call retained observed identity and usage; first-call runtime readiness was
+625ms/985ms respectively, with subsequent readiness rounded to zero milliseconds.
+The actual stored Langfuse trees were separately verified to contain connected
+AGENT, GENERATION, TOOL and GUARDRAIL observations, not merely queued exports.
+
+These are approximately 72% shorter **observed** runs, not a controlled estimate
+of transport-only improvement: the historical roots ran concurrently on CLI
+1.0.105, while these ran sequentially on 1.0.107, and model decisions/tool counts
+differ. They share one synthetic scenario, so they establish neither field
+reliability nor a latency percentile or sub-six-minute guarantee. Timing ends at
+the reviewed investigation, not the separate report-to-map callback.
+
+The adapter retains prompt, final-output and accepted-event capture limits,
+explicit timeouts, permission denial and failed-session cleanup. The SDK parses
+raw JSON-RPC frames before application event limits apply; this is not identical
+to the legacy transport's bounded raw-pipe capture. Its pinned private process
+handle is checked before installing the existing Windows orphan-process guard.
+`SUBSEA_COPILOT_TRANSPORT=cli` explicitly selects the legacy subprocess adapter.
+
+## Previous frozen-code S7 rehearsal: three fresh roots
 
 The local session artifact `files\demo-reliability-hardening-20261109\report.json`
 and its three `S7-2026-{95,120,180}\manifest.json` receipts record fresh S7 seed-2026
@@ -60,7 +100,7 @@ a small admission/audit interval outside the stored trace envelope.
 | +180s | 596.0s | 457.4s | 62.2s | 73.5s |
 
 The largest actionable finding is the **per-turn CLI lifecycle**, not simulation
-speed. The adapter launches a fresh owned CLI process/session for every model
+speed. The historical adapter launched a fresh owned CLI process/session for every model
 call. Aligning all 26 original calls with their owned `session.start` and
 `session.usage_record` timestamps shows **150.4/165.9/191.8 seconds before session
 start**, plus **41.9/41.9/53.3 seconds after usage**, per root respectively.
@@ -93,23 +133,23 @@ Several design choices then multiply that cost:
   context preparation, checkpoints and persistence; it is not established idle
   time or evidence of a particular database bottleneck.
 
-**Optimization order:** benchmark a long-lived CLI/SDK transport with fresh,
+**Original optimization order:** benchmark a long-lived CLI/SDK transport with fresh,
 isolated per-request sessions first; then remove redundant model turns and batch
 independent evidence requests, compact repeated context losslessly, and profile
 the uninstrumented handoff/persistence gaps. The
 [official Python SDK](https://github.com/github/copilot-sdk/blob/main/python/README.md)
-supports a client lifecycle separate from session creation; integrating it would
-require explicit deny-by-default tool permissions, the same scope isolation,
+supports a client lifecycle separate from session creation; the implementation
+qualified above retains explicit deny-by-default tool permissions, scope isolation,
 timeouts, cleanup, provenance and validation. Do not copy its approve-all example.
 The automatic fresh-run plan currently has only one allowed sequence, so an
 application-owned plan is also a candidate to remove a 35-40-second planning
 turn, but that is a deliberate orchestration/provenance change, not a prompt tweak.
 
 Do not remove the grounding reviewer, force acceptance, kill a CLI as soon as
-usage appears, or label playback as a faster live investigation. No faster
-transport or sub-six-minute live SLO is claimed here. Any implementation needs
-frozen, same-window before/after runs at both one-root and representative
-concurrency, with equal grounding/citation checks and failures retained.
+usage appears, or label playback as a faster live investigation. The faster
+transport is now qualified above, but no sub-six-minute live SLO is claimed.
+Controlled before/after runs at representative concurrency remain necessary
+before attributing all improvement to transport or committing a latency guarantee.
 
 ## S7 seed-2026 agent reliability regression
 
