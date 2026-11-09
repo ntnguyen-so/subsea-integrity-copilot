@@ -11,6 +11,8 @@ from .synthetic import ReplayDataset
 
 
 class Recording(Contract):
+    """A saved root and its exact measurement basis, including abstentions/failures."""
+
     scenario: str
     seed: int
     dataset_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
@@ -24,6 +26,7 @@ class Recording(Contract):
 
     @model_validator(mode="after")
     def same_basis(self) -> "Recording":
+        """Reject reports, children or casefiles transplanted from another evidence basis."""
         if (
             self.task.state not in {"SUCCEEDED", "ABSTAINED", "FAILED"}
             or self.task.parent_id is not None
@@ -107,6 +110,7 @@ def load_library(path: Path) -> RecordingLibrary:
 
 
 def save_library(path: Path, library: RecordingLibrary) -> None:
+    """Replace the library through a sibling pending file, avoiding partially written JSON."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".pending")
     temporary.write_text(library.model_dump_json(), encoding="utf-8")
@@ -114,6 +118,7 @@ def save_library(path: Path, library: RecordingLibrary) -> None:
 
 
 def dataset_hash(dataset: ReplayDataset) -> str:
+    """Bind playback to baseline and raw replay payloads, not merely a scenario/seed label."""
     return content_hash({
         "baseline": [row.model_dump(mode="json") for row in dataset.baseline],
         "records": [row.model_dump(mode="json") for row in dataset.records],

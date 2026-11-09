@@ -1,5 +1,10 @@
 """Re-extract archived Evaluation reports from incident text and rescore; no agents rerun."""
 
+# Reads the published evaluation, creates a one-time before-image archive, and writes
+# new extraction receipts plus deterministic spatial/process metrics to PUBLIC_REPORT.
+# Requires authenticated hosted Copilot for missing/stale extraction, not incident
+# agent reruns. Completed current-scope mappings are skipped; failed retries are opt-in
+# and retain prior extraction history. A concurrent report change prevents overwrite.
 import argparse
 
 from subsea_copilot.config import Settings
@@ -45,6 +50,8 @@ def main() -> None:
                     "id": sensor["id"], "station_id": sensor["station_id"],
                     "segment_id": sensor["segment_id"],
                 } for sensor in network["pack"]["sensors"]]
+                # Only visible interpretation plus the network sensor catalog enters
+                # extraction: detector diagnoses and ground truth are not supplied.
                 case["extraction"] = run_mapping(
                     model, case["interpretation"], catalog, telemetry,
                     tenant_id=cohort.get("tenant_id", "archived-evaluation"),

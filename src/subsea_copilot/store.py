@@ -3,9 +3,9 @@
 Business state lives in ``subsea``; graph checkpoints belong exclusively to
 ``subsea_checkpoint``. Events are append-only and retained, so reconnect cursors
 remain usable for the lifetime of a generation. No SQL transaction spans inference.
-CLI-only qualification permits nine cohort manual roots and one separately identified
-single-agent baseline per generation, instead of the interactive three-per-minute
-throttle; all other budgets remain unchanged.
+CLI-only qualification permits 27 cohort manual roots and three separately identified
+single-agent baselines per generation, instead of the interactive nine-per-minute
+throttle. These operational caps are enforced in ``001_initial.sql``.
 """
 
 from __future__ import annotations
@@ -140,6 +140,13 @@ def migrate(
 
 
 class Store:
+    """Scoped business-state repository with database-enforced invariants.
+
+    Application writes and read-only tool access use separate connection pools.
+    JSON payloads retain contract detail; relational columns support constraints,
+    scheduling and event cursors. SQL triggers independently enforce task budgets.
+    """
+
     def __init__(
         self,
         dsn: str,
@@ -193,6 +200,7 @@ class Store:
         action: str = "",
         repeatable: bool = False,
     ) -> Iterator[psycopg.Connection[dict[str, Any]]]:
+        """Set transaction-local RLS scope and optional lease authority before any SQL."""
         pool = self._tools_pool if read and self._tools_pool else self._pool
         try:
             with pool.connection() as conn, conn.transaction():
@@ -586,6 +594,7 @@ class Store:
     def observations(
         self, generation_id: str, start: datetime | None = None, end: datetime | None = None
     ) -> list[CanonicalObservation]:
+        """Read latest masks per raw variant, quarantining all conflicting source identities."""
         with self._tx(read=True) as conn:
             self._get(conn, "replays", generation_id, ReplaySession)
             rows = conn.execute(
@@ -608,6 +617,7 @@ class Store:
             return sorted(result, key=lambda item: (item.observed_at, item.identity, item.id))
 
     def install_history(self, documents: list[dict[str, Any]]) -> str:
+        """Pin a content-addressed corpus; insertion retries cannot replace old document bodies."""
         ordered = sorted(documents, key=lambda row: row["id"])
         encoded_documents: list[JsonValue] = list(ordered)
         version = content_hash(encoded_documents)
@@ -650,6 +660,7 @@ class Store:
         assets: list[str] | None = None,
         ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
+        """Retrieve incident-visible records via PostgreSQL full-text ranking, not embeddings."""
         query = history_search_query(query) if query is not None else None
         with self._tx(read=True) as conn:
             replay = self._get(conn, "replays", generation_id, ReplaySession)
@@ -681,6 +692,7 @@ class Store:
             return [row["payload"] for row in rows]
 
     def save_window(self, snapshot: WindowSnapshot) -> WindowSnapshot:
+        """Append evidence once, enforcing a same-interval predecessor chain for revisions."""
         self._scope(snapshot)
         with self._tx() as conn:
             self._generation(conn, snapshot.generation_id)
@@ -903,6 +915,7 @@ class Store:
             return int(row["id"])
 
     def get_projection(self, generation_id: str) -> dict[str, JsonValue]:
+        """Read UI state and its resume cursor in one repeatable-read database snapshot."""
         with self._tx(read=True, repeatable=True) as conn:
             replay = self._get(conn, "replays", generation_id, ReplaySession)
             latest = (
@@ -1020,6 +1033,7 @@ class Store:
         return previous == current
 
     def create_task(self, task: AgentTask, *, operator_id: str = "local") -> AgentTask:
+        """Atomically admit an idempotent root; SQL guards serialize quota/queue checks."""
         self._scope(task)
         if task.parent_id is not None:
             raise Conflict("use_create_child")
@@ -1093,6 +1107,7 @@ class Store:
         *,
         allow_waiting: bool = False,
     ) -> AgentTask:
+        """Fence writes with database time, live state, token and the root's hard deadline."""
         task = self._get(conn, "tasks", task_id, AgentTask, lock=True)
         now = conn.execute("SELECT clock_timestamp() AS now").fetchone()
         assert now
@@ -1216,6 +1231,11 @@ class Store:
         self, owner: str, ttl_seconds: int = 1080, *, task_id: str | None = None,
         root_id: str | None = None,
     ) -> AgentTask | None:
+        """Expire overdue work, then lease a queued/reclaimable task without waiting on peers.
+
+        Children sort first so specialists can unblock a waiting parent. Reclaim
+        creates a fresh token: an old worker cannot commit after losing ownership.
+        """
         if not owner or ttl_seconds <= 0:
             raise ValueError("A lease owner and positive TTL are required")
         with self._tx(action="claim") as conn:
@@ -1436,6 +1456,7 @@ class Store:
     def authorize_reuse(
         self, parent_id: str, task_ids: list[str], lease_token: str
     ) -> list[AgentTask]:
+        """Bind accepted specialists to the exact snapshot, policy and consumed ancestry."""
         if not 1 <= len(task_ids) <= 2 or len(set(task_ids)) != len(task_ids):
             raise Conflict("invalid_reuse_set")
         with self._tx(token=lease_token) as conn:
@@ -1542,6 +1563,7 @@ class Store:
             }
 
     def _reserve(self, task_id: str, lease_token: str, role_limit: int, field: str) -> AgentTask:
+        """Persist a call reservation before execution; failed work still consumes its allowance."""
         with self._tx(token=lease_token) as conn:
             initial = self._get(conn, "tasks", task_id, AgentTask)
             self._generation(conn, initial.generation_id)
@@ -1599,6 +1621,7 @@ class Store:
         table: str,
         event_type: str,
     ) -> None:
+        """Append an idempotent execution receipt only for a reserved call under a live lease."""
         if not call_id or len(call_id) > 200:
             raise ValueError("A bounded call identity is required")
         with self._tx(token=lease_token) as conn:

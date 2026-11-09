@@ -1,3 +1,8 @@
+/**
+ * Small DOM boundary shared by renderers. Required shell IDs/types fail loudly;
+ * dynamic prose uses textContent, not HTML parsing. Selected prose tags apply the
+ * display-only vocabulary formatter; SVG and raw source text remain literal.
+ */
 import { productText } from "./presentation";
 
 export function element<T extends HTMLElement>(id: string, kind: { new(): T }): T {

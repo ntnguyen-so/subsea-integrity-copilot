@@ -11,6 +11,7 @@ from .contracts import LocationCandidate, LocationFit, PipelineSegment, Point, S
 
 
 def point_at_chainage(segment: PipelineSegment, chainage_m: float) -> Point:
+    """Project engineering chainage onto drawing geometry, scaled to declared length."""
     lengths = [
         math.hypot(b.x - a.x, b.y - a.y)
         for a, b in zip(segment.points[:-1], segment.points[1:], strict=True)
@@ -41,6 +42,8 @@ def pipeline_distances(pack: SitePack) -> dict[tuple[str, str], float]:
     for segment in pack.segments:
         a, b = endpoints[segment.id]
         routes[a, b] = routes[b, a] = min(routes[a, b], segment.length_m)
+    # Floyd-Warshall on segment endpoints gives shortest connected-pipe paths;
+    # Euclidean proximity across disconnected branches is deliberately ignored.
     for via in vertices:
         for a in vertices:
             for b in vertices:
@@ -80,6 +83,11 @@ def locate(
     *,
     focus_deficits: Mapping[str, float] | None = None,
 ) -> LocationFit:
+    """Bracket sustained affected stations using usable neighbors on the same pipe.
+
+    This deterministic legacy helper proposes an inspection interval, never a
+    probability distribution or an inferred hydraulic leak coordinate.
+    """
     stations: dict[tuple[str, float], list[bool]] = defaultdict(list)
     observers = []
     for sensor in pack.sensors:
@@ -119,6 +127,8 @@ def locate(
         return LocationFit(
             status="withheld", reason="No usable unaffected pressure stations on both sides"
         )
+    # Midpoints reflect station spacing, not a fitted pressure decay model.
+    # Missing flanks or a bracket wider than policy allows withhold the result.
     lower = (max(before) + positions[0]) / 2
     upper = (positions[-1] + min(after)) / 2
     if upper - lower > pack.max_location_width_m:
@@ -175,6 +185,8 @@ def _pressure_peak_focus(
             bands[position] = band
     if not measured:
         return LocationFit(status="withheld", reason="No usable paired pressure-peak observations")
+    # Extended networks may have a wide above-threshold footprint. A unique
+    # paired peak may narrow inspection only if adjacent contrasts exceed noise.
     peak = max(measured.values())
     band = max(bands.values())
     core = sorted(position for position, value in measured.items() if peak - value <= band)

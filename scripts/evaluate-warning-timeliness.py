@@ -1,5 +1,9 @@
 """Reproduce synthetic warning timing without database workers or hosted inference."""
 
+# Inputs: number of synthetic seeds and output path. The domain evaluator owns
+# detection/timing calculations; this entry point only serializes its report and
+# propagates pass/fail as an exit code. Reruns overwrite the output, without services,
+# database writes or hosted model calls; source-time results are not field reliability.
 import argparse
 import json
 from pathlib import Path

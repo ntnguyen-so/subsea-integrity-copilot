@@ -1,3 +1,8 @@
+// Browser leg for a pre-existing harness task: argv supplies local URL, replay and
+// task IDs; SUBSEA_OPERATOR_PASSWORD supplies access. Checks public executed receipts,
+// durable validation/repair events and a denial-control submission, never private
+// reasoning. Requires running services/Chrome; posts a scripted question on each run
+// (stable idempotency key), so it is an integration probe rather than read-only export.
 const { chromium, expect } = require("@playwright/test");
 
 (async () => {

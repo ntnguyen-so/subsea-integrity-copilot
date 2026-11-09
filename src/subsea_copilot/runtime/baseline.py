@@ -1,4 +1,10 @@
-"""CLI qualification only: one model task, no delegation and no production policy widening."""
+"""CLI qualification only: one model task, no delegation and no production policy widening.
+
+A persisted snapshot and question produce one measured baseline execution using
+the shared service and budgets. This explicit qualification-only gateway combines
+quality/event reads; it does not grant those tools to production response tasks.
+Accepted output still needs ledger citations, original reads and retained limits.
+"""
 
 from __future__ import annotations
 
@@ -49,6 +55,7 @@ DEFAULT_QUESTION = (
 
 
 def baseline_schemas() -> list[dict[str, Any]]:
+    """Combine only the declared baseline tools from the two specialist registries."""
     schemas = {}
     for role in ("sensor_quality", "event_diagnosis"):
         for schema in tool_schemas(role):
@@ -123,6 +130,7 @@ class _BaselineService(AgentService):
         snapshot: WindowSnapshot,
         gateway: ToolGateway,
     ) -> AgentResult:
+        """Require actual quality/event receipts before applying the common factual gates."""
         receipts = cast(list[dict[str, Any]], self.store.tool_receipts(task.id))
         received = {r["name"] for r in receipts if not r.get("error")}
         if not BASELINE_REQUIRED <= received:
@@ -172,7 +180,7 @@ def run_single_agent_baseline(
     question: str = DEFAULT_QUESTION,
     checkpointer: BaseCheckpointSaver[Any] | None = None,
 ) -> dict[str, JsonValue]:
-    """Consume the explicitly declared baseline allowance and shared generation budget."""
+    """Persist and execute one baseline task, reporting observed calls rather than estimates."""
     if not store.qualification:
         raise ValidationError("baseline_authority", "Baseline requires a CLI qualification store.")
     if not question.strip() or len(question) > 4000:

@@ -1,4 +1,11 @@
-"""Small public qualification receipts; historical failures are never reconstructed."""
+"""Export an existing selected golden recording with its unsuccessful history intact.
+
+Qualification, manifest and recorded receipts supply pointers and measured counters;
+local Langfuse reads verify rejected-judge input/error evidence. No new model calls are
+made. Selected-case success is explicitly distinct from all-attempt success, and absent
+historical judge outputs are reported as gaps, never reconstructed. The G3 narrative
+and 17-tree summary describe this recorded selection, not universal runtime guarantees.
+"""
 
 from __future__ import annotations
 
@@ -12,6 +19,7 @@ from .telemetry import Telemetry
 
 
 def publish_recorded_receipts(output: Path) -> dict[str, Any]:
+    """Write bounded public JSON views while preserving source artifacts and failure gaps."""
     report = json.loads((output / "qualification.json").read_text())
     receipt = json.loads((output / "recorded-receipt.json").read_text())
     manifest = json.loads((output / "manifest.json").read_text())

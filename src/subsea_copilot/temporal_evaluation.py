@@ -1,4 +1,12 @@
-"""Source-causal lifecycle scores and recorded agent-protocol checks, not field validation."""
+"""Source-matched lifecycle scores and a separate recorded agent-process audit.
+
+Admitted final report mappings are carried forward across subsequent frames until a
+fresh accepted mapping replaces them. Episode detection requires post-onset evidence;
+recovery starts only after a full clean window and never treats failure as clearance.
+Counts describe overlapping synthetic source windows. Process metrics/re-audits check
+persisted protocol evidence without generating new diagnostic findings or inference;
+public detection projections intentionally omit those current-validator audit fields.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +29,7 @@ SUITE_NAMES = {
 }
 
 def without_agent_audit_results(value: Any) -> Any:
+    """Recursively remove process-audit fields without altering recorded detection scores."""
     if isinstance(value, dict):
         return {
             key: without_agent_audit_results(item) for key, item in value.items()
@@ -34,6 +43,7 @@ def without_agent_audit_results(value: Any) -> Any:
 
 
 def publish_evaluation(report: dict[str, Any], path: Path) -> None:
+    """Replace only the selected suite while preserving other recorded cohorts."""
     from .reference_evaluation import write_report
 
     suite = report.get("suite", "current")
@@ -57,6 +67,7 @@ def publish_evaluation(report: dict[str, Any], path: Path) -> None:
 
 
 def run_agent_evaluation(output: Path, *, suite: str = "current") -> dict[str, Any]:
+    """Re-audit archived roots with current validators, disclosing absent/mismatched receipts."""
     from uuid import uuid4
 
     from .config import Settings
@@ -120,6 +131,11 @@ def run_agent_evaluation(output: Path, *, suite: str = "current") -> dict[str, A
 def admitted_timeline(
     report: dict[str, Any], network: dict[str, Any],
 ) -> list[tuple[dict[str, Any], dict[str, Any] | None]]:
+    """Carry forward only completed, accepted, mapped, source/snapshot/hash-matched reports.
+
+    Failed or mismatched reviews cannot replace the last admitted report or retroactively
+    apply a future result to an earlier frame.
+    """
     rows = {row["case_id"]: row for row in report["cases"]}
     latest = None
     timeline = []
@@ -148,6 +164,13 @@ def admitted_timeline(
 
 
 def lifecycle_metrics(report: dict[str, Any]) -> dict[str, Any]:
+    """Count active-window coverage, fresh detections, clean recovery and false alarms.
+
+    Detection must be a correct-branch review after that episode's onset, not a stale
+    earlier same-branch report. Clearance needs an admitted negative review at or after
+    stop + window_seconds. Unassessed controls/recovery windows remain explicit rather
+    than being counted as safe; retained false alarms remain visible until replaced.
+    """
     episodes = []
     controls = []
     for network in report.get("networks", []):
@@ -224,6 +247,13 @@ def lifecycle_metrics(report: dict[str, Any]) -> dict[str, Any]:
 
 
 def agent_process_metrics(report: dict[str, Any]) -> dict[str, Any]:
+    """Use all dispatched reviews as check denominators; absent audits are not passes.
+
+    Planned-but-undispatched reviews are separate. Latency uses finite nonnegative
+    recorded agent timings: p50 is the median and p95 the nearest-rank ceil(0.95*n).
+    Model-call totals are recorded values, with missing counters disclosed. These are
+    reference/handoff/budget checks, not independent semantic accuracy measurements.
+    """
     attempts = [row for row in report["cases"] if row.get("root_count")]
     planned = [row for row in report["cases"] if row.get("force_review") or row.get("root_count")
                or row.get("truth", {}).get("review_required")]

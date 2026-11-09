@@ -1,4 +1,10 @@
-"""Static read-only authority. Prompts and providers cannot extend this registry."""
+"""Static read-only authority. Prompts and providers cannot extend this registry.
+
+Role and decision policy select tools, mandatory reads, claim kinds and execution
+ceilings; generated schemas advertise that same scope to the model. The current
+LLM policy exposes measurements rather than legacy event/location decisions.
+Gateway enforcement and result validation remain separate from prompt guidance.
+"""
 
 from dataclasses import dataclass
 from typing import Any
@@ -75,6 +81,7 @@ REGISTRY: dict[AgentRole, RolePolicy] = {
     ),
 }
 
+# Keep resource ceilings, but remove tools/claim kinds that would predetermine the diagnosis.
 LLM_REGISTRY: dict[AgentRole, RolePolicy] = {
     role: RolePolicy(
         policy.purpose,
@@ -96,6 +103,7 @@ LLM_REGISTRY: dict[AgentRole, RolePolicy] = {
 
 
 def role_policy(role: AgentRole, decision_policy: str = "legacy-v1") -> RolePolicy:
+    """Select the measurement-only policy explicitly; archived tasks retain legacy rules."""
     return (LLM_REGISTRY if decision_policy == "llm-diagnosis-v1" else REGISTRY)[role]
 
 RECOMMENDATIONS = {
@@ -125,6 +133,7 @@ LIMITATIONS = frozenset(
 
 
 def tool_schemas(role: AgentRole, decision_policy: str = "legacy-v1") -> list[dict[str, Any]]:
+    """Describe registered reads with mandatory snapshot/version fields and bounded arguments."""
     properties: dict[str, Any] = {
         "site_id": {"type": "string"},
         "snapshot_id": {"type": "string"},

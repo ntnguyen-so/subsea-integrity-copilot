@@ -1,3 +1,9 @@
+"""Verify authored factual labels before inference and reject fact/reference errors.
+
+Controlled fake transport checks pre-inference manifest persistence and failed-case
+denominators; passing these tests is not hosted-model accuracy evidence.
+"""
+
 import json
 from copy import deepcopy
 

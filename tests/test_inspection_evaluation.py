@@ -1,3 +1,9 @@
+"""Check measured inspection candidates and conservative context-based demotions.
+
+Missing references/bad taps cannot create locations; only incident-time approved
+matching citations can partition candidates. Metadata authority is not prose entailment.
+"""
+
 import pytest
 
 from subsea_copilot.inspection_evaluation import (

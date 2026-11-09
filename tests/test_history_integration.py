@@ -1,3 +1,9 @@
+"""Exercise incident-time retrieval and accepted handoffs with real PostgreSQL roles.
+
+Scripted model fixtures test governance rather than hosted answer quality: future
+records, wrong scopes, unread citations and changed grounding must fail closed.
+"""
+
 import json
 import os
 from datetime import timedelta

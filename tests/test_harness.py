@@ -1,3 +1,9 @@
+"""Verify bounded model context remains lossless, rehydratable and provenance-bound.
+
+These are offline message/receipt tests: compaction may shorten the model view,
+but cannot discard pinned claims, alter measurements or hide validation repairs.
+"""
+
 import copy
 import json
 from datetime import timedelta

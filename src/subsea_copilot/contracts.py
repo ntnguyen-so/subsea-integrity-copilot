@@ -44,6 +44,8 @@ def content_hash(value: JsonValue) -> str:
 
 
 class Contract(BaseModel):
+    """Reject unknown fields and nonfinite numbers at shared serialization boundaries."""
+
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
 
@@ -79,6 +81,13 @@ class Sensor(Contract):
 
 
 class SitePack(Contract):
+    """Versioned demo geometry and declared numerical policy, not fitted parameters.
+
+    Defaults use 1 Hz readings, 60s windows every 5s, and a 5s arrival allowance.
+    Coverage, persistence and independence thresholds are engineering assumptions
+    for synthetic qualification, not field-validated detection guarantees.
+    """
+
     id: str = "northsea"
     name: str = "NorthSea Pressure Monitoring Network"
     version: str = "pressure-pack-v3"
@@ -89,6 +98,8 @@ class SitePack(Contract):
     hop_seconds: int = 5
     lateness_seconds: int = 5
     revision_seconds: int = 120
+    # Three instruments alone are insufficient: station and gateway diversity
+    # must also hold so paired taps cannot masquerade as independent witnesses.
     min_observers: int = 3
     min_failure_domains: int = 2
     min_stations: int = 2
@@ -99,6 +110,8 @@ class SitePack(Contract):
     methane_lag_seconds: int = 25
     anomaly_threshold: float = 5
     minimum_scales: dict[Channel, float] = Field(default_factory=default_scales)
+    # Some fields remain for archived method contracts; current station brackets
+    # do not fit a hydraulic source using this legacy grid/residual configuration.
     location_grid_m: float = 25
     location_r0_m: float = 40
     compatible_residual_tolerance: float = 2
@@ -117,6 +130,8 @@ class RawRecord(Contract):
 
 
 class CanonicalObservation(Contract):
+    """Normalized value plus raw provenance; non-usable rows remain auditable."""
+
     id: str
     identity: str
     sensor_id: str
@@ -210,6 +225,8 @@ class Claim(Contract):
 
 
 class WindowSnapshot(Contract):
+    """Pinned numerical evidence for one interval/revision, shared by every agent role."""
+
     id: str
     tenant_id: str = "demo"
     site_id: str
@@ -235,6 +252,8 @@ class WindowSnapshot(Contract):
 
 
 class ReplaySession(Contract):
+    """Mutable replay controls; source time is distinct from real inference latency."""
+
     id: str
     tenant_id: str = "demo"
     site_id: str = "northsea"
@@ -345,6 +364,8 @@ class EngineerInterpretation(Contract):
 
 
 class AgentResult(Contract):
+    """Model-selected structured claims; validators bind references to executed reads."""
+
     outcome: Literal["supported", "insufficient_evidence"]
     claim_refs: list[str]
     evidence_ids: list[str] = Field(default_factory=list)
@@ -393,6 +414,8 @@ class InterpretationReview(Contract):
 
 
 class AgentTask(Contract):
+    """Durable work item with immutable evidence scope, deadline and fenced ownership."""
+
     id: str
     root_id: str
     tenant_id: str = "demo"

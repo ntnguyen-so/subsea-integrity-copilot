@@ -1,3 +1,8 @@
+/**
+ * Usage/time presentation contract: partial provider coverage stays explicit, the
+ * standard API-equivalent estimate is not a Copilot bill, active wall time advances
+ * and saved/completed durations freeze. Isolated fixtures plus opted-in S7 recordings.
+ */
 import { test, expect } from "@playwright/test";
 import { buildSync } from "esbuild";
 import type { AgentTask, ExecutionUsage, Projection, TaskDetail } from "../../web/ts/types";

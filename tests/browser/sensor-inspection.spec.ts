@@ -1,3 +1,8 @@
+/**
+ * Readings-first inspection with explicit synthetic API fixtures: absent versus
+ * unusable samples, common peer scales, stable sensor/window selection and optional
+ * source audit. Only identity/hash/version-matched accepted reports accompany data.
+ */
 import { test, expect } from "@playwright/test";
 import { buildSync } from "esbuild";
 import { join } from "node:path";

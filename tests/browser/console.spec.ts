@@ -1,3 +1,8 @@
+/**
+ * Owned-console navigation/replay integration: keyboard access, received evidence,
+ * supported speed persistence and paused history returning to confirmed source time.
+ * Requires local credentials/backend; saved monitoring inspection submits no questions.
+ */
 import { test, expect } from "@playwright/test";
 import type { ReplaySession } from "../../web/ts/types";
 

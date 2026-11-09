@@ -1,4 +1,11 @@
-"""Evaluation-only truth; never imported by the detector or agents."""
+"""Offline synthetic detector and warning checks, separate from runtime inference.
+
+Recipes produce baseline/arrival records; normalization and ``analyze_window`` use the
+production path, while this module alone reconstructs source labels for comparison.
+The default cohort is six scenarios x 20 held-out noise seeds (91000..91019).
+Mature-window classification, fault attribution and interval containment are distinct
+from sliding-window warning delay. Neither estimates field reliability or hydraulics.
+"""
 
 from __future__ import annotations
 
@@ -49,6 +56,11 @@ class EvaluationTruth:
 
 
 def evaluation_truth(scenario: str, seed: int) -> EvaluationTruth:
+    """Reproduce recipe labels, including RNG draw order, without consulting predictions.
+
+    S1 is observable leakage; S5 also has a source but deliberately lacks usable coverage.
+    The chosen chainage is authored synthetic truth, not a location inferred by an agent.
+    """
     rng = random.Random(seed)
     rng.uniform(0.8, 1.25)
     rng.uniform(1.3, 1.8)
@@ -79,6 +91,15 @@ def evaluation_truth(scenario: str, seed: int) -> EvaluationTruth:
 
 
 def evaluate(seeds: tuple[int, ...] = HELD_OUT_SEEDS) -> dict[str, Any]:
+    """Score one mature [120,180) window per scenario/seed, with clock at 185.
+
+    Leak precision is S1 detections / (S1 detections + false leak calls outside S1/S5);
+    recall and containment both divide by all S1 seeds, including location abstentions.
+    S5 is excluded from detectable-leak recall, not relabelled as a negative. Fault
+    precision/recall pool sensor-channel TP/FP/FN across S1/S2. The 90% gates are
+    declared acceptance criteria, not fitted confidence levels. Timing measures local
+    computation, and the per-sensor-alert baseline is only an any-anomaly comparator.
+    """
     confusion: dict[str, Counter[str]] = defaultdict(Counter)
     alert_baseline: dict[str, Counter[str]] = defaultdict(Counter)
     widths = []
@@ -186,13 +207,21 @@ def evaluate(seeds: tuple[int, ...] = HELD_OUT_SEEDS) -> dict[str, Any]:
 
 
 def evaluate_diagnostics(seed_count: int = 20) -> dict[str, JsonValue]:
+    """Select a bounded prefix of the frozen holdout seeds and return JSON-safe scores."""
     if not 1 <= seed_count <= len(HELD_OUT_SEEDS):
         raise ValueError("seed_count must be between 1 and 20")
     return cast(dict[str, JsonValue], evaluate(HELD_OUT_SEEDS[:seed_count]))
 
 
 def evaluate_warning_timeliness(seed_count: int = 3) -> dict[str, JsonValue]:
-    """Arrival-gated sliding windows; source-time delay is not wall-clock delivery."""
+    """Replay arrivals in 5-second hops; source delay is not wall-clock delivery.
+
+    A window sees only arrivals released by endpoint + lateness. S2 onset is zero;
+    other issue onsets are 90. Expected warnings must arrive within 120 source seconds.
+    Delay percentiles include observed expected warnings only; gates separately reject
+    missing warnings. Unlike mature-window recall, all-truth leak recall includes S5,
+    whose correct coverage warning is not counted as a possible-leak detection.
+    """
     if not 1 <= seed_count <= len(HELD_OUT_SEEDS):
         raise ValueError("seed_count must be between 1 and 20")
     expected_kinds = {

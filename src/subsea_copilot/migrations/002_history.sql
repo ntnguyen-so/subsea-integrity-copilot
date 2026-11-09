@@ -1,3 +1,5 @@
+-- Versioned synthetic operational records: authored/available/effective times
+-- support incident-time retrieval. Full-text search is lexical, not vector RAG.
 CREATE TABLE IF NOT EXISTS subsea.history_documents (
     tenant_id text NOT NULL,
     site_id text NOT NULL,
@@ -31,6 +33,8 @@ DROP TRIGGER IF EXISTS immutable ON subsea.history_documents;
 CREATE TRIGGER immutable BEFORE UPDATE OR DELETE ON subsea.history_documents
     FOR EACH ROW EXECUTE FUNCTION subsea.immutable_row();
 
+-- A specialist inherits the parent's corpus; neither may switch history or
+-- response protocol midway through the investigation.
 CREATE OR REPLACE FUNCTION subsea.guard_history_pin() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, subsea AS $$
 DECLARE parent_version text;

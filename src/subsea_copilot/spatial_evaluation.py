@@ -1,4 +1,15 @@
-"""Recorded numerical windows and real, truth-blind agents on extended networks."""
+"""Record extended-network diagnostics and truth-blind investigations over source time.
+
+Authored spatial/temporal recipes yield frozen 112-instrument inputs. Production
+normalization and 60-second windows advance every five seconds; measured pressure or
+instrument signals admit reviews without consulting hidden labels. Source ingestion
+pauses through inference, mapping and result admission, so source-time delays and model
+wall time remain separate. Networks run concurrently, but each network is sequential.
+
+Frames retain diagnostics/truth for inspection; review rows retain actual tasks,
+receipts, extraction and judge opinion. Deterministic scores include failed/withheld
+reviews and overlapping-window denominators, not independent field observations.
+"""
 
 from __future__ import annotations
 
@@ -70,6 +81,7 @@ INSTRUMENT_REVIEW_QUESTION = (
 
 @dataclass
 class InstrumentReviews:
+    """Track measured quality signals with a 60-source-second refresh cooldown."""
     checked: set[tuple[str, str]] = field(default_factory=set)
     last_review_seconds: int | None = None
 
@@ -94,6 +106,7 @@ class InstrumentReviews:
 
 
 def spatial_metrics(report: dict[str, Any]) -> dict[str, Any]:
+    """Reuse answer scores but omit fabricated binary detector truth for continuous footprints."""
     metrics = score_report(report)
     # The injected footprint is continuous, not a detector-threshold truth label.
     metrics["groups"] = {
@@ -107,6 +120,12 @@ def spatial_metrics(report: dict[str, Any]) -> dict[str, Any]:
 
 
 def spatial_timing(report: dict[str, Any]) -> list[dict[str, Any]]:
+    """Separate branch alert, admission, checked diagnosis and accepted answer timestamps.
+
+    Correct-branch credit requires the review's source time, snapshot and input hash to
+    match a frame. A succeeded checked diagnosis is preliminary, not a final report.
+    This summary follows the first source; lifecycle_metrics handles multiple episodes.
+    """
     timings = []
     for network in report.get("networks", []):
         frames = network.get("frames", [])
@@ -200,6 +219,7 @@ def frame_record(
     truth: dict[str, Any],
     review_case_id: str | None,
 ) -> dict[str, Any]:
+    """Persist current measured evidence and hidden grading truth, not a future agent answer."""
     summaries = {
         item.sensor_id: item.value
         for item in snapshot.evidence.values()
@@ -228,6 +248,7 @@ def frame_record(
 
 
 def public_task(store: Store, task: dict[str, Any]) -> dict[str, Any]:
+    """Expose task timing and only a succeeded, snapshot-checked legacy leak warning."""
     saved = store.get_task(task["id"])
     checked_finding = None
     if (
@@ -265,6 +286,15 @@ def run_spatial_evaluation(
     suite: str = "current",
     publish: bool = True,
 ) -> dict[str, Any]:
+    """Run isolated recordings with fixed checkpoints plus measurement-admitted follow-ups.
+
+    Current-suite checkpoints are 60/150/360; lifecycle suites use 60/180/240/360 and
+    force quiet reassessments after 60. Dynamic reviews increase planned_cases, retaining
+    early and failed attempts. Split is recorded metadata, not a recipe-family filter.
+    Mapping/judge controls precede networks. Each completed answer must have accepted
+    runtime output and completed extraction; judge opinion stays separate. Network
+    exceptions mark outstanding review rows failed and the overall run incomplete.
+    """
     if (
         os.environ.get("SUBSEA_TRACE_CONTENT") != "1"
         or os.environ.get("SUBSEA_SYNTHETIC_ONLY") != "1"

@@ -1,3 +1,9 @@
+/**
+ * Shared schematic symbols/geometry plus recorded truth-vs-report playback.
+ * Truth is an evaluation-only layer, never a monitoring input. Agent findings come
+ * from admitted quoted report mappings, not browser inference or detector fallbacks.
+ * Overall scores cover recorded windows, not just successful review checkpoints.
+ */
 import { button, node, svg } from "./dom";
 import { agentName } from "./agentwork";
 import type { CheckedFinding, EvaluationCase, EvaluationReport } from "./evaluation";
@@ -44,6 +50,7 @@ function matchingReview(report: EvaluationReport, frame: SpatialFrame): Evaluati
     && row.source_seconds === frame.source_seconds
     && row.snapshot_id === frame.snapshot_id && row.input_hash === frame.input_hash);
 }
+/** Release only source/snapshot/hash-matched accepted reports with completed extraction. */
 export function releasedReview(report: EvaluationReport, frame: SpatialFrame, reviewed: boolean): EvaluationCase | undefined {
   const row = matchingReview(report, frame);
   return reviewed && row?.status === "completed" && row.accepted_report
@@ -69,6 +76,8 @@ function checkedWarning(row: EvaluationCase | undefined, frame: SpatialFrame, se
 interface DisplayFindings {
   frame: SpatialFrame; row: EvaluationCase; review: EvaluationCase;
 }
+// Keep the most recent admitted report through failed/unreviewed periods. A newer
+// admitted negative report replaces it; future findings cannot backfill earlier time.
 function latestFindings(
   report: EvaluationReport, network: SpatialNetwork, current: SpatialFrame,
   reviewed: boolean,
@@ -88,6 +97,8 @@ function findingCounts(expected: string[], reported: string[]): { tp: number; fp
   const falseAlarms = [...predictions].filter(value => !truth.has(value));
   return { tp: truth.size - missed.length, fp: falseAlarms.length, fn: missed.length, missed, falseAlarms };
 }
+// Set-based units differ: leak existence, branch, sensor and sensor/type. Missing-only
+// issues are not hardware faults; they remain included in the separate issue-type unit.
 function snapshotScores(frame: SpatialFrame, review: EvaluationCase | undefined) {
   const mapping = review?.extraction?.mapping;
   const source = frame.truth.leak_source;
@@ -106,12 +117,15 @@ function snapshotScores(frame: SpatialFrame, review: EvaluationCase | undefined)
 function recall(counts: { tp: number; fn: number }): string {
   return counts.tp + counts.fn ? score(counts.tp / (counts.tp + counts.fn)) : "Not applicable";
 }
+/** Draw only intervals stated in report mappings; never substitute a numerical fit. */
 export function reportedInspectionIntervals(
   mapping: Pick<NonNullable<OutputExtraction["mapping"]>, "leaks"> | null | undefined,
 ): NonNullable<InvestigationCase["inspection"]>[] {
   return (mapping?.leaks || []).flatMap(leak => leak.interval
     ? [{ segment_id: leak.segment_id, ...leak.interval }] : []);
 }
+// Scoring uses the first stated interval and rejects empty/>400m bands; drawing
+// all report intervals is distinct from qualifying one interval for scoring.
 function scoredInspection(review: EvaluationCase | undefined): NonNullable<InvestigationCase["inspection"]> | undefined {
   const interval = reportedInspectionIntervals(review?.extraction?.mapping)[0];
   return interval && interval.end_m > interval.start_m && interval.end_m - interval.start_m <= 400
@@ -126,6 +140,11 @@ function emptyScores() {
     windows: 0, leakWindows: 0, noLeakWindows: 0, containedWindows: 0, unsupportedIntervals: 0,
   };
 }
+/**
+ * Aggregate every captured frame across networks, carrying only earlier admitted
+ * findings. Unreviewed leak windows count as misses; no-leak windows are the false
+ * alarm denominator. Correlated overlapping windows are not independent trials.
+ */
 function overallScores(report: EvaluationReport) {
   const overall = emptyScores();
   const cases = (report.networks || []).map(network => {
@@ -269,6 +288,7 @@ function renderScoreDetails(report: EvaluationReport, overall: ReturnType<typeof
   }
   return details;
 }
+// Warm-up/no finding means unassessed, never a healthy instrument or a missing-data diagnosis.
 export function sensorAssessment(snapshot: WindowSnapshot | null, sensorId: string): {
   assessed: boolean; missing: boolean; anomaly: boolean;
 } {
@@ -350,6 +370,8 @@ export function mapLegend(truth: boolean, options: {
   }
   return legend;
 }
+// Preserve aspect ratio, center the pack and invert Cartesian y for SVG coordinates.
+// Paired-instrument screen offsets do not change physical chainage or uncertainty.
 function geometry(pack: SitePack): (point: Point) => Point {
   const points = pack.segments.flatMap(segment => segment.points);
   const xmin = Math.min(...points.map(point => point.x)), xmax = Math.max(...points.map(point => point.x));
@@ -360,6 +382,7 @@ function geometry(pack: SitePack): (point: Point) => Point {
     y: 65 + (ymax - point.y) * scale + (390 - (ymax - ymin) * scale) / 2,
   });
 }
+/** Interpolate along pack endpoints; reject out-of-range chainage rather than clamp it. */
 function pipelinePoint(pack: SitePack, id: string, chainage: number, project: (point: Point) => Point): Point | null {
   const segment = pack.segments.find(item => item.id === id);
   if (!segment || chainage < 0 || chainage > segment.length_m) return null;
@@ -476,6 +499,7 @@ function drawMap(map: SVGSVGElement, pack: SitePack, frame: SpatialFrame, review
   }
 }
 
+/** Enforce the report's exact immutable basis before layering report findings on measured flags. */
 export function drawInvestigationMap(
   map: SVGSVGElement, pack: SitePack, snapshot: WindowSnapshot,
   file: InvestigationCase | null, selected: string, select: (id: string) => void,
@@ -524,6 +548,8 @@ function publicUpdate(event: ConsoleEvent): string {
 }
 const journalTypes = new Set(["agent.check_started", "agent.check_completed", "agent.handoff_requested", "agent.draft", "agent.review_requested", "answer.checked", "answer.critique"]);
 
+// Two clocks replay captured source windows and recorded agent wall-time admission.
+// Pauses/loading hold evidence at its boundary; replay does not execute the agents.
 export function renderSpatialEvaluation(container: HTMLElement, report: EvaluationReport): void {
   stopSpatialPlayback();
   const networks = report.networks || [];
@@ -540,6 +566,8 @@ export function renderSpatialEvaluation(container: HTMLElement, report: Evaluati
   }
   const playback = state;
   const heading = original("div", "", "spatial-heading");
+  // The descriptive scale below is the authored S7 suite contract, not discovered
+  // from arbitrary packs. Actual scored counts come from captured frames below.
   heading.append(original("strong", `S7-scale evaluation · ${report.split === "held_out" ? "held-out" : "development"}`),
     original("span", `${networks.length} recordings · 112 instruments each · 7 branches · 11.2 km · 6 minutes`, "muted"));
   container.append(heading);

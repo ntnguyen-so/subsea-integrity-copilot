@@ -1,4 +1,11 @@
-"""Reference-backed answer quality, with factual rules distinct from advisory opinions."""
+"""Reference-backed answer quality, with factual rules distinct from advisory opinions.
+
+Freeze authored synthetic inputs/expected facts and policies before model calls.
+An author sees inputs only; a separate judge sees the saved answer, references
+and deterministic checks. Outputs retain factual-check denominators separately
+from six advisory 1-5 ratings. This evaluates individual synthetic answers, not
+full workflow reliability, calibrated confidence or field engineering approval.
+"""
 
 from __future__ import annotations
 
@@ -98,6 +105,7 @@ class JudgeVerdict(Contract):
 
 
 def answer_instruction() -> str:
+    """Reuse factual packet rules while requesting a separately explainable operator answer."""
     rules = POLICY.split("The schema is: ", 1)[0]
     return (
         rules + "\nExplain the requested pressure and verification findings to an operator. "
@@ -110,6 +118,7 @@ def answer_instruction() -> str:
 
 
 def judge_instruction() -> str:
+    """Define advisory review against frozen facts, not an overall release/reliability score."""
     return (
         "Review a saved synthetic investigation answer, not an agent workflow or a release gate. "
         "The original input and expected structured facts were authored before the answer. "
@@ -136,6 +145,7 @@ def judge_instruction() -> str:
 
 
 def observed_response(model: BaseChatModel, response: BaseMessage) -> tuple[str, dict[str, Any]]:
+    """Require a tool-free final and observed live model identity, not requested-model claims."""
     if (
         not isinstance(response, AIMessage)
         or response.tool_calls
@@ -158,6 +168,7 @@ def observed_response(model: BaseChatModel, response: BaseMessage) -> tuple[str,
 
 
 def validate_judgment(case: ReferenceCase, answer: ExplainedAnswer, verdict: JudgeVerdict) -> None:
+    """Reject foreign citations, fabricated excerpts and endorsement of known numeric errors."""
     available = {row.id for row in case.input.measurements} | {
         row.id for row in case.input.documents
     }
@@ -183,6 +194,7 @@ def validate_judgment(case: ReferenceCase, answer: ExplainedAnswer, verdict: Jud
 
 
 def quality_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Aggregate only completed verdicts; unscored/failed reviews never become zero or success."""
     reviewed = [
         row
         for row in rows
@@ -197,6 +209,7 @@ def quality_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
             if item["dimension"] == key
         ]
         scores = [item["score"] for item in opinions if item["score"] is not None]
+        # Each dimension has its own assessed denominator; a null score is not a low rating.
         dimensions[key] = {
             "average": round(sum(scores) / len(scores), 3) if scores else None,
             "scored": len(scores),
@@ -241,6 +254,7 @@ def run_answer_quality_evaluation(
     model_id: str = "gpt-6.1-sol",
     judge_model_id: str = "gpt-6.1-sol",
 ) -> dict[str, Any]:
+    """Persist frozen references, saved answers and independent reviews with explicit coverage."""
     from .config import Settings
     from .qualification import qualification_model_factory
     from .reference_evaluation import (
@@ -461,6 +475,7 @@ def run_answer_quality_evaluation(
                 save()
 
     with ThreadPoolExecutor(max_workers=2) as executor:
+        # Bound independent case concurrency; shared report mutations/writes use the same lock.
         list(executor.map(evaluate, range(len(cases))))
     with lock:
         report.update(

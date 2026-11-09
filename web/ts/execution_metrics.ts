@@ -1,3 +1,9 @@
+/**
+ * Investigation wall time and provider-reported usage, never source-clock speed.
+ * Token totals/costs are supplied by the backend: reported/reserved and priced/reserved
+ * call counts expose partial coverage. API-equivalent estimates are not Copilot bills;
+ * mapper usage is presented separately by agentwork.
+ */
 import { box, node, text } from "./dom";
 import type { AgentTask, ExecutionUsage } from "./types";
 
@@ -60,6 +66,8 @@ export class ExecutionMetrics {
     }
   }
 
+  // Only active live work advances using the latest server/client clock offset.
+  // Terminal and recorded tasks freeze at their persisted updated_at timestamp.
   tick(): void {
     if (!this.root) return;
     const running = !this.recorded && active.has(this.root.state);

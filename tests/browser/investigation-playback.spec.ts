@@ -1,3 +1,8 @@
+/**
+ * Recorded/live timeline boundary: no future backfill, exact checkpoint evidence,
+ * no inference on playback, pause-before-recording and separate fixed-time live work.
+ * Delayed reads must hold each window without catching up/skipping after load.
+ */
 import { test, expect, type Page } from "@playwright/test";
 import { availableRecording } from "../../web/ts/investigation_playback";
 import type { SavedInvestigation } from "../../web/ts/investigation_playback";

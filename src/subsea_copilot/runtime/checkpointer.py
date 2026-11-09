@@ -1,4 +1,9 @@
-"""Checkpoint ownership is separate from application and gateway database roles."""
+"""Checkpoint ownership is separate from application and gateway database roles.
+
+An owned PostgreSQL connection/schema yields a LangGraph saver. Normal startup
+verifies migrations instead of silently provisioning storage; only explicit
+bootstrap performs setup. Checkpoints recover graph state, not tool authority.
+"""
 
 import re
 from collections.abc import Iterator
@@ -25,6 +30,7 @@ def postgres_checkpointer(
     """Bootstrap explicitly with setup=True; default startup verifies readiness immediately."""
     if not re.fullmatch(r"[a-z][a-z0-9_]{0,62}", schema):
         raise ValueError("Invalid checkpoint schema.")
+    # PostgresSaver needs autocommit/dict rows; prepared statements are disabled here.
     with psycopg.connect(
         connection_string, autocommit=True, prepare_threshold=0, row_factory=dict_row
     ) as connection:

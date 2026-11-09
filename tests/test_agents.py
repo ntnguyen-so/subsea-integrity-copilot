@@ -1,4 +1,9 @@
-"""Memory persistence is a unit-test fake only; the application uses PostgreSQL."""
+"""Check serial handoffs, receipt/scope gates, recovery, budgets and grounding limits.
+
+Memory persistence and scripted replies are unit-test fakes, not live reasoning
+evidence; the application uses PostgreSQL. Marked integration cases separately
+exercise a real PostgreSQL saver and require independently bootstrapped storage.
+"""
 
 from contextlib import contextmanager
 from datetime import timedelta

@@ -1,4 +1,12 @@
-"""Fail-closed claim gates and application-owned factual rendering."""
+"""Fail-closed claim gates and application-owned factual rendering.
+
+Untrusted AgentResult JSON is checked against one pinned snapshot, successful
+read receipts, role authority and linked accepted specialists. Numbers in the
+legacy factual channel come from immutable code-computed claims, not model
+arithmetic. Current LLM diagnosis keeps measurement/source gates but does not
+force archived classifier or location decisions. Advisory prose has separate
+citation and grounding checks before final engineer-v2 publication.
+"""
 
 import json
 import math
@@ -28,6 +36,7 @@ class ValidationError(ValueError):
 
 
 def parse_json(value: str) -> Any:
+    """Reject duplicate fields and NaN/Infinity before schema validation can hide ambiguity."""
     def pairs(items: list[tuple[str, Any]]) -> dict[str, Any]:
         parsed: dict[str, Any] = {}
         for key, item in items:
@@ -43,6 +52,7 @@ def parse_json(value: str) -> Any:
 
 
 def read_pinned_evidence(receipts: list[dict[str, Any]]) -> set[str]:
+    """Collect actual evidence.get identities, excluding failed reads and search hits."""
     return {
         ref
         for receipt in receipts
@@ -56,6 +66,7 @@ def dependency_limitations(dependencies: list[AgentTask]) -> set[str]:
 
 
 def read_evidence_reference(snapshot_id: str, receipts: list[dict[str, Any]]) -> str | None:
+    """Name the scoped successful-read set for prose citations, not for claim/evidence IDs."""
     read = read_pinned_evidence(receipts)
     if not read:
         return None
@@ -143,6 +154,7 @@ def investigation_facts_available(
             continue
         quantities = [value.get("baseline_median"), value.get("recent_5s_pressure_drop_bar")]
         complete_recent = (
+            # Current summaries need all five seconds; the legacy fallback needs all twenty.
             value.get("recent_5s_usable_samples") == 5 / pack.sample_seconds
             if "recent_5s_usable_samples" in value
             else (
@@ -178,6 +190,7 @@ def investigation_facts_available(
 
 
 def compatible(task: AgentTask, other: AgentTask, snapshot: WindowSnapshot) -> bool:
+    """Require accepted same-snapshot/mode/policy/history/guidance work, not just matching IDs."""
     return (
         other.tenant_id == task.tenant_id
         and other.site_id == task.site_id
@@ -201,6 +214,7 @@ def validate_result(
     receipts: list[dict[str, Any]],
     dependencies: list[AgentTask] | None = None,
 ) -> AgentResult:
+    """Apply the role's factual, dependency, history and interpretation acceptance contract."""
     return _validate_with_policy(
         value,
         task,
@@ -243,6 +257,7 @@ def _validate_with_policy(
     policy: RolePolicy,
     specialist_contract: bool,
 ) -> AgentResult:
+    """Validate schema and provenance first, then apply only the task's pinned decision policy."""
     llm_decides = task.decision_policy == "llm-diagnosis-v1"
     if llm_decides:
         snapshot = measurement_snapshot(snapshot)
@@ -275,6 +290,7 @@ def _validate_with_policy(
     ):
         reject("knowledge_scope", "Domain guidance differs from the pinned site or geometry.")
     specialist_handoff = llm_decides and task.role != "operator_response"
+    # A bounded specialist summary is advisory; the public factual channel is not free prose.
     if specialist_handoff and len(result.summary) > 3000:
         reject("certainty", "Specialist reasoning handoff exceeds its declared bound.")
     if not specialist_handoff and result.summary not in {"", "Evidence references only."}:
@@ -357,6 +373,7 @@ def _validate_with_policy(
     ):
         reject("dependency_receipts", "Response must consume every authorized specialist.")
     if specialist_contract and task.role in {"operator_response", "event_diagnosis"}:
+        # A downstream answer cannot silently upgrade the coverage/scope of its dependencies.
         required_limits = dependency_limitations(dependencies)
         if not required_limits <= set(result.limitations):
             missing_limits: list[JsonValue] = [
@@ -545,6 +562,7 @@ def _validate_with_policy(
 
     validate_interpretation(result, task, receipts)
     if task.response_protocol == "engineer-v2" and task.state in {"SUCCEEDED", "ABSTAINED"}:
+        # Draft validation precedes review; final acceptance must bind the accepted review too.
         from subsea_copilot.grounding import validate_review
 
         validate_review(result, task, snapshot, receipts)

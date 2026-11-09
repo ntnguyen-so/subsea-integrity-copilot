@@ -1,3 +1,8 @@
+# Process-local environment loader for bootstrap's owner-only credential document.
+# Validate paths, ACLs, schema, variable set and value formats before any assignment.
+# Repeated loads restore the same values; child commands must run in this process.
+# This neither starts services nor authenticates hosted Copilot: live calls still
+# require the separately configured provider/CLI access and local runtime services.
 # Dot-source this script; no credential values are printed.
 [CmdletBinding()]
 param()

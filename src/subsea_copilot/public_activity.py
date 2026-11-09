@@ -1,4 +1,10 @@
-"""Bounded explanations of executed work, never provider-private reasoning."""
+"""Bounded explanations of executed work, never provider-private reasoning.
+
+Gateway request/result metadata becomes a small public activity payload with
+application-authored purpose labels and observed status. Questions describe
+intended checks; only successful completed reads expose findings/citation IDs.
+This is neither the raw evidence ledger nor an assurance that a cause is proven.
+"""
 
 from __future__ import annotations
 
@@ -69,6 +75,7 @@ def public_check(
     *,
     completed: bool = False,
 ) -> dict[str, Any]:
+    """Separate requested intent, successful observations and failures in UI-safe summaries."""
     title, purpose = TOOL_PURPOSES.get(
         tool, ("Read scoped evidence", "Check only the evidence authorized for this agent.")
     )
@@ -85,6 +92,7 @@ def public_check(
     if isinstance(arguments.get("check_question"), str):
         payload["agent_question"] = arguments["check_question"][:240]
     if isinstance(arguments.get("knowledge_ids"), list):
+        # Public previews are shorter than tool allowances; original receipts retain full scope.
         payload["knowledge_ids"] = arguments["knowledge_ids"][:3]
     if error:
         payload["observation"] = f"Check failed: {error}. No successful finding is inferred."

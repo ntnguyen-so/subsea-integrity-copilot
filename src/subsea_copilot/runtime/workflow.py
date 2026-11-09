@@ -1,4 +1,16 @@
-"""Durable serial business orchestration around the shared checkpointed graph."""
+"""Durable serial business orchestration around the shared checkpointed graph.
+
+Replay questions bind immutable snapshots, then a response root plans serial
+quality -> diagnosis -> answer tasks or explicitly reuses compatible specialists.
+PostgreSQL task leases/budgets govern business state; LangGraph checkpoints govern
+conversation progress. Model/tool effects run outside graph nodes, with original
+read receipts and provenance retained across worker restarts.
+
+New questions use measurement-only LLM diagnosis and independently reviewed
+engineer-v2 prose; archived legacy tasks retain numerical eligibility rules.
+Neither model output, research guidance nor cached success is trusted without
+the corresponding scope, receipt and result checks.
+"""
 
 from __future__ import annotations
 
@@ -105,6 +117,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AgentService:
+    """Bridge leased business tasks, checkpointed conversations and checked public reports."""
     def __init__(
         self,
         store: Store,
@@ -163,6 +176,7 @@ class AgentService:
         automatic: bool = False,
         episode_id: str | None = None,
     ) -> AgentTask:
+        """Create an idempotent root pinned to persisted evidence and the prompt catalog."""
         from datetime import timedelta
 
         if session.workflow == "sensor_alerts":
@@ -197,6 +211,7 @@ class AgentService:
             )
         )
         existing = self._optional_task(identifier)
+        # A retry of the same submission retains its original history, policy and guidance.
         if existing is None:
             self._check_provider(session.id, session.mode)
         history_version = existing.history_version if existing else None
@@ -260,6 +275,7 @@ class AgentService:
         self.store.record_task_event(task.id, task.lease_token, name, payload)
 
     def _knowledge_for(self, snapshot: WindowSnapshot) -> KnowledgePacket | None:
+        """Pin applicable reviewed guidance; invalid guidance withholds RCA, not monitoring."""
         try:
             packet = select_knowledge(
                 load_knowledge(),
@@ -295,6 +311,7 @@ class AgentService:
         return ToolGateway(self.store, task, snapshot, self.telemetry)
 
     def _schemas(self, task: AgentTask) -> list[dict[str, Any]]:
+        """Hide completed intake-only reads and bind current-policy schemas to exact scope."""
         completed = {
             receipt["name"]
             for receipt in self.store.tool_receipts(task.id)
@@ -331,6 +348,7 @@ class AgentService:
 
     @staticmethod
     def _model_limit(task: AgentTask) -> int:
+        """Allow engineer-v2 coordinator review/reflection within one shared 18-call ceiling."""
         return (
             6 * BUDGET_MULTIPLIER
             if task.role == "operator_response" and task.response_protocol == "engineer-v2"
@@ -344,6 +362,7 @@ class AgentService:
         snapshot: WindowSnapshot,
         gateway: ToolGateway,
     ) -> AgentResult:
+        """Attach only already-read sources, then validate without choosing model findings."""
         receipts = self.store.tool_receipts(task.id)
         candidate = (
             bind_read_claim_evidence(
@@ -370,7 +389,7 @@ class AgentService:
         context: dict[str, Any],
         gateway: ToolGateway,
     ) -> tuple[list[dict[str, Any]], AgentTask]:
-        """Application-owned reads, not invented model requests or model generations."""
+        """Perform mandatory reads through the gateway, distinct from model-selected actions."""
         names = set(context["required_tools"])
         pressure_ids: set[str] = set()
         if task.role == "event_diagnosis":
@@ -468,6 +487,7 @@ class AgentService:
                 identity = json.dumps(
                     [task.id, snapshot.id, name, arguments, "required-intake-v1"], sort_keys=True
                 )
+                # Stable application call IDs let checkpoint recovery replay receipts safely.
                 call = {
                     "id": str(uuid5(NAMESPACE_URL, identity)),
                     "name": name,
@@ -554,6 +574,7 @@ class AgentService:
         return outputs, gateway.task
 
     def _context(self, task: AgentTask, snapshot: WindowSnapshot, phase: str) -> dict[str, Any]:
+        """Bind role instructions to rechecked dependencies, measurements and result schema."""
         scope = {
             "site_id": snapshot.site_id,
             "snapshot_id": snapshot.id,
@@ -574,6 +595,7 @@ class AgentService:
             and (not fresh or t.root_id == task.root_id)
         ]
         checked_candidates = []
+        # Cached acceptance is only a candidate: validate its current contract and dependencies.
         for candidate in candidates:
             gateway = ToolGateway(self.store, candidate, snapshot, self.telemetry)
             dependencies = gateway.dependencies()
@@ -948,6 +970,7 @@ class AgentService:
                 "eligible_location", "usable_location", "inspection_interval_available",
                 "requires_location",
             ):
+                # Do not leak archived eligibility/location decisions into current reasoning.
                 context.pop(field, None)
             for sensor in context["history_sensors"]:
                 sensor.pop("event_support", None)
@@ -964,6 +987,7 @@ class AgentService:
     def _initial_pressure_comparisons(
         snapshot: WindowSnapshot, *, measurements_only: bool = False,
     ) -> list[dict[str, Any]]:
+        """Batch station-paired profiles; current policy includes every instrument, not labels."""
         from subsea_copilot.monitoring import instrument_signals
         from subsea_copilot.synthetic import generate_pack
 
@@ -1029,6 +1053,7 @@ class AgentService:
 
     @staticmethod
     def _network_pressure_table(snapshot: WindowSnapshot) -> dict[str, Any]:
+        """Project all measured summaries; rounding is display compaction, not new evidence."""
         from subsea_copilot.synthetic import generate_pack
 
         pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
@@ -1100,6 +1125,7 @@ class AgentService:
 
     @staticmethod
     def _history_sensors(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+        """Link the small-layout context to actual pressure-summary source identities."""
         findings = {finding.sensor_id: finding for finding in snapshot.quality.findings}
         concerns = {
             f.sensor_id
@@ -1137,6 +1163,7 @@ class AgentService:
         criticism: GroundingAssessment | None = None,
         previous_candidate: AgentResult | None = None,
     ) -> tuple[dict[str, Any], AgentTask]:
+        """Run or resume one phase, fulfilling bounded interrupts and auditing every attempt."""
         gateway = self._gateway(task, snapshot)
 
         critic = phase.startswith("critic-")
@@ -1302,6 +1329,7 @@ class AgentService:
                 ]
             ).encode()
         ).hexdigest()
+        # A phase-specific thread separates plan/answer/reviews and all tenant/window scopes.
         config = {
             "configurable": {"thread_id": thread_id},
             "recursion_limit": GRAPH_RECURSION_LIMIT,
@@ -1504,6 +1532,7 @@ class AgentService:
                 task = self.store.reserve_model_call(
                     task.id, task.lease_token, self._model_limit(task)
                 )
+                # Reserve before inference: failed calls/restarts never replenish the allowance.
                 gateway.task = task
                 receipts = self.store.tool_receipts(task.id)
                 seen = {r["name"] for r in receipts if not r.get("error")}
@@ -1740,6 +1769,8 @@ class AgentService:
                     if metadata["error"] == "invalid_structured_output" and (
                         task.decision_policy == "llm-diagnosis-v1"
                     ):
+                        # Envelope repair is separate from schema repair, but spends the same
+                        # persisted model-call budget and deadline; auth/quota do not enter it.
                         transport_feedback = transport_diagnostic(
                             metadata.get("response_validation_stage")
                         )
@@ -1803,6 +1834,7 @@ class AgentService:
         snapshot: WindowSnapshot,
         result: AgentResult,
     ) -> tuple[AgentResult, AgentTask]:
+        """Review all prose units, allow bounded revisions, and withhold persistent rejection."""
         from subsea_copilot.grounding import review_material_hash
 
         rounds = []
@@ -1810,6 +1842,7 @@ class AgentService:
         previous_assessment = None
         compact = task.decision_policy == "llm-diagnosis-v1"
         limit = FRESH_REFLECTION_LIMIT if compact else REFLECTION_LIMIT
+        # Three author revisions permit four reviews; acceptance stops the loop immediately.
         for index in range(limit + 1):
             if result.interpretation is not None:
                 self._event(
@@ -1891,6 +1924,7 @@ class AgentService:
         )
 
     def _orchestrate(self, task: AgentTask, snapshot: WindowSnapshot) -> AgentTask | None:
+        """Persist a serial plan and one child at a time; None means an atomic parent wait."""
         parsed: dict[str, Any] | None = None
         if not task.plan:
             parsed, task = self._graph(task, snapshot, "plan")
@@ -1914,6 +1948,7 @@ class AgentService:
                 return task
             role: AgentRole = "sensor_quality" if step == "quality" else "event_diagnosis"
             identifier = str(uuid5(NAMESPACE_URL, f"{task.id}:plan:1:step:{index}"))
+            # Child identity survives a crash after commit, preventing duplicate specialist work.
             existing = self._optional_task(identifier)
             if existing is not None:
                 if (
@@ -1982,6 +2017,7 @@ class AgentService:
         raise ValidationError("plan", "Plan has no answer step.")
 
     def run_once(self) -> bool:
+        """Claim one task; execute, wait or finalize only while its worker lease remains valid."""
         self.completed_task = None
         task = self._claim_task()
         if task is None:
@@ -2168,6 +2204,7 @@ class AgentService:
                 if task.deadline <= utc_now():
                     raise ValidationError("deadline", "Report completion exceeded root deadline.")
                 if task.response_protocol == "engineer-v2":
+                    # Recheck the accepted review against the final result before publication.
                     self._accept(
                         result.model_dump_json(), task, snapshot, self._gateway(task, snapshot)
                     )

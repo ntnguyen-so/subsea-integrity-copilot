@@ -1,3 +1,9 @@
+"""Require fresh source-matched detection and clean admitted recovery evidence.
+
+Stale/mismatched reports and absent reviews cannot fake clearance; retained false alarms,
+failed/unattempted process checks and archive gaps remain visible across suite publication.
+"""
+
 from __future__ import annotations
 
 import json

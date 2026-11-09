@@ -1,5 +1,10 @@
 """Held-out joint-timing probe: execution gates, with semantic review still required."""
 
+# Two fresh hosted S7 arms preserve per-instrument before/after distributions while
+# changing only P7 temporal order. Requires database/checkpointer and hosted Copilot.
+# Creates a new tenant and timestamped runtime report; reruns repeat real calls rather
+# than reuse prior inference. Equal marginal hashes check the controlled manipulation,
+# not equal multivariate evidence or independently established causal correctness.
 import hashlib
 import json
 import math
@@ -68,6 +73,8 @@ def main():
                 for identifier in instruments:
                     for second in range(50, 110):
                         original_second = second
+                        # Rotate the later group's 40s post-period by 20s: magnitudes
+                        # stay identical as sets, but cross-instrument alignment changes.
                         if staggered and instruments.index(identifier) >= 4 and second >= 70:
                             original_second = 70 + (second - 70 + 20) % 40
                         pressure = (
@@ -191,6 +198,8 @@ def main():
         }
         output = Path("runtime") / f"joint-timing-live-{utc_now():%Y%m%dT%H%M%SZ}.json"
         output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        # This exit status qualifies controlled inputs and execution, not the
+        # semantic correctness of the two model-written engineering conclusions.
         qualified = report["matching_individual_before_after_distributions"] and all(
             arm["root"]["state"] in {"SUCCEEDED", "ABSTAINED"} for arm in arms
         )

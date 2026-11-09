@@ -1,3 +1,5 @@
+"""Check local session signatures, restart compatibility, credentials and CSRF rejection."""
+
 import pytest
 
 from subsea_copilot.security import AuthenticationError, SessionManager

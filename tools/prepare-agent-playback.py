@@ -1,5 +1,10 @@
 """Export preserved terminal synthetic investigations; never call a model."""
 
+# Inputs are S7 checkpoint manifests and the original tenants' database records.
+# Uses the authenticated recorded-console API in process to build public casefiles,
+# then merges recordings by task ID into runtime_dir/agent-playback.json. Reruns
+# replace matching IDs, retain others and make no hosted calls; DB access is required.
+# Dataset hashes, pack and immutable snapshots travel with each preserved execution.
 import argparse
 import json
 from pathlib import Path
@@ -20,6 +25,7 @@ def main() -> None:
     args = parser.parse_args()
     settings = Settings.from_env()
     destination = settings.runtime_dir / "agent-playback.json"
+    # Merge, do not erase other published checkpoints when exporting a subset.
     recordings = {row.task.id: row for row in load_library(destination).recordings}
     manifests = sorted(args.runs.glob(r"S7-2026-*\manifest.json"))
     if not manifests:

@@ -1,4 +1,9 @@
-"""Bounded public validation issues, independent of trace content capture."""
+"""Bounded public validation issues, independent of trace content capture.
+
+Typed failures become redacted repair guidance for the model and durable events.
+Schema inputs and raw provider output are excluded: diagnostics explain rejection
+without treating untrusted response text as authority or exposing private content.
+"""
 
 import json
 from typing import Any
@@ -52,6 +57,7 @@ TRANSPORT_REPAIR_HINTS = {
 
 
 def transport_diagnostic(stage: object) -> dict[str, str]:
+    """Map only known envelope-failure stages to application-authored repair instructions."""
     known_stage = stage if isinstance(stage, str) and stage in TRANSPORT_REPAIR_HINTS else "unknown"
     return {
         "code": "invalid_structured_output",
@@ -67,6 +73,7 @@ def transport_diagnostic(stage: object) -> dict[str, str]:
 
 
 def validation_diagnostic(error: Exception) -> dict[str, Any]:
+    """Expose at most 32 schema issues and bound/redact the serialized public payload."""
     code = error.code if isinstance(error, ValidationError) else "structure"
     feedback = (
         str(error)
@@ -101,6 +108,7 @@ def validation_diagnostic(error: Exception) -> dict[str, Any]:
         ),
     }
     encoded = redact_content(json.dumps(payload, ensure_ascii=True, allow_nan=False))
+    # Oversized details are replaced, not blindly sliced into invalid JSON.
     if len(encoded) > 16000:
         payload["issues"] = [
             {

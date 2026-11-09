@@ -1,4 +1,13 @@
-"""Independent synthetic factual references; not an audit of the agent's own validators."""
+"""Controlled factual-answer benchmark with authored, independently cross-checked labels.
+
+Fixture packets contain measurements and time-scoped verification documents; expected
+answers remain evaluation-only. Before any model is constructed, the complete dataset,
+selected development/held_out IDs, policy and implementation hashes are persisted.
+Only packet facts and policy reach the model. Deterministic scoring checks measurements,
+instrument evidence, leak authority and exact reference sets, not agent self-validation
+or an LLM judge. The current corpus has two development and six held-out cases.
+These fixture authority rules are not field engineering sufficiency.
+"""
 
 from __future__ import annotations
 
@@ -135,7 +144,14 @@ class ReferenceDataset(Contract):
 
 
 def independently_derived_reference(packet: EvidencePacket) -> ReferenceAnswer:
-    """Cross-check authored labels from raw fixture facts, never from an agent result."""
+    """Cross-check authored labels from raw fixture facts, never from an agent result.
+
+    Latest-at-or-before measurements win even when invalid; kPa/100 and MPa*10 yield
+    bar. Documents must be approved, available and effective by the packet clock;
+    eligible replacements suppress older IDs. Conflicting instrument documents retain
+    citations but establish no issue. Leak confirmation requires eligible documents
+    agreeing on one segment; pressure alone supplies no confirmation authority.
+    """
     eligible = [
         doc
         for doc in packet.documents
@@ -199,6 +215,13 @@ def independently_derived_reference(packet: EvidencePacket) -> ReferenceAnswer:
 
 
 def score_answer(expected: ReferenceAnswer, actual: ReferenceAnswer | None) -> dict[str, bool]:
+    """Score four case-level guarantees; absent answers fail all four.
+
+    Numeric values allow absolute error 1e-6 bar with zero relative tolerance.
+    Sensor sets must match without duplicates; cited document order is irrelevant,
+    but duplicate, missing or invented references fail. Fact and citation correctness
+    are deliberately separate checks.
+    """
     if actual is None:
         return {
             key: False
@@ -253,6 +276,7 @@ def score_answer(expected: ReferenceAnswer, actual: ReferenceAnswer | None) -> d
 
 
 def load_dataset(path: Path = DATASET_PATH) -> ReferenceDataset:
+    """Reject duplicate cases or authored labels inconsistent with raw fixture facts."""
     dataset = ReferenceDataset.model_validate_json(path.read_text(encoding="utf-8"))
     if len({case.id for case in dataset.cases}) != len(dataset.cases):
         raise ValueError("Duplicate reference case")
@@ -270,6 +294,13 @@ def run_reference_evaluation(
     split: Literal["development", "held_out", "all"] = "held_out",
     model_id: str = "gpt-6.1-sol",
 ) -> dict[str, Any]:
+    """Run two bounded live workers and persist progress, failures and model provenance.
+
+    Split selection filters authored cases, not predictions. Every planned case stays
+    in each check's denominator, including failed inference. Completion means the run
+    finished, not that every answer passed. The immutable run report and current public
+    projection retain expected/actual answers, hashes and observed transport identity.
+    """
     from .config import Settings
     from .llm.copilot_cli import CopilotCLIChatModel, ProviderError
     from .qualification import qualification_model_factory

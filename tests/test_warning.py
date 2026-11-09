@@ -1,3 +1,5 @@
+"""Verify immediate numerical warnings never turn missing evidence into safety clearance."""
+
 import pytest
 
 from subsea_copilot.diagnostics import analyze_window

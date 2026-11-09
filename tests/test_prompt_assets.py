@@ -1,3 +1,9 @@
+"""Check packaged prompt identity, exact body hashes and process-frozen catalog pins.
+
+Local asset fixtures test metadata validation and single-pass substitution;
+no prompt is sent to a live model and no reasoning quality is inferred.
+"""
+
 import hashlib
 from dataclasses import replace
 

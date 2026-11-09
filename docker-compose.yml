@@ -1,3 +1,5 @@
+# Required business database plus optional Jaeger trace viewing. Loopback-only
+# bindings keep this local demo off the network; credentials come from the shell.
 name: subsea-copilot
 
 services:
@@ -32,4 +34,5 @@ services:
     logging: *logging
 
 volumes:
+  # Preserve evidence across container restarts; this is not a disposable cache.
   database:

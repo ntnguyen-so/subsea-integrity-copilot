@@ -54,6 +54,7 @@ def load_pack(site_id: str = "northsea", path: Path | None = None) -> SitePack:
 
 
 def knowledge_items(pack: SitePack) -> list[dict[str, Any]]:
+    """Expose versioned assets and declared method caveats, never scenario injection labels."""
     return [
         {"id": pack.id, "kind": "site", "name": pack.name, "version": pack.version},
         *[

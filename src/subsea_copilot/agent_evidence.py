@@ -1,4 +1,10 @@
-"""Measurement-only agent views; archived numerical decisions are not agent evidence."""
+"""Measurement-only agent views; archived numerical decisions are not agent evidence.
+
+Project an immutable snapshot into measurement, coverage and metadata evidence
+for llm-diagnosis-v1. Remove legacy event/location claims and drift/disagreement
+decisions, but retain observed counts, usable anomalies and data limitations.
+The original archived snapshot is not rewritten or treated as a causal oracle.
+"""
 
 from .contracts import EventAssessment, WindowSnapshot
 
@@ -15,6 +21,7 @@ _MEASUREMENTS = {
 
 
 def measurement_snapshot(snapshot: WindowSnapshot) -> WindowSnapshot:
+    """Copy the snapshot with measurement-backed claims and no predetermined domain verdict."""
     evidence = {}
     for identifier, item in snapshot.evidence.items():
         if item.kind not in _MEASUREMENTS:
@@ -51,6 +58,7 @@ def measurement_snapshot(snapshot: WindowSnapshot) -> WindowSnapshot:
     return snapshot.model_copy(update={
         "quality": quality,
         "event": EventAssessment(
+            # Neutral schema placeholder, not a forced model outcome or a resolved no-event.
             hypothesis="insufficient_evidence",
             eligible_hypotheses=[],
             criteria_id="measurement-only-no-domain-decision",

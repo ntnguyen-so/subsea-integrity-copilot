@@ -1,3 +1,9 @@
+"""Protect matched report rubrics, bounded reviewer sequences and planned denominators.
+
+Abstention/context remain separate, exact-point claims fail, and slow, interrupted,
+failed or unattempted reports cannot disappear from timely-success accounting.
+"""
+
 from collections import Counter
 from copy import deepcopy
 

@@ -1,4 +1,11 @@
-"""Check contextual assessments against actual retrieval and comparison receipts."""
+"""Check contextual assessments against actual retrieval and comparison receipts.
+
+A history investigation must cite fully read admissible records and executed
+comparisons from the pinned corpus, not search titles or unread IDs. Legacy
+tasks additionally use explicit numerical plausibility gates; current LLM
+policy checks provenance without choosing a causal label from fixed thresholds.
+Rendered history is read-only context, never physical confirmation or control.
+"""
 
 from typing import Any
 
@@ -42,6 +49,7 @@ def validate_investigation(
     snapshot: WindowSnapshot,
     receipts: list[dict[str, Any]],
 ) -> None:
+    """Verify corpus/source authority before any policy-specific contextual plausibility checks."""
     review = result.investigation
     reads = [r for r in receipts if not r.get("error") and r["name"].startswith("history.")]
     if review is None or not any(r["name"] == "history.search" for r in reads):
@@ -97,6 +105,7 @@ def validate_investigation(
             "history_support", "A contextual explanation needs documents and measured comparison."
         )
     if task.decision_policy == "llm-diagnosis-v1":
+        # The current policy keeps provenance gates but lets the LLM assess measurements.
         return
     if review.assessment == "operating_change_plausible":
         operations = [d for d in selected_docs if d["type"] == "operation"]
@@ -104,6 +113,8 @@ def validate_investigation(
         from datetime import datetime
 
         epoch = snapshot.window_end.timestamp() - snapshot.end_seconds
+        # Legacy demo rule: >=0.2 bar on >=2 segments with >=60% usable data per side
+        # and a contemporaneous operation record; this is not calibrated causal confidence.
         for comparison in selected_comparisons:
             changed = {
                 s["segment_id"]
@@ -183,6 +194,7 @@ def validate_investigation(
 
 
 def render_investigation(review: HistoryInvestigation, receipts: list[dict[str, Any]]) -> str:
+    """Render checked record excerpts and measured before/after counts from original receipts."""
     documents = {
         d["id"]: d
         for r in receipts

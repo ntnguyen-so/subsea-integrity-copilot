@@ -1,3 +1,8 @@
+/**
+ * Load-aware local playback of preserved terminal investigations. Navigating a saved
+ * timeline loads original measurements/reports, makes no inference calls and cannot
+ * expose a future checkpoint. Fresh work is an explicit separate live-here action.
+ */
 import { box, node, svg } from "./dom";
 import { renderAgentWork, renderIdleAgentWork } from "./agentwork";
 import { drawInvestigationMap, mapLegend, sensorAssessment } from "./evaluation_maps";
@@ -17,6 +22,7 @@ interface PlaybackServices {
   error(error: unknown): void;
   metrics(root: AgentTask | null, usage: ExecutionUsage | null, recorded: boolean, serverTime: string): void;
 }
+/** Latest terminal checkpoint at or before selection; newest trial wins a same-time tie. */
 export function availableRecording(rows: SavedInvestigation[], seconds: number): SavedInvestigation | undefined {
   return rows.filter(row => ["SUCCEEDED", "ABSTAINED", "FAILED"].includes(row.state)
     && row.source_seconds <= seconds)
@@ -98,6 +104,7 @@ export class InvestigationPlayback {
     }
   }
 
+  // Pause backend ingestion before starting the independent local navigation clock.
   async enable(): Promise<void> {
     const replayId = this.projection?.replay.id;
     try {
@@ -125,6 +132,8 @@ export class InvestigationPlayback {
     if (this.timer !== null) clearInterval(this.timer);
     this.timer = null; this.playing = false;
   }
+  // Stop at each measurement hop/checkpoint and discard loading time instead of
+  // catching up later. Speed is a maximum navigation pace, not model acceleration.
   private advance(): void {
     if (!this.playing) return;
     this.dataChanged();
@@ -134,6 +143,7 @@ export class InvestigationPlayback {
       const nextWindow = (Math.floor(this.seconds / hop) + 1) * hop;
       const nextRecording = Math.min(...this.rows.filter(row => row.source_seconds > this.seconds)
         .map(row => row.source_seconds));
+      // The walkthrough is the authored six-minute timeline, not a live clock.
       this.seconds = Math.min(360, nextWindow, nextRecording,
         this.seconds + (now - this.anchor) * this.speed / 1000);
     }
@@ -182,6 +192,7 @@ export class InvestigationPlayback {
       box("automatic-conclusion").hidden = false;
     }
   }
+  /** Fetch/cache one preserved frame; version checks prevent late reads replacing a new selection. */
   private async show(row: SavedInvestigation): Promise<void> {
     if (!this.projection || this.requested === row.task_id) return;
     this.requested = row.task_id;

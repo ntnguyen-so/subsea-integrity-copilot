@@ -37,6 +37,7 @@ def build_console() -> None:
 
 
 def provider_check(model_id: str | None = None) -> dict[str, object]:
+    """Make one explicit hosted transport probe; this does not evaluate answer reliability."""
     from .llm.copilot_cli import CopilotCLIChatModel
 
     model = CopilotCLIChatModel(runtime_dir=runtime_directory(), model_id=model_id)
@@ -62,6 +63,11 @@ def provider_check(model_id: str | None = None) -> dict[str, object]:
 
 
 def main() -> None:
+    """Dispatch offline generation, local services and explicitly requested evaluation runs.
+
+    Live qualification writes retained evidence and can consume hosted quota.
+    Serving builds the UI first; migrations use separate administrative authority.
+    """
     parser = argparse.ArgumentParser(prog="subsea")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("migrate", help="Create independent PostgreSQL roles/schema")

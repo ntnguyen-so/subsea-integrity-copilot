@@ -1,4 +1,11 @@
-"""Independent language review with exact-source anchors and fail-closed acceptance."""
+"""Independent language review with exact-source anchors and fail-closed acceptance.
+
+An accepted structured result plus original read bodies produces cited review
+units and a separately prompted critic assessment. Legacy review checks literal
+source quotes; current semantic review binds the candidate, sources and task
+scope by hash. These identity/coverage checks constrain an LLM judgment, not a
+proof of causal truth. Revisions may replace rejected prose only, never facts.
+"""
 
 import json
 from typing import Any
@@ -37,6 +44,7 @@ class GroundingCheckBatch(GroundingAssessment):
 def apply_revision(
     value: str, candidate: AgentResult, criticism: GroundingAssessment
 ) -> AgentResult:
+    """Apply exactly one prose replacement per rejected unit, preserving checked fields."""
     patch = InterpretationRevision.model_validate(parse_json(value))
     expected = {c.paragraph_id for c in criticism.checks if c.verdict != "supported"}
     identifiers = [revision.paragraph_id for revision in patch.revisions]
@@ -84,10 +92,12 @@ def reusable_checks(
     *,
     require_quotes: bool = True,
 ) -> list[GroundingCheck]:
+    """Reuse only supported units with unchanged source bytes under the review protocol."""
     validate_assessment(assessment, previous, previous_sources, require_quotes=require_quotes)
     if not require_quotes and (
         candidate_hash(previous) != candidate_hash(current) or previous_sources != current_sources
     ):
+        # Compact semantic decisions have no quote anchors, so require whole-packet identity.
         return []
     before, after = paragraphs(previous), paragraphs(current)
     retained = []
@@ -110,6 +120,7 @@ def reusable_checks(
 
 
 def candidate_hash(result: AgentResult) -> str:
+    """Identify the full candidate while normalizing legacy absent/empty regional metadata."""
     value = result.model_dump(mode="json")
     if value["interpretation"] and not value["interpretation"].get("regional_assessments"):
         value["interpretation"].pop("regional_assessments", None)
@@ -117,6 +128,7 @@ def candidate_hash(result: AgentResult) -> str:
 
 
 def review_material_hash(task: AgentTask, result: AgentResult, sources: dict[str, str]) -> str:
+    """Bind semantic judgment to the exact candidate, original sources, question and scope."""
     return content_hash({
         "protocol": "semantic-grounding-v2",
         "tenant_id": task.tenant_id, "site_id": task.site_id,
@@ -128,6 +140,7 @@ def review_material_hash(task: AgentTask, result: AgentResult, sources: dict[str
 
 
 def validate_revision(candidate: AgentResult, revised: AgentResult) -> None:
+    """Prevent reflection from changing the factual ledger, outcome or investigation."""
     if revised.model_dump(exclude={"interpretation"}) != candidate.model_dump(
         exclude={"interpretation"}
     ):
@@ -135,6 +148,7 @@ def validate_revision(candidate: AgentResult, revised: AgentResult) -> None:
 
 
 def paragraphs(result: AgentResult) -> dict[str, dict[str, Any]]:
+    """Name complete answer/cause/region/question units, not individual visual paragraphs."""
     value = result.interpretation
     if value is None:
         raise ValidationError("grounding_missing", "A review needs a candidate interpretation.")
@@ -161,6 +175,7 @@ def critic_context(
     sources: dict[str, str],
     phase: str,
 ) -> dict[str, Any]:
+    """Construct a tool-free critic packet; guidance remains distinct from case observations."""
     context: dict[str, Any] = {
         "phase": phase,
         "role": "evidence_grounding_critic",
@@ -206,6 +221,7 @@ def source_texts(
     receipts: list[dict[str, Any]],
     knowledge: KnowledgePacket | None = None,
 ) -> dict[str, str]:
+    """Resolve sources from cited ledger entries, successful reads and reviewed handoff bodies."""
     sources = {
         ref: json.dumps(snapshot.claims[ref].model_dump(mode="json"), sort_keys=True)
         for ref in result.claim_refs
@@ -254,6 +270,7 @@ def source_texts(
             },
         }, sort_keys=True)
     elif pressure:
+        # Additional audit context is not itself a citation token the model can invent.
         sources["audited_pressure_summaries"] = json.dumps(
             compact_evidence({"evidence": pressure, "claims": {}}),
             sort_keys=True, separators=(",", ":"),
@@ -309,6 +326,7 @@ def validate_assessment(
     require_quotes: bool = True,
     require_corrections: bool = False,
 ) -> GroundingAssessment:
+    """Check exhaustive unique verdicts, real anchors/corrections and all-supported acceptance."""
     assessment = (
         value
         if isinstance(value, GroundingAssessment)
@@ -347,6 +365,7 @@ def validate_assessment(
                 "grounding_quotes", "Accepted paragraphs need exact source anchors."
             )
         for support in check.support:
+            # Substring membership anchors provenance; semantic entailment is the critic's job.
             if (
                 support.reference not in allowed
                 or support.reference not in sources
@@ -378,6 +397,7 @@ def validate_review(
     snapshot: WindowSnapshot,
     receipts: list[dict[str, Any]],
 ) -> None:
+    """Revalidate the final saved review against this exact result and current source packet."""
     if task.decision_policy == "llm-diagnosis-v1":
         from .agent_evidence import measurement_snapshot
 

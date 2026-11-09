@@ -1,5 +1,10 @@
 """Compare retained agent investigations with a declared fixed retrieval policy."""
 
+# Reads an existing qualification cohort plus its tenant's persisted tasks/receipts.
+# No new model calls: revalidate accepted results, then compare adaptive context
+# choices with fixed and quality-aware retrieval policies over the same snapshots.
+# Writes/overwrites the requested summary; the input cohort and stored answers stay
+# unchanged. Database credentials/services must still make the original tenant readable.
 import argparse
 import json
 from pathlib import Path
@@ -30,6 +35,8 @@ def main() -> None:
         tools_dsn=settings.tools_dsn,
     ) as store:
 
+        # Include explicit reuse as well as direct children: evidence may have been
+        # computed for an earlier question on this same immutable snapshot.
         def dependencies(task):
             return [
                 candidate
@@ -138,6 +145,8 @@ def main() -> None:
                     "fixed_matches_context": baseline["assessment"] in targets,
                 }
             )
+    # Answer-audit count and context-comparison case count are different denominators;
+    # context agreement is an authored synthetic expectation, not root-cause accuracy.
     summary = {
         "source_cohort": str(args.cohort),
         "mode": agents["mode"],

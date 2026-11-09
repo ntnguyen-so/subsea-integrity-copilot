@@ -83,6 +83,8 @@ def instrument_signals(snapshot: WindowSnapshot, pack: SitePack) -> set[tuple[st
 
 @dataclass
 class SourceState:
+    """Per-generation arrival cursor/cache; PostgreSQL retains durable replay truth."""
+
     dataset: ReplayDataset
     baseline: list[CanonicalObservation]
     received_seconds: list[float]
@@ -96,6 +98,12 @@ class SourceState:
 
 
 class Monitor:
+    """Advance source time and publish numerical windows independently of model calls.
+
+    A short monitor lease coordinates processes; the local lock protects caches.
+    Agent admission uses pinned window IDs rather than a moving latest-data query.
+    """
+
     def __init__(self, store: Store, agents: AgentService, telemetry: Telemetry) -> None:
         self.store = store
         self.agents = agents
@@ -110,6 +118,7 @@ class Monitor:
         self.last_compute_seconds: float | None = None
 
     def _source(self, session: ReplaySession) -> SourceState:
+        """Restore exact frozen inputs or regenerate a seeded source, never reinterpret archives."""
         if session.source_version != SOURCE_VERSION:
             raise Conflict(
                 "Archived replay: create a new brief-aligned pressure scenario. "
@@ -283,6 +292,7 @@ class Monitor:
             return self.store.get_replay(generation_id)
 
     def _advance(self, session: ReplaySession, source: SourceState) -> None:
+        """Convert monotonic wall-time credit to source seconds, stopping at investigation holds."""
         now = time.monotonic()
         if source.version != session.version:
             source.anchor = now
@@ -335,6 +345,7 @@ class Monitor:
             self._process(session, source)
 
     def _release(self, session: ReplaySession, source: SourceState) -> list[CanonicalObservation]:
+        """Release only arrived records and persist new rows/conflict masks incrementally."""
         previous = source.released
         while (
             source.released < len(source.received_seconds)
@@ -380,16 +391,21 @@ class Monitor:
                 tenant_id=session.tenant_id,
                 revision=previous.revision + 1 if previous else 1,
                 predecessor_id=previous.id if previous else None,
+                # Models receive measured alerts, not a preselected deterministic
+                # cause/inspection answer to repeat back as their own diagnosis.
                 screening_only=session.workflow == "agent_assisted",
             )
         self.last_compute_seconds = time.monotonic() - started
         return result
 
     def _process(self, session: ReplaySession, source: SourceState) -> ReplaySession:
+        """Revise affected recent windows, then complete new endpoints behind the watermark."""
         if session.investigation_window_id:
             return session
         changed = self._release(session, source)
         pack = source.dataset.pack
+        # A watermark is a declared arrival allowance, not a guarantee all data
+        # arrived. Later data can still create append-only revisions for 120s.
         watermark = session.clock_seconds - pack.lateness_seconds
         latest_id = session.latest_window_id
         endpoint = session.last_endpoint
@@ -443,6 +459,7 @@ class Monitor:
         return session
 
     def _pause_for_investigation(self, session: ReplaySession, snapshot: WindowSnapshot) -> bool:
+        """Acquire configured post-alert context before freezing one fresh investigation window."""
         if (
             not session.pause_on_anomaly
             or session.workflow == "sensor_alerts"
@@ -490,6 +507,7 @@ class Monitor:
         return ready
 
     def _episode(self, session: ReplaySession, snapshot: WindowSnapshot) -> None:
+        """Group alerts and admit bounded automatic work without blocking numerical warnings."""
         if session.workflow == "sensor_alerts":
             return
         if snapshot.quality.status == "WARMING_UP":
@@ -642,6 +660,7 @@ class Monitor:
             self.store.save_episode(refreshed)
 
     def tick(self) -> None:
+        """Process only generations needing work under a renewable cross-process monitor lease."""
         with self._lock:
             pack = load_pack(self.store.site_id)
             for session in self.store.list_monitor_replays(

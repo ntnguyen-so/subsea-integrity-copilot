@@ -1,5 +1,10 @@
 """Compare inspection priorities on identical numerical candidates and visible records."""
 
+# Runs the frozen authored inspection suite, not a console replay or geometry trial.
+# All methods share code-owned candidate brackets and availability-filtered records.
+# Fixed mode is offline; live requires hosted Copilot access and records call metadata.
+# Hashes bind data/code/policy provenance. The requested output is overwritten after
+# each case for interruption recovery; reruns are new calls, not cached evaluations.
 import argparse
 import hashlib
 import json
@@ -45,6 +50,8 @@ The transport final envelope value must be the inner JSON encoded as a STRING.
 """
 
 
+# Exact-set priority agreement is distinct from leak clearance or location accuracy.
+# An invalid/failed answer remains failed, rather than receiving credit for a tie.
 def score(decision: InspectionDecision | None, expected: list[str]) -> dict[str, object]:
     actual = set(decision.first_priority) if decision else set()
     return {
@@ -116,6 +123,8 @@ def main() -> None:
             receipt = {}
             decision = None
             error = None
+            # With no numerical support, abstention is deterministic and free of
+            # model calls; do not credit it as a model's engineering judgment.
             if not candidates:
                 # Geometry abstention is a code decision, not an LLM success.
                 decision = numerical

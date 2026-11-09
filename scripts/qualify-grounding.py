@@ -1,5 +1,9 @@
 """Replay adversarial prose through the production critic prompt and graph validator."""
 
+# Requires an existing accepted LIVE engineer-v2 S4 root, database read access and
+# authenticated hosted inference. Deep-copied candidates preserve the accepted source.
+# Repeated runs make fresh bounded critic calls and overwrite the incremental output;
+# no original task/answer is edited. This authored challenge set is not a safety proof.
 import argparse
 import json
 import time
@@ -73,6 +77,8 @@ def main() -> None:
             "No original task, source, answer or numerical field is modified.",
         ],
     }
+    # The accepted control should stay accepted; every altered answer should request
+    # revision with a non-supported answer paragraph. Schema repair has its own bound.
     candidates = {"accepted-control": None, **CHALLENGES}
     for name, text in candidates.items():
         candidate = original.model_copy(deep=True)

@@ -1,3 +1,9 @@
+"""Preserve exact evidence through compact transport and aligned joint profiles.
+
+Identical marginal distributions must not hide opposite timing; requested periods,
+pair dependencies and unknown gaps survive without invented correlation or pressure.
+"""
+
 import json
 from datetime import UTC, datetime, timedelta
 from statistics import median

@@ -1,4 +1,11 @@
-"""Persist Evaluation's truth-blind extraction against an exact accepted report."""
+"""Cache truth-blind report labels for an exact accepted coordinator interpretation.
+
+The mapping model sees public prose and catalog identities, not detector/source labels.
+Artifacts bind tenant/task/generation/snapshot, pack version, interpretation and catalog
+hashes. Loads revalidate packet/output hashes, quote support and completion state before
+reuse. Failed extraction stays failed unless an explicit retry is requested; prior calls
+remain in usage totals. Playback can reuse persisted evidence without new inference.
+"""
 
 import logging
 from pathlib import Path
@@ -42,6 +49,7 @@ def sensor_catalog(pack: SitePack) -> list[dict[str, Any]]:
 
 
 def _basis(task: AgentTask, pack: SitePack) -> dict[str, str]:
+    """Bind extraction to a succeeded root interpretation, excluding partial/child outputs."""
     if (
         task.state != "SUCCEEDED"
         or task.parent_id is not None
@@ -69,6 +77,7 @@ def _path(directory: Path, task: AgentTask) -> Path:
 
 
 def _execution_usage(task: AgentTask, receipt: dict[str, Any]) -> dict[str, object]:
+    """Reprice current and retained failed attempts from original model receipts."""
     attempts = [*receipt.get("previous_extractions", []), receipt]
     calls = [
         metadata
@@ -91,6 +100,11 @@ def load_report_mapping(
     task: AgentTask,
     pack: SitePack,
 ) -> dict[str, Any] | None:
+    """Validate persisted identity and quoted labels; absence alone returns None.
+
+    Symlinks, oversized files, changed reports and mismatched truth-blind packets raise
+    instead of falling back to detector-derived labels or silently rerunning a model.
+    """
     path = _path(directory, task)
     if not path.exists():
         return None
@@ -141,6 +155,11 @@ def prepare_report_mapping(
     *,
     retry_failed: bool = False,
 ) -> dict[str, Any]:
+    """Reuse validated evidence or persist one new extraction via atomic replacement.
+
+    retry_failed preserves previous receipts and their costs; completed results are
+    never automatically reinterpreted. Mapping failure is evidence, not an empty success.
+    """
     basis = _basis(task, pack)
     existing = load_report_mapping(directory, task, pack)
     if existing is not None and (existing["status"] == "completed" or not retry_failed):

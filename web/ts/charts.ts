@@ -1,8 +1,14 @@
+/**
+ * SVG views of canonical observations in a half-open [start, end) window.
+ * Invalid/absent data stays a gap; bands use backend baseline median, scale and
+ * anomaly threshold. Chart scaling and gap decoration do not perform diagnosis.
+ */
 import { node, svg, time } from "./dom";
 import type { CanonicalObservation, Channel, Sensor, WindowSnapshot } from "./types";
 
 const labels: Record<Channel, string> = { pressure: "Pipeline pressure", acoustic: "Acoustic relative power (archived)", methane: "Dissolved methane (archived)", temperature: "Temperature (archived)" };
 
+/** One bar-axis domain for comparisons, including supplied detector bands, not only observed extrema. */
 export function sharedPressureRange(readings: { sensor: Sensor; observations: CanonicalObservation[] }[],
   window: WindowSnapshot): [number, number] | undefined {
   const start = Date.parse(window.window_start), end = Date.parse(window.window_end);
@@ -23,6 +29,8 @@ export function sharedPressureRange(readings: { sensor: Sensor; observations: Ca
   return values.length ? [Math.min(...values), Math.max(...values)] : undefined;
 }
 
+// "Usable of received" counts returned records; expected-time absence is shown
+// separately below. Neither count substitutes for the snapshot's coverage denominator.
 export function renderCharts(container: HTMLElement, sensor: Sensor, observations: CanonicalObservation[], window: WindowSnapshot, sampleSeconds: number, sharedRange?: [number, number]): void {
   container.replaceChildren();
   const start = Date.parse(window.window_start);

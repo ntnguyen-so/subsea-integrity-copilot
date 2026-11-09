@@ -1,3 +1,10 @@
+/**
+ * Browser composition root: authenticated API projections drive monitoring, received
+ * sensor evidence, saved investigations and evaluation views. This client renders
+ * backend diagnoses and accepted reports; it never runs inference or invents samples.
+ * Walkthrough: initialize -> chooseReplay -> runProjection -> renderProjection.
+ * SSE invalidates the projection; focused reads load immutable window/task details.
+ */
 import { box, bounds, button, element, friendly, node, svg, text, time } from "./dom";
 import { renderCharts, sharedPressureRange } from "./charts";
 import { renderSensorInspection, type InspectionReadings } from "./sensor_inspection";
@@ -13,6 +20,8 @@ import type { AgentTask, CanonicalObservation, ConsoleEvent, InvestigationCase, 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
 const input = (id: string): HTMLInputElement => element(id, HTMLInputElement);
 const controlButton = (id: string): HTMLButtonElement => element(id, HTMLButtonElement);
+// Selection is independent of the current monitor: explicit inspection can pin an
+// older window while the server keeps monitoring. Tokens reject obsolete async reads.
 let session: Session = { authenticated: false, csrf_token: null, username: null };
 let projection: Projection | null = null;
 let replays: ReplaySession[] = [];
@@ -71,6 +80,8 @@ let comparisonToken = 0;
 const comparisonSensorIds = new Set<string>();
 const currentSource = "pressure-v3";
 const executionMetrics = new ExecutionMetrics();
+// Recorded playback is local navigation over preserved outputs. "Live here" is an
+// explicit server mutation creating separate work, not a reinterpretation of a recording.
 const playback = new InvestigationPlayback({
   get: request,
   pauseLive: async () => {
@@ -148,6 +159,11 @@ function jsonText(value: Json | undefined): string {
 function plainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+/**
+ * Same-origin transport boundary: mutations require an authenticated CSRF token.
+ * T describes the expected wire contract, not runtime schema validation; scope and
+ * event checks below guard evidence joins. API failures never create fallback data.
+ */
 async function request<T>(path: string, body?: object, signal?: AbortSignal): Promise<T> {
   const headers = new Headers({ Accept: "application/json" });
   if (body) {
@@ -350,6 +366,8 @@ function timelineSeconds(): number {
   if (playback.enabled) return Math.floor(playback.seconds);
   return liveSelection ?? confirmedEndpoint();
 }
+// Prefer the actual completed window; otherwise use the lateness-adjusted five-second
+// endpoint. This is source-time navigation, not a wall-clock prediction of telemetry.
 function confirmedEndpoint(): number {
   return projection?.latest_window?.end_seconds ?? Math.max(0, Math.floor(
     ((projection?.replay.clock_seconds || 0) - (projection?.pack.lateness_seconds || 0)) / 5,
@@ -419,6 +437,7 @@ async function switchInvestigationMode(): Promise<void> {
     renderProjection();
   }
 }
+/** Change evidence generation atomically from the UI's perspective; invalidate all pending reads. */
 async function chooseReplay(id: string, recorded = true, preserveTimeline = false): Promise<void> {
   if (!preserveTimeline) { recordedAnchor = null; liveSelection = null; }
   playback.selectRun(recorded);
@@ -488,6 +507,8 @@ function resetView(): void {
   box("map-legend").replaceChildren();
   renderWindowHistory(); renderBasis(); updateControls();
 }
+// Coalesce bursts of SSE invalidations into one reader, then rerun if dirtied mid-read.
+// Versions cannot move backward and responses must belong to the selected generation.
 function refreshProjection(): Promise<void> {
   if (!currentReplayId) return Promise.resolve();
   projectionDirty = true;
@@ -538,6 +559,10 @@ async function refreshWindows(id: string, token: number): Promise<void> {
     renderAutomaticInvestigation();
   } catch (error) { if (token === generationToken) showError(error); }
 }
+/**
+ * Durable event cursor + deduplication support reconnects. Events are activity signals,
+ * not patches to apply speculatively: each accepted signal requests coherent server state.
+ */
 function connectStream(id: string, token: number): void {
   closeStream();
   if (!session.authenticated || token !== generationToken) return;
@@ -598,6 +623,7 @@ function isJson(value: unknown): value is Json {
   if (Array.isArray(value)) return value.every(isJson);
   return plainObject(value) && Object.values(value).every(isJson);
 }
+// Check the public event envelope before trusting identifiers, cursor or payload.
 function isConsoleEvent(value: unknown): value is ConsoleEvent {
   return plainObject(value) && typeof value.id === "number" && Number.isSafeInteger(value.id)
     && typeof value.site_id === "string" && typeof value.generation_id === "string" && typeof value.type === "string"
@@ -606,6 +632,7 @@ function isConsoleEvent(value: unknown): value is ConsoleEvent {
     && plainObject(value.payload) && Object.values(value.payload).every(isJson);
 }
 
+/** Fan out one coherent projection to the view modules; detailed evidence loads remain scoped. */
 function renderProjection(): void {
   if (!projection) return;
   const { replay, pack, latest_window: latest, health } = projection;
@@ -642,6 +669,8 @@ function renderProjection(): void {
   playback.dataChanged(); renderClocks(); updateControls();
   if (replay.error) notify(`Replay ${replay.state}: ${replay.error}`, true);
 }
+// Quantize navigation to the pack hop and fetch that exact endpoint. Withhold old
+// readings while loading; generation, endpoint and warning snapshot must all agree.
 function syncTimelineWindow(): void {
   if (!projection) return;
   if (!playback.enabled && liveSelection === null) {
@@ -695,6 +724,8 @@ function syncTimelineWindow(): void {
     playback.dataChanged(); renderMonitoringWarning(); renderClocks(); updateControls();
   });
 }
+// Three distinct clocks: server-confirmed simulated source, local recorded navigation,
+// and real server/projection age. Only execution_metrics extrapolates live elapsed work.
 function renderClocks(): void {
   if (!projection || !projectionReceivedAt) return;
   const { replay, pack } = projection;
@@ -848,6 +879,8 @@ function reviewedLabelsForWindow(): NonNullable<TaskDetail["output_mapping"]>["m
   const detail = [automaticDetail, taskDetail].find(item => item?.task.id === review.task_id);
   return detail?.output_mapping?.status === "completed" ? detail.output_mapping.mapping : null;
 }
+// Geometry is a schematic projection of pack coordinates, not a hydraulic solution.
+// Measured sensor flags and reviewed report labels remain separate evidence layers.
 function renderMap(): void {
   if (!projection) return;
   const map = document.getElementById("topology");
@@ -875,6 +908,8 @@ function renderMap(): void {
   }
   map.dataset.snapshot = window?.id || "";
   const evidence = selectedEvidenceId && window ? window.evidence[selectedEvidenceId] : null;
+  // Fit the visible pack/focused branch with one aspect-preserving scale and flip
+  // Cartesian y. This display transformation does not change physical evidence.
   const points = segments.flatMap(segment => segment.points);
   if (!points.length) return;
   const xmin = Math.min(...points.map(point => point.x)), xmax = Math.max(...points.map(point => point.x));
@@ -913,6 +948,8 @@ function renderMap(): void {
       const a = project(segment.points[0]), b = project(segment.points[segment.points.length - 1]);
       const length = Math.hypot(b.x - a.x, b.y - a.y);
       if (length > 0) {
+        // Enlarge opposite-wall A/B offsets for legibility; both still share their
+        // station chainage. Paired agreement need not be independent evidence.
         const side = sensor.id.endsWith("-A") ? -1 : 1;
         const fraction = sensor.chainage_m / segment.length_m;
         stationPosition = { x: a.x + (b.x - a.x) * fraction, y: a.y + (b.y - a.y) * fraction };
@@ -1215,6 +1252,7 @@ function selectSensor(id: string): void {
   text("evidence-detail", `${id} · choose an optional calculation reference below to inspect its source.`);
   renderMap(); renderSensorList(); renderEvidenceChips(); void loadSensor(); renderInspectionWorkspace();
 }
+/** Read canonical received observations for the selected immutable window; stale replies are ignored. */
 async function loadSensor(): Promise<void> {
   const live = followCurrent;
   const id = selectedSensorId, window = live ? projection?.latest_window : selectedWindow;
@@ -1469,6 +1507,9 @@ function renderEvidenceChips(): void {
   }
   renderInspectionWorkspace();
 }
+// Coverage is supplied usable/expected samples, not usable/received chart points.
+// Domain counts come from the snapshot, stations from pack identities, and queued/
+// model-call totals from listed tasks (not an inferred generation budget).
 function renderMetrics(): void {
   if (!projection) return;
   const window = selectedWindow;
@@ -1506,6 +1547,7 @@ function renderTasks(): void {
   if (!tasks.length) container.append(node("p", "No persisted task yet. Monitoring continues without inference.", "empty"));
   if (focusedId) [...container.querySelectorAll<HTMLButtonElement>("[data-task]")].find(item => item.dataset.task === focusedId)?.focus();
 }
+/** Join task, report and receipt evidence only within the active generation and task scope. */
 async function readTaskDetail(id: string, generation: number): Promise<TaskDetail | null> {
   const detail = await request<TaskDetail>(`/api/tasks/${enc(id)}`);
   if (generation !== generationToken) return null;
@@ -1667,6 +1709,8 @@ function renderTrace(trace: Record<string, Json>): void {
     } catch { container.append(node("p", "Viewer link withheld: only same-origin or loopback HTTP(S) trace links are allowed.", "muted")); }
   } else container.append(node("p", "Langfuse viewer link not reported. Export acknowledgement is not proof of a stored trace.", "muted"));
 }
+// Present persisted answer/check results; acceptance is a backend contract and review
+// outcome, not a browser assertion that the engineering conclusion is physically true.
 function renderAnswer(): void {
   const selected = taskDetail?.task || projection?.tasks.find(item => item.id === selectedTaskId);
   const explicit = selected?.role === "operator_response" ? selected : null;
@@ -1722,6 +1766,7 @@ async function createReplay(): Promise<void> {
   } catch (error) { showError(error); }
   finally { commandBusy = false; updateControls(); }
 }
+// Retry identities survive transport failures so replay controls are not applied twice.
 async function command(action: "play" | "pause" | "step" | "speed", speed?: Speed): Promise<void> {
   if (action === "speed" && speed && liveSelection !== null) {
     playback.setSpeed(speed); renderProjection(); return;

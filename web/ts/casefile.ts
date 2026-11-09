@@ -1,3 +1,8 @@
+/**
+ * Render the persisted investigation handoff and its evidence audit. Display prose
+ * can be simplified, while source references, checked claims and review rounds remain
+ * inspectable. A comparison uses one snapshot; human effort/savings are not measured.
+ */
 import { bounds, button, friendly, node } from "./dom";
 import { reportText } from "./presentation";
 import type { AgentTask, InvestigationCase, Json, WindowSnapshot } from "./types";
@@ -8,11 +13,14 @@ function display(value: Json | undefined): string {
 function object(value: Json): value is Record<string, Json> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
+// Current semantic-review reports use the 300-second goal; older records retain
+// their recorded policy. This is real workflow duration, not simulated source time.
 function reportGoal(file: InvestigationCase): { seconds: number; met: boolean } {
   return file.interpretation_review?.protocol === "semantic-grounding-v2"
     ? { seconds: 300, met: file.recorded_elapsed_seconds < 300 }
     : { seconds: file.report_target_seconds, met: file.report_target_met };
 }
+/** Compare available outputs, not detection accuracy or a measured customer time-saving baseline. */
 export function renderWorkflowComparison(container: HTMLElement, snapshot: WindowSnapshot, task: AgentTask,
   file: InvestigationCase | null, scenario: string, inspect: () => void): void {
   const section = node("section", "", "workflow-comparison");
@@ -99,6 +107,7 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
     "Validation scope: compare answer quality, engineer review effort, failures and latency against a fixed workflow. Field accuracy and time savings remain unmeasured.", "muted"));
   container.append(section);
 }
+/** Build the readable report plus drill-down sources, tool comparisons and grounding checks. */
 export function renderCasefile(container: HTMLElement, file: InvestigationCase, actions: {
   claim: (id: string) => void;
 }): void {

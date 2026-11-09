@@ -1,4 +1,11 @@
-"""Read-only archived detection results; never regrade or run agents."""
+"""Index and reopen original detection reports without regrading or inference.
+
+Approved archive roots are runtime, eval and docs; only known report versions with a
+run ID are indexed. Tokens bind relative path, mtime and size, not a model score.
+Loading rechecks identity and file stability, then removes agent-process audit fields.
+The public index hides filesystem paths; missing/corrupt archives remain explicit
+warnings or errors rather than silently substituting the latest evaluation.
+"""
 
 from __future__ import annotations
 
@@ -40,6 +47,7 @@ def header(path: Path) -> dict[str, Any]:
 
 
 def rebuild_history(root: Path = ROOT, index: Path = INDEX) -> dict[str, Any]:
+    """Persist metadata-only discovery, retaining separate suites and report revisions."""
     from .reference_evaluation import write_report
 
     paths: set[Path] = set()
@@ -95,6 +103,7 @@ def rebuild_history(root: Path = ROOT, index: Path = INDEX) -> dict[str, Any]:
 
 
 def public_history(index: Path = INDEX) -> dict[str, Any]:
+    """Project archive tokens and labels without exposing local filesystem metadata."""
     if not index.exists():
         return {"entries": [], "warnings": []}
     result = json.loads(index.read_text(encoding="utf-8"))
@@ -114,6 +123,7 @@ def public_history(index: Path = INDEX) -> dict[str, Any]:
 
 
 def load_archive(archive_id: str, *, root: Path = ROOT, index: Path = INDEX) -> dict[str, Any]:
+    """Return original recorded scores only if indexed path, revision and scope match."""
     from .temporal_evaluation import without_agent_audit_results
 
     catalog = json.loads(index.read_text(encoding="utf-8"))

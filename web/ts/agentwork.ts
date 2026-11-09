@@ -1,3 +1,8 @@
+/**
+ * Public agent-work presentation: specialist/coordinator states, critic corrections
+ * and report-to-map receipts. All activity comes from tasks/events; rendering starts
+ * no model work. Acceptance is distinct from physical correctness.
+ */
 import { button, friendly, node } from "./dom";
 import { reportText } from "./presentation";
 import type { AgentTask, ConsoleEvent, Json, TaskDetail, WindowSnapshot } from "./types";
@@ -12,6 +17,8 @@ export function agentName(role: string): string {
     : role === "report_mapper" ? "Report-to-map Mapper"
     : agents.find(agent => agent[0] === role)?.[1] || friendly(role);
 }
+// Mapping is a backend presentation step after successful live report acceptance.
+// Its labels/quotes are not a second diagnosis or a fallback to numerical detector flags.
 function mapperCard(root: AgentTask | null, extraction: TaskDetail["output_mapping"],
   enabled: boolean, events: ConsoleEvent[] = [], quotesOpen = false): HTMLElement {
   const card = node("div", "", "agent-role"); card.dataset.role = "report_mapper";
@@ -100,6 +107,7 @@ function record(value: Json | undefined): Record<string, Json> | null {
 function accepted(task: AgentTask): boolean {
   return ["SUCCEEDED", "ABSTAINED"].includes(task.state) && task.result !== null && task.answer !== null;
 }
+// Explicit reuse is allowed only for the same site, generation and immutable snapshot.
 function linked(root: AgentTask, tasks: AgentTask[], reusedIds: readonly string[] = []): AgentTask[] {
   return tasks.filter(task => task.id === root.id || task.root_id === root.id
     || reusedIds.includes(task.id) && task.site_id === root.site_id
@@ -212,6 +220,10 @@ export function renderIdleAgentWork(progress: HTMLElement, findings: HTMLElement
   organizeAgentWorkspace(progress);
 }
 
+/**
+ * Rebuild only when public evidence changes; retain open audit sections and selected
+ * role so projection refreshes do not interrupt a reader. Merge durable and live events by ID.
+ */
 export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, root: AgentTask,
   tasks: AgentTask[], detail: TaskDetail | null, basis: WindowSnapshot | null,
   error: string | null, open: (taskId: string) => void, events: ConsoleEvent[] = []): void {

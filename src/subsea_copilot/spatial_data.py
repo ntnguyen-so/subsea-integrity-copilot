@@ -1,4 +1,12 @@
-"""Source-labelled, time-varying 112-instrument evaluation networks."""
+"""Author extended-network recordings and independent time-indexed source labels.
+
+Seven branches x eight paired stations yield 112 instruments, a 60-second normal preroll
+and 360 source seconds. Seeded noise, spatial deficits, shared-gateway offsets, operating
+shifts and tap-specific faults become ordinary mixed-unit/timezone RawRecords.
+The illustrative footprint is 80% Gaussian plus 20% exponential network-distance decay
+with a six-second onset ramp, not calibrated hydraulics. Recipes/truth remain evaluation-
+only; ReplayDataset contains geometry and measurements without injected source labels.
+"""
 
 from __future__ import annotations
 
@@ -16,6 +24,7 @@ CHECKPOINTS = (150, 360)
 
 
 def temporal_cases(suite: str) -> list[dict[str, Any]]:
+    """Declare recovery/new-branch episodes or non-leak controls without model-derived truth."""
     def leak(segment: str, chainage: int, start: int, end: int | None) -> dict[str, Any]:
         return {
             "segment_id": segment, "chainage_m": chainage, "start_seconds": start,
@@ -59,12 +68,14 @@ def leak_episodes(case: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def active_event(event: dict[str, Any], second: int) -> bool:
+    """Use half-open [start,end) source-time activity; absent end means still active."""
     return second >= event["start_seconds"] and (
         event.get("end_seconds") is None or second < event["end_seconds"]
     )
 
 
 def spatial_cases() -> list[dict[str, Any]]:
+    """Declare broad/narrow leak examples and a no-leak look-alike with nuisance issues."""
     issues = [
         {"sensor_id": "P1-ST6-A", "kind": "drift", "start_seconds": 180},
         {"sensor_id": "P3-ST7-A", "kind": "drift", "start_seconds": 180},
@@ -159,6 +170,12 @@ def spatial_cases() -> list[dict[str, Any]]:
 
 
 def spatial_dataset(case: dict[str, Any], seed: int, site_id: str) -> ReplayDataset:
+    """Apply authored event schedules before ingestion, retaining ordinary transport fields.
+
+    Hidden source probes calculate network distance only and are not runtime sensors.
+    Missing omits every third sample; invalid replaces every fourth sample. Flatline
+    freezes its first active value; drift/spikes and gateway offsets are separate causes.
+    """
     pack = generate_pack(site_id, version=EXTENDED_PACK_VERSION)
     rng = random.Random(seed)
     epoch = datetime(2026, 1, 1, tzinfo=UTC)
@@ -257,6 +274,13 @@ def spatial_dataset(case: dict[str, Any], seed: int, site_id: str) -> ReplayData
 
 
 def spatial_truth(case: dict[str, Any], dataset: ReplayDataset, end_seconds: int) -> dict[str, Any]:
+    """Label the window's latest possible instant (end-1), never future faults.
+
+    Operating context records overlap with the whole window. Continuous leak influence
+    has no invented binary per-sensor anomaly truth: that label list stays empty.
+    Missing alone requires review but does not establish an instrumentation diagnosis;
+    these authored eligibility labels are distinct from measured detector flags.
+    """
     start = max(0, end_seconds - dataset.pack.window_seconds)
     # Snapshots end exclusively: their latest possible observation is end - 1.
     active_source = next(

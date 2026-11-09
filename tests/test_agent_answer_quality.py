@@ -1,3 +1,9 @@
+"""Keep deterministic reference checks separate from advisory six-dimension opinions.
+
+Authored synthetic packets and mocked author/judge responses verify frozen labels,
+quote/citation checks and missing-score denominators, not live-model reliability.
+"""
+
 import json
 from copy import deepcopy
 

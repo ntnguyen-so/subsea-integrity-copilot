@@ -1,3 +1,9 @@
+"""Verify usage coverage, per-call pricing tiers and no cache/reasoning double counts.
+
+Synthetic receipts test a dated hypothetical Standard API estimate, not live
+provider metering, current prices or actual Copilot charges.
+"""
+
 from datetime import timedelta
 
 import pytest

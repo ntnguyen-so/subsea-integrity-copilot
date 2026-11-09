@@ -1,3 +1,5 @@
+"""Use controlled thread events to verify root dispatch and independent map failures."""
+
 from contextlib import contextmanager
 from datetime import timedelta
 from threading import Event

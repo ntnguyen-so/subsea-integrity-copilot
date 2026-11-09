@@ -28,6 +28,12 @@ class Principal:
 
 
 class SessionManager:
+    """Verify one local operator and issue signed, expiring, stateless session cookies.
+
+    The cookie is authenticated, not encrypted. Database tenant/site scope comes
+    from application settings, not a client-controlled session claim.
+    """
+
     def __init__(self, operator_password: str) -> None:
         self._hasher = PasswordHasher()
         self._password_hash = self._hasher.hash(operator_password)
@@ -57,6 +63,7 @@ class SessionManager:
         return encoded + "." + signature.hexdigest(), principal
 
     def authenticate(self, cookie: str | None) -> Principal:
+        """Verify signature before decoding/trusting the payload, then enforce expiry."""
         if not cookie or len(cookie) > 2048:
             raise AuthenticationError("Operator login required")
         try:

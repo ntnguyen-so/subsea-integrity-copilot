@@ -1,4 +1,17 @@
-"""Fresh golden qualification through production monitoring, agents and external judge."""
+"""Golden qualification from authored measurements to accepted operator evidence.
+
+The manifest first verifies four synthetic recipes against normalized measurements.
+Content-addressed inputs then follow production monitoring, auto-pause and agent
+dispatch in an isolated tenant: three pressure-triggered roots and one missing-only
+no-agent control. Deterministic contract checks, model-authored interpretation, external
+semantic opinion and stored telemetry verification remain separate evidence layers.
+
+A full live run plans five judge calls: two authored calibration controls plus three
+actual reports. No outcome is inferred from requested model identity or a numerical
+contract tag alone. Recorded rejudging and one-case same-input retries are explicit
+operations; selection retains original failures/calls and is not first-attempt
+reliability. Receipts preserve manifests, hashes, task/casefile pointers and trace IO.
+"""
 
 from __future__ import annotations
 
@@ -60,7 +73,13 @@ def install_golden_input(
 
 
 def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> dict[str, Any]:
-    """Compact measured/reference packet, not a prewritten source narrative."""
+    """Build a compact measured/reference packet, not a prewritten source narrative.
+
+    Columnar tables and exact-value references remove repeated numbers without rounding
+    away evidence. Grounded sources must equal their persisted pressure summaries.
+    Historical comparisons describe post-start periods; they do not replace the normal
+    preroll used by diagnostics and may show no change during a sustained deficit.
+    """
     quality = snapshot.quality.model_dump(mode="json")
     findings = quality.pop("findings")
     finding_columns = list(findings[0]) if findings else []
@@ -194,6 +213,11 @@ def grounded_case_evidence(snapshot: WindowSnapshot, audit: dict[str, Any]) -> d
 
 
 def judge_candidate_report(report: dict[str, Any]) -> dict[str, Any]:
+    """Make actual published prose the grading target, not its constrained numerical tag.
+
+    Interpretation reference metadata is retained without duplicating paragraphs already
+    in the public answer. Documents and comparisons belong in the evidence packet.
+    """
     candidate = {key: value for key, value in report.items() if key not in {
         "documents", "comparisons", "interpretation", "physical_decision",
     }}
@@ -223,6 +247,13 @@ def deterministic_golden_checks(
     expected: dict[str, Any], snapshot: WindowSnapshot,
     audit: dict[str, Any] | None, *, paused: bool, root_count: int, state: str | None = None,
 ) -> dict[str, bool]:
+    """Check measured trigger, production lifecycle, contract bounds and safe withholding.
+
+    Missing-only expects neither auto-pause nor a root. Triggered cases require an
+    accepted root with revalidated receipts. Explained abstention can satisfy the
+    contract but cannot count as model leak classification; proposed inspection must
+    equal the authored bounded interval, never the hidden exact source coordinate.
+    """
     pressure = any(f.anomaly_count for f in snapshot.quality.findings)
     checks = {
         "pressure_trigger_matches_truth": pressure == expected["pressure_trigger"],
@@ -283,6 +314,12 @@ def deterministic_golden_checks(
 def operator_accuracy_receipt(
     expected: dict[str, Any], row: dict[str, Any], casefile: dict[str, Any] | None,
 ) -> dict[str, Any]:
+    """Separate numerical eligibility, grounded prose classification and displayed inspection.
+
+    Classification needs a succeeded root, model-authored possible cause/region and
+    external class score 2. Inspection credit additionally requires the accepted
+    casefile to match the root/snapshot and both report and golden interval.
+    """
     report = (row.get("agent") or {}).get("report", {})
     interpretation = report.get("interpretation") or {}
     causes = interpretation.get("competing_causes", [])
@@ -505,7 +542,11 @@ def write_recorded_receipts(output: Path, report: dict[str, Any]) -> None:
 def judge_recorded_reports(
     output: Path, *, judge_model: str = "gpt-6.1-sol",
 ) -> dict[str, Any]:
-    """Fresh hosted judging of unchanged recorded reports; preserves all failed prior calls."""
+    """Fresh hosted judging of unchanged recorded reports; preserve failed prior calls.
+
+    Agent execution is not rerun. Original qualification is snapshotted, calibration and
+    verdicts are renewed, and stored trees/IO are reverified before operator-output audit.
+    """
     report: dict[str, Any] = json.loads((output / "qualification.json").read_text())
     if len(report["cases"]) != 4 or not report.get("model_call_accounting_complete"):
         raise ValueError("Recorded cohort must finish before external judge requalification")
@@ -943,7 +984,15 @@ def qualify_golden(
     mode: Mode, output: Path, *, agent_model: str = "gpt-6.1-sol",
     judge_model: str = "gpt-6.1-sol",
 ) -> dict[str, Any]:
-    """Never resets database or starts/stops console workers; fresh isolated tenant."""
+    """Run the manifest, production workflow, judging and stored-evidence stages.
+
+    Never reset the database or start/stop console workers; use a fresh isolated tenant.
+    Live qualification requires all four cases, five observed live judge receipts,
+    calibrated controls and verified runtime/judge trees plus stored IO. Provider
+    blocking, missing traces and flush failure cannot pass. Scripted runs exercise
+    contracts only and never satisfy the live pass criterion. Partial progress and
+    integration blockers are persisted even when the bounded runner fails.
+    """
     settings = Settings.from_env()
     manifest = write_manifest(output, site_id=settings.site_id)
     if not manifest["passed"]:

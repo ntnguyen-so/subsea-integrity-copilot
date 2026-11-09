@@ -1,4 +1,10 @@
-"""Citation-linked advisory language, separate from the checked numerical ledger."""
+"""Citation-linked advisory language, separate from the checked numerical ledger.
+
+Structured results and read receipts authorize references in engineer-facing
+prose, then render that prose apart from application-owned factual output.
+Only the response role may supply it; guidance must accompany case evidence.
+Citation membership is checked here, while grounding.py reviews actual support.
+"""
 
 from typing import Any
 
@@ -14,6 +20,7 @@ from subsea_copilot.validation import (
 def validate_interpretation(
     result: AgentResult, task: AgentTask, receipts: list[dict[str, Any]] | None = None
 ) -> None:
+    """Check protocol, citation/read scope, guidance application and bounded follow-up questions."""
     interpretation = result.interpretation
     required = task.role == "operator_response" and task.response_protocol in {
         "engineer-v1",
@@ -36,6 +43,7 @@ def validate_interpretation(
         allowed.update(review.document_ids)
         allowed.update(review.comparison_call_ids)
     evidence = set(allowed)
+    # Keep case evidence separate before adding KN guidance: a card alone proves no case fact.
     guidance = (
         {card.id for card in task.knowledge_packet.cards if task.role in card.roles}
         if task.knowledge_packet
@@ -112,6 +120,7 @@ def validate_interpretation(
 
 
 def render_interpretation(value: EngineerInterpretation, task: AgentTask) -> str:
+    """Format already-validated advisory text and its source IDs without recomputing numbers."""
     lines = [
         "ENGINEER QUESTION",
         task.question,

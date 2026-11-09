@@ -1,3 +1,5 @@
+"""Stub Node execution to ensure serving cannot start with a failed/stale frontend build."""
+
 from subprocess import CompletedProcess
 from unittest.mock import Mock
 

@@ -1,4 +1,10 @@
-"""Adaptive model views; durable transcripts and original tool evidence are never rewritten."""
+"""Adaptive model views; durable transcripts and original tool evidence are never rewritten.
+
+Messages, successful receipts and tool schemas become a bounded serialized prompt.
+Lossless evidence consolidation precedes staged archival; archived bodies remain
+retrievable by task-local receipt ID. Missing prompt detail is not missing data,
+and compaction never manufactures a read or a new numerical claim.
+"""
 
 import json
 from collections.abc import Sequence
@@ -14,7 +20,9 @@ from subsea_copilot.prompts import load_prompt
 from subsea_copilot.validation import ValidationError
 
 CONTEXT_POLICY_VERSION = "provenance-model-view-v2"
+# Character allowances, not token estimates: leave room below the adapter's hard limit.
 CONTEXT_HEADROOM_CHARS = 8000
+# Progressively retain 4, 2, then 0 recent bodies; immutable receipts remain in storage.
 COMPACTION_STAGES = (4, 2, 0)
 CONTEXT_INSTRUCTION = load_prompt("context-view").content.removesuffix("\n")
 
@@ -44,6 +52,7 @@ class ModelContext:
 def _consolidate_evidence(
     messages: Sequence[AnyMessage], receipts: Sequence[dict[str, Any]]
 ) -> tuple[list[AnyMessage], list[dict[str, Any]]]:
+    """Deduplicate original evidence bodies by kind, rejecting conflicting repeated IDs."""
     by_id = {
         receipt["call_id"]: receipt
         for receipt in receipts
@@ -159,6 +168,7 @@ def model_context(
     *,
     limit: int,
 ) -> ModelContext:
+    """Choose a fitting model-only projection or fail closed without truncating claims."""
     original = render_prompt(messages, tools)
     messages, consolidated = _consolidate_evidence(messages, receipts)
     projected_prompt = render_prompt(messages, tools)
@@ -196,6 +206,7 @@ def model_context(
         else None
     )
     for stage, recent in enumerate(COMPACTION_STAGES, start=1):
+        # Early stages keep tool diversity; every stage preserves the latest retrieved body.
         keep = set(ordered[-recent:]) if recent else set()
         if retrieved:
             keep.add(retrieved[-1])
@@ -296,6 +307,7 @@ def model_context(
         if len(prompt) <= target:
             return view
         if len(prompt) <= limit and fallback is None:
+            # A legal prompt may use reserved headroom if no stricter projection can fit.
             fallback = view
     if fallback is not None:
         return fallback

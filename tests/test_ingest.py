@@ -1,3 +1,9 @@
+"""Prove batch/stream equivalence for units, UTC times, duplicates and conflict masks.
+
+Invalid input remains inspectable with raw provenance instead of becoming a
+usable number or a last-write-wins replacement.
+"""
+
 from datetime import UTC, datetime
 
 import pytest

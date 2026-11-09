@@ -1,5 +1,11 @@
 """Run actual production workflows against a matched zero-LLM report baseline."""
 
+# Inputs select synthetic seeds/scenarios/questions; output is an incremental cohort
+# report with task/receipt provenance and a fixed-policy comparison on identical data.
+# Requires configured database/checkpointer services in both modes. Live additionally
+# requires authenticated hosted Copilot access; scripted checks contracts, not reasoning.
+# Creates a new qualification tenant; refuses an existing output. Explicit retries
+# create new attempts linked to failed roots, never rewrite the source cohort.
 import argparse
 import json
 import time
@@ -124,6 +130,8 @@ def main() -> None:
         ],
     }
 
+    # Keep planned, attempted and completed counts distinct so interruption/provider
+    # failures cannot improve the score by silently shrinking its denominator.
     def save() -> None:
         report["summary"] = summarize(rows, expected_count, attempted_count=len(attempts))
         args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -169,6 +177,8 @@ def main() -> None:
                             clock_seconds=185,
                         )
                     )
+                    # The 180s window is evaluated at receive-time 185s. Both methods
+                    # see only arrivals available then, not future source records.
                     arrived = [
                         row
                         for row in source.records
@@ -225,6 +235,8 @@ def main() -> None:
                         baseline = deterministic_report(store, baseline_task, snapshot, index)
                         baseline["rubric"] = report_rubric(scenario, index, baseline["report"])
                         baseline["rubric_passed"] = all(baseline["rubric"].values())
+                        # Wall timing excludes the shared numerical preprocessing and
+                        # baseline; later questions may reuse prior specialist work.
                         started = time.perf_counter()
                         root = service.submit_question(
                             replay, snapshot, question, f"operations:{index}"

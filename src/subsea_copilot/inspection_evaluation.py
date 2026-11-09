@@ -1,4 +1,13 @@
-"""Synthetic, read-only inspection prioritization; never changes production leak claims."""
+"""Synthetic context-aware inspection ranking, separate from production leak authority.
+
+Authored development/held_out cases alter ordinary S6 records before production
+normalization/diagnostics. Conditional fits enumerate measurable segment candidates;
+visible operational records may justify priority demotion, not leak clearance.
+The current corpus has four development and twelve held-out cases. The fixed comparator
+uses frozen execution/counterevidence phrases. Structural guards
+require a complete partition and current, approved, matching citations, but do not
+judge whether prose actually entails the model's demotion rationale.
+"""
 
 from __future__ import annotations
 
@@ -84,6 +93,7 @@ def load_inspection_suite() -> InspectionSuite:
 
 
 def case_snapshot(case: InspectionCase) -> tuple[SitePack, WindowSnapshot]:
+    """Inject post-90-second deficits/gaps/bad taps and analyze endpoint 180/clock 185."""
     source = generate_scenario("S6", duration_seconds=180)
     sensors = {sensor.id: sensor for sensor in source.pack.sensors}
     unknown = (
@@ -182,12 +192,14 @@ def inspection_candidates(pack: SitePack, snapshot: WindowSnapshot) -> list[Insp
 
 
 def visible_records(case: InspectionCase) -> list[ContextRecord]:
+    """Expose records available/effective by clock 185, including non-authoritative distractors."""
     return [
         record for record in case.records if record.available <= 185 and record.effective <= 185
     ]
 
 
 def authoritative_records(records: list[ContextRecord]) -> list[ContextRecord]:
+    """Select approved incident-time records after eligible replacements supersede older IDs."""
     records = [record for record in records if record.available <= 185 and record.effective <= 185]
     replaced = {record.supersedes for record in records if record.status == "approved"}
     return [
@@ -207,6 +219,10 @@ COUNTEREVIDENCE = re.compile(
 def fixed_inspection_baseline(
     candidates: list[InspectionCandidate], records: list[ContextRecord]
 ) -> InspectionDecision:
+    """Demote only matching executed operations without lexical counterevidence.
+
+    Ambiguity retains priority; the same frozen policy is used on both fixture splits.
+    """
     current = authoritative_records(records)
     first, demotions = [], []
     for candidate in candidates:
@@ -238,6 +254,7 @@ def validate_inspection_decision(
     candidates: list[InspectionCandidate],
     records: list[ContextRecord],
 ) -> None:
+    """Check partition and citation authority, not semantic entailment or a no-leak claim."""
     eligible = {candidate.segment_id for candidate in candidates}
     first = set(decision.first_priority)
     demoted = {item.segment_id for item in decision.deprioritized}

@@ -1,3 +1,10 @@
+"""Protect extended recording, measurement-led review and source-matched timing.
+
+Locations require independent local evidence; quality gaps cannot be hidden by broad
+footprints. Early/failed/withheld reviews remain recorded, and isolation preserves an
+active public run without leaking authored source labels into runtime inputs.
+"""
+
 from __future__ import annotations
 
 import copy

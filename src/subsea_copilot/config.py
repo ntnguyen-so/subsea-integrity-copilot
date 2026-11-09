@@ -22,6 +22,8 @@ def database_url(user: str, password: str) -> str:
 
 @dataclass(frozen=True)
 class Settings:
+    """Separate application, tool-read and checkpoint authorities; hide secrets from repr."""
+
     database_dsn: str = field(repr=False)
     tools_dsn: str = field(repr=False)
     checkpoint_dsn: str = field(repr=False)
@@ -38,6 +40,7 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> Settings:
+        """Require externally bootstrapped credentials rather than committing usable defaults."""
         app = required("SUBSEA_DB_APP_PASSWORD")
         tools = required("SUBSEA_DB_TOOL_PASSWORD")
         checkpoint = required("SUBSEA_DB_CHECKPOINT_PASSWORD")

@@ -1,3 +1,9 @@
+"""Verify redaction, hashed lineage, bounded queues and truthful trace-delivery health.
+
+Fake exporters and mocked stored-observation responses separate enqueue/export
+from verified storage; these tests do not require live collector availability.
+"""
+
 from __future__ import annotations
 
 import json

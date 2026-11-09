@@ -1,3 +1,9 @@
+"""Verify bounded tool-disabled transport, strict envelopes and sanitized provenance.
+
+Mocked CLI events and local stub subprocesses test isolation, deadlines, capture
+and cleanup without live inference or claims about provider reasoning quality.
+"""
+
 from __future__ import annotations
 
 import json

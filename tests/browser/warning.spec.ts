@@ -1,3 +1,8 @@
+/**
+ * Real 1x scripted local replay: a clear monitoring warning must arrive independently
+ * of pinned investigation evidence. Requires owned credentials/backend; the measured
+ * warning path is an integration guarantee, not a population timeliness benchmark.
+ */
 import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 

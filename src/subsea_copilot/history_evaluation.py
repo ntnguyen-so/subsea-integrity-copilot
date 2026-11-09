@@ -1,4 +1,11 @@
-"""A declared fixed policy using the same scoped records; no LLM or fake live receipts."""
+"""Declared non-model history comparator using the same scoped database evidence.
+
+The fixed policy searches, reads up to three current hits and compares measured sensor
+periods through the normal history interface. Optional quality-aware selection changes
+which instruments are compared, not the source labels. Investigation validation chooses
+an admissible contextual assessment; it does not prove a root cause. Offline receipts
+describe actual reads and zero model calls, never pretend to be live-agent execution.
+"""
 
 from typing import Any
 
@@ -17,6 +24,7 @@ EXPECTED_CONTEXTS = {
 
 
 def history_answer_supported(scenario: str, result: AgentResult | None, state: str) -> bool:
+    """Check authored scenario context, requiring explicit coverage-restoration abstention in S5."""
     if result is None or result.investigation is None:
         return False
     review = result.investigation
@@ -31,6 +39,7 @@ def history_answer_supported(scenario: str, result: AgentResult | None, state: s
 
 
 class FixedReader:
+    """Adapt scoped store reads and collect local receipts for investigation validation."""
     def __init__(self, store: Any):
         self.store = store
         self.reads: list[dict[str, Any]] = []
@@ -55,6 +64,12 @@ def fixed_history_baseline(
     *,
     quality_aware: bool = False,
 ) -> dict[str, Any]:
+    """Execute a frozen broad-query baseline without inspecting expected scenario outcomes.
+
+    Compare post-start measurements around the snapshot midpoint, not the independent
+    normal preroll. Try conservative assessment candidates through the existing guard;
+    a passing metadata/evidence contract is not independent semantic adjudication.
+    """
     diagnosis = diagnosis.model_copy(update={"decision_policy": "legacy-v1"})
     reader = FixedReader(store)
 

@@ -1,4 +1,10 @@
-"""Scoped immutable reads with persisted, idempotent dispatch receipts."""
+"""Scoped immutable reads with persisted, idempotent dispatch receipts.
+
+Untrusted model requests and application intake use the same role/snapshot/version
+checks. Authorized reads return existing measurements, history or revalidated
+specialist results; durable receipts bind request identity, arguments and outcome.
+No provider request can write assets, choose a new scope or expand tool authority.
+"""
 
 import json
 from typing import Any
@@ -29,6 +35,7 @@ from subsea_copilot.validation import ValidationError, compatible
 
 
 def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
+    """Order a bounded health page by concerns, prioritizing exclusions on larger layouts."""
     support = set(snapshot.event.supporting_sensor_ids)
     return sorted(
         snapshot.quality.findings,
@@ -53,6 +60,7 @@ def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
 
 
 def context_sensors(snapshot: WindowSnapshot) -> list[Sensor]:
+    """Select a bounded legacy overview; measurement-only diagnosis sees the full layout."""
     sensors = generate_pack(snapshot.site_id, version=snapshot.pack_version).sensors
     if snapshot.event.criteria_id == "measurement-only-no-domain-decision":
         return sensors
@@ -90,6 +98,7 @@ def context_sensors(snapshot: WindowSnapshot) -> list[Sensor]:
 
 
 def pressure_regions(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
+    """Summarize measured run extrema by branch, not simultaneous onset or physical cause."""
     if len(snapshot.quality.findings) <= 32 * BUDGET_MULTIPLIER:
         return []
     pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
@@ -133,6 +142,7 @@ def pressure_regions(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
 
 
 class ToolGateway:
+    """Enforce reads against one leased task and its pinned immutable evidence view."""
     def __init__(self, store: Any, task: AgentTask, snapshot: WindowSnapshot, telemetry: Any):
         if task.decision_policy == "llm-diagnosis-v1":
             snapshot = measurement_snapshot(snapshot)
@@ -140,6 +150,7 @@ class ToolGateway:
         self._history_ranges: HistoryRangeCache = {}
 
     def dependencies(self) -> list[AgentTask]:
+        """Return compatible accepted tasks constrained by sibling/child or authorized reuse."""
         candidates = self.store.list_tasks(self.task.generation_id)
         if self.task.role == "event_diagnosis":
             return [
@@ -179,6 +190,7 @@ class ToolGateway:
         }
 
     def _validate_scope(self, arguments: dict[str, Any]) -> None:
+        """Require exact site, window and all numerical version pins before any read."""
         bound = {
             "site_id": self.snapshot.site_id,
             "snapshot_id": self.snapshot.id,
@@ -252,6 +264,7 @@ class ToolGateway:
             raise ValidationError("tool_arguments", "Page offset must be a nonnegative integer.")
 
     def _read(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Resolve an authorized read; the surrounding dispatcher owns audit and budgets."""
         snapshot = self.snapshot
         if name.startswith("history."):
             return read_history(
@@ -266,6 +279,7 @@ class ToolGateway:
         event = {k: c for k, c in ledger.items() if c["kind"] in {"hypothesis", "limitation"}}
         if name == "evidence.get":
             if "receipt_id" in arguments:
+                # Retrieval reopens this task's original result; it never reruns that tool.
                 receipt = next(
                     (
                         item for item in self.store.tool_receipts(self.task.id)
@@ -486,10 +500,12 @@ class ToolGateway:
         raise ValidationError("tool_authority", "Unknown read.")
 
     def dispatch(self, call: dict[str, Any]) -> dict[str, Any]:
+        """Authorize, replay-or-reserve, execute and persist a bounded read outcome."""
         call_id, name, arguments = call["id"], call["name"], call["args"]
         diagnostic: dict[str, Any] | None = None
         try:
             self._authorize(name, arguments)
+            # Scope is checked even on replay; the same call ID cannot acquire a new payload.
             for receipt in self.store.tool_receipts(self.task.id):
                 if receipt["call_id"] == call_id:
                     if receipt["name"] != name or receipt["arguments"] != arguments:
@@ -554,6 +570,7 @@ class ToolGateway:
             },
         ) as span:
             try:
+                # Argument failures consume the reserved attempt but yield no accepted evidence.
                 self._validate_arguments(
                     name, arguments, self._argument_schemas(),
                 )

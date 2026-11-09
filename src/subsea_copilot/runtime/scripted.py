@@ -1,4 +1,10 @@
-"""Offline contract transport, not evidence of live reasoning or model quality."""
+"""Offline contract transport, not evidence of live reasoning or model quality.
+
+Bound context and scoped tool outputs drive deterministic plan/read/result
+fixtures through the real graph contracts. Scripted critiques deliberately
+recognize fixture language; neither these verdicts nor heuristic history labels
+measure semantic reasoning, provider availability or production reliability.
+"""
 
 from __future__ import annotations
 
@@ -16,6 +22,7 @@ from subsea_copilot.profiles import comparison_documents, comparison_sensors, ex
 
 
 def decoded_output(content: str) -> dict[str, Any]:
+    """Expand supported lossless model-view encodings for the offline fixture transport."""
     output: dict[str, Any] = json.loads(content)
     value = output.get("result")
     if isinstance(value, dict) and value.get("encoding") in {
@@ -43,6 +50,7 @@ def decoded_output(content: str) -> dict[str, Any]:
 
 
 class ScriptedChatModel(BaseChatModel):
+    """Exercise orchestration and acceptance contracts without provider inference."""
     role: str
     bound_schemas: list[dict[str, Any]] = Field(default_factory=list)
 
@@ -398,6 +406,7 @@ class ScriptedChatModel(BaseChatModel):
         outputs: list[dict[str, Any]],
         context: dict[str, Any],
     ) -> tuple[AIMessage | None, dict[str, Any] | None]:
+        """Script bounded search/read/compare follow-ups for history-enabled fixture tasks."""
         if (
             self.role != "event_diagnosis"
             or context["phase"] == "plan"
@@ -540,6 +549,7 @@ class ScriptedChatModel(BaseChatModel):
                 },
             ), None
         approved = [doc for doc in read_docs if doc["admissible"]]
+        # These 0.2-bar/60%-coverage rules mirror legacy fixture checks, not live LLM policy.
         operating = any(
             len({
                 sensor["segment_id"]

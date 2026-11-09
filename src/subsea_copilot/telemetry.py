@@ -1,4 +1,11 @@
-"""Native OTLP fanout with content-free local audit and truthful exporter health."""
+"""Native OTLP fanout with content-free local audit and truthful exporter health.
+
+Application spans fan out independently to configured loopback collectors.
+Attributes pass identity hashing, allowlisting and optional synthetic-only
+redaction; the local JSONL audit never includes captured prompt/output content.
+Exporter acceptance, queue completion and stored observation-tree visibility
+are distinct health signals, not evidence that business results were correct.
+"""
 
 from __future__ import annotations
 
@@ -66,6 +73,7 @@ def _hash(value: object) -> str:
 
 
 def _safe(key: str, value: object, content_enabled: bool) -> object | None:
+    """Filter before export: hash scope identities, drop secrets and bound opted-in content."""
     if (
         len(key) > 180
         or _SENSITIVE.search(key)
@@ -96,6 +104,8 @@ def _safe(key: str, value: object, content_enabled: bool) -> object | None:
 
 
 class _ObservedExporter(SpanExporter):
+    """Track delivery without mistaking SDK enqueue/flush for stored trace visibility."""
+
     def __init__(self, delegate: SpanExporter) -> None:
         self.delegate = delegate
         self.accepted_batches = 0
@@ -146,6 +156,8 @@ class _ObservedExporter(SpanExporter):
 
 
 class _QueuedProcessor(SpanProcessor):
+    """Bound asynchronous fanout; synchronous export is an explicit diagnostic/test option."""
+
     def __init__(self, exporter: _ObservedExporter, synchronous: bool) -> None:
         self.exporter = exporter
         self.delegate: SpanProcessor = (
@@ -153,6 +165,7 @@ class _QueuedProcessor(SpanProcessor):
             if synchronous
             else BatchSpanProcessor(
                 exporter,
+                # At most 256 queued/64 per batch; dropped spans remain incomplete in health.
                 max_queue_size=256,
                 max_export_batch_size=64,
                 schedule_delay_millis=1000,
@@ -179,6 +192,7 @@ def _stored_tree_matches(
     observations: list[dict[str, Any]],
     required_types: Sequence[str],
 ) -> bool:
+    """Require requested types plus a connected acyclic single-root, single-session agent tree."""
     required = {kind.lower() for kind in required_types}
     if not required <= {str(item.get("type", "")).lower() for item in observations}:
         return False
@@ -214,6 +228,8 @@ def _stored_tree_matches(
 
 
 class _SafeSpan:
+    """Filter later attributes/events too, suppressing raw exception messages."""
+
     def __init__(
         self,
         span: trace.Span,
@@ -266,7 +282,7 @@ class _SafeSpan:
 
 
 class Telemetry:
-    """span(name, attributes=None, root=False); no global provider mutation."""
+    """Own a tracer/exporters without mutating the process-global provider."""
 
     def __init__(self, runtime_dir: Path | None = None) -> None:
         self.runtime_dir = runtime_dir or Path(
@@ -354,6 +370,7 @@ class Telemetry:
         root: bool = False,
         parent: Mapping[str, object] | None = None,
     ) -> Iterator[_SafeSpan]:
+        """Restore persisted parentage or start a clean root with context-local hashed identity."""
         parent_context: Context | None = None
         if parent is not None:
             if root:
@@ -455,6 +472,7 @@ class Telemetry:
             _SCOPE.reset(token)
 
     def _audit(self, record: dict[str, object]) -> None:
+        """Append only filtered metadata locally; audit failure is reported separately."""
         try:
             with self._audit_lock:
                 self.runtime_dir.mkdir(parents=True, exist_ok=True)
@@ -481,6 +499,7 @@ class Telemetry:
         return f"{parts.scheme}://{parts.netloc}/project/subsea-copilot/traces/{trace_id}"
 
     def health(self) -> dict[str, object]:
+        """Distinguish disabled, queued, failed-export and unverified-storage states."""
         destinations = {}
         for name, configuration in self._configuration.items():
             destinations[name] = {
@@ -544,6 +563,8 @@ class Telemetry:
             observations = []
             cursor = None
             seen_cursors: set[str] = set()
+            # Verification is bounded to five 100-observation/100KB pages, with no redirects
+            # or ambient proxy credentials; a partial/oversized tree is not verified.
             for _ in range(5):
                 url = endpoint + (f"&cursor={quote(cursor, safe='')}" if cursor else "")
                 request = urllib.request.Request(url, headers={"Authorization": f"Basic {auth}"})
@@ -589,6 +610,7 @@ class Telemetry:
         return False
 
     def flush(self) -> bool:
+        """Check SDK completion and delivery success using a five-second flush timeout."""
         error_type = None
         try:
             completed = self.provider.force_flush(timeout_millis=5000)

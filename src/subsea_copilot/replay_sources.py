@@ -25,6 +25,7 @@ def source_payload(dataset: ReplayDataset) -> dict[str, Any]:
 
 
 def freeze_replay_source(dataset: ReplayDataset) -> str:
+    """Persist measurement-only inputs under their hash, excluding recipes and answer labels."""
     payload = source_payload(dataset)
     digest = content_hash(payload)
     FROZEN_SOURCE_DIR.mkdir(parents=True, exist_ok=True)

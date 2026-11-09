@@ -1,4 +1,10 @@
-"""Local authenticated console API and durable server-sent monitoring events."""
+"""Composition root for the local FastAPI console, monitoring and agent workers.
+
+Routes expose scoped PostgreSQL evidence, not direct model/database capabilities.
+Numerical monitoring runs independently of hosted inference; durable event cursors
+let the browser reconnect. Recorded views reconstruct measurements or replay saved
+reports, while explicit investigation endpoints admit fresh hosted work.
+"""
 
 from __future__ import annotations
 
@@ -98,6 +104,12 @@ class PlaybackInvestigation(Contract):
 
 
 class AgentWorker:
+    """Dispatch independent roots, each with its own graph-checkpoint connection.
+
+    Report-to-map extraction happens after investigation completion and reports
+    its own errors; visualization failure must not erase the accepted report.
+    """
+
     def __init__(
         self, service: AgentService, map_report: Callable[[AgentTask], None] | None = None,
         *, service_factory: Callable[[str], AbstractContextManager[AgentService]],
@@ -209,6 +221,7 @@ class AgentWorker:
 
 
 def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
+    """Wire scoped storage, authentication, optional workers and lifecycle cleanup."""
     store = Store(
         settings.database_dsn,
         tenant_id=settings.tenant_id,
@@ -300,6 +313,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         return JSONResponse(status_code=status, content={"detail": str(exc), "code": exc.code})
 
     def principal(request: Request, *, write: bool = False) -> Principal:
+        """Authenticate every protected route and require CSRF/same-origin checks for writes."""
         try:
             result = sessions.authenticate(request.cookies.get(COOKIE_NAME))
             if write:
@@ -489,6 +503,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         replay: ReplaySession, end_seconds: int, clock_seconds: float,
         sensor_id: str | None = None,
     ) -> list[CanonicalObservation]:
+        """Reconstruct only measurements available at the requested source clock."""
         source = monitor_service()._source(replay)
         end = replay.epoch + timedelta(seconds=end_seconds)
         start = end - timedelta(seconds=source.dataset.pack.window_seconds)
@@ -511,6 +526,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def timeline_window(
         generation_id: str, source_seconds: int, request: Request,
     ) -> dict[str, object]:
+        """Build a bounded measurement-only display frame without creating agent work."""
         principal(request)
         replay = store.get_replay(generation_id)
         source = monitor_service()._source(replay)
@@ -554,6 +570,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         return playback_hashes[generation_id]
 
     def compatible_recordings(generation_id: str) -> list[Recording]:
+        """Match scenario, seed, raw-data hash and geometry before presenting a saved report."""
         from .playback import load_library
 
         replay = store.get_replay(generation_id)
@@ -620,6 +637,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def investigate_here(
         generation_id: str, form: PlaybackInvestigation, request: Request,
     ) -> dict[str, object]:
+        """Create a separate live generation at a selected endpoint; never mutate the recording."""
         principal(request, write=True)
         from .contracts import content_hash
         from .monitoring import AUTO_QUESTION
@@ -778,6 +796,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def task_detail(
         task_id: str, *, accepted_casefile_only: bool = False,
     ) -> dict[str, object]:
+        """Revalidate accepted results against executed receipts before constructing a handoff."""
         from .execution_usage import summarize_usage
 
         task = store.get_task(task_id)
@@ -891,6 +910,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
 
     @app.get("/api/replays/{generation_id}/events")
     async def events(generation_id: str, request: Request, after: int = 0) -> StreamingResponse:
+        """Stream committed events after a durable cursor; heartbeats contain no synthetic data."""
         principal(request)
         await run_in_threadpool(store.get_replay, generation_id)
         supplied = request.headers.get("Last-Event-ID")

@@ -1,3 +1,10 @@
+"""Check numerical evidence against seeded signals and adversarial measurement mutations.
+
+The analyzer receives normalized readings, not scenario labels. Tests distinguish
+coverage, independent sustained drops, faulty peers and topology-limited brackets;
+the expected labels here are test assertions, not runtime model instructions.
+"""
+
 from datetime import timedelta
 
 import pytest

@@ -1,3 +1,8 @@
+/**
+ * Display-only wording and report readability transforms, not evidence validation.
+ * Stored artifacts retain their synthetic provenance and full precision even when
+ * the UI shortens labels, citations or long decimal values.
+ */
 /** Display legacy prose without changing saved evidence, exports or source quotes. */
 export function productText(value: string): string {
   return value
@@ -16,7 +21,11 @@ export function productText(value: string): string {
     .replace(/COMPETING CAUSES - NOT CONFIRMED ROOT CAUSES/g, "COMPETING EXPLANATIONS");
 }
 
-/** Format report prose only; retain recorded measurements, sources and exports. */
+/**
+ * Hide recognized internal citation notation, preserving ordinary bracketed prose.
+ * Round long display decimals (small values use significant figures, not zero);
+ * callers retain the original report and references for audit/export.
+ */
 export function reportText(value: string, references: readonly string[] = []): string {
   return productText(value)
     .replace(/[\[(]([^[\]()\n]+)[\])]/g, (notation: string, body: string) => {

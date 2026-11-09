@@ -1,3 +1,5 @@
+"""Check retry identities and explicit store errors without opening database connections."""
+
 from datetime import timedelta
 
 import pytest

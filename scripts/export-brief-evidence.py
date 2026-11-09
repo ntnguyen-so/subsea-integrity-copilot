@@ -1,5 +1,9 @@
 """Generate the brief's geometry and example evidence from the running domain code."""
 
+# Offline source-of-truth exporter: seed 2026 S1/S2, a 140s endpoint with 145s receive
+# cutoff, and the current generated pack. Overwrites packs/northsea.json and the brief
+# fixture consumed by render-topology.cjs; no database/inference. Reproducible for the
+# same domain code, so rerun after numerical changes rather than edit figure numbers.
 import json
 from datetime import timedelta
 from pathlib import Path
@@ -37,6 +41,8 @@ def main() -> None:
             "snapshot": snapshot.model_dump(mode="json"),
             "window_start_seconds": (snapshot.window_start - source.epoch).total_seconds(),
             "window_end_seconds": (snapshot.window_end - source.epoch).total_seconds(),
+            # The plot uses the snapshot's half-open observed-time bounds and receive
+            # cutoff. Unusable records become null gaps, never interpolated pressure.
             "traces": {
                 sensor: [
                     {

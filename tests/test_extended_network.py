@@ -1,3 +1,9 @@
+"""Protect extended-network evidence scale, bounded reads and conservative location.
+
+Shared gateways/distractors cannot replace independent leak evidence, and measured
+near/far/quiet comparisons must use the same period without changing original geometry.
+"""
+
 import json
 from datetime import timedelta
 from statistics import median

@@ -1,4 +1,12 @@
-"""Code-managed, versioned prompt assets with a process-frozen catalog."""
+"""Code-managed, versioned prompt assets with a process-frozen catalog.
+
+Packaged Markdown has validated identity/version headers stripped before use;
+the exact remaining body is model input. Legacy and llm-* role assets describe
+different decision policies, while shared assets define transport/repair/views.
+Body hashes and the catalog manifest pin instructions across task/checkpoint
+recovery. Even HTML comments enter these bodies, so interview annotations belong
+in Python rather than silently changing rendered instructions or fingerprints.
+"""
 
 import hashlib
 import json
@@ -25,6 +33,7 @@ class PromptTemplate:
     sha256: str
 
     def render(self, **values: str) -> str:
+        """Replace exactly declared tokens once; inserted text is never reinterpreted."""
         required = set(_TOKEN.findall(self.content))
         missing = required - values.keys()
         unknown = values.keys() - required
@@ -39,6 +48,7 @@ class PromptTemplate:
 
 
 def _parse(name: str, raw: str) -> PromptTemplate:
+    """Validate asset metadata and hash the exact body, excluding the non-rendered header."""
     header = _HEADER.match(raw)
     if header is None:
         raise ValueError(f"Prompt {name!r} requires a valid prompt_id and semantic version.")
@@ -53,6 +63,7 @@ def _parse(name: str, raw: str) -> PromptTemplate:
 
 @cache
 def _catalog() -> Mapping[str, PromptTemplate]:
+    """Eagerly validate and freeze all assets on first access, not one role at a time."""
     templates: dict[str, PromptTemplate] = {}
     identifiers: set[str] = set()
     for resource in sorted(files(__package__).iterdir(), key=lambda item: item.name):
@@ -72,6 +83,7 @@ def _catalog() -> Mapping[str, PromptTemplate]:
 
 
 def load_prompt(name: str) -> PromptTemplate:
+    """Resolve only a known packaged asset name; callers cannot inject a resource path."""
     if not _NAME.fullmatch(name):
         raise ValueError(f"Invalid prompt asset name: {name!r}.")
     catalog = _catalog()
@@ -85,6 +97,7 @@ def prompt_manifest() -> dict[str, dict[str, str]]:
 
 
 def prompt_manifest_sha256() -> str:
+    """Hash identities/versions/body hashes; version-only changes still alter the catalog pin."""
     return hashlib.sha256(
         json.dumps(prompt_manifest(), sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()

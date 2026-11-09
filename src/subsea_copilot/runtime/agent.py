@@ -1,4 +1,10 @@
-"""One LangGraph loop for every role; external effects happen at interrupts."""
+"""One LangGraph loop for every role; external effects happen at interrupts.
+
+Messages enter a model -> tools -> model or model -> parse loop; only validated
+structured output leaves it. The service, not graph nodes or provider tools,
+performs external calls and resumes checkpointed interrupts. Schema repair is
+bounded and does not relax the validator or reset persisted execution budgets.
+"""
 
 import json
 from collections.abc import Callable
@@ -23,6 +29,7 @@ class WorkPlan(BaseModel):
     reuse_task_ids: list[str] = Field(default_factory=list, max_length=2)
 
     def checked(self) -> list[str]:
+        """Allow only serial prerequisite-complete plans, with explicit reuse identities."""
         if self.steps not in [
             ["quality", "answer"],
             ["quality", "diagnosis", "answer"],
@@ -63,6 +70,7 @@ class GraphState(TypedDict, total=False):
 def checked_plan_sources(
     plan: WorkPlan, history_required: bool, compatible_tasks: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
+    """Resolve proposed reuse against already checked quality/diagnosis candidates."""
     plan.checked()
     if history_required and "diagnosis" not in plan.steps and "reuse" not in plan.steps:
         raise ValidationError(
@@ -97,7 +105,7 @@ def build_graph(
     result_schema: Any = None,
     on_rejection: Callable[[Exception, int, bool, str | None], dict[str, Any]] | None = None,
 ) -> Any:
-    """The service fulfils model/tool requests outside graph nodes and checkpoints them."""
+    """Compile the shared loop; the service fulfils effects outside checkpointed nodes."""
 
     def model(state: GraphState) -> dict[str, Any]:
         response = interrupt({"kind": "model", "messages": state["messages"]})
@@ -121,6 +129,7 @@ def build_graph(
             accepted = validator(message.content)
             return {"parsed": accepted.model_dump(mode="json")}
         except (ValueError, TypeError) as exc:
+            # Repair changes the reply, never the evidence contract; every retry is revalidated.
             repairs = state.get("repairs", 0)
             retry = repairs < SCHEMA_REPAIR_LIMIT
             candidate = message.content if isinstance(message.content, str) else None
@@ -187,6 +196,7 @@ def build_graph(
 
 
 def model_tool_result(result: JsonValue) -> dict[str, Any]:
+    """Losslessly project large tool bodies for the model without changing receipts."""
     from subsea_copilot.profiles import compact_comparison, compact_documents, compact_evidence
 
     if not isinstance(result, dict):
@@ -202,6 +212,7 @@ def model_tool_result(result: JsonValue) -> dict[str, Any]:
 
 
 def repair_model_messages(messages: list[AnyMessage]) -> list[AnyMessage]:
+    """Hide rejected final drafts from retries, retaining evidence and validator feedback."""
     invalid_drafts = set()
     for index, message in enumerate(messages):
         if not (
@@ -220,6 +231,7 @@ def tool_messages(
     calls: list[dict[str, Any]],
     results: list[dict[str, Any]],
 ) -> list[ToolMessage]:
+    """Pair each scoped result with its originating request identity, preserving order."""
     return [
         ToolMessage(
             content=json.dumps(model_tool_result(result), allow_nan=False, separators=(",", ":")),

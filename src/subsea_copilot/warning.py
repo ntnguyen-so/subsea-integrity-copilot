@@ -26,6 +26,11 @@ def monitoring_warning(
     snapshot: WindowSnapshot | None, *, sensor_alerts_only: bool = False,
     workflow: Workflow | None = None,
 ) -> MonitoringWarning:
+    """Project numerical status promptly, without waiting for or claiming model confirmation.
+
+    Workflow views show sensor alerts, not a deterministic causal verdict. Warm-up
+    and coverage loss take precedence so absent evidence never becomes clearance.
+    """
     severity: Literal["attention", "warning", "info"]
     kind: Literal[
         "waiting",

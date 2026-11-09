@@ -13,6 +13,7 @@ from .config import Settings
 
 
 def create_recorded_console(settings: Settings, tenant_id: str) -> FastAPI:
+    """Reuse read views with workers disabled and reject mutations except login/logout."""
     from .api import create_app
 
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", tenant_id):

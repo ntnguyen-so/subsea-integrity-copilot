@@ -1,4 +1,16 @@
-"""Reproducible labelled cohorts using the unchanged production monitor and agents."""
+"""End-to-end source-labelled cohort using production monitor and agent execution.
+
+Eight recipes extend the golden examples with other branches, a stable control and
+drift. Labels come from injected source/fault schedules, not detector predictions.
+Frozen content-addressed runtime inputs omit those labels. Accepted public answers
+are mapped truth-blind; deterministic set metrics then compare them with source truth,
+while an external model separately judges explanation quality against hidden evidence.
+
+The caller supplies seed/split metadata; split does not filter recipe families here.
+Seed holdout varies noise, not unseen pattern families. Immutable run directories,
+implementation/prompt/data hashes, per-case audits and incremental public projections
+preserve failures and provenance without establishing field reliability.
+"""
 
 from __future__ import annotations
 
@@ -41,6 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 def evaluation_implementation_hash() -> str:
+    """Hash package Python and prompt text, including docs, to detect mid-run changes."""
     package = ROOT / "src" / "subsea_copilot"
     source: dict[str, Any] = {
         path.relative_to(package).as_posix(): path.read_text(encoding="utf-8")
@@ -54,6 +67,7 @@ def evaluation_implementation_hash() -> str:
 
 
 def reference_cases() -> list[dict[str, Any]]:
+    """Build eight authored patterns and remove golden expected-output shortcut fields."""
     cases: list[dict[str, Any]] = copy.deepcopy(load_cases()["cases"])
     for identifier, segment, mixed in (("E5", "P2", False), ("E6", "P3", True)):
         case = copy.deepcopy(cases[2 if mixed else 0])
@@ -108,6 +122,12 @@ def reference_dataset(case: dict[str, Any], seed: int, site_id: str) -> ReplayDa
 
 
 def truth_labels(case: dict[str, Any], dataset: ReplayDataset) -> dict[str, Any]:
+    """Declare source/issue/anomaly identities from recipes, never runtime predictions.
+
+    The small-network source footprint targets stations 2/3 with expected 200..600 m
+    inspection bounds. Missing/invalid samples are unknown, not instrumentation proof;
+    source and nuisance issues may coexist rather than forcing one exclusive class.
+    """
     issues = [{"sensor_id": item["sensor_id"], "kind": "spike"} for item in case["spikes"]]
     issues += [{"sensor_id": sensor, "kind": "invalid"} for sensor in case["invalid_sensor_ids"]]
     issues += [{"sensor_id": sensor, "kind": "missing"} for sensor in case["gap_sensor_ids"]]
@@ -146,6 +166,11 @@ def truth_labels(case: dict[str, Any], dataset: ReplayDataset) -> dict[str, Any]
 
 
 def write_report(path: Path, report: dict[str, Any]) -> None:
+    """Replace JSON atomically with bounded Windows-lock retries and archive indexing.
+
+    Public writes strip agent-process audits and attach independent reference/history
+    projections. Completed archive reports retain their original recorded scores.
+    """
     if path == PUBLIC_REPORT:
         from .temporal_evaluation import without_agent_audit_results
 
@@ -192,6 +217,7 @@ def write_report(path: Path, report: dict[str, Any]) -> None:
 
 
 def read_evaluation() -> dict[str, Any]:
+    """Load current or checked-in evidence, never fabricate a successful not-run result."""
     path = (
         PUBLIC_REPORT
         if PUBLIC_REPORT.exists()
@@ -222,6 +248,7 @@ def read_evaluation() -> dict[str, Any]:
 
 
 def mapping_controls() -> list[dict[str, Any]]:
+    """Author extraction calibration for negation, coexistence, false certainty and issue types."""
     return [
         {
             "name": "valid-pressure-anomaly-is-not-instrument-failure",
@@ -312,6 +339,13 @@ def run_reference_evaluation(
     agent_model: str = "gpt-6.1-sol",
     evaluator_model: str = "gpt-6.1-terra",
 ) -> dict[str, Any]:
+    """Freeze recipes/labels before two concurrent first-attempt production investigations.
+
+    Mapping controls exercise truth-blind extraction before cohort cases. Judge controls
+    and verdicts are separate opinion receipts; calibration failure blocks target_met
+    rather than rewriting the candidate. Missing reports/mappings and exceptions remain
+    failed terminal rows. Run completion does not mean all cases or metrics passed.
+    """
     if (
         os.environ.get("SUBSEA_TRACE_CONTENT") != "1"
         or os.environ.get("SUBSEA_SYNTHETIC_ONLY") != "1"

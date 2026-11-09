@@ -1,3 +1,7 @@
+# One-time local credential provisioning in LOCALAPPDATA\SubseaCopilot, outside Git.
+# Inputs are the current Windows identity and cryptographic randomness; output is
+# owner-only secrets.json. Existing secrets are never reset, so reruns fail safely.
+# No service, migration, hosted call or secret printing occurs here.
 # Creates credentials only. Services and migrations are separate explicit commands.
 [CmdletBinding()]
 param()
@@ -15,6 +19,7 @@ if ((Test-Path -LiteralPath $root) -and
     throw "Refusing a linked secrets directory."
 }
 
+# Remove inherited access and grant only the current identity; the loader rechecks it.
 function Set-UserOnlyAcl([string]$Target, [bool]$Directory) {
     if ($Directory) {
         $acl = [System.Security.AccessControl.DirectorySecurity]::new()

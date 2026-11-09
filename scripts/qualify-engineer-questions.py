@@ -1,5 +1,10 @@
 """Exercise question-specific interpretation, not detection accuracy or business ROI."""
 
+# Builds S4/S2/S1 numerical windows and runs the production service in a new tenant.
+# Requires database/checkpointer services; live also needs authenticated hosted access.
+# Output includes exact interpretations, review rounds, real elapsed time and receipts;
+# reruns create new tasks and overwrite the requested report, not prior stored results.
+# Optional unsupported prose is injected only into a new provisional synthetic draft.
 import argparse
 import json
 import time
@@ -57,6 +62,8 @@ def main() -> None:
             postgres_checkpointer(settings.checkpoint_dsn) as saver,
         ):
 
+            # Narrow test seam: leave production validation/critic intact so the
+            # injected false paragraph must be revised before an answer is accepted.
             class QualificationService(AgentService):
                 def _graph(self, task, snapshot, phase, candidate=None, criticism=None):
                     parsed, current = super()._graph(
@@ -132,6 +139,7 @@ def main() -> None:
                     root = store.get_task(root.id)
                 tasks = [t for t in store.list_tasks(replay.id) if t.root_id == root.id]
                 interpretation = root.result.interpretation if root.result else None
+                # Contract acceptance is not independently graded semantic accuracy.
                 accepted = root.state in {"SUCCEEDED", "ABSTAINED"} and interpretation is not None
                 if args.inject_unsupported_draft:
                     accepted = (

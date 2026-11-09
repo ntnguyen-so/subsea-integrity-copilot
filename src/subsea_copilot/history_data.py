@@ -1,4 +1,12 @@
-"""Validated fictional history; applicability is private retrieval metadata, not evidence."""
+"""Validate authored fictional operational records before scoped history retrieval.
+
+The versioned corpus preserves document bodies, approval state, incident-time availability,
+effective periods and supersession edges. Loading validates structure but does not choose
+admissible evidence; runtime retrieval applies clock, asset and revision rules later.
+Scenario applicability is excluded from public model serialization and exported only as
+private index routing metadata. Neither these records nor their asset tags are observed
+maintenance proof or labels establishing a pressure event's physical cause.
+"""
 
 from __future__ import annotations
 
@@ -104,6 +112,7 @@ class HistoryCorpus(BaseModel):
 
     @model_validator(mode="after")
     def validate_corpus(self) -> HistoryCorpus:
+        """Check epoch, ID uniqueness and same-type, increasing-revision replacement links."""
         if self.synthetic_epoch != SYNTHETIC_EPOCH:
             raise ValueError("synthetic_epoch must be 2026-01-01T00:00:00Z")
         by_id = {record.id: record for record in self.records}

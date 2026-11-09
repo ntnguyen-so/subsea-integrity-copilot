@@ -1,3 +1,9 @@
+/**
+ * End-to-end dashboard invariants: same measurements in both workflows, independent
+ * warnings, coherent pinned/live evidence, schematic geometry and honest agent status.
+ * Hosted/golden scenarios have explicit opt-ins; other cases use scripted or scoped
+ * fixtures. These UI checks do not establish detector accuracy or field reliability.
+ */
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import type { InvestigationCase, Projection } from "../../web/ts/types";

@@ -1,4 +1,12 @@
-"""Frozen synthetic qualification; results are measurements, not field reliability."""
+"""Coordinate bounded detector/agent/knowledge qualification and persist JSON receipts.
+
+Detector truth stays in evaluation modules; agents use normal scoped stores, tools,
+checkpoints and production workflow. The agent cohort pins S1/S2/S4/S5 at endpoint
+180/clock 185 and repeats three customer questions one to three times (12..36 answers).
+Acceptance combines runtime completion, authored context/claim checks, a legacy single-
+agent comparator and stored trace visibility. Measured calls/latency/observed identities
+are distinct from requested models, configured ceilings and unknown monetary cost.
+"""
 
 from __future__ import annotations
 
@@ -62,6 +70,7 @@ def qualification_model_factory(
 
 
 def model_receipts(store: Store, task_ids: list[str]) -> list[JsonValue]:
+    """Project persisted public transport metadata, not requested-model assumptions."""
     return [
         {key: receipt.get(key) for key in MODEL_METADATA_KEYS}
         for task_id in task_ids
@@ -70,6 +79,13 @@ def model_receipts(store: Store, task_ids: list[str]) -> list[JsonValue]:
 
 
 def qualify_agents(mode: Mode, repetitions: int = 3) -> dict[str, JsonValue]:
+    """Run the full planned question cohort in a fresh tenant using arrived data only.
+
+    Auth/quota failures stop subsequent attempts and remain provider_blocked; the pass
+    condition still requires every planned answer. Repetitions share four snapshots,
+    so they are not independent physical trials. An accepted abstention needs correct
+    contextual support; same-stack validators and critics are not external prose judges.
+    """
     if not 1 <= repetitions <= 3:
         raise ValueError("Agent qualification requires one to three repetitions")
     settings = Settings.from_env()
@@ -312,6 +328,7 @@ def run_qualification(
     output: Path,
     repetitions: int = 3,
 ) -> dict[str, JsonValue]:
+    """Run requested sections and save timestamped evidence; suite pass is their conjunction."""
     report: dict[str, JsonValue] = {
         "created_at": utc_now().isoformat(),
         "suite": suite,

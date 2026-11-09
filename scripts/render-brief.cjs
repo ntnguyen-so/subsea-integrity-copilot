@@ -1,8 +1,14 @@
+// Offline document export: regenerate shared topology/evidence assets, then convert
+// the two existing brief Markdown sources into one-page PDFs in docs (overwriting).
+// Requires uv/project Python and installed Chrome/Playwright; no hosted model calls.
+// This is a deliberately small Markdown subset, not a general Markdown/HTML engine.
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { chromium } = require("@playwright/test");
 const { renderTopology } = require("./render-topology.cjs");
 
+// Escape text first; only HTTPS links and bounded local SVG/PNG illustrations are
+// expanded. The final page-count assertion catches layout drift on repeated renders.
 async function renderBrief(name) {
   const docs = path.join(__dirname, "..", "docs");
   const source = await fs.readFile(

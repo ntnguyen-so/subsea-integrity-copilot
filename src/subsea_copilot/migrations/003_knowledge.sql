@@ -1,3 +1,5 @@
+-- Freeze the selected advisory packet at admission and copy it to children.
+-- This prevents a later corpus edit from changing an in-flight answer's basis.
 CREATE OR REPLACE FUNCTION subsea.guard_knowledge_pin() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, subsea AS $$
 DECLARE parent_packet jsonb;

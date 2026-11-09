@@ -1,5 +1,10 @@
 """Preserve Evaluation-compatible labels for an already accepted synthetic report."""
 
+# Select a stored task (DB access required) or successful playback-library entries.
+# This DOES require authenticated hosted Copilot when extraction is needed: it maps
+# accepted report text to quoted presentation labels, not a fresh incident diagnosis.
+# Saves runtime mapping receipts via prepare_report_mapping; existing outcomes are
+# reused unless an explicit failed retry is requested. No accepted answer is rewritten.
 import argparse
 
 from subsea_copilot.config import Settings
@@ -32,6 +37,8 @@ def main() -> None:
                 task = store.get_task(args.task_id)
                 snapshot = store.get_window(task.snapshot_id)
                 rows = [(task, generate_pack(snapshot.site_id, version=snapshot.pack_version))]
+        # Geometry/catalog constrain identifiers; the mapper must quote the report,
+        # not invent sensor faults from detector flags or a numerical location.
         for task, pack in rows:
             receipt = prepare_report_mapping(
                 settings.runtime_dir, task, pack,

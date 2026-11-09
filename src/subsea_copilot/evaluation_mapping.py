@@ -1,4 +1,11 @@
-"""Truth-blind extraction of the incident report, never sensor inference."""
+"""Translate published coordinator prose to auditable labels without source truth.
+
+Only answer.text and catalog identities reach the extraction model; specialist
+outputs, detector findings and hidden recipe labels do not. Exact paragraph quotes
+and catalog membership constrain extraction but cannot prove semantic faithfulness.
+Receipts preserve model identity, input/output hashes and at most one validation
+repair. This is report interpretation, not a new diagnosis or a correctness judge.
+"""
 
 from __future__ import annotations
 
@@ -83,6 +90,7 @@ def extraction_packet(
     interpretation: dict[str, Any],
     catalog: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    """Expose public prose and bounded verbatim paragraph choices, never hidden context."""
     texts = public_texts(interpretation)
     choices = {
         f"paragraph-{index}": paragraph.strip()
@@ -93,6 +101,7 @@ def extraction_packet(
 
 
 def bind_quote_pointers(value: Any, choices: dict[str, str]) -> Any:
+    """Resolve model-selected paragraph IDs to original text before schema validation."""
     if not isinstance(value, dict):
         return value
     quotes = [
@@ -121,6 +130,7 @@ def validate_mapping(
     texts: dict[str, str],
     catalog: list[dict[str, Any]],
 ) -> None:
+    """Reject invented identities/quotes; semantic entailment still needs inspection."""
     sensors = {item["id"] for item in catalog}
     segments = {item["segment_id"] for item in catalog}
     quotes = [item.quote for item in mapping.leaks]
@@ -226,6 +236,12 @@ def run_mapping(
     tenant_id: str,
     generation_id: str,
 ) -> dict[str, Any]:
+    """Require observed live, tool-free JSON and retain failure rather than invent labels.
+
+    Only a live, final response rejected by ValueError gets one correction request.
+    Transport/provider failures are not retried here. Hashes and telemetry let stored
+    output be checked against the exact submitted text and accepted mapping.
+    """
     packet = extraction_packet(interpretation, catalog)
     messages: list[SystemMessage | HumanMessage | AIMessage] = list(extraction_messages(packet))
     captured: dict[str, Any] = {"system": str(messages[0].content), "packet": packet}

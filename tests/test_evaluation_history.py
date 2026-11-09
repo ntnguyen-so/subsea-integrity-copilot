@@ -1,3 +1,9 @@
+"""Keep archive suites/revisions distinct and serve original scores only.
+
+Changed, missing, unreadable or out-of-root files fail explicitly; authenticated reads
+must never substitute the latest report for a requested historical token.
+"""
+
 from __future__ import annotations
 
 import json

@@ -1,4 +1,9 @@
-"""Pure golden/judge qualification checks: no hosted inference, database or temp files."""
+"""Exercise golden measurement, isolation, grading and recorded-provenance guarantees.
+
+Pure fixtures/injected transports check production gates, source reopening, bounded
+judge IO, exact hashes and retained failed retries without hosted inference or database
+access. Numerical eligibility must never substitute for model-authored classification.
+"""
 
 import json
 import sys

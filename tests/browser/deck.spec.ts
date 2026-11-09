@@ -1,3 +1,8 @@
+/**
+ * Offline deck/figure contract: source-pack geometry and identities, interview clock/
+ * navigation, readable responsive layout and one-slide-per-print-page containment.
+ * Opens local presentation assets, not the console or a hosted inference session.
+ */
 import { test, expect } from "@playwright/test";
 import path from "node:path";
 import { pathToFileURL } from "node:url";

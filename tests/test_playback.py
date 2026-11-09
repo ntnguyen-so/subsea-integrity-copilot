@@ -1,3 +1,5 @@
+"""Ensure saved reports keep their exact evidence basis and retain real failures."""
+
 from datetime import timedelta
 
 import pytest

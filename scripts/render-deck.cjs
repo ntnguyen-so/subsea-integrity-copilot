@@ -1,3 +1,6 @@
+// Rebuild shared figures and print the local HTML deck to docs/INTERVIEW_DECK.pdf.
+// Requires uv/project Python and Chrome/Playwright, not backend services or inference.
+// Reruns overwrite assets/PDF; a slide/page mismatch deletes the invalid PDF.
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
@@ -16,6 +19,7 @@ async function main() {
     await page.locator("img").evaluateAll(images => Promise.all(images.map(image => image.decode())));
     if (errors.length) throw new Error(errors.join("\n"));
     const expected = await page.locator(".slide").count();
+    // Printed relative references need a stable repository URL, not a local file URL.
     await page.locator("a[href]").evaluateAll(anchors => {
       for (const anchor of anchors) {
         const href = anchor.getAttribute("href");

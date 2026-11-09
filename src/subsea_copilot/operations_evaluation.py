@@ -1,7 +1,11 @@
-"""Evaluation-only, matched report rubric and persisted operation audit.
+"""Compare matched synthetic reports and audit the persisted investigation protocol.
 
-Fixture expectations never enter an agent prompt or the deterministic baseline.
-Passing this rubric is not independent semantic adjudication of generated prose.
+The fixed comparator reads scoped history and emits a conservative template with no
+model calls. Agent auditing traverses actual dependencies, revalidates stored results
+and checks receipts, authority, scope, budgets and critic/reflection sequence. A common
+authored scenario rubric scores both methods without entering either method's input.
+Planned-case denominators preserve failures and unattempted work; protocol correctness,
+template/rubric agreement and independent semantic correctness are separate claims.
 """
 
 from __future__ import annotations
@@ -173,6 +177,7 @@ def deterministic_report(
 
 
 def review_sequence_complete(decisions: Sequence[str], phases: Counter[str]) -> bool:
+    """Require revise* then accept, each indexed critic and enough recorded reflections."""
     return bool(
         decisions and decisions[-1] == "accept"
         and len(decisions) <= REVIEW_ROUND_LIMIT
@@ -184,6 +189,14 @@ def review_sequence_complete(decisions: Sequence[str], phases: Counter[str]) -> 
 
 
 def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) -> dict[str, Any]:
+    """Rebuild the dependency closure from stored evidence without new model calls.
+
+    Fresh-root counters exclude reused prior inference, which is reported separately.
+    Tool receipts distinguish required application intake from model-requested actions.
+    Revalidation uses the applicable decision policy and snapshot; acceptance is not
+    an independent judgement that every prose claim is true. Failed roots must withhold
+    answer/result rather than being credited as successful abstentions.
+    """
     if root.decision_policy == "llm-diagnosis-v1":
         snapshot = measurement_snapshot(snapshot)
     fresh = [t for t in store.list_tasks(root.generation_id) if t.root_id == root.id]
@@ -417,6 +430,14 @@ def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) ->
 def summarize(
     rows: list[dict[str, Any]], expected_count: int, *, attempted_count: int | None = None
 ) -> dict[str, Any]:
+    """Summarize matched report checks against the planned, not completed, population.
+
+    Latency percentiles use scored timings, while correct-within-300s counts retain the
+    planned denominator. Attempted-but-unscored and never-attempted work stay distinct.
+    Passing requires all planned agent reports, every operation check and <=300s each;
+    it does not demonstrate superiority over the deterministic comparator or human time
+    savings. Report accuracy and timely delivery are deliberately separate counters.
+    """
     attempted_count = len(rows) if attempted_count is None else attempted_count
     if not len(rows) <= attempted_count <= expected_count:
         raise ValueError("Scored <= attempted <= planned must hold.")

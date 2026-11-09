@@ -1,4 +1,10 @@
-"""Root-scoped provider usage and explicitly hypothetical OpenAI API pricing."""
+"""Root-scoped provider usage and explicitly hypothetical OpenAI API pricing.
+
+Given a caller-selected task tree and recorded calls, total only valid reported
+input/output counts; absent usage stays uncovered, not an inferred free call.
+Static dated rates yield a Standard API equivalent, never a Copilot bill or live
+price lookup. Cache counters are input subsets and reasoning is already output.
+"""
 
 from collections.abc import Mapping, Sequence
 from decimal import Decimal
@@ -9,7 +15,7 @@ from .contracts import AgentTask
 
 PRICING_URL = "https://developers.openai.com/api/docs/pricing"
 PRICING_DATE = "2026-11-08"
-# USD per million tokens: standard input and output.
+# Dated USD-per-million input/output pairs: <=272K input, then >272K input per call.
 STANDARD_RATES = {
     "gpt-6.1-sol": (
         (Decimal("2"), Decimal("10")),
@@ -25,6 +31,7 @@ def _count(value: JsonValue) -> int | None:
 def summarize_usage(
     tasks: Sequence[AgentTask], calls: Sequence[Mapping[str, JsonValue]],
 ) -> dict[str, object]:
+    """Report observed token totals, reservation/reporting coverage and partially priced cost."""
     totals = {"input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0,
               "cache_write_tokens": 0}
     reported = priced = cached_reported = 0
@@ -55,9 +62,11 @@ def summarize_usage(
         if not isinstance(model, str) or model not in STANDARD_RATES:
             continue
         rates = STANDARD_RATES[model][int(input_tokens > 272_000)]
+        # Apply the tier per request, not to the root total; no speculative cache discounts.
         cost += (input_tokens * rates[0] + output_tokens * rates[1]) / 1_000_000
         priced += 1
     expected = sum(task.model_calls for task in tasks)
+    # Coverage counts remain visible even when only some calls can be priced.
     return {
         **totals, "total_tokens": totals["input_tokens"] + totals["output_tokens"],
         "reserved_calls": expected, "completed_calls": len(calls),

@@ -1,3 +1,9 @@
+/**
+ * Read-only evaluation UI: recorded detection/reference metrics and a separate
+ * frozen-packet answer-quality benchmark. Opening tabs/archives never runs inference.
+ * Backend metric rates retain their numerator, denominator and uncertainty; spatial
+ * playback additionally computes explicit recorded-window coverage in evaluation_maps.
+ */
 import { box, node } from "./dom";
 import { agentName } from "./agentwork";
 import { renderSpatialEvaluation, stopSpatialPlayback } from "./evaluation_maps";
@@ -154,6 +160,8 @@ function raw<K extends keyof HTMLElementTagNameMap>(tag: K, value = "", classNam
   return result;
 }
 function percent(value: number | null): string { return value === null ? "Not measurable" : `${(value * 100).toFixed(1)}%`; }
+// A null rate is unmeasurable, not a perfect zero. Wilson intervals describe the
+// supplied count model, not independent field reliability for overlapping windows.
 function rate(value: Rate): string {
   const count = value.denominator === undefined ? "" : ` (${value.numerator}/${value.denominator})`;
   const confidence = value.wilson95 ? ` · 95% interval ${percent(value.wilson95[0])}–${percent(value.wilson95[1])}` : "";
@@ -253,6 +261,7 @@ const suiteNames: Record<string, string> = {
   non_leak: "No-leak scenarios and false alarms",
 };
 
+/** Preserve reader expansion while switching suites/archives; cancel obsolete archive selection reads. */
 export function renderEvaluation(
   report: EvaluationReport, loader?: (id: string, signal: AbortSignal) => Promise<EvaluationReport>,
 ): void {
@@ -424,6 +433,8 @@ function resetArchive(): void {
   archiveLoading = false; archiveError = "";
 }
 
+// Source-window/episode measures differ from review-checkpoint scores: uncovered
+// periods, retained false alarms and fresh post-onset detections remain explicit.
 function renderLifecycle(report: EvaluationReport, container: HTMLElement): void {
   const metrics = report.metrics?.temporal;
   if (!metrics) return;
@@ -503,6 +514,9 @@ function renderDetectionApproach(container: HTMLElement): void {
   container.append(approach);
 }
 
+// This benchmark supplies frozen packets to one answerer, not the production
+// multi-agent workflow. Advisory model opinions exclude unscored/missing reviews
+// from quality means; factual and coverage denominators still retain failed cases.
 function renderAgentReferences(
   report: AgentReferenceReport | undefined, container: HTMLElement, opened: Set<string | undefined>,
   openedInputs: Set<string | undefined>,
@@ -756,6 +770,8 @@ function renderAgentReferences(
   workspace.append(provenance);
 }
 
+// Render persisted deterministic truth-vs-extracted-label comparisons. The separate
+// semantic judge does not award TP/FP/FN, precision, recall or localization scores.
 function renderEvidence(report: EvaluationReport, container: HTMLElement): void {
   const opened = new Set([...container.querySelectorAll<HTMLDetailsElement>("details[open]")].map(item => item.dataset.case));
   container.replaceChildren();

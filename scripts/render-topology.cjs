@@ -1,3 +1,7 @@
+// Generate presentation SVGs from the same Python-exported pack/snapshots as the
+// console. Running this overwrites the pack, brief fixture and two docs assets.
+// Requires uv/project Python; no database or hosted inference. Synthetic provenance
+// and version checks bind figures to their source rather than hand-drawn numbers.
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
@@ -5,6 +9,8 @@ const { execFileSync } = require("node:child_process");
 const escape = value => String(value).replace(/[&<>"]/g, character =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[character]);
 
+// Schematic Cartesian-to-SVG projection. A/B markers use exaggerated opposite wall
+// offsets; chainage fractions and source metadata retain actual pack geometry.
 function network(pack, { x, y, scale }, snapshot = null) {
   const project = point => ({ x: x + point.x * scale, y: y - point.y * scale });
   const result = [];
@@ -32,6 +38,8 @@ function network(pack, { x, y, scale }, snapshot = null) {
   return result.join("\n");
 }
 
+// Independent per-trace y-scales illustrate shape, not comparable amplitude.
+// Nulls and discontinuous sampling break paths rather than interpolate unknown data.
 function trace(values, x, y, label, start, end) {
   const usable = values.filter(item => item.value !== null);
   const min = Math.min(...usable.map(item => item.value));

@@ -1,4 +1,10 @@
-"""Content-addressed author-harness templates and effective execution policy."""
+"""Content-addressed author-harness templates and effective execution policy.
+
+Task phase, prompts, schemas, registry and budgets produce a reproducible harness
+identity. Bound incident values are not the harness template identity; the service
+separately hashes actual model input. Source-byte hashes detect implementation
+changes, including comment-only edits, rather than proving semantic equivalence.
+"""
 
 import hashlib
 from dataclasses import asdict
@@ -45,6 +51,7 @@ def harness_provenance(
     task: AgentTask, phase: str, prompt: str, context: dict[str, Any], *, prompt_limit: int,
     prompt_asset: PromptTemplate | None = None,
 ) -> dict[str, Any]:
+    """Fingerprint phase instructions and effective authority for checkpoint compatibility."""
     phase_kind = (
         "critic"
         if phase.startswith("critic-")
@@ -96,6 +103,7 @@ def harness_provenance(
         "context_stages": list(COMPACTION_STAGES),
     }
     policy_hash = content_hash(policy)
+    # Reuse/resume must identify the harness, not merely the requested model or prompt name.
     identity: dict[str, Any] = {
         "role": task.role,
         "phase_kind": phase_kind,

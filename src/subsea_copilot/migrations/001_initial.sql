@@ -1,3 +1,5 @@
+-- Business-state schema. Graph checkpoints have a separate owner/schema so a
+-- model's read-only tools cannot alter business evidence or execution state.
 CREATE SCHEMA IF NOT EXISTS subsea;
 REVOKE ALL ON SCHEMA subsea FROM PUBLIC, subsea_checkpoint;
 GRANT USAGE ON SCHEMA subsea TO subsea_app, subsea_tools_ro;
@@ -11,6 +13,7 @@ CREATE TABLE IF NOT EXISTS subsea.replays (
     payload jsonb NOT NULL, version integer NOT NULL CHECK (version > 0),
     PRIMARY KEY (tenant_id, site_id, id)
 );
+-- Append raw variants and later quarantine masks; never replace source history.
 CREATE TABLE IF NOT EXISTS subsea.observations (
     tenant_id text NOT NULL, site_id text NOT NULL, generation_id text NOT NULL,
     identity text NOT NULL, raw_hash text NOT NULL, payload_hash text NOT NULL,
@@ -40,6 +43,8 @@ CREATE TABLE IF NOT EXISTS subsea.episodes (
     FOREIGN KEY (tenant_id, site_id, generation_id)
         REFERENCES subsea.replays (tenant_id, site_id, id)
 );
+-- Relational execution columns mirror the JSON contract and are checked below.
+-- Composite foreign keys keep ancestry/evidence inside the same tenant and site.
 CREATE TABLE IF NOT EXISTS subsea.tasks (
     tenant_id text NOT NULL, site_id text NOT NULL, id text NOT NULL,
     generation_id text NOT NULL, root_id text NOT NULL, parent_id text,
@@ -69,6 +74,8 @@ CREATE TABLE IF NOT EXISTS subsea.tasks (
     CHECK (state IN ('QUEUED','RUNNING','WAITING_ON_CHILD',
                     'SUCCEEDED','ABSTAINED','FAILED','CANCELLED'))
 );
+-- Durable SSE cursor. Store._generation serializes event-producing writes because
+-- sequence allocation by itself would not guarantee transaction commit ordering.
 CREATE TABLE IF NOT EXISTS subsea.events (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     tenant_id text NOT NULL, site_id text NOT NULL, generation_id text NOT NULL,
@@ -177,6 +184,9 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'immutable_evidence';
 END $$;
 
+-- Defense in depth: enforce admission, ancestry, deadlines, lease fencing and
+-- cumulative call budgets even if an application caller bypasses Python checks.
+-- Numeric caps are operational demo policy, not measured reliability scores.
 CREATE OR REPLACE FUNCTION subsea.guard_task() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, subsea AS $$
 DECLARE
@@ -365,6 +375,8 @@ BEGIN
     RETURN NEW;
 END $$;
 
+-- Reuse is an explicit dependency binding, not a fresh successful investigation.
+-- Diagnosis must already have consumed the matching quality specialist result.
 CREATE OR REPLACE FUNCTION subsea.guard_reuse() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, subsea AS $$
 DECLARE parent_row subsea.tasks; source_row subsea.tasks; quality_row subsea.tasks;
@@ -414,6 +426,8 @@ BEGIN
     RETURN NEW;
 END $$;
 
+-- Transaction-local scope settings drive forced RLS for both application and
+-- read-only roles; evidence tables additionally reject UPDATE and DELETE.
 DO $$
 DECLARE t text;
 BEGIN

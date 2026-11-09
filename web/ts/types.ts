@@ -1,3 +1,9 @@
+/**
+ * Browser wire contracts for backend-owned evidence and execution state.
+ * These interfaces are compile-time shapes, not JSON validators. Snapshot IDs,
+ * generation IDs, input hashes and version tuples carry the provenance used when
+ * joining records, reports and maps. Nullable values mean unknown/withheld, not zero.
+ */
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type Channel = "pressure" | "acoustic" | "methane" | "temperature";
 export type Mode = "scripted" | "live";
@@ -13,11 +19,15 @@ export interface SitePack {
   min_stations: number; persistence_seconds: number; neighborhood_m: number;
 }
 export interface RawRecord { sensor_id: string; channel: Channel; observed_at: string; received_at: string; value: number | string | null; unit: string; source_id: string; source_record_id: string }
+// Observed time places a sample in the window; received time determines availability.
+// Original records and transformation names preserve the audit trail after normalization.
 export interface CanonicalObservation { id: string; identity: string; sensor_id: string; channel: Channel; observed_at: string; received_at: string; value: number | null; unit: string; validity: string; source_id: string; source_record_id: string; original: RawRecord; transformations: string[] }
 export interface QualityFinding { sensor_id: string; channel: Channel; expected: number; received: number; usable: number; missing: number; hard_excluded: number; spike_count: number; drift_suspected: boolean; peer_disagreement: boolean; anomaly_count: number; max_score: number; persistence_seconds: number; evidence_ids: string[] }
 export interface EvidenceItem { id: string; kind: string; sensor_id: string | null; channel: Channel | null; value: Json }
 export interface Claim { id: string; kind: string; value: Json; evidence_ids: string[] }
 export interface LocationCandidate { segment_id: string; chainage_m: number; position: Point; residual: number | null; strength: number | null }
+// Immutable, revisioned numerical evidence. Coverage/expected counts are computed
+// server-side; event support is not independent-sensor proof or a confirmed cause.
 export interface WindowSnapshot {
   id: string; site_id: string; generation_id: string; window_start: string; window_end: string;
   end_seconds: number; revision: number; predecessor_id: string | null; input_hash: string;
@@ -58,6 +68,7 @@ export interface InvestigationCase {
   knowledge_packet: KnowledgePacket | null;
   knowledge_used_ids: string[];
 }
+// Usage may be partial: absent reporting/pricing is explicitly counted at call level.
 export interface ExecutionUsage {
   input_tokens: number; output_tokens: number; total_tokens: number;
   cache_read_tokens: number; cache_write_tokens: number;

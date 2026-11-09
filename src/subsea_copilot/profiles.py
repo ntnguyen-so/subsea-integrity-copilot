@@ -15,6 +15,7 @@ from .localization import pipeline_distances
 def compact_evidence(
     result: dict[str, Any], *, columnar_all_kinds: bool = False
 ) -> dict[str, Any]:
+    """Losslessly share repeated ledger values/columns to fit bounded tool context."""
     evidence = result["evidence"]
     claims = {}
     for identifier, claim in result["claims"].items():
@@ -66,6 +67,7 @@ def compact_evidence(
 
 
 def expanded_evidence(result: dict[str, Any]) -> dict[str, Any]:
+    """Restore the full ledger before checking references or comparing values."""
     evidence = {
         identifier: {**result.get("evidence_shared_fields", {}), **item}
         for identifier, item in result["evidence"].items()
@@ -168,6 +170,11 @@ def joint_profiles(
     split: int,
     end: int,
 ) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    """Compute before-relative pressure profiles and paired-complete correlations.
+
+    Buckets summarize at most about eight periods; gaps stay null. Correlation
+    requires >=10 shared timestamps and nonconstant series, not imputed samples.
+    """
     series = {
         identifier: {
             int((row.observed_at - epoch).total_seconds()): row.value
@@ -206,6 +213,8 @@ def joint_profiles(
             "pressure_min_bar": round(min(values.values()), 4) if values else None,
             "pressure_max_bar": round(max(values.values()), 4) if values else None,
         }
+    # Joint sample counts accompany every coefficient so a high correlation
+    # cannot conceal inadequate overlap. Distances follow topology, not the map.
     distances = pipeline_distances(pack)
     correlation: list[list[float | None]] = []
     counts = []

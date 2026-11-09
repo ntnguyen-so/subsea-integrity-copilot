@@ -1,3 +1,9 @@
+"""Verify authored spatial patterns actually appear in normalized measured traces.
+
+Connected near/far deficits evolve together; peer, temporal and shared-gateway
+comparisons distinguish nuisance faults without treating recipe labels as predictions.
+"""
+
 from statistics import correlation, median, pstdev
 
 import pytest

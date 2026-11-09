@@ -1,4 +1,12 @@
-"""Evaluation-only recipes/truth. Only ReplayDataset crosses the runtime boundary."""
+"""Author and verify four frozen pressure examples before running any agents.
+
+The versioned recipe supplies source truth and expected outcomes on the 24-tap Y
+network. Seeded Gaussian spatial deficits, isolated spikes, gaps and invalid values
+produce ordinary RawRecords; only ReplayDataset crosses the runtime boundary.
+The manifest keeps recipe/source labels, content hashes, measured diagnostic outputs
+and explicit checks separate. These are illustrative synthetic patterns, not observed
+field leaks or a calibrated transient hydraulic model.
+"""
 
 from __future__ import annotations
 
@@ -31,7 +39,12 @@ def generate_golden(
     case: dict[str, Any], seed: int = 20261107, duration_seconds: int = 120,
     site_id: str = "northsea",
 ) -> ReplayDataset:
-    """No truth fields, case IDs or scenario names are emitted in measurement records."""
+    """Generate a 60-second normal preroll plus a seeded post-start recording.
+
+    The source is active at t=0, making the first complete window mature. Network
+    distance controls the Gaussian deficit; gap/invalid/spike schedules are authored.
+    No truth fields, case IDs or scenario names are emitted in measurement records.
+    """
     if duration_seconds < 60:
         raise ValueError("Golden datasets require a complete 60-second window")
     pack = generate_pack(site_id)
@@ -82,10 +95,17 @@ def generate_golden(
 
 
 def dataset_hash(dataset: ReplayDataset) -> str:
+    """Identify exact runtime inputs, not merely the seed or human-readable case label."""
     return content_hash(source_payload(dataset))
 
 
 def measured_manifest(case: dict[str, Any], dataset: ReplayDataset) -> dict[str, Any]:
+    """Compare authored expectations with production diagnostics at endpoint 60/clock 65.
+
+    Fifteen invalid values and twenty omitted samples follow the every-fourth/every-
+    third schedules in that 60-second window. Source containment is checked separately
+    from the inferred station-midpoint interval, never used to generate that interval.
+    """
     snapshot = analyze_window(
         dataset.pack, normalize_records(dataset.baseline, dataset.pack),
         normalize_records(dataset.records, dataset.pack), "manifest-input",
@@ -153,6 +173,7 @@ def measured_manifest(case: dict[str, Any], dataset: ReplayDataset) -> dict[str,
 def write_manifest(
     output: Path, *, write_inputs: bool = True, site_id: str = "northsea",
 ) -> dict[str, Any]:
+    """Persist evaluation truth/verification and optional label-free runtime JSONL inputs."""
     corpus = load_cases()
     output.mkdir(parents=True, exist_ok=True)
     rows = []

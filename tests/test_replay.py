@@ -1,3 +1,5 @@
+"""Verify source-clock scheduling, arrival cutoffs and bounded late revisions without I/O."""
+
 import pytest
 
 from subsea_copilot.replay import (

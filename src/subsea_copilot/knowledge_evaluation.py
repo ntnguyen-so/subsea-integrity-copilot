@@ -1,4 +1,11 @@
-"""Paired synthetic knowledge ablation; not a field-accuracy or human-benefit study."""
+"""Paired synthetic knowledge ablation on one pinned S7 snapshot.
+
+Both arms receive identical arrived measurements at endpoint 110/clock 115. The legacy
+comparator removes only the knowledge packet; production AgentService supplies the
+enabled arm. Persisted roots, casefiles, reads and comparisons provide utility evidence,
+while input hashes check pairing. Scripted success checks contracts, not reasoning;
+one seed/window per arm cannot establish causal benefit, field accuracy or time savings.
+"""
 
 import time
 from datetime import timedelta
@@ -32,6 +39,12 @@ class KnowledgeOffService(AgentService):
 
 
 def qualify_knowledge(mode: Mode) -> dict[str, JsonValue]:
+    """Run bounded roots for both arms and record acceptance separately from utility checks.
+
+    Passing requires matching input hashes and accepted roots. Cited operating/gateway
+    records and a P5 comparison with absolute change >=0.2 bar are descriptive utility
+    checks, not additional accuracy estimates or independent expert judgements.
+    """
     settings = Settings.from_env()
     tenant = "knowledge-eval-" + uuid4().hex[:12]
     telemetry = Telemetry(runtime_dir=settings.runtime_dir)

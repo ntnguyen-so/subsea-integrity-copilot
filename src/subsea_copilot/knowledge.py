@@ -83,6 +83,8 @@ class KnowledgeCorpus(BaseModel):
 
 
 class KnowledgePacket(BaseModel):
+    """Pinned advisory context, not observations, operational records or ground truth."""
+
     model_config = ConfigDict(extra="forbid")
     version: str = Field(pattern=r"^knowledge-[a-f0-9]{64}$")
     authority: Literal["advisory_only", "synthetic_advisory_only"]
@@ -131,6 +133,11 @@ def load_knowledge(path: Path = DEFAULT_KNOWLEDGE_PATH) -> KnowledgeCorpus:
 def select_knowledge(
     corpus: KnowledgeCorpus, *, site_id: str, pack_version: str, as_of: datetime
 ) -> KnowledgePacket:
+    """Select exact site/version/time matches and exclude both sides of conflicts.
+
+    No similarity ranking can bypass applicability or promote draft guidance.
+    Corpus hashing keeps later edits from silently changing an admitted task.
+    """
     if as_of.tzinfo is None or as_of.utcoffset() is None:
         raise ValueError("Knowledge selection requires an aware investigation timestamp.")
     eligible: dict[str, KnowledgeCard] = {}

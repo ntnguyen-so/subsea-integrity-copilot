@@ -1,3 +1,5 @@
+"""Check the read-only wrapper blocks new work while preserving scoped inspection."""
+
 from pathlib import Path
 from unittest.mock import MagicMock
 

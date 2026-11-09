@@ -35,6 +35,7 @@ HistoryRangeCache = dict[tuple[str, ...], tuple[list[CanonicalObservation], str]
 
 
 def admissible(document: dict[str, Any], as_of: datetime) -> bool:
+    """Check current authority after store-level availability/effective-time filtering."""
     expiry = document.get("effective_to")
     return document["status"] == "approved" and (
         expiry is None or datetime.fromisoformat(expiry) >= as_of
@@ -50,11 +51,18 @@ def read_history(
     *,
     range_cache: HistoryRangeCache | None = None,
 ) -> dict[str, Any]:
+    """Execute bounded search/read/compare against the task's pinned incident context.
+
+    Search discovers sources, read retrieves citeable bodies, and compare computes
+    pressure statistics in Python. Retrieved prose is data, never tool authority.
+    """
     if not task.history_version:
         raise ValidationError("history_unavailable", "This archived task has no pinned corpus.")
     if arguments.get("intent") not in INTENTS:
         raise ValidationError("history_intent", "Declare a bounded investigation intent.")
     replay = store.get_replay(task.generation_id)
+    # Use the pinned source clock, not today's wall time: future-authored records
+    # must not explain an earlier incident retrospectively.
     as_of = replay.epoch + timedelta(seconds=snapshot.clock_seconds)
     receipts = [row for row in store.tool_receipts(task.id) if not row.get("error")]
     pack = generate_pack(snapshot.site_id, version=snapshot.pack_version)
@@ -68,6 +76,8 @@ def read_history(
         raise ValidationError("history_pack", "Historical comparison requires its pinned geometry.")
 
     def public(document: dict[str, Any]) -> dict[str, Any]:
+        # Scenario membership selects synthetic fixtures in storage, but revealing
+        # it to the model would leak the evaluation recipe.
         clean = {k: v for k, v in document.items() if k != "scenarios"}
         clean["admissible"] = admissible(document, as_of)
         clean["content_hash"] = content_hash(clean)
@@ -231,6 +241,8 @@ def read_history(
                 and sensors[first].station_id == sensors[second].station_id
             ],
         }
+    # This historical comparison assumes the source's one-second cadence:
+    # expected counts are interval durations, while usable counts exclude gaps.
     summaries = []
     for identifier in ids:
         selected_rows = [row for row in rows if row.sensor_id == identifier]

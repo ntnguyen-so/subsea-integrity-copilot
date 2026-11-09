@@ -1,5 +1,9 @@
 """Seed a mature fictional fixture in the console tenant without automatic inference."""
 
+# Requires configured database credentials/services. Each run creates a fresh live-
+# labeled replay plus arrival-gated observations and one mature snapshot, then prints
+# their IDs. Mode "live" here is metadata, not evidence that inference has occurred.
+# Existing rows are preserved; reruns accumulate fixtures rather than reset the tenant.
 import argparse
 import json
 from datetime import datetime, timedelta
@@ -36,6 +40,8 @@ def main() -> None:
                 epoch=source.epoch,
             )
         )
+        # Reconstruct only records received by +185s for the +180s window; observed
+        # timestamps alone would leak late/future evidence into this handoff fixture.
         observations = normalize_records(
             [
                 row

@@ -1,3 +1,6 @@
+# Optional, independently owned observability stack, not the business database.
+# Web/worker share configuration; PostgreSQL stores metadata, ClickHouse traces,
+# Redis queues work, and MinIO holds uploaded events/media. No credentials in Git.
 name: subsea-langfuse
 
 services:

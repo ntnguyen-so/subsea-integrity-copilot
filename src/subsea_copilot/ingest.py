@@ -39,6 +39,7 @@ def normalize_records(
     records: Sequence[RawRecord],
     pack: SitePack,
 ) -> list[CanonicalObservation]:
+    """Build a batch view using the same deduplication/quarantine rules as streaming."""
     buffer = CanonicalBuffer(pack)
     buffer.ingest(records)
     return buffer.observations()
@@ -93,6 +94,8 @@ def _normalize_record(
             value = None
             validity = "malformed"
             transformations.append("malformed/nonfinite numeric payload")
+    # Unit conversion preserves the raw payload and an explicit transformation
+    # trail. Domain bounds below are declared validation limits, not leak rules.
     canonical_unit = UNITS[record.channel]
     if record.channel == "pressure" and record.unit in {"kPa", "MPa", "Pa"}:
         factor = {"kPa": 0.01, "MPa": 10.0, "Pa": 0.00001}[record.unit]
@@ -157,9 +160,12 @@ class CanonicalBuffer:
         self._ordered: list[CanonicalObservation] | None = None
 
     def ingest(self, records: Sequence[RawRecord]) -> list[CanonicalObservation]:
+        """Return new rows and conflict replacements, never overwrite caller snapshots."""
         changed: dict[str, CanonicalObservation] = {}
         for record in records:
             digest = content_hash(record.model_dump(mode="json"))
+            # Identical payloads are retries; different payloads with the same
+            # source identity are contradictions, so neither version is trusted.
             if digest in self._by_digest:
                 continue
             identity = f"{record.source_id}:{record.source_record_id}"

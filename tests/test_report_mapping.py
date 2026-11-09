@@ -1,3 +1,9 @@
+"""Bind persisted extraction to the exact accepted report, catalog and snapshot.
+
+Reuse needs no detector read or inference; original usage survives repricing. Invalid
+quotes get one bounded repair, and paragraph pointers bind unchanged source text.
+"""
+
 import json
 from datetime import timedelta
 from unittest.mock import Mock

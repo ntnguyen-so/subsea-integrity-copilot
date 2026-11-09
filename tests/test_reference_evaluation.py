@@ -1,3 +1,9 @@
+"""Check truth-blind quoted extraction and deterministic source-label accounting.
+
+Wrong/failed/withheld answers stay in denominators; empty populations are not perfect.
+Scoped bounded intake and repair paths preserve exact evidence without importing truth.
+"""
+
 from __future__ import annotations
 
 import copy

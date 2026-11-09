@@ -1,4 +1,11 @@
-"""Qualification-only reads of stored Langfuse public observations, never auth artifacts."""
+"""Verify persisted synthetic telemetry rather than trusting exporter enqueue success.
+
+Local Langfuse observations supply stored generation/tool inputs, outputs and public
+model metadata. Runtime/extractor inputs are scanned for hidden-truth keys; external
+judge/extractor evidence must match submitted input and accepted-output hashes.
+Bounded capture and credential filtering keep receipts public. Presence/hash checks
+support provenance, not completeness of runtime reasoning or semantic correctness.
+"""
 
 from __future__ import annotations
 
@@ -16,6 +23,7 @@ from .contracts import content_hash
 
 
 def normalized_content(value: Any) -> Any:
+    """Decode up to two JSON string layers used by stored observation encodings."""
     for _ in range(2):
         if not isinstance(value, str):
             break
@@ -39,6 +47,7 @@ def _contains_hidden_truth(value: Any) -> bool:
 
 
 def public_observation_metadata(value: Any) -> dict[str, Any]:
+    """Allowlist public model/error attributes without exporting auth/configuration fields."""
     metadata = normalized_content(value)
     if not isinstance(metadata, dict):
         return {}
@@ -60,7 +69,12 @@ def content_evidence(
     observations: list[dict[str, Any]], kind: str,
     *, expected_input_hash: str | None = None, expected_output_hash: str | None = None,
 ) -> dict[str, Any]:
-    """Deterministic storage checks, not a judge or exporter enqueue assertion."""
+    """Require stored generation IO and, for runtime traces, tool IO as well.
+
+    Judge/mapping checks require one generation whose complete input and output hashes
+    both match. Runtime truth-key scanning is a structural safeguard, not proof that
+    arbitrary prose cannot leak a label or that every model interaction was captured.
+    """
     required = (
         {"generation"} if kind in {"external_judge", "output_mapping"}
         else {"generation", "tool"}
@@ -192,6 +206,7 @@ def verify_stored_content(
     trace_id: str, kind: str, output: Path, *,
     expected_input_hash: str | None = None, expected_output_hash: str | None = None,
 ) -> dict[str, Any]:
+    """Save selected stored observations; unavailable/invalid capture is a failed receipt."""
     try:
         observations = fetch_stored_observations(trace_id)
         evidence = content_evidence(

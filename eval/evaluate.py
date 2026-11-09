@@ -1,4 +1,10 @@
-"""Run with ``uv run python eval\\evaluate.py``; truth remains evaluation-only."""
+"""Run ``uv run python eval\\evaluate.py`` for the offline 120-window detector cohort.
+
+The default six scenarios x 20 held-out seeds use production diagnostics without model
+calls. This entry point persists/prints measured JSON in evaluation-results.json;
+recipe labels remain evaluation-only. Running it rewrites that generated evidence,
+so reading a checked-in result is distinct from performing a fresh evaluation.
+"""
 
 import json
 from pathlib import Path

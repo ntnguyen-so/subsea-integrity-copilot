@@ -1,3 +1,9 @@
+"""Exercise fail-closed claim, source-read, limitation and legacy location contracts.
+
+Synthetic ledgers and fake receipts test acceptance/rendering independently of
+live inference; a valid citation or supported fixture is not field confirmation.
+"""
+
 from datetime import timedelta
 
 import pytest

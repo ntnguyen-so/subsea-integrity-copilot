@@ -1,3 +1,8 @@
+/**
+ * Authenticated recorded evaluation integration: opening findings submits no inference,
+ * monitoring stays truth-blind and recorded evidence remains inspectable. Explicit
+ * local-credential opt-in; this verifies UI isolation, not the correctness of labels.
+ */
 import { test, expect } from "@playwright/test";
 import type { EvaluationReport } from "../../web/ts/evaluation";
 

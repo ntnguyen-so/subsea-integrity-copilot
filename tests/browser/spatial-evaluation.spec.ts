@@ -1,3 +1,9 @@
+/**
+ * Controlled recording fixtures exercise truth/report map isolation, exact admission
+ * timing, retained findings, explicit failures and archive-load races. Whole-recording
+ * scores include uncovered windows and negative controls; playback position cannot
+ * improve denominators or lend future reports to earlier misses. No hosted calls.
+ */
 import { test, expect } from "@playwright/test";
 import type { EvaluationReport } from "../../web/ts/evaluation";
 import type { SpatialFrame } from "../../web/ts/evaluation_maps";

@@ -1,3 +1,8 @@
+/**
+ * Report readability without evidence mutation: hide internal citations, preserve
+ * ordinary brackets/small measurements and retain audit/trace access. Fixture checks
+ * and opted-in recorded/live integrations distinguish display from saved source text.
+ */
 import { test, expect } from "@playwright/test";
 import { buildSync } from "esbuild";
 import { reportText } from "../../web/ts/presentation";

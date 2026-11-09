@@ -1,3 +1,8 @@
+/**
+ * Readings-first inspection workspace: one scoped window, optional peer on a shared
+ * pressure scale, then the accepted report for that same evidence. Missing/unusable
+ * samples and a model's instrument concern are deliberately different concepts.
+ */
 import { renderCharts, sharedPressureRange } from "./charts";
 import { bounds, button, friendly, node, time } from "./dom";
 import { reportText } from "./presentation";
@@ -22,6 +27,7 @@ export interface SensorInspection {
   inspectWindow(snapshotId: string): void;
 }
 
+/** Require identity, input hash and all numerical versions before attaching prose to readings. */
 export function inspectionReportMatches(detail: TaskDetail, window: WindowSnapshot): boolean {
   const { task, casefile: file } = detail;
   return Boolean(file && task.parent_id === null && task.role === "operator_response"
@@ -40,6 +46,8 @@ function pressureReadings(rows: CanonicalObservation[], window: WindowSnapshot):
     .sort((a, b) => Date.parse(a.observed_at) - Date.parse(b.observed_at));
 }
 
+// Only saved, matched report mappings provide issue labels/inspection intervals.
+// A failed lookup or incomplete mapping cannot be replaced with detector diagnoses.
 function agentCompanion(container: HTMLElement, state: SensorInspection): void {
   const panel = node("section", "", "inspection-agent");
   panel.append(node("h3", "3 · What does the accepted agent report say?"),
@@ -118,6 +126,8 @@ export function renderSensorInspection(container: HTMLElement, state: SensorInsp
   const rows = pressureReadings(state.readings, window);
   const usable = rows.filter(row => row.validity === "usable" && row.value !== null);
   const finding = window.quality.findings.find(item => item.sensor_id === sensor.id && item.channel === "pressure");
+  // Distinguish received-but-unusable rows from absent sample times. Absence uses
+  // the backend expected count minus distinct received timestamps, not raw row count.
   const receivedTimes = new Set(rows.map(row => row.observed_at));
   const metrics = node("dl", "", "inspection-metrics");
   for (const [label, value] of [

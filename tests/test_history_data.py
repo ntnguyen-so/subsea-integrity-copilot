@@ -1,3 +1,9 @@
+"""Validate fictional corpus schema, UTC clocks, asset IDs and revision boundaries.
+
+Private scenario routing must not leak into public serialization; pressure caches must
+preserve scoped calculations rather than mixing pinned evidence or incident times.
+"""
+
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path

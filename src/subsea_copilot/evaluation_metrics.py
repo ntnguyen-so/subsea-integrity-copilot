@@ -1,4 +1,11 @@
-"""Pure ground-truth scoring; no LLM, detector or runtime inference imports."""
+"""Deterministic comparisons of frozen source labels with extracted public answers.
+
+Runtime findings, truth-blind model extraction and semantic judge opinions arrive as
+separate report fields. No model or detector is invoked here. Failed terminal cases
+remain in scores; queued/running cases are excluded until terminal, and target_met
+additionally requires the full planned population. Wilson intervals describe these
+synthetic proportions, not calibrated field accuracy or independent repeated trials.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +14,10 @@ from typing import Any
 
 
 def proportion(successes: int, total: int) -> dict[str, Any]:
+    """Return successes/total and the two-sided Wilson 95% score interval (z=1.96).
+
+    An empty denominator yields null value/interval, never a perfect score.
+    """
     if not total:
         return {"value": None, "numerator": successes, "denominator": 0, "wilson95": None}
     p, z = successes / total, 1.959963984540054
@@ -22,6 +33,11 @@ def proportion(successes: int, total: int) -> dict[str, Any]:
 
 
 def detection_metrics(truth: set[Any], predicted: set[Any]) -> dict[str, Any]:
+    """Use set intersections: precision=TP/(TP+FP), recall=TP/(TP+FN).
+
+    F1=2TP/(2TP+FP+FN); zero denominators remain null. Callers choose identities
+    such as case, case/pipeline, case/sensor or case/sensor/issue type.
+    """
     tp, fp, fn = len(truth & predicted), len(predicted - truth), len(truth - predicted)
     return {
         "tp": tp,
@@ -34,6 +50,19 @@ def detection_metrics(truth: set[Any], predicted: set[Any]) -> dict[str, Any]:
 
 
 def score_report(report: dict[str, Any]) -> dict[str, Any]:
+    """Aggregate answer recognition, localization, report coverage and calibration.
+
+    Review-required cases define sensor/type and accepted-report/judge denominators.
+    Missing extraction is no positive prediction, not removal from the population.
+    Localization counts correct-branch intervals containing the source with width
+    0 < width <= 400 m, divided by every truth leak, including withheld/failed fits.
+    Midpoint error and mean width instead describe supplied correct-branch intervals.
+    Negative-case withholding requires completion; quiet controls require zero roots.
+
+    The target requires every non-detector precision/recall/F1 and rate strictly >0.95,
+    complete execution, unchanged implementation, calibrated extraction/judge and no
+    confirmed-cause claims. It tests point estimates, not Wilson lower bounds.
+    """
     rows = [row for row in report["cases"] if row["status"] in {"completed", "failed"}]
     leaks, predicted_leaks, faults, predicted_faults = set(), set(), set(), set()
     pipelines: set[tuple[str, str]] = set()

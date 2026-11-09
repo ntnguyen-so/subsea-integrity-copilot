@@ -41,6 +41,8 @@ class InvestigationStep(Contract):
 
 
 class InvestigationCase(Contract):
+    """Exportable engineer-review packet, retaining provenance and unverified-model caveats."""
+
     schema_version: Literal["investigation-v1"] = "investigation-v1"
     task_id: str
     generation_id: str
@@ -88,6 +90,11 @@ def build_casefile(
     dependencies: list[AgentTask],
     receipts: list[dict[str, JsonValue]],
 ) -> InvestigationCase:
+    """Assemble already-validated claims and executed history reads into a review packet.
+
+    This is a projection, not another model call. The newer diagnosis policy strips
+    legacy domain decisions, so it cannot inherit a deterministic inspection area.
+    """
     if task.decision_policy == "llm-diagnosis-v1":
         snapshot = measurement_snapshot(snapshot)
     if (
@@ -196,6 +203,8 @@ def build_casefile(
         comparison["call_id"] for comparison in comparisons
     }:
         raise ValidationError("casefile_sources", "Accepted citations lack executed source reads.")
+    # Fresh call counts exclude reused specialists. Elapsed time is observed
+    # task wall time, not replay/source time or the sum of model request durations.
     fresh = [task, *[dep for dep in dependencies if dep.parent_id == task.id]]
     elapsed = max(0, (task.updated_at - task.created_at).total_seconds())
     target = max(1, round((task.deadline - task.created_at).total_seconds()))

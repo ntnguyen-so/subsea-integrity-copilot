@@ -1,4 +1,10 @@
-"""Original synthetic source; configuration is not diagnostic evidence."""
+"""Seeded measurement source for repeatable demos, not a calibrated hydraulic model.
+
+``generate_pack`` supplies topology and instruments; ``generate_scenario`` emits
+60 seconds of verified-normal training data followed by an arrival-ordered replay.
+Scenario IDs and injection parameters are source/test knowledge, not evidence to
+give the investigating model. Runtime tools must expose measurements instead.
+"""
 
 from __future__ import annotations
 
@@ -31,6 +37,8 @@ SCENARIOS = {
 
 @dataclass(frozen=True)
 class ReplayDataset:
+    """Keep normal training records separate from potentially abnormal replay data."""
+
     pack: SitePack
     baseline: list[RawRecord]
     records: list[RawRecord]
@@ -39,6 +47,8 @@ class ReplayDataset:
 
 def generate_pack(site_id: str = "northsea", *, version: str | None = None) -> SitePack:
     """The brief's Y or a versioned extension; paired taps share a gateway."""
+    # Coordinates are local illustrative metres, not latitude/longitude. Each
+    # station has two taps, but sharing a gateway limits their independence.
     lines = [
         ("P1", "Trunk", (0.0, -800.0), (0.0, 0.0)),
         ("P2", "Branch A", (0.0, 0.0), (-640.0, 480.0)),
@@ -115,6 +125,11 @@ def generate_scenario(
     duration_seconds: int = 360,
     site_id: str = "northsea",
 ) -> ReplayDataset:
+    """Inject authored disturbances into noisy pressure records at one-second cadence.
+
+    The seed controls noise and footprint variability, not measured field physics.
+    Event time starts at a fixed UTC epoch; receive time independently models delay.
+    """
     if scenario not in SCENARIOS:
         raise ValueError(f"Unknown synthetic scenario: {scenario}")
     if duration_seconds <= 0:
@@ -147,6 +162,8 @@ def generate_scenario(
         )
         routes = pipeline_distances(pack.model_copy(update={"sensors": [*pack.sensors, probe]}))
         extended_distances = {sensor.id: routes[probe.id, sensor.id] for sensor in pack.sensors}
+    # Negative seconds belong only to the baseline. Sustained disturbances start
+    # at +90s; sporadic gaps/spikes may occur earlier. Timings are demo assumptions.
     for second in range(-60, duration_seconds):
         normal = second < 0
         target = baseline if normal else records
@@ -214,6 +231,8 @@ def generate_scenario(
                             continue
                     if sensor.segment_id == "P2" and second < 145:
                         numeric_value += 0.4
+                # Exercise ingestion with absent values, sentinels, mixed units,
+                # delayed arrivals and exact duplicate payloads; do not clean here.
                 value: float | str | None = numeric_value
                 if not normal and rng.random() < 0.004:
                     value = None

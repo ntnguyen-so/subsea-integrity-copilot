@@ -1,4 +1,12 @@
-"""Bounded stdin/JSONL transport; model tool requests never execute in the CLI."""
+"""Bounded stdin/JSONL transport; model tool requests never execute in the CLI.
+
+LangChain messages and schemas become one stdin prompt in an owned CLI session.
+The adapter disables CLI tools/MCPs/custom instructions, bounds process capture
+and decodes only a top-level final response into an application message. Tool
+requests must still pass the runtime gateway; result JSON must still pass domain
+validation. Sanitized metadata distinguishes requested from observed model/usage,
+and private reasoning or raw provider errors never become public diagnostics.
+"""
 
 from __future__ import annotations
 
@@ -169,6 +177,7 @@ class ProviderError(Exception):
 
 
 def _json(raw: str) -> Any:
+    """Reject duplicate keys and nonfinite constants instead of accepting ambiguous JSON."""
     def object_hook(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
         value: dict[str, Any] = {}
         for key, item in pairs:
@@ -319,6 +328,7 @@ def _run_transport(
 
 def _cleanup_capture(capture: Path, *, deadline: float) -> int:
     """Windows can release a terminated CLI's directory handles asynchronously."""
+    # Four deletion attempts with 50/100/200ms backoff retry cleanup only, never inference.
     for attempt in range(1, 5):
         try:
             shutil.rmtree(capture)
@@ -465,6 +475,7 @@ def _owned_metadata_events(
 
 
 def _final(events: list[dict[str, Any]]) -> str:
+    """Select the latest main-session assistant reply, excluding thinking and subagents."""
     for event in reversed(events):
         data = event.get("data")
         if (
@@ -480,6 +491,7 @@ def _final(events: list[dict[str, Any]]) -> str:
 
 
 def _decode(content: str, allowed: set[str]) -> AIMessage:
+    """Decode a native final object or at most 24 allowlisted application-tool requests."""
     stage = "outer_json"
     try:
         envelope = _json(content)
@@ -526,6 +538,7 @@ def _decode(content: str, allowed: set[str]) -> AIMessage:
 
 
 def _metadata(events: list[dict[str, Any]], requested: str | None) -> dict[str, Any]:
+    """Sum reported usage only; unknown counters/model identity remain explicitly unknown."""
     observed = None
     source = "requested_only" if requested else "unknown"
     records = []
@@ -625,9 +638,12 @@ def render_prompt(messages: Sequence[BaseMessage], tools: Sequence[Any]) -> str:
 
 
 class CopilotCLIChatModel(BaseChatModel):
+    """Tool-disabled inference with owned process cleanup, not a general CLI execution API."""
+
     runtime_dir: Path
     model_id: str | None = None
     timeout_seconds: float = Field(default=180, gt=0)
+    # Input/final limits are characters; pipe capture limits are bytes, not token allowances.
     max_prompt_chars: int = Field(default=144000, gt=0)
     max_final_chars: int = Field(default=36000, gt=0)
     max_capture_bytes: int = Field(default=6000000, gt=0)
@@ -664,6 +680,7 @@ class CopilotCLIChatModel(BaseChatModel):
         run_manager: Any = None,
         **kwargs: Any,
     ) -> ChatResult:
+        """Make one inference attempt under one deadline, including version lookup and cleanup."""
         started = time.monotonic()
         if stop or set(kwargs) - {"tools", "timeout"}:
             raise ProviderError("unsupported_request")
@@ -761,6 +778,7 @@ class CopilotCLIChatModel(BaseChatModel):
                 ),
                 self.model_id,
             )
+            # Owned session metadata fills missing observations; never add it to stream usage.
             if not reported["observed_model"] and persisted["observed_model"]:
                 reported["observed_model"] = persisted["observed_model"]
                 reported["model_identity_source"] = "owned_session"
@@ -817,6 +835,7 @@ class CopilotCLIChatModel(BaseChatModel):
                             cleanup.metadata, capture_cleanup_error=cleanup.code
                         )
                     else:
+                        # Even a valid reply is withheld if owned capture cleanup cannot finish.
                         cleanup.metadata.update(
                             metadata,
                             duration_ms=round((time.monotonic() - started) * 1000, 3),

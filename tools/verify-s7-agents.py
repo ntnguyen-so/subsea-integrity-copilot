@@ -1,5 +1,10 @@
 """Run fresh hosted S7 investigations at reproducible demo playback checkpoints."""
 
+# Requires authenticated hosted Copilot plus database/checkpointer services. Each
+# checkpoint has an independent qualification tenant/root; source windows are released
+# numerically before real-time agent execution. Writes manifests, receipts/audits and
+# a report under a new output directory; exist_ok=False prevents destructive reruns.
+# Dataset/implementation fingerprints bind the recorded results to their provenance.
 from __future__ import annotations
 
 import argparse
@@ -22,6 +27,8 @@ from subsea_copilot.store import Store
 from subsea_copilot.telemetry import Telemetry
 
 
+# Build one bounded checkpoint through production automatic admission, then audit
+# actual tool/model work. An accepted contract is not a field diagnosis certificate.
 def run_checkpoint(endpoint: int, output: Path) -> dict[str, object]:
     settings = Settings.from_env()
     tenant = "s7-reliability-" + uuid4().hex[:12]
@@ -152,6 +159,7 @@ def main() -> None:
         parser.error("Workers must be positive.")
     args.output.mkdir(parents=True, exist_ok=False)
     fingerprint = evaluation_implementation_hash()
+    # Parallelism is across isolated roots, not faster simulated model time.
     with ThreadPoolExecutor(max_workers=args.workers or len(args.checkpoints)) as executor:
         cases = list(executor.map(lambda end: run_checkpoint(end, args.output), args.checkpoints))
     report = {

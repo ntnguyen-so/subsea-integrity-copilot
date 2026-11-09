@@ -1,3 +1,5 @@
+"""Test advisory applicability, version pinning, conflict exclusion and packet bounds."""
+
 from datetime import UTC, datetime, timedelta
 
 import pytest

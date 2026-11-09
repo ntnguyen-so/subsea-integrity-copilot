@@ -1,3 +1,8 @@
+/**
+ * Shared map semantics under explicit fixtures: paired-station geometry, unassessed
+ * warm-up symbols, measured anomalies and quoted agent findings stay distinct.
+ * Report-only inspection bands cannot be invented from numerical station brackets.
+ */
 import { test, expect } from "@playwright/test";
 import { buildSync } from "esbuild";
 import { join } from "node:path";

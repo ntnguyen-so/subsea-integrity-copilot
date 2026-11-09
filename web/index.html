@@ -1,4 +1,7 @@
 <!doctype html>
+<!-- Operator shell: stable IDs are the contract consumed by web/ts/console.ts.
+     The deferred bundle binds controls and renders authenticated server evidence;
+     no measurements, inference or accepted findings are embedded in this HTML. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -20,6 +23,8 @@
     <h2 id="login-title">Operator access</h2><p>Use the configured local operator password. No default password is assumed.</p>
     <form id="login-form"><label>Username<input value="operator" name="username" autocomplete="username" readonly></label><label>Password<input id="password" type="password" autocomplete="current-password" required></label><button type="submit">Sign in</button></form>
   </section>
+  <!-- Replay mutations are authenticated server actions. Recorded navigation below
+       reuses saved results; simulation speed never accelerates model wall time. -->
   <section class="toolbar" aria-label="Replay and evidence controls">
     <div class="control"><label for="scenario">New scenario</label><select id="scenario"><option value="">Loading scenarios…</option></select></div>
     <div class="control"><label for="workflow">Monitoring mode</label><select id="workflow"><option value="sensor_alerts">Sensor alerts only</option><option value="agent_assisted" selected>Agent-assisted investigation</option></select></div>
@@ -44,6 +49,8 @@
       <p class="muted">Decision support only. Engineer review remains required; no safety clearance is implied.</p>
       <section id="investigation-hold" class="monitoring-warning info" role="status" hidden></section>
       <div id="evidence-selection" class="selection-strip"><div class="selection-text"><strong id="selected-basis">No window selected</strong><span id="basis-warning">Choose a sensor and a received measurement window to inspect.</span></div><div class="control"><label for="window-history">View a past window</label><select id="window-history"><option value="">Follow current window</option></select></div><button id="follow-live" type="button">Follow current</button></div>
+      <!-- Monitoring warnings remain separate from report acceptance. The map and
+           manual trends share one selected window; explicit inspection pins it. -->
       <section id="panel-live" role="tabpanel" aria-labelledby="tab-live">
         <section class="panel investigation-time-control" aria-label="Investigation timeline">
           <div class="panel-heading"><h2>Investigation timeline</h2><button id="investigation-mode" type="button" role="switch" aria-checked="false" disabled>Recorded results · switch to live</button><button id="investigate-live-here" type="button" hidden disabled>Run agents at selected time</button></div>
@@ -66,6 +73,8 @@
             <div class="comparison-controls"><button id="compare-sensors" type="button">Compare sensor histories</button><button id="clear-comparison" type="button">Clear selection</button></div>
           </section>
         </div>
+        <!-- Tasks/events supply progress; accepted reports and saved quoted mappings
+             supply agent findings. Execution usage is real time, not source time. -->
         <section class="panel agent-status-panel" aria-labelledby="automatic-title">
           <div class="panel-heading"><h2 id="automatic-title">Agents · investigation beyond the detector</h2><a id="automatic-langfuse" target="_blank" rel="noopener noreferrer" hidden>Open whole investigation in Langfuse ↗</a><span id="automatic-trace-status" class="muted" role="status"></span><span id="automatic-state" class="badge">Waiting for telemetry</span></div>
           <section id="execution-summary" class="execution-summary" aria-label="Investigation runtime and usage" hidden>
@@ -88,6 +97,8 @@
         </section>
         <section id="comparison-panel" class="panel channels-panel" hidden><div class="panel-heading"><h2>Sensor comparison</h2></div><p id="comparison-basis" class="muted">Pins the visible window. Up to four histories share UTC time and a common pressure scale.</p><div id="comparison-charts" class="comparison-grid"></div></section>
       </section>
+      <!-- Readings-first inspection retains raw records and transformation details
+           behind the source audit; matched reports are explanatory companions. -->
       <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
         <div class="panel sensor-inspection">
           <div class="panel-heading"><h2>Sensor inspection</h2><span class="eyebrow">READINGS FIRST / AGENT FINDINGS ALONGSIDE</span></div>

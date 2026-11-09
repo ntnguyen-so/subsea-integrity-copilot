@@ -1,3 +1,8 @@
+/**
+ * Owned local integration: displayed counters come from the actual projection and
+ * sensor charts survive refresh while pinned to immutable evidence. Requires loaded
+ * operator credentials and an existing backend/run, not a fabricated browser dataset.
+ */
 import { test, expect } from "@playwright/test";
 
 test("actual projection counters remain explicit without the removed context section", async ({ page }) => {

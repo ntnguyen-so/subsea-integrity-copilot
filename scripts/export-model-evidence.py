@@ -1,5 +1,9 @@
 """Export scoped synthetic cohort receipts, never model reasoning or credentials."""
 
+# Reads an existing agents cohort and its qualification tenant using configured DB
+# credentials. Adds persisted answers, task counts and whitelisted provider receipts
+# to the requested output (overwritten on rerun); no new inference or source mutation.
+# "Live evidence" requires observed model metadata, not merely a requested mode label.
 import argparse
 import json
 from pathlib import Path
@@ -38,6 +42,7 @@ def main() -> None:
                  "error_code": task.error_code}
                 for task in tasks
             ]
+    # Requested and observed model identities are not interchangeable evidence.
     metadata = [
         receipt for row in cohort["results"] for receipt in row["model_receipts"]
     ]

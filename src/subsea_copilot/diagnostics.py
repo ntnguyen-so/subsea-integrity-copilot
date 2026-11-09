@@ -1,4 +1,10 @@
-"""Pressure alerts and cross-sensor investigation; no scenario labels or LLM arithmetic."""
+"""Application-owned pressure arithmetic and the legacy deterministic investigation.
+
+``analyze_window`` builds quality counts, measured summaries and a hashed ledger.
+Agent-assisted monitoring requests ``screening_only``: no deterministic cause or
+inspection verdict is exposed there. The fuller rule path remains for sensor-only
+and evaluation callers; neither path reads scenario labels or asks an LLM to count.
+"""
 
 from __future__ import annotations
 
@@ -27,6 +33,7 @@ from .localization import locate, pipeline_distances
 
 
 def _longest_run(times: Sequence[float], sample_seconds: int) -> tuple[float, float] | None:
+    """Measure consecutive samples as a half-open interval, including the final sample."""
     longest: tuple[float, float] | None = None
     previous = -math.inf
     run_start = 0.0
@@ -57,6 +64,11 @@ def analyze_window(
     predecessor_id: str | None = None,
     screening_only: bool = False,
 ) -> WindowSnapshot:
+    """Analyze an event-time window using only records available by its source clock.
+
+    Late arrivals can create a new revision; existing snapshots retain their input
+    hashes. Baseline fitting never includes the monitored interval.
+    """
     if epoch.tzinfo is None or epoch.utcoffset() is None:
         raise ValueError("epoch must be timezone aware")
     if not math.isfinite(clock_seconds) or end_seconds <= 0 or revision < 1:
@@ -68,6 +80,8 @@ def analyze_window(
     start = epoch + timedelta(seconds=end_seconds - pack.window_seconds)
     end = epoch + timedelta(seconds=end_seconds)
     clock = epoch + timedelta(seconds=clock_seconds)
+    # [start, end) prevents a boundary sample being counted in both adjacent
+    # non-overlapping intervals; arrival filtering prevents future-data leakage.
     selected = sorted(
         {
             row.id: row
@@ -95,6 +109,8 @@ def analyze_window(
     for row in normal:
         if row.value is not None:
             baselines[row.sensor_id].append(row.value)
+    # Coverage counts distinct usable event timestamps, not raw payload count.
+    # Missing and quarantined observations must not improve coverage.
     expected_each = math.ceil(pack.window_seconds / pack.sample_seconds)
     findings: list[QualityFinding] = []
     stats: dict[str, dict[str, Any]] = {}
@@ -164,6 +180,8 @@ def analyze_window(
         }
         times = [(row.observed_at - epoch).total_seconds() for row, _ in scores]
         readings = [row.value for row, _ in scores if row.value is not None]
+        # Drift is a heuristic: a first/last-third median shift plus |Pearson r|
+        # >=0.85. It is considered only when the paired instrument disagrees.
         trend = False
         if (
             not screening_only and model and len(times) >= pack.persistence_seconds
@@ -260,6 +278,8 @@ def analyze_window(
         and stats[sensor.id]["usable"] >= expected_each * pack.min_coverage
         and not finding.peer_disagreement
     ]
+    # Require overlapping sustained drops, graph proximity, station diversity
+    # and gateway diversity. Correlation or two taps at one station is not enough.
     clusters = []
     for anchor in pressure:
         group = [anchor]
@@ -329,6 +349,8 @@ def analyze_window(
                 break
         if transient:
             break
+    # Conservative precedence: incomplete coverage, broad/common-mode changes
+    # and multiple regions defeat a local leak suspicion instead of being hidden.
     if screening_only:
         hypothesis = "insufficient_evidence"
         limitations = ["SYNTHETIC_UNCALIBRATED"]
@@ -567,6 +589,8 @@ def analyze_window(
             )
     for code in dict.fromkeys(limitations):
         ledger("limitation", {"code": code}, "limitation")
+    # Hash the actual selected records, normal reference and configuration, not
+    # just displayed counts. Revisions link identities without rewriting history.
     input_hash = content_hash(
         {
             "observations": [row.model_dump(mode="json") for row in selected],

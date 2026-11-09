@@ -1,3 +1,9 @@
+"""Check that public activity separates requested intent, observations and failure.
+
+Local payload fixtures require no model/tool execution; failed reads must never
+publish successful findings or unchecked claim references.
+"""
+
 from subsea_copilot.public_activity import public_check
 
 

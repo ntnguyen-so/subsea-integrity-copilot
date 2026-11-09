@@ -15,6 +15,7 @@ def completed_endpoints(
     pack: SitePack,
     last_endpoint: int = 0,
 ) -> list[int]:
+    """Return unprocessed hop endpoints whose windows have passed the lateness allowance."""
     watermark = clock_seconds - pack.lateness_seconds
     first = (last_endpoint // pack.hop_seconds + 1) * pack.hop_seconds
     return list(
@@ -29,6 +30,7 @@ def affected_endpoints(
     clock_seconds: float,
     pack: SitePack,
 ) -> list[int]:
+    """Find completed overlapping windows still inside the declared late-revision horizon."""
     watermark = clock_seconds - pack.lateness_seconds
     return [
         endpoint
@@ -48,6 +50,8 @@ def arrived_records(dataset: ReplayDataset, clock_seconds: float) -> list[RawRec
 
 @dataclass
 class ReplayClock:
+    """Pure simulated clock; playback speed does not alter real hosted inference duration."""
+
     duration_seconds: float = 360
     clock_seconds: float = 0
     speed: int = 1

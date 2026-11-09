@@ -1,3 +1,8 @@
+/**
+ * Agent-workspace contract: readable role selection, retained focus, honest reviewer/
+ * mapper states and accessible trace links. Mixes isolated fixtures with opted-in
+ * owned recordings; rendering a saved workspace must not start new inference.
+ */
 import { test, expect } from "@playwright/test";
 import { buildSync } from "esbuild";
 import { join } from "node:path";
