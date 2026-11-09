@@ -10,6 +10,9 @@ async function renderBrief(name) {
   );
   const escape = value => value.replace(/[&<>"]/g, character =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[character]);
+  const inline = value => escape(value)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
   const paragraphs = source.trim().split(/\r?\n\s*\r?\n/);
   const title = paragraphs.shift().replace(/^#\s+/, "");
   const parts = [];
@@ -17,6 +20,17 @@ async function renderBrief(name) {
     if (paragraph === "---") {
       parts.push('<div class="page-break"></div>');
       continue;
+    }
+    const lines = paragraph.split(/\r?\n/);
+    if (lines.length >= 3 && lines.every(line => line.startsWith("|") && line.endsWith("|"))) {
+      const rows = lines.map(line => line.slice(1, -1).split("|").map(cell => cell.trim()));
+      if (rows[1].every(cell => /^:?-+:?$/.test(cell)) &&
+          rows.every(row => row.length === rows[0].length)) {
+        parts.push(`<table><thead><tr>${rows[0].map(cell => `<th>${inline(cell)}</th>`).join("")}</tr></thead><tbody>${
+          rows.slice(2).map(row => `<tr>${row.map(cell => `<td>${inline(cell)}</td>`).join("")}</tr>`).join("")
+        }</tbody></table>`);
+        continue;
+      }
     }
     const image = paragraph.match(/^!\[([^\]]+)\]\(([^)]+)\)$/);
     if (image) {
@@ -28,9 +42,7 @@ async function renderBrief(name) {
       const bytes = await fs.readFile(imagePath);
       parts.push(`<figure><img alt="${escape(image[1])}" src="data:${mime};base64,${bytes.toString("base64")}"></figure>`);
     } else {
-      parts.push(`<p>${escape(paragraph.replace(/\r?\n/g, " "))
-        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-        .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>')}</p>`);
+      parts.push(`<p>${inline(paragraph.replace(/\r?\n/g, " "))}</p>`);
     }
   }
   const body = parts.join("");
@@ -42,6 +54,9 @@ async function renderBrief(name) {
       body{font:10pt/1.25 Arial,sans-serif;color:#17212b}
       h1{font-size:18pt;margin:0 0 8pt}p{margin:0 0 6pt;break-inside:avoid}
       figure{margin:0 0 6pt;break-inside:avoid}figure img{display:block;width:100%;height:auto}
+      table{width:100%;border-collapse:collapse;margin:0 0 6pt;table-layout:fixed}
+      th,td{border:1px solid #c9d6e2;padding:6pt;text-align:left;vertical-align:top}
+      th{background:#edf3f8;color:#173c4b}tr{break-inside:avoid}
       .page-break{break-before:page}a{color:#174c79;overflow-wrap:anywhere}
       </style><h1>${escape(title)}</h1>${body}</html>`);
     await page.locator("img").evaluateAll(images => Promise.all(images.map(image => image.decode())));

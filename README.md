@@ -51,6 +51,13 @@ need internet; fresh inference uses your own Copilot entitlement and quota.
 
 ## Interview walkthrough
 
+**Lead with the same-data comparison:** use **S1**, seed **2026**, in both
+monitoring modes and pin the **same measurement window**. Sensor alerts only
+leaves the investigation to the engineer; agent assistance adds the cited
+assessment, inspection priority and verification handoff. Compare these outputs,
+not different detector inputs or replay speeds. This does not establish measured
+labor savings or superiority over a strong fixed workflow.
+
 | Question | What to do and inspect |
 |---|---|
 | **Leak or faulty sensors?** | In **Evaluation → Detection**, select a case and play its saved timeline. Compare the ground-truth and agent maps, then open the recorded report and supporting quotations. Playback makes no model calls. |
