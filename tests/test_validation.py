@@ -102,6 +102,25 @@ def test_claim_evidence_binding_does_not_legitimize_fabricated_claims_or_sources
     assert rejected.value.code == "evidence"
 
 
+def test_binding_forwards_only_successfully_read_requested_source_kinds(snapshot):
+    draft = valid_result().model_copy(update={"claim_refs": ["coverage"], "evidence_ids": []})
+    observed = [
+        {"name": "evidence.get", "error": None,
+         "result": {"evidence": {"coverage-e": {}, "health-e": {}}}},
+        {"name": "pressure.measurements", "error": None,
+         "result": {"evidence": {"limit-e": {}}}},
+        {"name": "task.result", "error": None,
+         "result": {"evidence": {"limit-e": {}}}},
+        {"name": "evidence.get", "error": "context_budget_exceeded",
+         "result": {"evidence": {"limit-e": {}}}},
+    ]
+    kinds = frozenset({snapshot.evidence["health-e"].kind, snapshot.evidence["limit-e"].kind})
+    bound = bind_read_claim_evidence(draft, snapshot, observed, include_read_kinds=kinds)
+    assert set(bound.evidence_ids) == {"coverage-e", "health-e"}
+    assert bound.claim_refs == ["coverage"]
+    assert bound.model_dump(exclude={"evidence_ids"}) == draft.model_dump(exclude={"evidence_ids"})
+
+
 def test_context_budget_denial_must_remain_an_explicit_report_limitation(snapshot):
     observed = [
         *receipts(),

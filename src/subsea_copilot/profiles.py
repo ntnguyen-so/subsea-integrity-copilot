@@ -12,7 +12,9 @@ from .contracts import CanonicalObservation, SitePack
 from .localization import pipeline_distances
 
 
-def compact_evidence(result: dict[str, Any]) -> dict[str, Any]:
+def compact_evidence(
+    result: dict[str, Any], *, columnar_all_kinds: bool = False
+) -> dict[str, Any]:
     evidence = result["evidence"]
     claims = {}
     for identifier, claim in result["claims"].items():
@@ -32,7 +34,8 @@ def compact_evidence(result: dict[str, Any]) -> dict[str, Any]:
     compact = {**result, "claims": claims, "encoding": "referenced-evidence-v1"}
     items = list(evidence.values())
     if len(items) >= 8 and all(
-        item["kind"] == "channel_summary" and isinstance(item["value"], dict)
+        (columnar_all_kinds or item["kind"] == "channel_summary")
+        and item["kind"] == items[0]["kind"] and isinstance(item["value"], dict)
         for item in items
     ):
         columns = list(items[0]["value"])

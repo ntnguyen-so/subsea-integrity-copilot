@@ -23,7 +23,7 @@ test("1x replay delivers a clear warning independently of the pinned investigati
   }
   await page.goto("/");
   await expect(page.locator("#create-replay")).toBeEnabled();
-  await page.locator("#replay-history").selectOption(replay.id);
+  await page.goto("/?replay=" + encodeURIComponent(replay.id) + "&view=live");
   await expect(page.locator("#source-clock")).toContainText("80.0");
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "no_qualifying_event");
   const playing = page.waitForResponse(response => response.request().method() === "POST"

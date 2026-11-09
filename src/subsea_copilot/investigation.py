@@ -16,6 +16,26 @@ ACTION_LABELS = {
 }
 
 
+def history_reference_ids(receipts: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """Expose exact read identities, not inferred relevance or causal decisions."""
+    reads = [receipt for receipt in receipts if not receipt.get("error")]
+    documents = {
+        document["id"]: document for receipt in reads if receipt["name"] == "history.read"
+        for document in (receipt.get("result") or {}).get("documents", [])
+    }
+    return {
+        "document_ids": sorted(
+            key for key, document in documents.items() if document["admissible"]
+        ),
+        "rejected_document_ids": sorted(
+            key for key, document in documents.items() if not document["admissible"]
+        ),
+        "comparison_call_ids": sorted(
+            receipt["call_id"] for receipt in reads if receipt["name"] == "history.compare"
+        ),
+    }
+
+
 def validate_investigation(
     result: AgentResult,
     task: AgentTask,
@@ -53,7 +73,14 @@ def validate_investigation(
             raise ValidationError("history_citations", "Duplicate historical references.")
     if any(i not in documents or not documents[i]["admissible"] for i in review.document_ids):
         raise ValidationError(
-            "history_citations", "Cite only fully read, current approved records."
+            "history_citations", "Cite only fully read, current approved records.",
+            details={
+                "invalid_document_ids": [
+                    identifier for identifier in review.document_ids
+                    if identifier not in documents or not documents[identifier]["admissible"]
+                ],
+                "allowed_document_ids": [*history_reference_ids(receipts)["document_ids"]],
+            },
         )
     if any(i not in documents or documents[i]["admissible"] for i in review.rejected_document_ids):
         raise ValidationError(
@@ -69,6 +96,8 @@ def validate_investigation(
         raise ValidationError(
             "history_support", "A contextual explanation needs documents and measured comparison."
         )
+    if task.decision_policy == "llm-diagnosis-v1":
+        return
     if review.assessment == "operating_change_plausible":
         operations = [d for d in selected_docs if d["type"] == "operation"]
         supported = False
@@ -125,6 +154,21 @@ def validate_investigation(
             raise ValidationError(
                 "history_instrumentation_support",
                 "Maintenance context must match compared instruments.",
+                details={
+                    "comparison_call_ids": [*review.comparison_call_ids],
+                    "concerned_sensor_ids": [*sorted(concerned_sensors)],
+                    "compared_assets": sorted(compared_assets),
+                    "maintenance_documents": [
+                        {"document_id": d["id"], "asset_ids": d["asset_ids"]}
+                        for d in selected_docs
+                        if d["type"] == "maintenance"
+                    ],
+                    "required_match": (
+                        "A current cited maintenance record must match a concerned instrument "
+                        "in the cited comparisons. Specific sensor or gateway references "
+                        "must match those references, not merely their segment."
+                    ),
+                },
             )
     if review.next_action == "inspect_supported_interval" and not (
         snapshot.event.eligible_location

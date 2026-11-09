@@ -25,6 +25,8 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import Runnable
 from pydantic import Field, field_validator
 
+from subsea_copilot.prompts import load_prompt
+
 _REMOVED_ENV = {
     "COPILOT_AGENT_SESSION_ID",
     "COPILOT_CLI",
@@ -478,19 +480,27 @@ def _final(events: list[dict[str, Any]]) -> str:
 
 
 def _decode(content: str, allowed: set[str]) -> AIMessage:
+    stage = "outer_json"
     try:
         envelope = _json(content)
+        stage = "envelope_shape"
         if not isinstance(envelope, dict) or set(envelope) != {"kind", "value"}:
             raise ValueError
         if envelope["kind"] == "final":
             value = envelope["value"]
-            if not isinstance(value, str) or not isinstance(_json(value), dict):
+            stage = "final_value_type"
+            if not isinstance(value, dict):
                 raise ValueError
-            return AIMessage(content=value)
+            return AIMessage(content=json.dumps(
+                value, ensure_ascii=False, allow_nan=False, separators=(",", ":"),
+            ))
+        stage = "envelope_kind"
         if envelope["kind"] != "tool_calls":
             raise ValueError
     except (ValueError, TypeError):
-        raise ProviderError("invalid_structured_output") from None
+        error = ProviderError("invalid_structured_output")
+        error.metadata["response_validation_stage"] = stage
+        raise error from None
     calls = envelope["value"]
     if not isinstance(calls, list) or not 1 <= len(calls) <= 24:
         raise ProviderError("invalid_tool_call")
@@ -570,6 +580,50 @@ def _metadata(events: list[dict[str, Any]], requested: str | None) -> dict[str, 
     }
 
 
+PROMPT_INSTRUCTIONS = load_prompt("transport").content.removesuffix("\n")
+
+
+def render_prompt(messages: Sequence[BaseMessage], tools: Sequence[Any]) -> str:
+    """Use the same wire envelope for context accounting, fingerprints and transport."""
+    conversation = []
+    for message in messages:
+        if not isinstance(message.content, str):
+            raise ProviderError("unsupported_request")
+        item: dict[str, Any] = {"role": message.type, "content": message.content}
+        try:
+            if message.type == "system" and "\nBOUND_CONTEXT\n" in message.content:
+                text, context = message.content.split("\nBOUND_CONTEXT\n", 1)
+                item.update(content=text, bound_context=_json(context))
+            elif (
+                message.type == "tool" and message.content.startswith("{")
+                or message.type == "human"
+                and message.content.startswith(('{"application_intake":', '{"repair":'))
+            ):
+                item["content"] = _json(message.content)
+        except ValueError:
+            raise ProviderError("unsupported_request") from None
+        if isinstance(message, ToolMessage):
+            item["tool_call_id"] = message.tool_call_id
+        if isinstance(message, AIMessage) and message.tool_calls:
+            item["tool_calls"] = message.tool_calls
+        conversation.append(item)
+    try:
+        prompt = json.dumps(
+            {
+                "instructions": PROMPT_INSTRUCTIONS,
+                "conversation": conversation,
+                "application_tools": _schemas(tools),
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+        prompt.encode("utf-8")
+        return prompt
+    except (ValueError, TypeError, UnicodeError):
+        raise ProviderError("unsupported_request") from None
+
+
 class CopilotCLIChatModel(BaseChatModel):
     runtime_dir: Path
     model_id: str | None = None
@@ -618,51 +672,8 @@ class CopilotCLIChatModel(BaseChatModel):
             raise ProviderError("timeout")
         deadline = started + min(float(timeout), self.timeout_seconds)
         tools = _schemas(kwargs.get("tools", []))
-        conversation = []
-        for message in messages:
-            if not isinstance(message.content, str):
-                raise ProviderError("unsupported_request")
-            item: dict[str, Any] = {"role": message.type, "content": message.content}
-            try:
-                if message.type == "system" and "\nBOUND_CONTEXT\n" in message.content:
-                    text, context = message.content.split("\nBOUND_CONTEXT\n", 1)
-                    item.update(content=text, bound_context=_json(context))
-                elif (
-                    message.type == "tool"
-                    and message.content.startswith("{")
-                    or message.type == "human"
-                    and message.content.startswith(('{"application_intake":', '{"repair":'))
-                ):
-                    item["content"] = _json(message.content)
-            except ValueError:
-                raise ProviderError("unsupported_request") from None
-            if isinstance(message, ToolMessage):
-                item["tool_call_id"] = message.tool_call_id
-            if isinstance(message, AIMessage) and message.tool_calls:
-                item["tool_calls"] = message.tool_calls
-            conversation.append(item)
-        try:
-            prompt = json.dumps(
-                {
-                    "instructions": (
-                        "Return exactly one JSON object, without markdown. "
-                        'Use {"kind":"tool_calls","value":[{"name":registered_name,'
-                        '"arguments":{},"decision_summary":"brief public purpose"}]} '
-                        'or {"kind":"final","value":"STRING containing the inner result JSON '
-                        'object"}. '
-                        "Application tools are data only; never execute CLI tools. "
-                        "Use only supplied evidence; do not reveal private reasoning."
-                    ),
-                    "conversation": conversation,
-                    "application_tools": tools,
-                },
-                ensure_ascii=False,
-                separators=(",", ":"),
-                allow_nan=False,
-            )
-            prompt_bytes = prompt.encode("utf-8")
-        except (ValueError, TypeError, UnicodeError):
-            raise ProviderError("unsupported_request") from None
+        prompt = render_prompt(messages, tools)
+        prompt_bytes = prompt.encode("utf-8")
         if len(prompt) > self.max_prompt_chars:
             failure = ProviderError("input_too_large")
             failure.metadata = {
@@ -674,6 +685,7 @@ class CopilotCLIChatModel(BaseChatModel):
         request_id = str(uuid.uuid4())
         metadata: dict[str, Any] = {
             **_metadata([], self.model_id),
+            "transport_protocol": "native-final-object-v2",
             "request_id": request_id,
             "prompt_hash": hashlib.sha256(prompt_bytes).hexdigest(),
         }

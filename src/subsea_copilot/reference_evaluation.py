@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import logging
 import os
 import threading
 import time
@@ -25,6 +26,7 @@ from .golden_judge import calibration_packets, run_judge
 from .grounding import source_texts
 from .monitoring import Monitor
 from .operations_evaluation import audit_operations
+from .prompts import prompt_catalog_provenance, prompt_manifest_sha256
 from .qualification import TERMINALS, qualification_model_factory
 from .replay_sources import freeze_replay_source
 from .runtime.checkpointer import postgres_checkpointer
@@ -35,6 +37,7 @@ from .telemetry import Telemetry
 
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC_REPORT = ROOT / "runtime" / "evaluation-report.json"
+logger = logging.getLogger(__name__)
 
 
 def evaluation_implementation_hash() -> str:
@@ -44,7 +47,8 @@ def evaluation_implementation_hash() -> str:
         for path in sorted(package.rglob("*.py"))
     }
     source["prompts"] = {
-        path.name: path.read_text(encoding="utf-8") for path in (ROOT / "prompts").glob("*.md")
+        path.name: path.read_text(encoding="utf-8")
+        for path in (ROOT / "src" / "subsea_copilot" / "prompts").glob("*.md")
     }
     return content_hash(source)
 
@@ -142,10 +146,49 @@ def truth_labels(case: dict[str, Any], dataset: ReplayDataset) -> dict[str, Any]
 
 
 def write_report(path: Path, report: dict[str, Any]) -> None:
+    if path == PUBLIC_REPORT:
+        from .temporal_evaluation import without_agent_audit_results
+
+        report = without_agent_audit_results(report)
+        agent_report = PUBLIC_REPORT.parent / "agent-reference-report.json"
+        if agent_report.exists():
+            report["agent_reference_evaluation"] = json.loads(
+                agent_report.read_text(encoding="utf-8")
+            )
+        history = PUBLIC_REPORT.parent / "evaluation-history.json"
+        if history.exists():
+            from .evaluation_history import public_history
+
+            report["evaluation_history"] = public_history(history)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".pending")
     temporary.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
-    temporary.replace(path)
+    for attempt in range(5):
+        try:
+            temporary.replace(path)
+            if path != PUBLIC_REPORT and report.get("status") in {
+                "completed", "incomplete", "failed",
+            }:
+                from .evaluation_history import ROOT as history_root
+                from .evaluation_history import VERSIONS, rebuild_history
+
+                if (
+                    report.get("version") in VERSIONS
+                    and path.resolve().is_relative_to(history_root)
+                ):
+                    try:
+                        rebuild_history()
+                    except (OSError, ValueError, TypeError) as exc:
+                        logger.error(
+                            "Detection report saved, but history catalog update failed: %s",
+                            type(exc).__name__,
+                        )
+            return
+        except PermissionError as exc:
+            if getattr(exc, "winerror", None) not in {5, 32, 33} or attempt == 4:
+                raise
+            logger.warning("Report replacement blocked by a Windows file handle; retrying")
+            time.sleep(0.05 * 2 ** attempt)
 
 
 def read_evaluation() -> dict[str, Any]:
@@ -164,6 +207,17 @@ def read_evaluation() -> dict[str, Any]:
     report: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
     if report.get("version") not in {"reference-evaluation-v1", "spatial-evaluation-v1"}:
         raise ValueError("Unrecognized evaluation report")
+    from .temporal_evaluation import without_agent_audit_results
+
+    report = without_agent_audit_results(report)
+    agent_report = PUBLIC_REPORT.parent / "agent-reference-report.json"
+    if agent_report.exists():
+        report["agent_reference_evaluation"] = json.loads(agent_report.read_text(encoding="utf-8"))
+    history = PUBLIC_REPORT.parent / "evaluation-history.json"
+    if history.exists():
+        from .evaluation_history import public_history
+
+        report["evaluation_history"] = public_history(history)
     return report
 
 
@@ -302,12 +356,8 @@ def run_reference_evaluation(
         "mapping_calibration": [],
         "judge_calibration": [],
         "recipe_sha256": content_hash(json.loads(json.dumps(recipes))),
-        "prompt_sha256": content_hash(
-            {
-                path.name: path.read_text(encoding="utf-8")
-                for path in (ROOT / "prompts").glob("*.md")
-            }
-        ),
+        "prompt_sha256": prompt_manifest_sha256(),
+        **prompt_catalog_provenance(),
         "limitations": [
             "Synthetic pressure footprints, not field-calibrated hydraulic leak models.",
             "Held-out seeds change measurement noise, not the known pattern families.",

@@ -16,7 +16,7 @@ from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 from opentelemetry import trace
 from opentelemetry.context import Context
@@ -31,47 +31,18 @@ from opentelemetry.sdk.trace.export import (
 )
 from opentelemetry.trace import Link, SpanContext, Status, StatusCode, TraceFlags
 
+from subsea_copilot.redaction import SENSITIVE_KEYS as _SENSITIVE
+from subsea_copilot.redaction import redact_content as _redact_content
+
 _SCOPE: contextvars.ContextVar[dict[str, str]] = contextvars.ContextVar("subsea_trace_scope")
 _IDENTITIES = {"tenant_id", "site_id", "replay_generation_id", "generation_id", "episode_id"}
 _SESSION_IDENTITIES = ("tenant_id", "site_id", "replay_generation_id", "episode_id")
-_SENSITIVE = re.compile(r"secret|password|authorization|credential|token(?!s$)", re.I)
 _CONTENT = re.compile(r"prompt(?![._](?:hash|sha256|chars))|content|input$|output$|reasoning", re.I)
 _SAFE_STRING = re.compile(
-    r"(?:^|[._])(?:id|hash|sha256|name|role|mode|purpose|outcome|status|code|model|source|"
+    r"(?:^|[._])(?:id|hash|sha256|name|role|phase|mode|purpose|outcome|status|code|model|source|tool|"
     r"version|requested_model|observed_model|model_identity_source|error|type|session)$"
 )
 TRACE_CONTENT_LIMIT = 192 * 1024
-
-
-def _redact_content(value: str) -> str:
-    def clean(item: Any) -> Any:
-        if isinstance(item, dict):
-            if item.get("type") in {"thinking", "reasoning", "redacted_thinking"}:
-                return {"type": "private_reasoning_removed"}
-            return {
-                key: "[REDACTED]"
-                if _SENSITIVE.search(key) or "reasoning" in key.lower()
-                else clean(child)
-                for key, child in item.items()
-            }
-        if isinstance(item, list):
-            return [clean(child) for child in item]
-        return item
-
-    if value.lstrip().startswith(("{", "[")):
-        try:
-            parsed = json.loads(value)
-            cleaned = clean(parsed)
-            if cleaned != parsed:
-                value = json.dumps(cleaned, ensure_ascii=True)
-        except json.JSONDecodeError:
-            pass
-    value = re.sub(
-        r"(?i)(?:bearer\s+\S+|(?:password|secret|token|api[_-]?key)\s*[:=]\s*\S+)",
-        "[REDACTED]",
-        value,
-    )
-    return re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]+|sk-[A-Za-z0-9_-]+)", "[REDACTED]", value)
 
 
 def _enabled(name: str, default: bool = False) -> bool:
@@ -263,6 +234,9 @@ class _SafeSpan:
         for key, value in attributes.items():
             self.set_attribute(key, value)
 
+    def update_name(self, name: str) -> None:
+        self._span.update_name(_redact_content(name)[:200])
+
     def add_event(
         self,
         name: str,
@@ -378,9 +352,31 @@ class Telemetry:
         name: str,
         attributes: Mapping[str, object] | None = None,
         root: bool = False,
+        parent: Mapping[str, object] | None = None,
     ) -> Iterator[_SafeSpan]:
+        parent_context: Context | None = None
+        if parent is not None:
+            if root:
+                raise ValueError("A root span cannot also have a persisted parent")
+            trace_id, span_id = parent.get("trace_id"), parent.get("span_id")
+            if (
+                not isinstance(trace_id, str)
+                or not re.fullmatch(r"[0-9a-f]{32}", trace_id)
+                or not isinstance(span_id, str)
+                or not re.fullmatch(r"[0-9a-f]{16}", span_id)
+            ):
+                raise ValueError("Invalid persisted trace context")
+            context = SpanContext(
+                int(trace_id, 16),
+                int(span_id, 16),
+                is_remote=True,
+                trace_flags=TraceFlags(TraceFlags.SAMPLED),
+            )
+            if not context.is_valid:
+                raise ValueError("Invalid persisted trace context")
+            parent_context = trace.set_span_in_context(trace.NonRecordingSpan(context), Context())
         original = dict(attributes or {})
-        scope = {} if root else dict(_SCOPE.get({}))
+        scope = {} if root or parent is not None else dict(_SCOPE.get({}))
         if "generation_id" in original and "replay_generation_id" not in original:
             original["replay_generation_id"] = original["generation_id"]
         for identity in _SESSION_IDENTITIES:
@@ -388,7 +384,7 @@ class Telemetry:
                 scope[identity] = _hash(original[identity])
         if "session_id" not in scope and scope:
             scope["session_id"] = _hash(json.dumps(scope, sort_keys=True))
-        # A new attempt can share an episode session, but never a parent's live span.
+        # Rebuild episode identity without inheriting another worker's active scope.
         if root and scope:
             scope["session_id"] = _hash(
                 json.dumps(
@@ -410,7 +406,7 @@ class Telemetry:
         observation_type = kind if kind in {"generation", "tool", "guardrail", "agent"} else "span"
         safe["langfuse.observation.type"] = observation_type
         if root:
-            safe["langfuse.trace.name"] = name[:100]
+            safe.setdefault("langfuse.trace.name", name[:100])
         links = []
         if original.get("linked_trace_id") and original.get("linked_span_id"):
             try:
@@ -428,7 +424,7 @@ class Telemetry:
             with self.tracer.start_as_current_span(
                 name[:100],
                 attributes=safe,
-                context=Context() if root else None,
+                context=parent_context if parent is not None else (Context() if root else None),
                 links=links,
                 record_exception=False,
                 set_status_on_exception=False,
@@ -476,6 +472,13 @@ class Telemetry:
             "span_id": f"{context.span_id:016x}" if context.is_valid else None,
             "session_id": _SCOPE.get({}).get("session_id"),
         }
+
+    def trace_url(self, trace_id: str) -> str | None:
+        if not re.fullmatch(r"[0-9a-f]{32}", trace_id) or not _loopback(self._langfuse_endpoint):
+            return None
+        parts = urlsplit(self._langfuse_endpoint)
+        # The owned Compose stack initializes this project with a fixed ID.
+        return f"{parts.scheme}://{parts.netloc}/project/subsea-copilot/traces/{trace_id}"
 
     def health(self) -> dict[str, object]:
         destinations = {}
@@ -531,7 +534,6 @@ class Telemetry:
             f"?traceId={trace_id}&fields=core,basic&limit=100"
         )
         auth = base64.b64encode(f"{self._public_key}:{self._secret_key}".encode()).decode()
-        request = urllib.request.Request(endpoint, headers={"Authorization": f"Basic {auth}"})
 
         class NoRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self, *args: Any, **kwargs: Any) -> None:
@@ -539,29 +541,48 @@ class Telemetry:
 
         try:
             opener = urllib.request.build_opener(NoRedirect, urllib.request.ProxyHandler({}))
-            with opener.open(request, timeout=3) as response:
-                raw = response.read(100001)
+            observations = []
+            cursor = None
+            seen_cursors: set[str] = set()
+            for _ in range(5):
+                url = endpoint + (f"&cursor={quote(cursor, safe='')}" if cursor else "")
+                request = urllib.request.Request(url, headers={"Authorization": f"Basic {auth}"})
+                with opener.open(request, timeout=3) as response:
+                    raw = response.read(100001)
                 if len(raw) > 100000:
-                    raise ValueError
+                    raise ValueError("Stored trace page exceeds verification bound")
                 value = json.loads(raw)
-                observations = value.get("data", []) if isinstance(value, dict) else []
-                found = (
-                    isinstance(observations, list)
-                    and 0 < len(observations) <= 100
-                    and all(
-                        isinstance(item, dict) and item.get("traceId") == trace_id
-                        for item in observations
+                page = value.get("data") if isinstance(value, dict) else None
+                if (
+                    not isinstance(page, list)
+                    or len(page) > 100
+                    or any(
+                        not isinstance(item, dict) or item.get("traceId") != trace_id
+                        for item in page
                     )
-                )
-                if found:
-                    self._visible.add(trace_id)
-                    self._visibility_status = "verified"
-                    if required_types:
-                        if not _stored_tree_matches(observations, required_types):
-                            self._visibility_status = "incomplete_tree"
-                            return False
-                        self._verified_trees.add(trace_id)
-                    return True
+                ):
+                    raise ValueError("Stored trace page is incorrectly scoped")
+                observations.extend(page)
+                meta = value.get("meta") or {}
+                if not isinstance(meta, dict):
+                    raise ValueError("Invalid stored trace pagination")
+                cursor = meta.get("cursor")
+                if not cursor:
+                    break
+                if not isinstance(cursor, str) or len(cursor) > 4096 or cursor in seen_cursors:
+                    raise ValueError("Invalid stored trace cursor")
+                seen_cursors.add(cursor)
+            else:
+                raise ValueError("Stored trace pagination exceeds verification bound")
+            if observations:
+                self._visible.add(trace_id)
+                self._visibility_status = "verified"
+                if required_types:
+                    if not _stored_tree_matches(observations, required_types):
+                        self._visibility_status = "incomplete_tree"
+                        return False
+                    self._verified_trees.add(trace_id)
+                return True
         except (OSError, ValueError, urllib.error.URLError):
             pass
         self._visibility_status = "not_visible"

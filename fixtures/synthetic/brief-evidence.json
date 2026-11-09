@@ -5,7 +5,7 @@
   "examples": {
     "S1": {
       "snapshot": {
-        "id": "window-d0521bc5974e0e5373e944e6b8900f835e5087e8c8f6c5334c96e9bd3ccd08c5",
+        "id": "window-8daa7743560c49649193bbadb5a392808b47194f97e63047c93ff1935d93605e",
         "tenant_id": "demo",
         "site_id": "northsea",
         "generation_id": "brief-S1",
@@ -17,10 +17,10 @@
         "input_hash": "0c9de24aa55c4dd1bfd2f71b0a71b526ec4f36ced9acc21d31a8023e30962602",
         "pack_version": "pressure-pack-v3",
         "baseline_version": "pressure-median-mad-v2",
-        "parameter_version": "pressure-window-v2",
+        "parameter_version": "pressure-window-v4",
         "clock_seconds": 145.0,
         "watermark_seconds": 140.0,
-        "created_at": "2026-11-06T11:21:03.023699Z",
+        "created_at": "2026-11-09T15:18:05.448226Z",
         "canonical_count": 1440,
         "quality": {
           "status": "DEGRADED",
@@ -1888,7 +1888,8 @@
                 700.0
               ],
               "unit": "m",
-              "method": "pressure-alert-bracket-v2"
+              "method": "pressure-alert-bracket-v2",
+              "reason": "Priority inspection interval between station midpoints; not an exact leak location or a confidence interval"
             }
           },
           "ev-052": {
@@ -2558,7 +2559,8 @@
                 700.0
               ],
               "unit": "m",
-              "method": "pressure-alert-bracket-v2"
+              "method": "pressure-alert-bracket-v2",
+              "reason": "Priority inspection interval between station midpoints; not an exact leak location or a confidence interval"
             },
             "evidence_ids": [
               "ev-051"
@@ -3359,7 +3361,7 @@
     },
     "S2": {
       "snapshot": {
-        "id": "window-1bf3af519b26a393366ad604f1c7ddaf2270545ad4bad81db3ffa20cb27f50e2",
+        "id": "window-26bb6a352d19925db9374fb73707474234d1fe23c7b5b13bd9ce9ed77696e482",
         "tenant_id": "demo",
         "site_id": "northsea",
         "generation_id": "brief-S2",
@@ -3371,10 +3373,10 @@
         "input_hash": "1646a0af466704bbfb986252cc2336371e4def3bdb842432b65219f96040fe50",
         "pack_version": "pressure-pack-v3",
         "baseline_version": "pressure-median-mad-v2",
-        "parameter_version": "pressure-window-v2",
+        "parameter_version": "pressure-window-v4",
         "clock_seconds": 145.0,
         "watermark_seconds": 140.0,
-        "created_at": "2026-11-06T11:21:03.376927Z",
+        "created_at": "2026-11-09T15:18:07.315222Z",
         "canonical_count": 1380,
         "quality": {
           "status": "DEGRADED",

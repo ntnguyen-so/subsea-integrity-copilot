@@ -19,6 +19,15 @@ test("evaluation opens authenticated recordings without submitting inference or 
   await expect(page.getByRole("tab", { name: "Evaluation" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#panel-evaluation")).toBeVisible();
   await expect(page.locator("#panel-live")).toBeHidden();
+  await expect(page.locator("#question-tools")).toHaveCount(0);
+  await expect(page.locator("#system-details")).toBeHidden();
+  const provenance = page.getByRole("region", { name: "Evaluation provenance and limits" });
+  await expect(provenance).toBeVisible();
+  await expect(provenance).toContainText("Orange pressure alerts and preliminary screening warnings remain deterministic");
+  if (report.remapped_at) {
+    await expect(provenance).toContainText("not fresh agent runs");
+    await expect(provenance).toContainText("not a full-cohort evaluation of the revised prompts");
+  }
   if (report.version === "spatial-evaluation-v1") {
     await expect(page.locator("#evaluation-truth-map [data-sensor]")).toHaveCount(112);
     await expect(page.locator("#evaluation-agent-map [data-sensor]")).toHaveCount(112);
@@ -28,10 +37,13 @@ test("evaluation opens authenticated recordings without submitting inference or 
   await expect(page.locator("#evaluation-results")).toContainText("deterministic comparison");
   if (report.metrics) {
     await expect(page.locator("#evaluation-results")).toContainText(
-      report.metrics.target_met ? "Observed reference metrics exceed 95%." : "The >95% target is not yet met.",
+      report.metrics.target_met ? report.version === "spatial-evaluation-v1" ?
+        "Observed review-checkpoint metrics exceed 95%; this is not continuous coverage." :
+        "Observed reference metrics exceed 95%." : "The >95% target is not yet met.",
     );
     const issues = report.metrics.groups.agent_issue_types;
-    await expect(page.getByRole("row").filter({ hasText: "Agent issue-type mapping · sensor/window/type" }))
+    await expect(page.getByRole("row").filter({ hasText: report.version === "spatial-evaluation-v1" ?
+      "Agent issue-type mapping · network/review/sensor/type" : "Agent issue-type mapping · sensor/window/type" }))
       .toContainText(`${issues.tp} / ${issues.fp} / ${issues.fn}`);
   }
   const first = report.cases.find(item => item.answer) || report.cases[0];
@@ -49,6 +61,18 @@ test("evaluation opens authenticated recordings without submitting inference or 
     const source = item.truth.leak_source;
     if (source) await expect(page.locator(`.evaluation-case[data-case="${item.case_id}"]`))
       .toContainText(`Leak source on ${source.segment_id} at ${source.chainage_m} m`);
+  }
+  await page.getByLabel("Evaluation suite").selectOption("agent");
+  const accepted = [report, ...(report.additional_evaluations || [])]
+    .flatMap(cohort => cohort.cases.filter(item => item.accepted_report));
+  const reportOnly = accepted.filter(item => item.extraction?.status === "completed"
+    && item.extraction.source_text_scope === "incident-answer-only-v1").length;
+  await expect(provenance).toContainText(`${reportOnly}/${accepted.length} accepted reports`);
+  await page.getByLabel("Evaluation suite").selectOption("current");
+  for (const name of ["Live", "Inspect"]) {
+    await page.getByRole("tab", { name, exact: true }).click();
+    await expect(page.locator("#question-tools")).toHaveCount(0);
+    await expect(page.locator("#system-details")).toBeVisible();
   }
   expect(postRequests).toEqual([]);
 });

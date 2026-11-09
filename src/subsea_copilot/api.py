@@ -7,9 +7,11 @@ import json
 import logging
 import threading
 import time
+from bisect import bisect_right
 from collections import defaultdict, deque
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator, Callable, Iterator
+from contextlib import AbstractContextManager, asynccontextmanager, contextmanager
+from datetime import timedelta
 from pathlib import Path
 from typing import Literal
 
@@ -21,10 +23,24 @@ from starlette.concurrency import run_in_threadpool
 from .budgets import ROOT_WATCHDOG_SECONDS
 from .casefile import InvestigationCase, build_casefile
 from .config import Settings
-from .contracts import AgentRole, Contract, Mode, WindowSnapshot, Workflow, utc_now
-from .ingest import normalize_records
+from .contracts import (
+    AgentRole,
+    AgentTask,
+    CanonicalObservation,
+    Contract,
+    Mode,
+    ReplaySession,
+    SitePack,
+    WindowSnapshot,
+    Workflow,
+    utc_now,
+)
+from .diagnostics import analyze_window
+from .ingest import normalize_records, parse_timestamp
 from .llm.copilot_cli import CopilotCLIChatModel
 from .monitoring import Monitor
+from .playback import Recording
+from .report_mapping import load_report_mapping, prepare_report_mapping
 from .runtime.checkpointer import postgres_checkpointer
 from .runtime.gateway import ToolGateway
 from .runtime.scripted import ScriptedChatModel
@@ -36,8 +52,8 @@ from .security import (
     Principal,
     SessionManager,
 )
-from .store import Store, StoreError
-from .synthetic import CUSTOMER_QUESTIONS, SCENARIOS
+from .store import TERMINAL, Store, StoreError
+from .synthetic import CUSTOMER_QUESTIONS, SCENARIOS, generate_pack
 from .telemetry import Telemetry
 from .validation import ValidationError as AgentValidationError
 from .validation import validate_result
@@ -64,7 +80,8 @@ class ReplayCreate(Contract):
 
 class ReplayControl(Contract):
     action: Literal["play", "pause", "step", "speed"]
-    speed: Literal[1, 2, 5, 10] | None = None
+    speed: Literal[1, 2, 5, 10, 20, 30] | None = None
+    step_seconds: Literal[1, 2, 5, 10, 20, 30] | None = None
     idempotency_key: str = Field(min_length=1, max_length=200)
 
 
@@ -75,31 +92,119 @@ class QuestionForm(Contract):
     idempotency_key: str = Field(min_length=1, max_length=200)
 
 
+class PlaybackInvestigation(Contract):
+    source_seconds: int = Field(ge=60, le=360)
+    idempotency_key: str = Field(min_length=1, max_length=200)
+
+
 class AgentWorker:
-    def __init__(self, service: AgentService) -> None:
+    def __init__(
+        self, service: AgentService, map_report: Callable[[AgentTask], None] | None = None,
+        *, service_factory: Callable[[str], AbstractContextManager[AgentService]],
+    ) -> None:
         self.service = service
+        self.service_factory = service_factory
+        self.map_report = map_report
         self._stop = threading.Event()
+        self._lock = threading.Lock()
         self.thread: threading.Thread | None = None
+        self._workers: dict[str, threading.Thread] = {}
+        self._failed_roots: set[str] = set()
+        self._mapping_roots: set[str] = set()
         self.error: str | None = None
+        self.mapping_error: str | None = None
+
+    @property
+    def active_workers(self) -> int:
+        with self._lock:
+            return sum(thread.is_alive() for thread in self._workers.values()) - len(
+                self._mapping_roots
+            )
 
     def start(self) -> None:
-        self.thread = threading.Thread(target=self.run, name="subsea-agent-worker", daemon=True)
+        self.thread = threading.Thread(
+            target=self.run, name="subsea-investigation-dispatcher", daemon=True,
+        )
         self.thread.start()
+
+    def _map_one(self, task: AgentTask) -> None:
+        if self.map_report is None:
+            return
+        with self._lock:
+            self._mapping_roots.add(task.root_id)
+        try:
+            self.map_report(task)
+        except Exception:
+            logger.exception("Background report mapping failed; investigations remain available")
+            self.mapping_error = "mapping_worker_failed"
+            self.service.store.publish_event(
+                task.generation_id, "mapping.completed",
+                {"status": "failed", "error_code": "mapping_worker_failed"},
+                task_id=task.id, snapshot_id=task.snapshot_id,
+            )
+        else:
+            self.mapping_error = None
+        finally:
+            with self._lock:
+                self._mapping_roots.discard(task.root_id)
+
+    def _investigate(self, root_id: str) -> None:
+        try:
+            with self.service_factory(root_id) as service:
+                while not self._stop.is_set():
+                    if self.service.store.get_task(root_id).state in TERMINAL:
+                        return
+                    progressed = service.run_once()
+                    root = self.service.store.get_task(root_id)
+                    if root.state in TERMINAL:
+                        self._map_one(root)
+                        return
+                    if not progressed:
+                        self._stop.wait(0.25)
+        except Exception:
+            logger.exception("Investigation worker failed root_id=%s", root_id)
+            self.error = "agent_worker_failed"
+            with self._lock:
+                self._failed_roots.add(root_id)
+            root = self.service.store.get_task(root_id)
+            self.service.store.publish_event(
+                root.generation_id, "agent.worker_failed",
+                {"error_code": "agent_worker_failed"},
+                task_id=root.id, snapshot_id=root.snapshot_id,
+            )
 
     def run(self) -> None:
         try:
             while not self._stop.is_set():
-                if not self.service.run_once():
-                    self._stop.wait(0.25)
+                roots = self.service.store.pending_root_ids()
+                with self._lock:
+                    self._workers = {
+                        root_id: thread for root_id, thread in self._workers.items()
+                        if thread.is_alive()
+                    }
+                    for root_id in roots:
+                        if root_id in self._workers or root_id in self._failed_roots:
+                            continue
+                        thread = threading.Thread(
+                            target=self._investigate, args=(root_id,),
+                            name=f"subsea-investigation-{root_id}", daemon=True,
+                        )
+                        self._workers[root_id] = thread
+                        thread.start()
+                self._stop.wait(0.25)
         except Exception:
-            logger.exception("Agent worker stopped after an unhandled failure")
+            logger.exception("Investigation dispatcher stopped after an unhandled failure")
             self.error = "agent_worker_failed"
 
     def close(self) -> None:
         self._stop.set()
         if self.thread:
-            self.thread.join(timeout=ROOT_WATCHDOG_SECONDS)
-            if self.thread.is_alive():
+            self.thread.join(timeout=10)
+        with self._lock:
+            threads = list(self._workers.values())
+        for thread in threads:
+            thread.join(timeout=ROOT_WATCHDOG_SECONDS)
+            if thread.is_alive():
                 logger.error("Agent worker exceeded its root deadline during shutdown")
 
 
@@ -130,7 +235,33 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
 
             service = AgentService(store, model_factory, checkpointer, telemetry)
             monitor = Monitor(store, service, telemetry)
-            worker = AgentWorker(service)
+
+            def map_report(task: AgentTask) -> None:
+                if (
+                    task.mode != "live" or task.state != "SUCCEEDED"
+                    or task.role != "operator_response"
+                    or task.parent_id is not None or task.result is None
+                    or task.result.interpretation is None
+                ):
+                    return
+                extraction = prepare_report_mapping(
+                    settings.runtime_dir, task, monitor.pack_for(task.generation_id),
+                    model_factory("operator_response", "live"), telemetry,
+                )
+                store.publish_event(
+                    task.generation_id, "mapping.completed",
+                    {"status": extraction["status"]},
+                    task_id=task.id, snapshot_id=task.snapshot_id,
+                )
+
+            @contextmanager
+            def investigation_service(root_id: str) -> Iterator[AgentService]:
+                with postgres_checkpointer(settings.checkpoint_dsn) as own_checkpointer:
+                    yield AgentService(
+                        store, model_factory, own_checkpointer, telemetry, root_id=root_id,
+                    )
+
+            worker = AgentWorker(service, map_report, service_factory=investigation_service)
             resources.update({"service": service, "monitor": monitor, "worker": worker})
             if start_workers:
                 monitor.start()
@@ -194,6 +325,15 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             raise HTTPException(status_code=503, detail="Agent service is not initialized")
         return instance
 
+    def report_labels(task: AgentTask, pack: SitePack) -> object:
+        try:
+            return load_report_mapping(settings.runtime_dir, task, pack)
+        except (OSError, ValueError):
+            logger.exception("Map extraction evidence unavailable task_id=%s", task.id)
+            return {
+                "status": "failed", "mapping": None, "error_code": "mapping_evidence_invalid",
+            }
+
     def health() -> dict[str, object]:
         worker = resources.get("worker")
         monitor = resources.get("monitor")
@@ -213,6 +353,13 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
                 else "starting"
             ),
             "agent": agent_status,
+            "investigation_workers": worker.active_workers
+            if isinstance(worker, AgentWorker) else 0,
+            "investigation_worker_limit": None,
+            "map_worker": (
+                worker.mapping_error or ("ready" if start_workers else "disabled")
+                if isinstance(worker, AgentWorker) else "starting"
+            ),
             "observability": telemetry.health(),
             "provider": provider,
             "source": "synthetic",
@@ -304,7 +451,8 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         principal(request, write=True)
         try:
             return monitor_service().control(
-                generation_id, form.action, form.speed, form.idempotency_key
+                generation_id, form.action, form.speed, form.idempotency_key,
+                step_seconds=form.step_seconds,
             )
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -318,7 +466,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             {
                 "warning": monitoring_warning(
                     WindowSnapshot.model_validate(latest) if latest is not None else None,
-                    sensor_alerts_only=True,
+                    workflow=ReplaySession.model_validate(view["replay"]).workflow,
                 ),
                 "pack": monitor_service().pack_for(generation_id),
                 "health": health(),
@@ -333,6 +481,211 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         store.get_replay(generation_id)
         return {"windows": store.list_windows(generation_id, limit=120)}
 
+    playback_hashes: dict[str, str] = {}
+    timeline_frames: dict[str, WindowSnapshot] = {}
+    timeline_lock = threading.RLock()
+
+    def timeline_observations(
+        replay: ReplaySession, end_seconds: int, clock_seconds: float,
+        sensor_id: str | None = None,
+    ) -> list[CanonicalObservation]:
+        source = monitor_service()._source(replay)
+        end = replay.epoch + timedelta(seconds=end_seconds)
+        start = end - timedelta(seconds=source.dataset.pack.window_seconds)
+        released = bisect_right(source.received_seconds, clock_seconds)
+        return normalize_records([
+            row for row in source.dataset.records[:released]
+            if (sensor_id is None or row.sensor_id == sensor_id)
+            and start <= parse_timestamp(row.observed_at) < end
+        ], source.dataset.pack)
+
+    def display_window(snapshot_id: str) -> WindowSnapshot:
+        with timeline_lock:
+            cached = timeline_frames.get(snapshot_id)
+        if cached is not None:
+            store.get_replay(cached.generation_id)
+            return cached
+        return store.get_window(snapshot_id)
+
+    @app.get("/api/replays/{generation_id}/timeline-window")
+    def timeline_window(
+        generation_id: str, source_seconds: int, request: Request,
+    ) -> dict[str, object]:
+        principal(request)
+        replay = store.get_replay(generation_id)
+        source = monitor_service()._source(replay)
+        pack = source.dataset.pack
+        if not 0 <= source_seconds <= replay.duration_seconds or source_seconds % pack.hop_seconds:
+            raise HTTPException(status_code=422, detail="Choose a source-window endpoint")
+        if source_seconds == 0:
+            return {
+                "snapshot": None,
+                "warning": monitoring_warning(None, workflow=replay.workflow),
+            }
+        with timeline_lock:
+            cached = next((
+                frame for frame in timeline_frames.values()
+                if frame.generation_id == generation_id and frame.end_seconds == source_seconds
+            ), None)
+        if cached is None:
+            clock = source_seconds + pack.lateness_seconds
+            cached = analyze_window(
+                pack, source.baseline,
+                timeline_observations(replay, source_seconds, clock),
+                generation_id=generation_id, end_seconds=source_seconds,
+                clock_seconds=clock, epoch=replay.epoch, tenant_id=replay.tenant_id,
+                screening_only=True,
+            )
+            with timeline_lock:
+                timeline_frames[cached.id] = cached
+                if len(timeline_frames) > 128:
+                    del timeline_frames[next(iter(timeline_frames))]
+        return {
+            "snapshot": cached,
+            "warning": monitoring_warning(cached, workflow=replay.workflow),
+        }
+
+    def recording_dataset_hash(generation_id: str) -> str:
+        from .playback import dataset_hash
+
+        replay = store.get_replay(generation_id)
+        if generation_id not in playback_hashes:
+            playback_hashes[generation_id] = dataset_hash(monitor_service()._source(replay).dataset)
+        return playback_hashes[generation_id]
+
+    def compatible_recordings(generation_id: str) -> list[Recording]:
+        from .playback import load_library
+
+        replay = store.get_replay(generation_id)
+        digest = recording_dataset_hash(generation_id)
+        pack = monitor_service().pack_for(generation_id)
+        try:
+            library = load_library(settings.runtime_dir / "agent-playback.json")
+        except (OSError, ValueError) as exc:
+            logger.error("Recording library unavailable: %s", type(exc).__name__)
+            raise HTTPException(
+                status_code=503, detail="Recording library unavailable; no results substituted.",
+            ) from exc
+        return [
+            row for row in library.recordings
+            if row.scenario == replay.scenario and row.seed == replay.seed
+            and row.dataset_sha256 == digest and row.pack.version == pack.version
+        ]
+
+    @app.get("/api/replays/{generation_id}/recordings")
+    def recordings(generation_id: str, request: Request) -> dict[str, object]:
+        principal(request)
+        replay = store.get_replay(generation_id)
+        rows = [
+            {"origin": "library", **row.summary()}
+            for row in compatible_recordings(generation_id)
+        ]
+        pack = monitor_service().pack_for(generation_id)
+        rows.extend(store.recorded_investigations(replay, pack.version))
+        unique = {str(row["task_id"]): row for row in rows}
+        return {"base_playback_speed": 5, "recordings": sorted(unique.values(), key=lambda row: (
+            int(str(row["source_seconds"])), str(row["created_at"]),
+        ))}
+
+    @app.get("/api/replays/{generation_id}/recordings/{task_id}")
+    def recording_detail(generation_id: str, task_id: str, request: Request) -> dict[str, object]:
+        principal(request)
+        for row in compatible_recordings(generation_id):
+            if row.task.id == task_id:
+                payload = row.public_detail()
+                detail = payload["detail"]
+                assert isinstance(detail, dict)
+                detail["output_mapping"] = report_labels(row.task, row.pack)
+                return payload
+        replay = store.get_replay(generation_id)
+        task = store.get_task(task_id)
+        original = store.get_replay(task.generation_id)
+        snapshot = store.get_window(task.snapshot_id)
+        pack = monitor_service().pack_for(generation_id)
+        if (
+            task.parent_id is not None
+            or task.state not in {"SUCCEEDED", "ABSTAINED", "FAILED"}
+            or original.scenario != replay.scenario or original.seed != replay.seed
+            or original.source_version != replay.source_version
+            or snapshot.pack_version != pack.version
+            or recording_dataset_hash(original.id) != recording_dataset_hash(generation_id)
+        ):
+            raise HTTPException(status_code=404, detail="No compatible recorded investigation")
+        return {
+            "pack": pack, "snapshot": snapshot,
+            "detail": task_detail(task_id, accepted_casefile_only=True),
+        }
+
+    @app.post("/api/replays/{generation_id}/investigate-here")
+    def investigate_here(
+        generation_id: str, form: PlaybackInvestigation, request: Request,
+    ) -> dict[str, object]:
+        principal(request, write=True)
+        from .contracts import content_hash
+        from .monitoring import AUTO_QUESTION
+
+        original = store.get_replay(generation_id)
+        monitor = monitor_service()
+        pack = monitor.pack_for(generation_id)
+        if form.source_seconds % pack.hop_seconds:
+            raise HTTPException(status_code=422, detail="Choose a monitoring-window endpoint")
+        creation_key = "playback:" + form.idempotency_key
+        prepared_id = "replay-" + content_hash({
+            "tenant": store.tenant_id, "key": creation_key,
+        })[:24]
+        try:
+            replay = store.get_replay(prepared_id)
+        except StoreError as exc:
+            if exc.code != "not_found":
+                raise
+            replay = monitor.create(
+                original.scenario, original.seed, "live", creation_key,
+                workflow="agent_assisted", pause_on_anomaly=True,
+            )
+        if (
+            replay.scenario != original.scenario or replay.seed != original.seed
+            or replay.mode != "live" or replay.workflow != "agent_assisted"
+            or not replay.pause_on_anomaly
+        ):
+            raise HTTPException(status_code=409, detail="Retry key belongs to another source")
+        existing = [task for task in store.list_tasks(replay.id) if task.parent_id is None]
+        if existing:
+            snapshot = store.get_window(existing[0].snapshot_id)
+            if snapshot.end_seconds != form.source_seconds:
+                raise HTTPException(status_code=409, detail="Retry key belongs to another endpoint")
+            return {"replay": replay, "task": existing[0]}
+        source = monitor._source(replay)
+        if replay.investigation_window_id:
+            held = store.get_window(replay.investigation_window_id)
+            if held.end_seconds != form.source_seconds:
+                raise HTTPException(status_code=409, detail="Retry key belongs to another endpoint")
+        if replay.last_endpoint > form.source_seconds:
+            raise HTTPException(status_code=409, detail="Retry key belongs to another endpoint")
+        prepared_snapshot = (
+            store.get_window(replay.latest_window_id) if replay.latest_window_id else None
+        )
+        for endpoint in range(
+            replay.last_endpoint + pack.hop_seconds,
+            form.source_seconds + 1, pack.hop_seconds,
+        ):
+            replay = store.save_replay(replay.model_copy(update={
+                "clock_seconds": endpoint + pack.lateness_seconds,
+            }), expected_version=replay.version)
+            monitor._release(replay, source)
+            prepared_snapshot = store.save_window(monitor._snapshot(replay, source, endpoint))
+            replay = store.save_replay(replay.model_copy(update={
+                "latest_window_id": prepared_snapshot.id, "last_endpoint": endpoint,
+            }), expected_version=replay.version)
+        if prepared_snapshot is None:
+            raise HTTPException(status_code=409, detail="Live source window was not prepared")
+        replay = store.save_replay(replay.model_copy(update={
+            "investigation_window_id": prepared_snapshot.id,
+        }), expected_version=replay.version)
+        task = agent_service().submit_question(
+            replay, prepared_snapshot, AUTO_QUESTION, "playback-live:" + form.idempotency_key,
+        )
+        return {"replay": replay, "task": task}
+
     @app.get("/api/evaluation")
     def evaluation_report(request: Request) -> object:
         principal(request)
@@ -340,12 +693,24 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         from .reference_evaluation import read_evaluation
 
         try:
-            report = read_evaluation()
-            for case in report.get("cases", []):
-                case["model_receipts"] = [
-                    {key: receipt.get(key) for key in ("task_id", *MODEL_METADATA_KEYS)}
-                    for receipt in case.get("model_receipts", [])
-                ]
+            archive_id = request.query_params.get("archive_id")
+            if archive_id:
+                from .evaluation_history import load_archive
+
+                try:
+                    report = load_archive(archive_id)
+                except LookupError as exc:
+                    raise HTTPException(
+                        status_code=404, detail="Archived evaluation not found",
+                    ) from exc
+            else:
+                report = read_evaluation()
+            for recording in [report, *report.get("additional_evaluations", [])]:
+                for case in recording.get("cases", []):
+                    case["model_receipts"] = [
+                        {key: receipt.get(key) for key in ("task_id", *MODEL_METADATA_KEYS)}
+                        for receipt in case.get("model_receipts", [])
+                    ]
             return report
         except (OSError, ValueError, TypeError) as exc:
             logger.error("Reference evaluation artifact is unreadable: %s", type(exc).__name__)
@@ -356,17 +721,23 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     @app.get("/api/windows/{snapshot_id}")
     def window(snapshot_id: str, request: Request) -> object:
         principal(request)
-        return store.get_window(snapshot_id)
+        return display_window(snapshot_id)
 
     @app.get("/api/windows/{snapshot_id}/sensors/{sensor_id}")
     def sensor_details(snapshot_id: str, sensor_id: str, request: Request) -> dict[str, object]:
         principal(request)
-        snapshot = store.get_window(snapshot_id)
+        snapshot = display_window(snapshot_id)
         pack = monitor_service().pack_for(snapshot.generation_id)
         sensor = next((row for row in pack.sensors if row.id == sensor_id), None)
         if sensor is None:
             raise HTTPException(status_code=404, detail="Sensor not found in this site")
         replay = store.get_replay(snapshot.generation_id)
+        with timeline_lock:
+            reconstructed = snapshot_id in timeline_frames
+        if reconstructed:
+            return {"sensor": sensor, "observations": timeline_observations(
+                replay, snapshot.end_seconds, snapshot.clock_seconds, sensor_id,
+            )}
         originals = [
             row.original
             for row in store.observations(snapshot.generation_id)
@@ -404,7 +775,11 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             raise HTTPException(status_code=404, detail="Episode not found in this replay")
         return submit(snapshot.generation_id, form, episode_id)
 
-    def task_detail(task_id: str) -> dict[str, object]:
+    def task_detail(
+        task_id: str, *, accepted_casefile_only: bool = False,
+    ) -> dict[str, object]:
+        from .execution_usage import summarize_usage
+
         task = store.get_task(task_id)
         children = [row for row in store.list_tasks(task.generation_id) if row.parent_id == task.id]
         sources = [row for row in children if row.role == "event_diagnosis"]
@@ -421,10 +796,13 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             if str(receipt["name"]).startswith("history.")
         ]
         casefile: InvestigationCase | None = None
+        output_mapping: object = None
         if (
             task.role == "operator_response"
             and task.response_protocol in {"engineer-v1", "engineer-v2"}
-            and task.state in {"SUCCEEDED", "ABSTAINED"}
+            and task.state in (
+                {"SUCCEEDED"} if accepted_casefile_only else {"SUCCEEDED", "ABSTAINED"}
+            )
         ):
             if task.result is None:
                 raise AgentValidationError("casefile_unavailable", "Accepted task has no result.")
@@ -449,13 +827,24 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
                 dependencies,
             )
             casefile = build_casefile(task, snapshot, dependencies, history_receipts)
+            if task.state == "SUCCEEDED" and casefile.interpretation is not None:
+                output_mapping = report_labels(
+                    task, generate_pack(snapshot.site_id, version=snapshot.pack_version),
+                )
         return {
             "task": task,
             "children": children,
             "receipts": store.tool_receipts(task_id),
+            "harness_events": store.task_harness_events(task_id),
             "investigation_receipts": history_receipts,
             "casefile": casefile,
+            "output_mapping": output_mapping,
             "activity": store.public_agent_activity(task.id),
+            "execution_usage": summarize_usage(
+                [task, *children],
+                [receipt for member in [task, *children]
+                 for receipt in store.list_model_calls(member.id)],
+            ),
         }
 
     @app.get("/api/tasks/{task_id}")
@@ -494,8 +883,8 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
             "snapshot_id": task.snapshot_id,
             "mode": task.mode,
             "observability": telemetry.health(),
-            "langfuse_url": "http://127.0.0.1:3001",
-            "content_capture": False,
+            "langfuse_url": telemetry.trace_url(trace_id) if isinstance(trace_id, str) else None,
+            "content_capture": telemetry.content_enabled,
             "stored_trace_visible": visible,
             **metadata,
         }
@@ -540,17 +929,21 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
 
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:
-        return FileResponse(web / "index.html")
+        return FileResponse(web / "index.html", headers={"Cache-Control": "no-store"})
 
     @app.get("/assets/styles.css", include_in_schema=False)
     def stylesheet() -> FileResponse:
-        return FileResponse(web / "styles.css", media_type="text/css")
+        return FileResponse(
+            web / "styles.css", media_type="text/css", headers={"Cache-Control": "no-store"},
+        )
 
     @app.get("/assets/console.js", include_in_schema=False)
     def javascript() -> FileResponse:
         asset = web / "dist" / "console.js"
         if not asset.exists():
             raise HTTPException(status_code=503, detail="Console not built; run npm run build")
-        return FileResponse(asset, media_type="application/javascript")
+        return FileResponse(
+            asset, media_type="application/javascript", headers={"Cache-Control": "no-store"},
+        )
 
     return app

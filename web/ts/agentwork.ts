@@ -1,4 +1,5 @@
-import { button, friendly, node, time } from "./dom";
+import { button, friendly, node } from "./dom";
+import { reportText } from "./presentation";
 import type { AgentTask, ConsoleEvent, Json, TaskDetail, WindowSnapshot } from "./types";
 
 const agents = [
@@ -8,10 +9,68 @@ const agents = [
 ] as const;
 export function agentName(role: string): string {
   return role === "grounding_reviewer" ? "Grounding Reviewer"
+    : role === "report_mapper" ? "Report-to-map Mapper"
     : agents.find(agent => agent[0] === role)?.[1] || friendly(role);
+}
+function mapperCard(root: AgentTask | null, extraction: TaskDetail["output_mapping"],
+  enabled: boolean, events: ConsoleEvent[] = [], quotesOpen = false): HTMLElement {
+  const card = node("div", "", "agent-role"); card.dataset.role = "report_mapper";
+  card.append(node("strong", "Report-to-map Mapper"),
+    node("p", "LLM presentation step: extracts quoted leak branches, inspection intervals and instrument findings from the accepted report; performs no new diagnosis."),
+    node("small", "Backend-triggered after acceptance, outside the coordinator workflow. No measurements, detector flags or ground truth are supplied."));
+  const output = node("div", "", "agent-handoff-output");
+  output.append(node("h4", "Report-to-map presentation"));
+  const completion = root ? [...events].reverse().find(event =>
+    event.task_id === root.id && event.type === "mapping.completed") : undefined;
+  let status: string;
+  if (!enabled) {
+    status = "Not enabled";
+    output.append(node("p", "Agent execution is off; no hosted map extraction is started."));
+  } else if (!root || ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state)) {
+    status = "Waiting for accepted report";
+    output.append(node("p", "Provisional drafts do not populate the agent map. Extraction follows report acceptance."));
+  } else if (root.state !== "SUCCEEDED" || !root.result?.interpretation || root.mode !== "live") {
+    status = "Not run";
+    output.append(node("p", "Hosted map extraction requires a successful live coordinator incident report. No labels are inferred from detector flags."));
+  } else if (extraction?.status === "failed" || completion?.payload.status === "failed") {
+    status = "Failed";
+    const code = extraction?.error_code || completion?.payload.error_code || "invalid output";
+    output.append(node("p", `Map extraction failed (${code}). The accepted report remains available; no replacement diagnoses are inferred.`));
+  } else if (extraction?.status === "completed" && extraction.mapping) {
+    status = "Ready";
+    const mapping = extraction.mapping;
+    output.append(node("p", `${mapping.leaks.length} leak branch finding(s) · ${mapping.leaks.filter(item => item.interval).length} report-stated inspection interval(s) · ${mapping.sensor_issues.length} instrument issue label(s), including missing readings where stated.`),
+      node("p", "Red branches show reported leak findings; green bands show inspection intervals, not exact leak points. Purple rings show instrument issues other than missing readings alone.", "muted"));
+    const details = node("details");
+    details.dataset.section = "mapper:quotes"; details.open = quotesOpen;
+    details.append(node("summary", "Saved map labels and exact report quotations"));
+    const labels = node("ul", "", "agent-mapping-findings");
+    for (const leak of mapping.leaks) {
+      const item = node("li");
+      item.append(node("strong", `${leak.segment_id}: ${leak.assertion} leak${leak.interval ? ` · inspect ${leak.interval.start_m}–${leak.interval.end_m} m` : " · no inspection interval stated"}`),
+        node("p", leak.quote.text));
+      labels.append(item);
+    }
+    for (const issue of mapping.sensor_issues) {
+      const item = node("li");
+      item.append(node("strong", `${issue.sensor_id}: ${issue.kind} · ${issue.assertion}${issue.kind === "missing" ? " · not a hardware-fault diagnosis" : ""}`),
+        node("p", issue.quote.text));
+      labels.append(item);
+    }
+    if (!mapping.leaks.length && !mapping.sensor_issues.length) labels.append(node("li", "No positive leak or instrument labels extracted; this is not a healthy-pipeline clearance."));
+    details.append(labels); output.append(details);
+    if (extraction.execution_usage) output.append(node("p",
+      `Presentation extraction: ${extraction.execution_usage.total_tokens.toLocaleString()} reported tokens. Separate from investigation usage; saved playback makes no new calls.`, "muted"));
+  } else {
+    status = "Not available yet";
+    output.append(node("p", "The accepted report is available, but no saved map extraction is loaded yet. This does not establish that a model call is running. Older recordings may need their mapping prepared separately; no detector-based diagnoses are substituted."));
+  }
+  card.append(node("span", status), output);
+  return card;
 }
 function reviewerState(root: AgentTask | null, events: ConsoleEvent[]): string {
   if (!root) return "Not started";
+  if (root.error_code === "grounding_rejected") return "Rejected · report withheld";
   if (root.interpretation_review?.rounds.length) return "Completed";
   const verdict = [...events].reverse().find(event => event.task_id === root.id && event.type === "answer.critique");
   if (verdict?.payload.decision === "accept") return "Completed";
@@ -19,52 +78,20 @@ function reviewerState(root: AgentTask | null, events: ConsoleEvent[]): string {
   return events.some(event => event.task_id === root.id && event.type === "agent.review_requested")
     ? "Checking the draft" : "Not started";
 }
-function publicJournal(container: HTMLElement, root: AgentTask, tasks: AgentTask[], events: ConsoleEvent[]): void {
-  const ids = new Set(linked(root, tasks).map(task => task.id));
-  const types = new Set(["agent.check_started", "agent.check_completed", "agent.handoff_requested",
-    "agent.draft", "agent.review_requested", "answer.checked", "answer.critique"]);
-  const updates = events.filter(event => event.task_id && ids.has(event.task_id) && types.has(event.type));
-  const heading = node("h3", "Live work journal");
-  container.append(heading, node("p", "Saved evidence checks, provisional drafts and handoffs. Initial intake checks are application-required; later check questions are agent-written. Drafts are not accepted conclusions, and private model reasoning is not displayed.", "muted"));
-  const list = node("ol", "", "agent-public-journal");
-  list.setAttribute("aria-label", "Agent checks, interim findings and handoffs");
-  for (const event of updates.slice(-200)) {
-    const payload = event.payload;
-    const role = typeof payload.role === "string" ? payload.role : tasks.find(task => task.id === event.task_id)?.role || "agent";
+function correctionChecklist(container: HTMLElement, corrections: unknown): void {
+  if (!Array.isArray(corrections) || !corrections.length) return;
+  const list = node("ol", "", "agent-review-corrections");
+  for (const entry of corrections) {
+    if (!entry || typeof entry !== "object" || !("excerpt" in entry) || !("instruction" in entry)
+      || typeof entry.excerpt !== "string" || typeof entry.instruction !== "string") continue;
     const item = node("li");
-    item.dataset.event = String(event.id); item.dataset.kind = event.type;
-    item.append(node("small", `${time(event.created_at)} · ${agentName(role)}`));
-    if (event.type === "agent.handoff_requested") {
-      const to = typeof payload.to_role === "string" ? payload.to_role : "agent";
-      item.append(node("strong", `Response Coordinator → ${agentName(to)}`),
-        node("p", typeof payload.reason === "string" ? payload.reason : "Separate specialist task requested."));
-      item.dataset.fromTask = String(payload.from_task_id); item.dataset.toTask = String(payload.to_task_id);
-    } else if (event.type === "agent.draft") {
-      item.append(node("strong", "Draft finding · review pending"), node("p", String(payload.text || "")));
-    } else if (event.type === "agent.review_requested") {
-      item.append(node("strong", "Draft → Grounding Reviewer"), node("p", String(payload.purpose || "")));
-    } else if (event.type === "answer.critique") {
-      item.append(node("strong", payload.decision === "accept" ? "Evidence wording accepted" : "Corrections requested"),
-        node("p", `${payload.issues || 0} review checks require attention. This review is not proof of physical accuracy.`));
-      if (Array.isArray(payload.checks)) for (const check of payload.checks) {
-        const value = record(check);
-        if (value && value.verdict !== "supported" && typeof value.reason === "string")
-          item.append(node("p", `Review feedback: ${value.reason}`));
-      }
-    } else if (event.type === "answer.checked") {
-      const to = typeof payload.to_role === "string" ? agentName(payload.to_role) : "Next step";
-      item.append(node("strong", `Checked handoff → ${to}`), node("p", String(payload.public_output || "Checked findings recorded.")));
-    } else {
-      item.append(node("strong", `${payload.title || "Evidence check"} · ${payload.status || "recorded"}`),
-        node("p", String(payload.purpose || "")));
-      item.append(node("small", payload.origin === "application_intake" ? "Application-required evidence intake" : "Agent-requested evidence check"));
-      if (typeof payload.agent_question === "string") item.append(node("p", `Agent's check question: ${payload.agent_question}`));
-      if (typeof payload.observation === "string") item.append(node("p", `Interim output: ${payload.observation}`));
-      if (typeof payload.call_id === "string") item.dataset.callId = payload.call_id;
+    item.append(node("blockquote", entry.excerpt), node("p", entry.instruction));
+    if ("source_references" in entry && Array.isArray(entry.source_references)) {
+      const references = entry.source_references.filter((ref: unknown): ref is string => typeof ref === "string");
+      item.append(node("small", `Verify against: ${references.join(", ")}`));
     }
     list.append(item);
   }
-  if (!updates.length) list.append(node("li", "This saved run has no current-format public journal. Its recorded receipts remain available; no new activity is invented."));
   container.append(list);
 }
 function record(value: Json | undefined): Record<string, Json> | null {
@@ -73,12 +100,104 @@ function record(value: Json | undefined): Record<string, Json> | null {
 function accepted(task: AgentTask): boolean {
   return ["SUCCEEDED", "ABSTAINED"].includes(task.state) && task.result !== null && task.answer !== null;
 }
-function linked(root: AgentTask, tasks: AgentTask[]): AgentTask[] {
-  return tasks.filter(task => task.id === root.id || task.root_id === root.id);
+function linked(root: AgentTask, tasks: AgentTask[], reusedIds: readonly string[] = []): AgentTask[] {
+  return tasks.filter(task => task.id === root.id || task.root_id === root.id
+    || reusedIds.includes(task.id) && task.site_id === root.site_id
+      && task.generation_id === root.generation_id && task.snapshot_id === root.snapshot_id);
+}
+function readableOutput(container: HTMLElement, text: string, references: readonly string[] = [],
+  extraction: TaskDetail["output_mapping"] = null): void {
+  const headings = new Set(["Leak assessment", "Why this location", "Instrument findings",
+    "Operating and other pressure changes", "Limits of this result"]);
+  for (const paragraph of reportText(text, references).split(/\n\s*\n/).filter(value => value.trim())) {
+    const lines = paragraph.trim().split("\n");
+    if (headings.has(lines[0])) {
+      container.append(node("h4", lines[0]));
+      if (lines[0] === "Instrument findings" && extraction?.status === "completed" && extraction.mapping) {
+        const inventory = node("ul", "", "reported-instrument-inventory");
+        inventory.setAttribute("aria-label", "Instrument issues extracted from this incident report");
+        const groups = new Map<string, string[]>();
+        for (const issue of extraction.mapping.sensor_issues) {
+          const ids = groups.get(issue.kind) || [];
+          if (!ids.includes(issue.sensor_id)) ids.push(issue.sensor_id);
+          groups.set(issue.kind, ids);
+        }
+        for (const [kind, ids] of groups) inventory.append(node("li",
+          `${kind === "missing" ? "Missing readings · not diagnosed hardware faults" : `Suspected measurement problem · ${kind}`}: ${ids.join(", ")}`));
+        if (!groups.size) inventory.append(node("li",
+          "No concrete instrument issue identified in this incident report; this is not proof that every sensor is healthy."));
+        container.append(inventory);
+      }
+      if (lines.length > 1) container.append(node("p", lines.slice(1).join("\n")));
+    } else container.append(node("p", paragraph));
+  }
+}
+function organizeAgentWorkspace(progress: HTMLElement, reviewOpen = false): void {
+  const reviewer = progress.querySelector<HTMLElement>('.agent-role[data-role="grounding_reviewer"]');
+  const reviewStatus = reviewer?.querySelector(":scope > span")?.textContent || "Not started";
+  const cards = [...progress.querySelectorAll<HTMLElement>('.agent-role:not([data-role="grounding_reviewer"])')];
+  const selector = node("div", "", "agent-selector");
+  selector.setAttribute("role", "tablist"); selector.setAttribute("aria-label", "Choose an agent output");
+  const reader = node("div", "", "agent-output-reader");
+  const requested = progress.dataset.activeRole || progress.dataset.defaultRole || "operator_response";
+  const preferred = cards.some(card => card.dataset.role === requested) ? requested : "operator_response";
+  const tabs: HTMLButtonElement[] = [];
+  const panels: HTMLElement[] = [];
+  const select = (role: string, focus = false): void => {
+    progress.dataset.activeRole = role;
+    for (const [index, card] of cards.entries()) {
+      const active = card.dataset.role === role;
+      card.classList.toggle("active", active);
+      tabs[index].setAttribute("aria-selected", String(active)); tabs[index].tabIndex = active ? 0 : -1;
+      panels[index].hidden = !active;
+      if (active && focus) tabs[index].focus();
+    }
+  };
+  for (const [index, card] of cards.entries()) {
+    const role = card.dataset.role!;
+    const label = card.querySelector("strong")?.textContent || agentName(role);
+    const tab = button("", () => select(role));
+    tab.append(node("strong", label), node("span",
+      card.querySelector(":scope > span")?.textContent?.split(" · ")[0] || "Not started",
+      "agent-tab-status"));
+    if (role === "operator_response") tab.append(node("small", `Review: ${reviewStatus}`, "agent-review-status"));
+    tab.id = `agent-output-tab-${role}`; tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-label", `${label} output`); tab.setAttribute("aria-controls", `agent-output-panel-${role}`);
+    tab.addEventListener("keydown", event => {
+      if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === "Home" ? 0 : event.key === "End" ? cards.length - 1
+        : (index + (["ArrowLeft", "ArrowUp"].includes(event.key) ? -1 : 1) + cards.length) % cards.length;
+      select(cards[next].dataset.role!, true);
+    });
+    const panel = node("section", "", "agent-output-panel");
+    panel.id = `agent-output-panel-${role}`; panel.dataset.role = role;
+    panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", tab.id); panel.tabIndex = 0;
+    panel.append(node("h3", label), node("p", card.querySelector("p")?.textContent || "", "muted"));
+    const metadata = node("div", "", "agent-output-meta");
+    metadata.append(...card.querySelectorAll(":scope > span, :scope > small"));
+    panel.append(metadata);
+    const output = card.querySelector(".agent-handoff-output");
+    if (output) panel.append(output);
+    else panel.append(node("p", "No accepted output is available yet. The agent's status is shown above.", "agent-output-empty"));
+    if (role === "operator_response" && reviewer) {
+      const review = node("details", "", "agent-grounding-review");
+      review.dataset.section = "grounding-review"; review.open = reviewOpen;
+      review.append(node("summary", `Grounding Reviewer · ${reviewStatus}`),
+        ...reviewer.querySelectorAll(":scope > p, :scope > small, :scope > .agent-handoff-output"));
+      panel.append(review);
+    }
+    card.replaceChildren(tab); tabs.push(tab); panels.push(panel);
+    selector.append(card); reader.append(panel);
+  }
+  progress.replaceChildren(selector, reader);
+  select(preferred);
 }
 export function renderIdleAgentWork(progress: HTMLElement, findings: HTMLElement, enabled: boolean): void {
   progress.replaceChildren(); findings.replaceChildren();
   delete progress.dataset.renderKey; delete progress.dataset.task;
+  delete progress.dataset.activeRole;
+  delete progress.dataset.defaultRole;
   for (const [role, label, purpose] of agents) {
     const card = node("div", "", "agent-role"); card.dataset.role = role;
     card.append(node("strong", label), node("p", purpose), node("span", enabled ? "Not started" : "Not enabled"));
@@ -89,6 +208,8 @@ export function renderIdleAgentWork(progress: HTMLElement, findings: HTMLElement
   reviewer.append(node("strong", "Grounding Reviewer"), node("p", "A separate model call checks whether the draft matches its sources."),
     node("span", enabled ? "Not started" : "Not enabled"));
   progress.append(reviewer);
+  progress.append(mapperCard(null, null, enabled));
+  organizeAgentWorkspace(progress);
 }
 
 export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, root: AgentTask,
@@ -97,24 +218,50 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
   const key = JSON.stringify([root.id, root.state, root.updated_at, root.plan,
     linked(root, tasks).map(task => [task.id, task.updated_at, task.state, task.model_calls, task.tool_calls]),
     detail?.task.updated_at, detail?.investigation_receipts.map(receipt => receipt.call_id),
+    detail?.output_mapping,
     Boolean(detail?.casefile), basis?.id, error, events[events.length - 1]?.id,
     detail?.activity?.[detail.activity.length - 1]?.id]);
   if (progress.dataset.renderKey === key) return;
   const opened = new Set(progress.dataset.task === root.id
     ? [...progress.querySelectorAll<HTMLDetailsElement>("details[open]"), ...findings.querySelectorAll<HTMLDetailsElement>("details[open]")]
       .map(item => item.dataset.section) : []);
-  const existingSections = new Set(progress.dataset.task === root.id
-      ? [...progress.querySelectorAll<HTMLDetailsElement>("details")].map(item => item.dataset.section)
-      : []);
-  const section = (id: string): HTMLDetailsElement => {
-    const item = node("details");
-    item.dataset.section = id; item.open = opened.has(id);
-    return item;
-  };
+  if (progress.dataset.task !== root.id) delete progress.dataset.activeRole;
+  const focusedRole = progress.querySelector<HTMLElement>('[role="tab"]:focus')?.closest<HTMLElement>(".agent-role")?.dataset.role;
   progress.dataset.task = root.id; progress.dataset.renderKey = key;
   progress.replaceChildren();
   findings.replaceChildren();
-  const members = linked(root, tasks);
+  const reusedIds = detail?.casefile?.reused_task_ids || [];
+  const members = linked(root, tasks, reusedIds);
+  progress.dataset.defaultRole = accepted(root) ? "operator_response"
+    : members.find(task => task.role !== "operator_response" && task.state === "RUNNING")?.role || "operator_response";
+  const journalEvents = [...new Map(
+    [...(detail?.activity || []), ...events].map(event => [event.id, event])
+  ).values()].sort((a, b) => a.id - b.id);
+  if (root.state === "FAILED") {
+    const failure = node("section", "", "agent-failure-summary summary");
+    failure.dataset.stage = root.error_code === "grounding_rejected" ? "grounding_reviewer" : root.role;
+    failure.append(node("h3", root.error_code === "grounding_rejected"
+      ? "Report withheld at Grounding Reviewer" : `Investigation stopped at ${agentName(root.role)}`),
+      node("p", members.filter(task => task.id !== root.id)
+        .map(task => `${agentName(task.role)}: ${friendly(task.state)}`).join(" · ")
+        || "No completed specialist handoffs are loaded."));
+    const rejected = journalEvents.filter(event =>
+      event.task_id === root.id && event.type === "answer.critique" && event.payload.decision === "revise");
+    for (const event of rejected) {
+      if (!Array.isArray(event.payload.checks)) continue;
+      for (const entry of event.payload.checks) {
+        const check = record(entry);
+        if (check && check.verdict !== "supported" && typeof check.reason === "string") {
+          failure.append(node("p", `Round ${event.payload.round} · ${check.paragraph_id}: ${check.reason}`));
+          correctionChecklist(failure, check.corrections);
+        }
+      }
+    }
+    if (!rejected.length) failure.append(node("p", root.error_message || root.error_code || "Failure details are not loaded."));
+    failure.append(node("p", "No report or map diagnosis was accepted. Completed checks remain available; do not treat this as safety clearance."),
+      button("Open failed coordinator receipts and trace", () => open(root.id)));
+    findings.append(failure);
+  }
   for (const [role, label, purpose] of agents) {
     const task = role === "operator_response" ? root : members.find(item => item.role === role);
     const card = node("div", "", "agent-role");
@@ -123,13 +270,16 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
     const reused = !task && root.plan.includes("reuse");
     card.append(node("span", task ? `${friendly(task.state)} · ${task.model_calls} model / ${task.tool_calls} tool calls`
       : reused ? "Reuse selected · inspect linked receipts" : "Not started"));
+    if (task && reusedIds.includes(task.id)) card.append(node("span", "Reused recorded handoff · no new specialist calls"));
     if (task && accepted(task) && task.result) {
       const count = task.result.claim_refs.filter(id => basis?.claims[id]?.kind === "sensor_health").length;
       if (role === "sensor_quality") card.append(node("span",
         `${basis ? `${count} sensor-health claims checked` : "Loading checked claim scope"}${task.result.limitations.includes("partial_health_review") ? " · partial, not exhaustive" : ""}`));
-      const result = section(`role:${role}`);
-      result.append(node("summary", "Read checked handoff"), node("p", task.answer || "Checked findings are loading."));
-      result.open = !existingSections.has(`role:${role}`) || opened.has(`role:${role}`);
+      const result = node("div", "", "agent-handoff-output");
+      result.append(node("h4", role === "operator_response" ? "Accepted incident assessment" : "Checked specialist output"));
+      const answer = task.result.interpretation?.answer;
+      readableOutput(result, answer?.text || task.answer || "Checked findings are loading.",
+        answer?.references, role === "operator_response" ? detail?.output_mapping : null);
       result.append(button("Open executed receipts", () => open(task.id)));
       card.append(result);
     }
@@ -137,180 +287,49 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
   }
   const reviewer = node("div", "", "agent-role");
   reviewer.dataset.role = "grounding_reviewer";
+  const reviewerRounds = detail?.casefile?.interpretation_review?.rounds || root.interpretation_review?.rounds || [];
   reviewer.append(node("strong", "Grounding Reviewer"), node("p", "Checks explanations against sources before the coordinator releases a report."),
-    node("span", reviewerState(root, events)),
+    node("span", reviewerRounds.length ? "Completed" : reviewerState(root, journalEvents)),
     node("small", "A separate review call, not a fourth sensor-investigation agent."));
-  progress.append(reviewer);
-  const journalEvents = [...new Map(
-    [...(detail?.activity || []), ...events].map(event => [event.id, event])
-  ).values()].sort((a, b) => a.id - b.id);
-  publicJournal(findings, root, tasks, journalEvents);
-  findings.append(node("h3", "Investigation evidence · beyond individual sensor alerts"));
-  if (error) {
-    findings.append(node("p", `Work record unavailable: ${error}. No source checks are inferred. Reconnect to reload.`, "summary"));
-    return;
-  }
-  if (!detail) {
-    findings.append(node("p", "Loading the executed work record; no historical findings claimed yet.", "muted"));
-    return;
-  }
-  const file = accepted(root) && detail.task.state === root.state ? detail.casefile : null;
-  const receipts = detail.investigation_receipts;
-  const reads = receipts.filter(receipt => receipt.name === "history.read" && !receipt.error);
-  const documents = new Set(reads.flatMap(receipt => {
-    const result = record(receipt.result);
-    return Array.isArray(result?.documents) ? result.documents.flatMap(value => {
-      const doc = record(value); return typeof doc?.id === "string" ? [doc.id] : [];
-    }) : [];
-  }));
-  const comparisons = receipts.filter(receipt => receipt.name === "history.compare" && !receipt.error);
-  const search = [...receipts].reverse().find(receipt => receipt.name === "history.search" && !receipt.error);
-  const args = search ? record(search.arguments) : null;
-  const review = file?.interpretation_review;
-  const decision = review?.rounds[review.rounds.length - 1]?.assessment.decision;
-  const decisionLabel = decision === "accept" ? "accepted" : decision;
-  const reviewStatus = review
-    ? `${review.rounds.length} source-grounding review round(s) completed${decisionLabel ? ` · final decision ${decisionLabel}` : ""}`
-    : "no reviewed interpretation yet";
-  findings.append(node("p", `${documents.size} operational records read · ${comparisons.length} pressure comparisons recorded · ${reviewStatus}.`, "agent-work-counts"));
-  if (file?.reused_task_ids.length) findings.append(node("p",
-    `${file.reused_task_ids.length} compatible specialist handoffs reused; their recorded reads are not new model calls.`, "muted"));
-  if (args && typeof args.query === "string") findings.append(node("p",
-    `Investigation agent chose to ${friendly(typeof args.intent === "string" ? args.intent : "seek context")}: “${args.query}”.`, "agent-search"));
-  if (!file) {
-    if (documents.size) findings.append(node("p", `Records actually opened: ${[...documents].join(", ")}. Reads are not yet a reviewed conclusion.`, "muted"));
-    if (!["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state)) findings.append(node("p",
-      accepted(root) ? "Loading the completed handoff; source-backed findings are not displayed until it matches this report."
-        : "Investigation failed or abstained without an accepted handoff. No new cause is established.", "muted"));
-    return;
-  }
-  const regions = file.interpretation?.regional_assessments;
-  if (regions?.length) {
-    const panel = node("section", "", "agent-regions");
-    panel.append(node("h3", "Agent conclusions by sensor group"),
-      node("p", file.interpretation_review
-        ? "Source-reviewed explanations of the compared readings. Each group explains the observations, plausible causes and the next verification."
-        : "Model-written explanations from an archived handoff; no current-protocol grounding review. Separate from detector flags; physical causes remain unconfirmed.", "muted"));
-    const groups = node("div", "", "agent-region-grid");
-    const labels = {
-      leak_pattern: "Pressure pattern to investigate for leakage",
-      instrumentation_or_telemetry: "Sensor or data-connection problems to check",
-      operating_change: "Operating conditions to review",
-      unresolved: "Additional evidence needed",
-    };
-    for (const [index, region] of regions.entries()) {
-      const item = node("article", "", "agent-region");
-      item.dataset.region = String(index);
-      item.dataset.hypothesis = region.hypothesis;
-      item.append(node("h4", labels[region.hypothesis]),
-        node("p", `${region.sensor_ids.length} sensor(s) · ${region.sensor_ids.join(", ")}`, "agent-region-sensors"),
-        node("p", region.text),
-        node("p", `Review references: ${region.references.join(", ") || "None recorded"}`, "muted"));
-      groups.append(item);
-    }
-    panel.append(groups);
-    findings.append(panel);
-  }
-  const historySteps = file.steps.filter(step => step.tool.startsWith("history."));
-  if (historySteps.length) {
-    const panel = section("why-these-checks");
-    panel.className = "agent-checks";
-    panel.append(node("summary", `Why these checks · ${historySteps.length} recorded history call(s)`),
-      node("p", "Recorded tool arguments, not proposed checks. Review the call IDs alongside the conclusion references above.", "muted"));
-    const checks = node("ol");
-    for (const step of [...historySteps].sort((a, b) => a.sequence - b.sequence)) {
-      const ids = step.arguments.knowledge_ids;
-      const knowledgeIds = Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string") : [];
-      const question = step.arguments.check_question;
+  const reviewOutput = node("div", "", "agent-handoff-output");
+  reviewOutput.append(node("h4", "Grounding review"));
+  const lastReview = reviewerRounds[reviewerRounds.length - 1];
+  if (lastReview) {
+    reviewOutput.append(node("p", `Latest review: ${friendly(lastReview.assessment.decision)}. ${reviewerRounds.length} review round(s) recorded.`));
+    const checks = node("ul", "", "agent-review-checks");
+    for (const check of lastReview.assessment.checks) {
       const item = node("li");
-      item.dataset.callId = step.call_id;
-      item.append(node("strong", knowledgeIds.length ? knowledgeIds.join(", ") : "No knowledge IDs recorded"),
-        node("p", `→ ${typeof question === "string" && question.trim() ? question : "No check question recorded"}`),
-        node("code", `→ ${step.tool} · ${step.call_id}`));
-      if (step.error) item.append(node("p", `Call failed: ${step.error}. No successful check is inferred.`, "muted"));
+      item.append(node("strong", `${check.paragraph_id}: ${friendly(check.verdict)}`), node("p", reportText(check.reason)));
+      correctionChecklist(item, check.corrections);
       checks.append(item);
     }
-    panel.append(checks);
-    findings.append(panel);
-  }
-  for (const source of file.sources) {
-    const id = source.document.id;
-    if (typeof id !== "string") continue;
-    const row = section(`source:${id}`); row.className = "agent-source";
-    row.dataset.document = id;
-    row.append(node("summary", `${id} · ${source.use === "cited" ? "read and cited" : friendly(source.use)}`));
-    if (typeof source.document.title === "string") row.append(node("strong", source.document.title));
-    if (typeof source.document.body === "string") row.append(node("p", source.document.body));
-    findings.append(row);
-  }
-  const knowledge = file.knowledge_packet;
-  if (knowledge) {
-    const applied = knowledge.cards.filter(card => file.knowledge_used_ids.includes(card.id));
-    const panel = section("domain-knowledge");
-    panel.className = "agent-knowledge";
-    panel.append(node("summary", `Domain guidance · ${applied.length} card(s) cited with case evidence`));
-    if (!applied.length) panel.append(node("p", "No domain guidance was cited in this handoff.", "muted"));
-    for (const card of applied) {
-      const item = node("article", "", "knowledge-card");
-      item.dataset.knowledge = card.id;
-      item.append(node("h4", card.title), node("p", card.guidance));
-      if (card.applies_when) item.append(node("p", `Applies when: ${card.applies_when}`, "muted"));
-      for (const [label, entries] of [
-        ["Recommended verification · not execution receipts", card.verification_steps],
-        ["Counterexamples to check", card.counterexamples],
-      ] as const) {
-        if (!entries?.length) continue;
-        item.append(node("strong", label));
-        const checks = node("ul");
-        for (const entry of entries) checks.append(node("li", entry));
-        item.append(checks);
-      }
-      if (card.limitations.length) {
-        item.append(node("strong", "When not to rely on this guidance"));
-        const limits = node("ul");
-        for (const limitation of card.limitations) limits.append(node("li", limitation));
-        item.append(limits);
-      }
-      const provenance = section(`knowledge-provenance:${card.id}`);
-      provenance.append(node("summary", "Sources, review basis and authority"),
-        node("p", `${card.id} · ${knowledge.version} · pinned ${time(knowledge.selected_at)} at investigation time, not incident time.`, "muted"),
-        node("p", "Domain guidance supports the investigation. Apply its prerequisites and verify findings against site evidence.", "muted"),
-        node("p", `Review basis: ${card.review_basis}`, "muted"));
-      for (const source of card.sources) provenance.append(node("p",
-        `${source.reference} · ${source.locator}. ${source.boundary}`, "muted"));
-      item.append(provenance);
-      panel.append(item);
-    }
-    if (Object.keys(knowledge.excluded).length) panel.append(node("p",
-      `Withheld guidance: ${Object.entries(knowledge.excluded).map(([id, reason]) => `${id}: ${friendly(reason)}`).join("; ")}`, "muted"));
-    findings.append(panel);
+    reviewOutput.append(checks);
   } else {
-    findings.append(node("p", "Archived handoff: no pinned domain-knowledge packet.", "muted"));
+    const latest = [...journalEvents].reverse().find(event =>
+      event.task_id === root.id && event.type === "answer.critique");
+    if (latest && Array.isArray(latest.payload.checks)) {
+      reviewOutput.append(node("p", `Recorded review round ${latest.payload.round}: ${latest.payload.decision}.`));
+      const checks = node("ul", "", "agent-review-checks");
+      for (const entry of latest.payload.checks) {
+        const check = record(entry);
+        if (!check || typeof check.paragraph_id !== "string"
+          || typeof check.verdict !== "string" || typeof check.reason !== "string") continue;
+        const item = node("li");
+        item.append(node("strong", `${check.paragraph_id}: ${friendly(check.verdict)}`),
+          node("p", reportText(check.reason)));
+        correctionChecklist(item, check.corrections);
+        checks.append(item);
+      }
+      reviewOutput.append(checks);
+    } else reviewOutput.append(node("p", "No detailed grounding review has been recorded for this run yet."));
   }
-  const quotes = new Set<string>();
-  const cited = new Set(file.sources.filter(source => source.use === "cited").map(source => source.document.id));
-  const rounds = file.interpretation_review?.rounds || [];
-  for (const check of rounds[rounds.length - 1]?.assessment.checks || []) {
-    for (const support of check.support) {
-      if (check.verdict !== "supported" || !cited.has(support.reference) || quotes.has(support.reference)) continue;
-      quotes.add(support.reference);
-      if (quotes.size <= 2) findings.append(node("blockquote", `${support.reference}: “${support.quote}”`, "agent-source-finding"));
-    }
+  reviewOutput.append(node("p", "This checks whether explanations match their sources; it does not confirm a physical leak.", "muted"));
+  reviewer.append(reviewOutput);
+  progress.append(reviewer);
+  progress.append(mapperCard(root, detail?.output_mapping, true, journalEvents, opened.has("mapper:quotes")));
+  organizeAgentWorkspace(progress, opened.has("grounding-review") || root.error_code === "grounding_rejected");
+  if (focusedRole) progress.querySelector<HTMLButtonElement>(`#agent-output-tab-${focusedRole}`)?.focus();
+  if (error) {
+    findings.append(node("p", `Work record unavailable: ${error}. No source checks are inferred. Reconnect to reload.`, "summary"));
   }
-  if (file.interpretation) {
-    const causes = node("div", "", "agent-causes");
-    for (const cause of file.interpretation.competing_causes) {
-      const item = section(`cause:${cause.cause}`);
-      item.dataset.cause = cause.cause;
-      item.append(node("summary", `${friendly(cause.cause)}: ${friendly(cause.stance)}`),
-        node("p", cause.text), node("p", `Checked references: ${cause.references.join(", ")}`, "muted"));
-      causes.append(item);
-    }
-    findings.append(causes);
-    const nextCheck = file.interpretation.follow_up_questions[0];
-    if (nextCheck) findings.append(node("p", `Engineer verification needed: ${nextCheck}`, "agent-next-question"));
-  }
-  findings.append(node("p", `${file.next_action} ${file.interpretation_review
-    ? "Same-model critic and exact-source checks are not a correctness guarantee."
-    : "Archived report: no current-protocol grounding review."}`, "muted"));
 }

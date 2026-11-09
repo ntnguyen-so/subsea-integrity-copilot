@@ -1,46 +1,19 @@
 # Subsea Integrity Copilot - Customer Brief
 
-**Prospect and problem.** NorthSea Integrity Operations is a fictional offshore
-gas operator. Engineers must distinguish pipeline leaks from sensor spikes,
-gaps and drift. Missed leaks threaten the environment and operations; false
-alarms trigger costly inspections. Scarce expertise is difficult to encode and
-transfer to newcomers.
+**The decision we want to improve.** Which pressure alerts need a leak investigation, which indicate unreliable instruments, and where should an engineer inspect first? The proposal is evidence-backed investigation alongside existing detectors, not another alarm dashboard or autonomous safety system.
 
-![Original Y topology and synthetic pressure evidence: related drops support investigation; scattered spikes, gaps and drift suggest sensor faults.](assets/pressure-leak-vs-sensor-faults.svg)
+**Customer and problem.** NorthSea Integrity Operations is a fictional offshore gas operator. Its sensors stream pressure readings along a long pipeline network; existing anomaly detectors flag unusual values. Engineers must then compare nearby and paired instruments, source times, pipeline topology and operating records. A leak can produce related pressure changes around a section, while faulty instruments can produce scattered spikes, gaps or drift. But operating changes and shared equipment failures can also affect several sensors, and leaks and faults can coexist. An anomaly is therefore a starting point, not a diagnosis. This manual investigation concentrates work in a few experienced engineers and makes knowledge difficult to transfer. Missed leaks risk environmental releases, disruption and regulatory exposure; false diagnoses can mobilize costly vessel or ROV inspections.
 
-**Why this problem.** My PhD studied marine data quality, anomaly detection and
-translating expertise into reviewable smart systems.
+**Why I chose this problem.** My PhD studied marine data quality, anomaly detection and translating expert requirements into reviewable software. This applies that experience to a high-consequence decision where trusting the measurements matters as much as detecting change.
 
-**The two customer roles.** The **Head of Subsea Operations** owns the budget:
-cost, workload, timeline and risk. The **Lead Subsea Integrity & Instrumentation
-Engineer** challenges calibration, shared failures, missing data and unsupported
-conclusions. Engineers and newcomers use the copilot.
+**What the solution does.** Numerical code normalizes measurements and raises warnings without waiting for AI. Three scoped agent roles investigate sensor quality, assess event evidence and coordinate an engineer-facing response. They compare pressure histories and read incident-time records, then explain competing causes, a supported inspection interval or why one cannot be justified. A grounding reviewer checks source support; rejected reports are withheld. The engineer retains the decision.
 
-**Why unsigned.** Doubts about effort savings, hallucinations, missed leaks,
-integration cost, privacy and accountability. Cheaper fixed workflows are credible alternatives.
+**What we will demonstrate.** "Leak or faulty sensors?" Compare a leak footprint with scattered instrument faults and a mixed case. "Where should we inspect, and why?" Inspect the reported interval and measured comparisons, not an invented exact coordinate. "What supports this, and what remains unknown?" Open frozen readings, cited records, limitations and the executed investigation. The Evaluation workspace compares findings with synthetic labels authored before inference, retaining failures, misses and false alarms. Answer-quality ratings are shown separately as advisory model opinions. Saved Detection playback requires no new inference; fresh investigations expose actual model latency.
 
-**Monitoring workloads.** Original Y: three 800m pipes, 24 instruments. Extended:
-seven branches, 11.2km, 112 instruments; overlapping near/far responses and faults.
-Median/MAD feeds sliding-window screening; agents compare joint patterns, records
-and failure dependencies. Ambiguous locations are withheld.
-Questions: "Leak or faulty sensors?", "Where should we inspect,
-and why?" and "What evidence supports this, and what remains unknown?"
+**The two customer roles and objections.** The **Head of Subsea Operations** owns the budget and asks whether lower investigation effort justifies integration, inference and review costs without increasing operational risk. The **Lead Subsea Integrity & Instrumentation Engineer** asks whether conclusions survive missing data, inconsistent units, conflicting documents, shared failures and reproduction from source evidence. They have not signed because a cheaper fixed workflow may suffice, AI can be wrong, and data movement and accountability need approval.
 
-**Agent value.** Three scoped roles investigate quality, choose incident-time
-history searches/comparisons and explain competing causes. A separate same-model
-critic reviews original sources; code checks quotes, coverage and identity.
-Revise once, then accept or withhold. Engineers inspect sources and download
-evidence. Versioned research-curated guidance is not SME-approved or automatically
-acquired expertise.
+**The offer and buying gate.** Agree a proposed four-week, read-only shadow pilot on one pipeline, subject to data/security access. Establish a manual/fixed-workflow baseline, an inference spend cap and acceptance thresholds before starting. Measure engineer review time, missed/false findings, useful inspection intervals, unsupported claims, abstention and end-to-end availability/latency, including failed attempts. Expand only if evidence quality, effort and total cost justify adoption; no savings or response-time guarantee is assumed.
 
-**Limits and buying gate.** Fictional dirty/conflicting data; unvalidated hydraulics;
-intervals, not exact positions. Original cohort: hosted 15/18 first attempts,
-then 3/3 explicit retries; fixed 18/18 and faster. No field-accuracy guarantee.
-Warnings never wait for inference. Manual time is unmeasured; reports target five
-minutes, counting failures and human review separately. Propose a four-week
-read-only shadow pilot with agreed quality, abstention, latency and cost gates.
-Pricing requires discovery; savings are unproven, connectors unbuilt and hosted
-data requires approval. Humans retain safety authority. Buy only if quality,
-effort and total cost beat manual/fixed baselines.
+**Assumptions and limits.** Data and records are synthetic; pressure behavior is not a validated hydraulic model. Inspection intervals are priorities, not confirmed leak coordinates or dispatch authorization. Hosted inference needs approval; production connectors and expert-approved procedures require customer work. There is no independent engineering validation or field-reliability claim. Humans retain safety authority.
 
-**Private GitHub and run instructions:** [github.com/ntnguyen-so/subsea-integrity-copilot](https://github.com/ntnguyen-so/subsea-integrity-copilot). Repository access must be granted before review.
+**Demo and run instructions:** [github.com/ntnguyen-so/subsea-integrity-copilot](https://github.com/ntnguyen-so/subsea-integrity-copilot).

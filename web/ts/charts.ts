@@ -3,6 +3,26 @@ import type { CanonicalObservation, Channel, Sensor, WindowSnapshot } from "./ty
 
 const labels: Record<Channel, string> = { pressure: "Pipeline pressure", acoustic: "Acoustic relative power (archived)", methane: "Dissolved methane (archived)", temperature: "Temperature (archived)" };
 
+export function sharedPressureRange(readings: { sensor: Sensor; observations: CanonicalObservation[] }[],
+  window: WindowSnapshot): [number, number] | undefined {
+  const start = Date.parse(window.window_start), end = Date.parse(window.window_end);
+  const ids = new Set(readings.map(item => item.sensor.id));
+  const values = readings.flatMap(item => item.observations.flatMap(row =>
+    row.channel === "pressure" && row.unit === "bar" && row.validity === "usable" && row.value !== null
+      && Date.parse(row.observed_at) >= start && Date.parse(row.observed_at) < end ? [row.value] : []));
+  for (const item of Object.values(window.evidence)) {
+    if (item.kind !== "channel_summary" || !item.sensor_id || !ids.has(item.sensor_id)
+      || item.channel !== "pressure" || item.value === null || typeof item.value !== "object" || Array.isArray(item.value)) continue;
+    const model = item.value;
+    if (typeof model.baseline_median === "number" && typeof model.baseline_scale === "number"
+      && typeof model.anomaly_threshold === "number") {
+      values.push(model.baseline_median - model.baseline_scale * model.anomaly_threshold,
+        model.baseline_median + model.baseline_scale * model.anomaly_threshold);
+    }
+  }
+  return values.length ? [Math.min(...values), Math.max(...values)] : undefined;
+}
+
 export function renderCharts(container: HTMLElement, sensor: Sensor, observations: CanonicalObservation[], window: WindowSnapshot, sampleSeconds: number, sharedRange?: [number, number]): void {
   container.replaceChildren();
   const start = Date.parse(window.window_start);
@@ -34,7 +54,7 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
     for (let index = 0; index < 3; index++) {
       const yy = 20 + index * 54;
       chart.append(svg("line", { x1: 48, x2: 344, y1: yy, y2: yy, class: "grid" }));
-      if (values.length) chart.append(svg("text", { x: 3, y: yy + 4 }, (max - index * (max - min) / 2).toPrecision(3)));
+      if (values.length) chart.append(svg("text", { x: 3, y: yy + 4 }, Number((max - index * (max - min) / 2).toPrecision(6)).toString()));
     }
     // Expected-time slots expose absence even when no missing record exists.
     const step = Math.max(sampleSeconds * 1000, 1);
@@ -81,7 +101,7 @@ export function renderCharts(container: HTMLElement, sensor: Sensor, observation
     }
     entry("missing", "Missing value");
     heading.append(legend);
-    section.append(heading, chart, node("p", `${unit} · ${usable.length} usable / ${records.length} received · ${gaps} gap interval${gaps === 1 ? "" : "s"}. Original samples in Evidence.`));
+    section.append(heading, chart, node("p", `${unit} · ${usable.length} usable / ${records.length} received · ${gaps} gap interval${gaps === 1 ? "" : "s"}. Original samples in Inspect's optional audit.`));
     if (band.length) section.append(node("p", "Amber points are individual pressure anomalies, not leak diagnoses or sensor-fault classifications."));
     container.append(section);
   }

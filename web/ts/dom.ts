@@ -2,7 +2,8 @@ import { productText } from "./presentation";
 
 export function element<T extends HTMLElement>(id: string, kind: { new(): T }): T {
   const node = document.getElementById(id);
-  if (!(node instanceof kind)) throw new Error(`Required console element missing: ${id}`);
+  if (!node) throw new Error(`Required console element missing: ${id}`);
+  if (!(node instanceof kind)) throw new Error(`Console element has incompatible type: ${id} is ${node.tagName}`);
   return node;
 }
 export function box(id: string): HTMLElement { return element(id, HTMLElement); }

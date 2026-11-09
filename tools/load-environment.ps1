@@ -46,6 +46,7 @@ if (@($properties | Where-Object { $_ -notin $required }).Count -ne 0 -or
 foreach ($name in $required) {
     $value = $document.secrets.$name
     $pattern = '^[a-f0-9]{64}$'
+    if ($name -eq "SUBSEA_OPERATOR_PASSWORD") { $pattern = '^\S{1,1024}$' }
     if ($name -eq "LANGFUSE_PUBLIC_KEY") { $pattern = '^pk-lf-[a-f0-9]{64}$' }
     if ($name -eq "LANGFUSE_SECRET_KEY") { $pattern = '^sk-lf-[a-f0-9]{64}$' }
     if ($value -isnot [string] -or $value -cnotmatch $pattern) {

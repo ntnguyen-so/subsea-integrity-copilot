@@ -2,7 +2,7 @@ export type Json = null | boolean | number | string | Json[] | { [key: string]: 
 export type Channel = "pressure" | "acoustic" | "methane" | "temperature";
 export type Mode = "scripted" | "live";
 export type Workflow = "sensor_alerts" | "agent_assisted";
-export type Speed = 1 | 2 | 5 | 10;
+export type Speed = 1 | 2 | 5 | 10 | 20 | 30;
 export interface Point { x: number; y: number }
 export interface Sensor { id: string; station_id: string; segment_id: string; chainage_m: number; position: Point; failure_domain_id: string; channels: Channel[] }
 export interface SitePack {
@@ -28,20 +28,21 @@ export interface WindowSnapshot {
   location: { status: string; best: LocationCandidate | null; compatible: LocationCandidate[]; reason: string; method: string; grid_m: number; inspection_start_m: number | null; inspection_end_m: number | null; station_bracket_m: number[] } | null;
   evidence: Record<string, EvidenceItem>; claims: Record<string, Claim>;
 }
-export interface ReplaySession { id: string; site_id: string; scenario: string; source_version: "legacy-v1" | "pressure-v2" | "pressure-v3"; seed: number; mode: Mode; workflow: Workflow; pause_on_anomaly: boolean; investigation_context_seconds?: number; investigation_context_policy?: "pressure-persistence-v1" | "inspection-context-v2"; pending_pressure_alert_seconds?: number | null; investigation_window_id: string | null; detected_alert_keys: string[]; state: "PAUSED" | "PLAYING" | "COMPLETED" | "FAILED"; clock_seconds: number; speed: Speed; duration_seconds: number; epoch: string; latest_window_id: string | null; version: number; updated_at: string; error: string | null }
+export interface ReplaySession { id: string; site_id: string; scenario: string; source_version: "legacy-v1" | "pressure-v2" | "pressure-v3"; seed: number; mode: Mode; workflow: Workflow; pause_on_anomaly: boolean; investigation_context_seconds?: number; investigation_context_policy?: "pressure-persistence-v1" | "inspection-context-v2" | "early-pressure-context-v3"; pending_pressure_alert_seconds?: number | null; investigation_window_id: string | null; detected_alert_keys: string[]; state: "PAUSED" | "PLAYING" | "COMPLETED" | "FAILED"; clock_seconds: number; speed: Speed; duration_seconds: number; epoch: string; latest_window_id: string | null; version: number; updated_at: string; error: string | null }
 export interface MonitoringEpisode { id: string; site_id: string; generation_id: string; state: string; hypothesis: string; basis_window_id: string; current_window_id: string; segment_ids: string[]; first_seen_seconds: number; material_revision: number; pending_window_id: string | null; auto_roots: number; dispatch_status: string | null }
 export interface HistoryInvestigation { assessment: "operating_change_plausible" | "instrumentation_context" | "unresolved"; document_ids: string[]; rejected_document_ids: string[]; comparison_call_ids: string[]; next_action: string }
 export interface CitedExplanation { text: string; references: string[] }
 export interface CauseExplanation extends CitedExplanation { cause: "leak" | "operating_change" | "instrumentation_or_telemetry"; stance: "possible" | "not_established" | "not_testable" }
 export interface RegionalAssessment extends CitedExplanation { sensor_ids: string[]; hypothesis: "leak_pattern" | "instrumentation_or_telemetry" | "operating_change" | "unresolved" }
 export interface EngineerInterpretation { focus: string; answer: CitedExplanation; competing_causes: CauseExplanation[]; follow_up_questions: string[]; regional_assessments?: RegionalAssessment[] }
-export interface InterpretationReview { protocol: "grounding-v1"; rounds: { candidate_hash: string; assessment: { decision: "accept" | "revise"; checks: { paragraph_id: string; verdict: string; reason: string; support: { reference: string; quote: string }[] }[] } }[] }
+export interface InterpretationReview { protocol: "grounding-v1" | "semantic-grounding-v2"; source_hash?: string; rounds: { candidate_hash: string; material_hash?: string | null; assessment: { decision: "accept" | "revise"; checks: { paragraph_id: string; verdict: string; reason: string; support: { reference: string; quote: string }[]; corrections?: { excerpt: string; instruction: string; source_references: string[] }[] }[] } }[] }
 export interface AgentResult { outcome: string; claim_refs: string[]; evidence_ids: string[]; limitations: string[]; hypothesis: string | null; recommendation_ids: string[]; summary: string; investigation: HistoryInvestigation | null; interpretation: EngineerInterpretation | null }
 export interface AgentTask { id: string; root_id: string; site_id: string; generation_id: string; snapshot_id: string; episode_id: string | null; parent_id: string | null; role: string; purpose: string; question: string; mode: Mode; state: string; created_at: string; updated_at: string; model_calls: number; tool_calls: number; plan: string[]; result: AgentResult | null; answer: string | null; error_code: string | null; error_message: string | null; automatic: boolean; interpretation_review?: InterpretationReview | null }
 export interface ConsoleEvent { id: number; site_id: string; generation_id: string; type: string; created_at: string; simulated_seconds: number | null; snapshot_id: string | null; task_id: string | null; payload: Record<string, Json> }
 export interface Session { authenticated: boolean; csrf_token: string | null; username: string | null }
 export interface Projection { replay: ReplaySession; pack: SitePack; latest_window: WindowSnapshot | null; warning: { kind: string; severity: string; snapshot_id: string | null; title: string; message: string }; episodes: MonitoringEpisode[]; tasks: AgentTask[]; cursor: number; health: { agent: string; observability: Record<string, Json>; monitor: string }; server_time: string }
 export interface InvestigationCase {
+  decision_policy?: "legacy-v1" | "llm-diagnosis-v1";
   schema_version: "investigation-v1"; task_id: string; generation_id: string; snapshot_id: string;
   question: string; mode: Mode; state: "SUCCEEDED" | "ABSTAINED"; window_start: string; window_end: string;
   input_hash: string; pack_version: string; baseline_version: string; parameter_version: string; history_version: string | null;
@@ -57,7 +58,26 @@ export interface InvestigationCase {
   knowledge_packet: KnowledgePacket | null;
   knowledge_used_ids: string[];
 }
-export interface TaskDetail { task: AgentTask; children: AgentTask[]; receipts: Record<string, Json>[]; investigation_receipts: Record<string, Json>[]; casefile: InvestigationCase | null; activity?: ConsoleEvent[] }
+export interface ExecutionUsage {
+  input_tokens: number; output_tokens: number; total_tokens: number;
+  cache_read_tokens: number; cache_write_tokens: number;
+  reserved_calls: number; completed_calls: number; reported_calls: number;
+  cache_reported_calls: number; priced_calls: number; models: string[];
+  cost_usd?: number | null;
+  cost_min_usd: number | null; cost_max_usd: number | null;
+  pricing_url: string; pricing_date: string; pricing_basis: string; pricing_assumptions: string;
+  rates_per_million: Record<string, { short: number[]; long: number[] }>;
+}
+export interface OutputMapping {
+  leaks: { segment_id: string; assertion: string; interval: { start_m: number; end_m: number } | null; quote: { path: string; text: string } }[];
+  sensor_issues: { sensor_id: string; kind: string; assertion: string; quote: { path: string; text: string } }[];
+  instrumentation_concern: boolean;
+}
+export interface OutputExtraction {
+  status: "completed" | "failed"; mapping: OutputMapping | null;
+  error_code?: string; execution_usage?: ExecutionUsage;
+}
+export interface TaskDetail { task: AgentTask; children: AgentTask[]; receipts: Record<string, Json>[]; investigation_receipts: Record<string, Json>[]; casefile: InvestigationCase | null; activity?: ConsoleEvent[]; execution_usage?: ExecutionUsage | null; output_mapping?: OutputExtraction | null }
 export interface KnowledgeCard {
   id: string; title: string; kind: "heuristic" | "procedure"; status: "draft" | "curated" | "demo_curated" | "retired";
   guidance: string; limitations: string[]; review_basis: string;

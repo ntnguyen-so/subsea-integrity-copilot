@@ -16,13 +16,14 @@ from uuid import NAMESPACE_URL, uuid5
 
 import numpy as np
 
+from .agent_evidence import measurement_snapshot
 from .budgets import BUDGET_MULTIPLIER, REVIEW_ROUND_LIMIT
 from .contracts import AgentResult, AgentTask, WindowSnapshot
 from .evaluation import EXPECTED
 from .history_evaluation import fixed_history_baseline
 from .investigation import ACTION_LABELS
 from .runtime.gateway import ToolGateway
-from .runtime.registry import REGISTRY
+from .runtime.registry import REGISTRY, role_policy
 from .store import Store
 from .validation import ValidationError, compatible, validate_result
 
@@ -183,6 +184,8 @@ def review_sequence_complete(decisions: Sequence[str], phases: Counter[str]) -> 
 
 
 def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) -> dict[str, Any]:
+    if root.decision_policy == "llm-diagnosis-v1":
+        snapshot = measurement_snapshot(snapshot)
     fresh = [t for t in store.list_tasks(root.generation_id) if t.root_id == root.id]
     dependency_map: dict[str, list[AgentTask]] = {}
     closure: dict[str, AgentTask] = {t.id: t for t in fresh}
@@ -315,7 +318,10 @@ def audit_operations(store: Store, root: AgentTask, snapshot: WindowSnapshot) ->
         "model_receipt_accounting": all(len(models[t.id]) == t.model_calls for t in fresh),
         "tool_receipt_accounting": all(len(receipts[t.id]) == t.tool_calls for t in fresh),
         "read_only_role_authority": all(
-            receipt["name"] in REGISTRY[closure[str(receipt["task_id"])].role].tools
+            receipt["name"] in role_policy(
+                closure[str(receipt["task_id"])].role,
+                closure[str(receipt["task_id"])].decision_policy,
+            ).tools
             for receipt in reads
         ),
         "pinned_tool_scope": all(

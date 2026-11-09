@@ -1,6 +1,7 @@
 """One LangGraph loop for every role; external effects happen at interrupts."""
 
 import json
+from collections.abc import Callable
 from typing import Annotated, Any, TypedDict
 
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, ToolMessage
@@ -12,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from subsea_copilot.budgets import SCHEMA_REPAIR_LIMIT
 from subsea_copilot.contracts import AgentResult
+from subsea_copilot.runtime.diagnostics import REPAIR_INSTRUCTION, validation_diagnostic
 from subsea_copilot.validation import ValidationError, parse_json
 
 
@@ -27,7 +29,8 @@ class WorkPlan(BaseModel):
             ["reuse", "answer"],
         ]:
             raise ValidationError(
-                "plan", "Plan must be bounded, serial, and prerequisite-complete."
+                "plan", "Plan must be bounded, serial, and prerequisite-complete.",
+                details={"path": ["steps"]},
             )
         if (
             self.steps[0] == "reuse"
@@ -35,9 +38,15 @@ class WorkPlan(BaseModel):
             or self.steps[0] != "reuse"
             and self.reuse_task_ids
         ):
-            raise ValidationError("plan", "Reuse requires explicit compatible source task IDs.")
+            raise ValidationError(
+                "plan", "Reuse requires explicit compatible source task IDs.",
+                details={"path": ["reuse_task_ids"]},
+            )
         if len(set(self.reuse_task_ids)) != len(self.reuse_task_ids):
-            raise ValidationError("plan", "Reuse source identities must be unique.")
+            raise ValidationError(
+                "plan", "Reuse source identities must be unique.",
+                details={"path": ["reuse_task_ids"]},
+            )
         return self.steps
 
 
@@ -47,9 +56,47 @@ class GraphState(TypedDict, total=False):
     parsed: dict[str, Any]
     repairs: int
     failure: str
+    harness_id: str
+    harness: dict[str, Any]
 
 
-def build_graph(checkpointer: Any = None, validator: Any = None, result_schema: Any = None) -> Any:
+def checked_plan_sources(
+    plan: WorkPlan, history_required: bool, compatible_tasks: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    plan.checked()
+    if history_required and "diagnosis" not in plan.steps and "reuse" not in plan.steps:
+        raise ValidationError(
+            "history_plan", "Current investigations require a diagnosis review.",
+            details={"path": ["steps"]},
+        )
+    if "reuse" not in plan.steps:
+        return []
+    identifiers = set(plan.reuse_task_ids)
+    selected = [task for task in compatible_tasks if task["id"] in identifiers]
+    if len(selected) != len(identifiers):
+        raise ValidationError(
+            "reuse", "Reuse proposal cites incompatible source tasks.",
+            details={"path": ["reuse_task_ids"]},
+        )
+    if not any(task["role"] == "sensor_quality" for task in selected):
+        raise ValidationError(
+            "reuse", "No compatible accepted quality result to reuse.",
+            details={"path": ["reuse_task_ids"]},
+        )
+    if history_required and not any(task["role"] == "event_diagnosis" for task in selected):
+        raise ValidationError(
+            "history_reuse", "Reuse must include the checked history diagnosis.",
+            details={"path": ["reuse_task_ids"]},
+        )
+    return selected
+
+
+def build_graph(
+    checkpointer: Any = None,
+    validator: Any = None,
+    result_schema: Any = None,
+    on_rejection: Callable[[Exception, int, bool, str | None], dict[str, Any]] | None = None,
+) -> Any:
     """The service fulfils model/tool requests outside graph nodes and checkpoints them."""
 
     def model(state: GraphState) -> dict[str, Any]:
@@ -67,28 +114,43 @@ def build_graph(checkpointer: Any = None, validator: Any = None, result_schema: 
             message = state["messages"][-1]
             if not isinstance(message, AIMessage) or not isinstance(message.content, str):
                 raise ValidationError("structure", "Final output must be a JSON string.")
-            if state["phase"] == "plan":
+            if state["phase"] == "plan" and validator is None:
                 parsed = WorkPlan.model_validate(parse_json(message.content))
                 parsed.checked()
                 return {"parsed": parsed.model_dump()}
             accepted = validator(message.content)
             return {"parsed": accepted.model_dump(mode="json")}
         except (ValueError, TypeError) as exc:
-            if state.get("repairs", 0) >= SCHEMA_REPAIR_LIMIT:
-                return {"failure": getattr(exc, "code", "structure")}
+            repairs = state.get("repairs", 0)
+            retry = repairs < SCHEMA_REPAIR_LIMIT
+            candidate = message.content if isinstance(message.content, str) else None
+            diagnostic = (
+                on_rejection(exc, repairs, retry, candidate)
+                if on_rejection else {**validation_diagnostic(exc), "repair_requested": retry}
+            )
+            if not diagnostic["repair_requested"]:
+                return {"failure": diagnostic["code"]}
             return {
                 "repairs": state.get("repairs", 0) + 1,
                 "messages": [
                     HumanMessage(
                         content=json.dumps(
                             {
-                                "repair": getattr(exc, "code", "structure"),
-                                "validator_feedback": str(exc)[:1000],
-                                "instruction": (
-                                    "Regenerate a complete valid result from the supplied source "
-                                    "evidence and validator feedback; no prose. "
-                                    "The invalid draft is retained in the audit, not this request."
+                                "repair": diagnostic["code"],
+                                "validator_feedback": diagnostic["validator_feedback"],
+                                "validator_issues": diagnostic["issues"],
+                                "repair_hint": diagnostic["repair_instruction"],
+                                **(
+                                    {"rejection_id": diagnostic["rejection_id"]}
+                                    if "rejection_id" in diagnostic else {}
                                 ),
+                                **(
+                                    {"validator_details": diagnostic["issues"][0]["details"]}
+                                    if diagnostic["issues"]
+                                    and diagnostic["issues"][0].get("details")
+                                    else {}
+                                ),
+                                "instruction": REPAIR_INSTRUCTION,
                                 **(
                                     {"expected_schema_source": "BOUND_CONTEXT.result_schema"}
                                     if result_schema is not None and state["phase"] != "plan"

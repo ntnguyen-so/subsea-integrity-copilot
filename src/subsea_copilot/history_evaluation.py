@@ -55,6 +55,7 @@ def fixed_history_baseline(
     *,
     quality_aware: bool = False,
 ) -> dict[str, Any]:
+    diagnosis = diagnosis.model_copy(update={"decision_policy": "legacy-v1"})
     reader = FixedReader(store)
 
     def read(name: str, arguments: dict[str, Any]) -> dict[str, Any]:

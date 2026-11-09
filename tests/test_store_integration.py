@@ -417,8 +417,19 @@ def test_fenced_leases_children_and_call_receipts(store: Store, settings: Settin
         store.save_task(claimed.model_copy(update={"state": "FAILED"}), lease_token=stale_token)
     with pytest.raises(Conflict):
         store.reserve_model_call(created.id, stale_token, 3)
+    with pytest.raises(Conflict):
+        store.record_task_event(
+            created.id, stale_token, "validation.rejected", {"code": "stale-validator"},
+        )
     token = reclaimed.lease_token
     assert token
+    store.record_task_event(
+        created.id, token, "validation.rejected",
+        {"code": "structure", "issues": [{"path": ["limitations"]}]},
+    )
+    assert store.task_harness_events(created.id)[0].payload["code"] == "structure"
+    with pytest.raises(ValueError):
+        store.record_task_event(created.id, token, "task.succeeded", {})
     assert store.latest_task_trace(created.id) is None
     store.publish_event(
         "generation",
@@ -432,6 +443,18 @@ def test_fenced_leases_children_and_call_receipts(store: Store, settings: Settin
     trace = store.latest_task_trace(created.id)
     assert trace and trace["trace_id"] == "trace" and trace["span_id"] == "span"
     assert "secret_text" not in trace
+    store.publish_event(
+        "generation",
+        "task.started",
+        {
+            "trace_id": "resumed-trace",
+            "span_id": "resumed-span",
+            "trace_layout": "investigation-v1",
+        },
+        task_id=created.id,
+    )
+    assert store.first_task_trace(created.id) == trace
+    assert store.latest_task_trace(created.id)["trace_layout"] == "investigation-v1"
     reclaimed = store.reserve_model_call(created.id, token, 3)
     assert store.begin_attempt(created.id, token)
     store.record_model_call(created.id, token, "model-1", {"mode": "scripted"})
@@ -681,6 +704,30 @@ def test_targeted_claim_never_consumes_other_queued_work(store: Store) -> None:
     assert store.get_task(first.id).state == "QUEUED"
     with pytest.raises(NotFound):
         store.claim_task("worker", task_id="missing")
+
+
+def test_investigation_claim_is_scoped_to_root_and_its_children(store: Store) -> None:
+    replay(store)
+    store.save_window(window(store))
+    first = store.create_task(root(store, "first"))
+    second = store.create_task(root(store, "second"))
+    assert store.pending_root_ids() == [first.id, second.id]
+    claimed = store.claim_task("second-worker", root_id=second.id)
+    assert claimed and claimed.id == second.id and claimed.lease_token
+    child = store.create_child(
+        root(
+            store, "second-quality", root_id=second.id, parent_id=second.id,
+            role="sensor_quality", purpose="assess_sensor_health", deadline=claimed.deadline,
+        ),
+        0, lease_token=claimed.lease_token,
+    )
+    selected = store.claim_task("second-worker", root_id=second.id)
+    assert selected and selected.id == child.id
+    assert store.get_task(first.id).state == "QUEUED"
+    with pytest.raises(ScopeError):
+        store.claim_task("second-worker", root_id=child.id)
+    with pytest.raises(ScopeError):
+        store.claim_task("second-worker", root_id=second.id, task_id=first.id)
 
 
 def test_reuse_authority_is_fenced_exact_and_tied_to_consumed_quality(store: Store) -> None:

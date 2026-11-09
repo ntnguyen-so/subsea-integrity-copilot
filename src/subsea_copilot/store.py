@@ -329,6 +329,86 @@ class Store:
                 for row in conn.execute("SELECT payload FROM subsea.replays ORDER BY id")
             ]
 
+    def recorded_investigations(
+        self, replay: ReplaySession, pack_version: str,
+    ) -> list[dict[str, Any]]:
+        self._scope(replay)
+        with self._tx(read=True) as conn:
+            return conn.execute(
+                """
+                SELECT t.id AS task_id, t.state, w.end_seconds AS source_seconds,
+                       w.id AS snapshot_id, w.payload->>'input_hash' AS input_hash,
+                       t.payload->>'created_at' AS created_at, 'saved' AS origin
+                FROM subsea.tasks t
+                JOIN subsea.replays r ON r.tenant_id=t.tenant_id AND r.site_id=t.site_id
+                    AND r.id=t.generation_id
+                JOIN subsea.windows w ON w.tenant_id=t.tenant_id AND w.site_id=t.site_id
+                    AND w.id=t.snapshot_id AND w.generation_id=t.generation_id
+                WHERE t.parent_id IS NULL AND t.state IN ('SUCCEEDED','ABSTAINED','FAILED')
+                    AND t.payload->>'mode'='live'
+                    AND r.payload->>'scenario'=%s AND (r.payload->>'seed')::bigint=%s
+                    AND r.payload->>'source_version'=%s
+                    AND (r.payload->>'epoch')::timestamptz=%s
+                    AND (r.payload->>'duration_seconds')::integer=%s
+                    AND w.payload->>'pack_version'=%s
+                ORDER BY w.end_seconds, t.payload->>'created_at'
+                """,
+                (replay.scenario, replay.seed, replay.source_version, replay.epoch,
+                 replay.duration_seconds, pack_version),
+            ).fetchall()
+
+    def list_monitor_replays(
+        self, source_version: str, hop_seconds: int, lateness_seconds: int,
+        unavailable_dispatch: Sequence[str],
+    ) -> list[ReplaySession]:
+        with self._tx(read=True) as conn:
+            rows = conn.execute(
+                """
+                SELECT r.payload FROM subsea.replays r
+                WHERE r.payload->>'source_version' = %s
+                AND r.payload->>'state' IN ('PLAYING','PAUSED','COMPLETED')
+                AND (
+                    r.payload->>'state' = 'PLAYING'
+                    OR (
+                        r.payload->>'investigation_window_id' IS NULL
+                        AND (
+                            (r.payload->>'last_endpoint')::numeric < LEAST(
+                                (r.payload->>'duration_seconds')::numeric,
+                                FLOOR(((r.payload->>'clock_seconds')::numeric - %s) / %s) * %s
+                            )
+                            OR EXISTS (
+                                SELECT 1 FROM subsea.episodes e
+                                WHERE e.tenant_id=r.tenant_id AND e.site_id=r.site_id
+                                AND e.generation_id=r.id
+                                AND e.payload->>'pending_window_id' IS NOT NULL
+                            )
+                        )
+                    )
+                    OR (
+                        r.payload->>'investigation_window_id' IS NOT NULL
+                        AND NOT EXISTS (
+                            SELECT 1 FROM subsea.tasks t
+                            WHERE t.tenant_id=r.tenant_id AND t.site_id=r.site_id
+                            AND t.generation_id=r.id AND t.parent_id IS NULL
+                            AND t.snapshot_id=r.payload->>'investigation_window_id'
+                        )
+                        AND NOT EXISTS (
+                            SELECT 1 FROM subsea.episodes e
+                            WHERE e.tenant_id=r.tenant_id AND e.site_id=r.site_id
+                            AND e.generation_id=r.id
+                            AND e.payload->>'current_window_id'
+                                = r.payload->>'investigation_window_id'
+                            AND e.payload->>'dispatch_status' = ANY(%s)
+                        )
+                    )
+                )
+                ORDER BY r.id
+                """,
+                (source_version, lateness_seconds, hop_seconds, hop_seconds,
+                 list(unavailable_dispatch)),
+            )
+            return [ReplaySession.model_validate(row["payload"]) for row in rows]
+
     def save_replay(
         self, session: ReplaySession, expected_version: int | None = None
     ) -> ReplaySession:
@@ -756,6 +836,40 @@ class Store:
                 conn, generation_id, type, payload, snapshot_id, task_id, simulated_seconds
             )
 
+    def record_task_event(
+        self, task_id: str, lease_token: str, type: str, payload: dict[str, JsonValue]
+    ) -> ConsoleEvent:
+        if type not in {
+            "validation.rejected", "validation.repair_requested", "validation.passed",
+            "harness.started", "model.context_compacted", "tool.rejected",
+            "grounding.checks_reused",
+        }:
+            raise ValueError("Unsupported harness event type.")
+        with self._tx(token=lease_token) as conn:
+            task = self._get(conn, "tasks", task_id, AgentTask)
+            self._generation(conn, task.generation_id)
+            self._live_task(conn, task_id, lease_token)
+            return self._event(
+                conn, task.generation_id, type, payload, task.snapshot_id, task.id
+            )
+
+    def task_harness_events(self, task_id: str) -> list[ConsoleEvent]:
+        with self._tx(read=True) as conn:
+            self._get(conn, "tasks", task_id, AgentTask)
+            return [
+                ConsoleEvent.model_validate(row)
+                for row in conn.execute(
+                    "SELECT * FROM subsea.events WHERE task_id=%s AND type=ANY(%s) "
+                    "ORDER BY id LIMIT 1000",
+                    (task_id, [
+                        "harness.started", "model.started", "model.context_compacted",
+                        "grounding.checks_reused",
+                        "validation.rejected", "validation.repair_requested",
+                        "validation.passed", "tool.rejected",
+                    ]),
+                )
+            ]
+
     def public_agent_activity(self, task_id: str) -> list[ConsoleEvent]:
         kinds = [
             "agent.check_started",
@@ -1023,6 +1137,7 @@ class Store:
                 "history_version",
                 "knowledge_packet",
                 "response_protocol",
+                "decision_policy",
                 "model_calls",
                 "tool_calls",
                 "lease_token",
@@ -1087,28 +1202,47 @@ class Store:
                         )
             return saved
 
+    def pending_root_ids(self) -> list[str]:
+        with self._tx(read=True) as conn:
+            return [
+                row["id"] for row in conn.execute(
+                    "SELECT id FROM subsea.tasks WHERE parent_id IS NULL "
+                    "AND state IN ('QUEUED','RUNNING','WAITING_ON_CHILD') "
+                    "ORDER BY created_at,id"
+                )
+            ]
+
     def claim_task(
-        self, owner: str, ttl_seconds: int = 1080, *, task_id: str | None = None
+        self, owner: str, ttl_seconds: int = 1080, *, task_id: str | None = None,
+        root_id: str | None = None,
     ) -> AgentTask | None:
         if not owner or ttl_seconds <= 0:
             raise ValueError("A lease owner and positive TTL are required")
         with self._tx(action="claim") as conn:
+            if root_id is not None:
+                root = self._get(conn, "tasks", root_id, AgentTask)
+                if root.parent_id is not None or root.root_id != root.id:
+                    raise ScopeError("Investigation worker requires a root task")
             if task_id is not None:
-                self._get(conn, "tasks", task_id, AgentTask)
+                selected_task = self._get(conn, "tasks", task_id, AgentTask)
+                if root_id is not None and selected_task.root_id != root_id:
+                    raise ScopeError("Task belongs to a different investigation")
             # Acquire generation locks before task locks, matching every writer.
             generations = conn.execute(
                 "SELECT DISTINCT generation_id FROM subsea.tasks "
                 "WHERE state IN ('QUEUED','RUNNING','WAITING_ON_CHILD') "
-                "AND (%s::text IS NULL OR id=%s) ORDER BY generation_id",
-                (task_id, task_id),
+                "AND (%s::text IS NULL OR id=%s) "
+                "AND (%s::text IS NULL OR root_id=%s) ORDER BY generation_id",
+                (task_id, task_id, root_id, root_id),
             ).fetchall()
             for generation in generations:
                 self._generation(conn, generation["generation_id"])
             expired = conn.execute(
                 "SELECT payload FROM subsea.tasks "
                 "WHERE state IN ('QUEUED','RUNNING','WAITING_ON_CHILD') "
-                "AND deadline <= clock_timestamp() AND (%s::text IS NULL OR id=%s) FOR UPDATE",
-                (task_id, task_id),
+                "AND deadline <= clock_timestamp() AND (%s::text IS NULL OR id=%s) "
+                "AND (%s::text IS NULL OR root_id=%s) FOR UPDATE",
+                (task_id, task_id, root_id, root_id),
             ).fetchall()
             for row in expired:
                 task = AgentTask.model_validate(row["payload"])
@@ -1135,9 +1269,10 @@ class Store:
                 "SELECT payload FROM subsea.tasks WHERE deadline > clock_timestamp() "
                 "AND (state='QUEUED' OR (state='RUNNING' AND lease_expires_at<=clock_timestamp())) "
                 "AND (%s::text IS NULL OR id=%s) "
+                "AND (%s::text IS NULL OR root_id=%s) "
                 "ORDER BY (parent_id IS NOT NULL) DESC,created_at,id "
                 "FOR UPDATE SKIP LOCKED LIMIT 1",
-                (task_id, task_id),
+                (task_id, task_id, root_id, root_id),
             ).fetchone()
             if not selected:
                 return None
@@ -1210,6 +1345,8 @@ class Store:
             if parent.lease_token != token:
                 raise Conflict("stale_lease")
             self._live_task(conn, parent.id, token, allow_waiting=True)
+            if child.decision_policy != parent.decision_policy:
+                raise Conflict("child_decision_policy_conflict")
             clean = child.model_copy(update={"lease_token": None, "lease_expires_at": None})
             saved = self._insert_task(
                 conn, clean, step_index=step_index, plan_revision=plan_revision
@@ -1319,10 +1456,11 @@ class Store:
             if len(quality) != 1 or len(diagnosis) != len(tasks) - 1:
                 raise Conflict("invalid_reuse_set")
             for task in tasks:
-                if (task.generation_id, task.snapshot_id, task.mode) != (
+                if (task.generation_id, task.snapshot_id, task.mode, task.decision_policy) != (
                     parent.generation_id,
                     parent.snapshot_id,
                     parent.mode,
+                    parent.decision_policy,
                 ):
                     raise ScopeError("scope_error")
                 expected_purpose = (
@@ -1376,12 +1514,19 @@ class Store:
             ]
 
     def latest_task_trace(self, task_id: str) -> dict[str, JsonValue] | None:
+        return self._task_trace(task_id, first=False)
+
+    def first_task_trace(self, task_id: str) -> dict[str, JsonValue] | None:
+        return self._task_trace(task_id, first=True)
+
+    def _task_trace(self, task_id: str, *, first: bool) -> dict[str, JsonValue] | None:
         with self._tx(read=True) as conn:
             self._get(conn, "tasks", task_id, AgentTask)
+            order = "ASC" if first else "DESC"
             row = conn.execute(
                 "SELECT payload FROM subsea.events WHERE task_id=%s AND type='task.started' "
                 "AND coalesce(payload->'trace_metadata'->>'trace_id',payload->>'trace_id') "
-                "IS NOT NULL ORDER BY id DESC LIMIT 1",
+                f"IS NOT NULL ORDER BY id {order} LIMIT 1",
                 (task_id,),
             ).fetchone()
             if not row:
@@ -1392,7 +1537,7 @@ class Store:
                 metadata = payload
             return {
                 key: metadata.get(key, payload.get(key))
-                for key in ("trace_id", "span_id", "attempt_id", "session_id")
+                for key in ("trace_id", "span_id", "attempt_id", "session_id", "trace_layout")
                 if metadata.get(key, payload.get(key)) is not None
             }
 
@@ -1523,6 +1668,7 @@ class Store:
         error: str | None = None,
         *,
         lease_token: str | None = None,
+        diagnostic: dict[str, JsonValue] | None = None,
     ) -> None:
         from .contracts import TOOL_RESULT_MAX_BYTES
 
@@ -1537,6 +1683,7 @@ class Store:
                 "arguments": arguments,
                 "result": result,
                 "error": error,
+                **({"diagnostic": diagnostic} if diagnostic is not None else {}),
             },
             lease_token,
             "tool_receipts",

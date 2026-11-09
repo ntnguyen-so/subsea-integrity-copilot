@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("actual projection counters and every pipeline chip are explicit", async ({ page }) => {
+test("actual projection counters remain explicit without the removed context section", async ({ page }) => {
   const password = process.env.SUBSEA_OPERATOR_PASSWORD;
   if (!password) throw new Error("Load the owned environment before browser qualification");
   const login = await page.context().request.post("/api/login", {
@@ -17,17 +17,12 @@ test("actual projection counters and every pipeline chip are explicit", async ({
   await expect(page.locator("#create-replay")).toBeEnabled();
   const projectionResponse = page.waitForResponse(response =>
     new URL(response.url()).pathname === `/api/replays/${replay.id}/projection`);
-  await page.locator("#replay-history").selectOption(replay.id);
+  await page.goto("/?replay=" + encodeURIComponent(replay.id) + "&view=live");
   const projection: { pack: { segments: { id: string }[] }; tasks: { state: string; model_calls: number }[] } = await (await projectionResponse).json();
   const calls = projection.tasks.reduce((sum, task) => sum + task.model_calls, 0);
   await expect(page.locator("#budget-usage")).toContainText(`${calls} model calls in listed tasks`);
   await expect(page.locator("#budget-usage")).toContainText("generation model-call limit: unknown");
-  await page.locator(".engineer-details > summary").click();
-  const chips = page.locator("#ontology .chip.entity");
-  await expect(chips).toHaveCount(projection.pack.segments.length);
-  for (const segment of projection.pack.segments) {
-    await expect(page.locator("#ontology").getByRole("button", { name: `PIPELINE ${segment.id}`, exact: true })).toBeVisible();
-  }
+  await expect(page.locator(".engineer-details")).toHaveCount(0);
 });
 
 test("real sensor charts survive projection refreshes on a pinned window", async ({ page }) => {
@@ -53,7 +48,7 @@ test("real sensor charts survive projection refreshes on a pinned window", async
   if (!replay) throw new Error("Sensor regression needs an existing real replay with a computed window");
   await page.goto("/");
   await expect(page.locator("#create-replay")).toBeEnabled();
-  await page.locator("#replay-history").selectOption(replay.id);
+  await page.goto("/?replay=" + encodeURIComponent(replay.id) + "&view=live");
   await expect(page.locator("#selected-basis")).toContainText("CURRENT VIEW");
   const sensor = page.locator("#topology [data-sensor]").first();
   await sensor.focus();

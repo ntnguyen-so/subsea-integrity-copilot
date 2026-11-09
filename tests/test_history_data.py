@@ -50,6 +50,74 @@ def test_default_corpus_is_deterministic_versioned_and_matches_network():
             assert timestamp.tzinfo == UTC
 
 
+def test_pressure_range_cache_preserves_group_calculation_and_isolates_pinned_scope():
+    from types import SimpleNamespace
+
+    from subsea_copilot.contracts import AgentTask, ReplaySession, utc_now
+    from subsea_copilot.diagnostics import analyze_window
+    from subsea_copilot.history import read_history
+    from subsea_copilot.ingest import normalize_records
+    from subsea_copilot.synthetic import generate_scenario
+    from subsea_copilot.validation import ValidationError as SourceError
+
+    source = generate_scenario("S1", duration_seconds=60)
+    observations = normalize_records(source.records, source.pack)
+    window = analyze_window(
+        source.pack, normalize_records(source.baseline, source.pack), observations,
+        "range-test", 60, 65, source.epoch, screening_only=True,
+    )
+    task = AgentTask(
+        id="range", root_id="range", generation_id=window.generation_id,
+        snapshot_id=window.id, site_id=window.site_id, role="event_diagnosis",
+        purpose="assess_event_and_location", question="Compare readings.", mode="scripted",
+        deadline=utc_now(), history_version="history-test", decision_policy="llm-diagnosis-v1",
+    )
+    reads = []
+
+    def read_observations(generation_id, start, end):
+        reads.append((generation_id, start, end))
+        return observations
+
+    store = SimpleNamespace(
+        get_replay=lambda generation: ReplaySession(
+            id=generation, scenario="S1", epoch=source.epoch,
+        ),
+        tool_receipts=lambda task_id: [{
+            "name": "history.search", "error": None, "result": {"documents": []},
+        }],
+        observations=read_observations,
+    )
+    arguments = {
+        "intent": "test_instrumentation",
+        "sensor_ids": [sensor.id for sensor in source.pack.sensors[:2]],
+        "start_seconds": 0, "split_seconds": 30, "end_seconds": 60,
+    }
+    cache = {}
+    first = read_history(store, task, window, "history.compare", arguments, range_cache=cache)
+    changed = {
+        **arguments, "sensor_ids": [sensor.id for sensor in source.pack.sensors[2:4]],
+        "split_seconds": 40,
+    }
+    reused = read_history(store, task, window, "history.compare", changed, range_cache=cache)
+    assert len(reads) == 1
+    assert reused["input_hash"] == first["input_hash"]
+    assert reused == read_history(store, task, window, "history.compare", changed)
+    assert len(reads) == 2
+    changed_snapshot = window.model_copy(update={"input_hash": "changed-pinned-source"})
+    read_history(store, task, changed_snapshot, "history.compare", changed, range_cache=cache)
+    read_history(
+        store, task.model_copy(update={"tenant_id": "another-tenant"}), window,
+        "history.compare", changed, range_cache=cache,
+    )
+    assert len(reads) == 4
+    with pytest.raises(SourceError, match="bounded past range"):
+        read_history(
+            store, task, window, "history.compare", {**changed, "end_seconds": 70},
+            range_cache=cache,
+        )
+    assert len(reads) == 4
+
+
 def test_custom_path_preserves_file_order_and_rejects_duplicate_ids(history_path):
     path = history_path
     payload = json.loads(DEFAULT_HISTORY_PATH.read_text(encoding="utf-8"))

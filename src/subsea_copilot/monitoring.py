@@ -52,8 +52,33 @@ def _pressure_alert_keys(snapshot: WindowSnapshot) -> list[str]:
             f"{finding.sensor_id}:pressure"
             for finding in snapshot.quality.findings
             if finding.anomaly_count > 0
+            or finding.missing > finding.expected * 0.1
+            or finding.hard_excluded > 0
         }
     )
+
+
+def pressure_context_ready(
+    snapshot: WindowSnapshot, pack: SitePack, first_alert_seconds: int, context_seconds: int = 15,
+) -> bool:
+    return (
+        snapshot.quality.status != "WARMING_UP"
+        and bool(_pressure_alert_keys(snapshot))
+        and snapshot.end_seconds - first_alert_seconds >= context_seconds
+    )
+
+
+def instrument_signals(snapshot: WindowSnapshot, pack: SitePack) -> set[tuple[str, str]]:
+    signals: set[tuple[str, str]] = set()
+    for finding in snapshot.quality.findings:
+        for kind, present in (
+            ("invalid", finding.hard_excluded > 0),
+            ("missing", finding.missing > finding.expected * 0.1),
+            ("anomaly", finding.anomaly_count > 0),
+        ):
+            if present:
+                signals.add((finding.sensor_id, kind))
+    return signals
 
 
 @dataclass
@@ -67,6 +92,7 @@ class SourceState:
     dirty: bool = False
     anchor: float = field(default_factory=time.monotonic)
     version: int = 0
+    pending_seconds: float = 0
 
 
 class Monitor:
@@ -146,9 +172,9 @@ class Monitor:
                     mode=mode,
                     workflow=workflow,
                     pause_on_anomaly=pause_on_anomaly,
-                    investigation_context_seconds=30
+                    investigation_context_seconds=15
                     if pause_on_anomaly and workflow == "agent_assisted" else 0,
-                    investigation_context_policy="inspection-context-v2",
+                    investigation_context_policy="early-pressure-context-v3",
                     epoch=dataset.epoch,
                 )
             )
@@ -157,13 +183,21 @@ class Monitor:
         self,
         generation_id: str,
         action: Literal["play", "pause", "step", "speed"],
-        speed: Literal[1, 2, 5, 10] | None,
+        speed: Literal[1, 2, 5, 10, 20, 30] | None,
         idempotency_key: str,
+        *,
+        step_seconds: Literal[1, 2, 5, 10, 20, 30] | None = None,
     ) -> ReplaySession:
         with self._lock:
             session = self.store.get_replay(generation_id)
             source = self._source(session)
             action_hash = content_hash({"action": action, "speed": speed})
+            if step_seconds is not None:
+                if action != "step":
+                    raise ValueError("Step seconds are only valid for a step control")
+                action_hash = content_hash({
+                    "action": action, "speed": speed, "step_seconds": step_seconds,
+                })
             if self.store.replay_control_applied(generation_id, idempotency_key, action_hash):
                 return session
             self._advance(session, source)
@@ -197,6 +231,7 @@ class Monitor:
             if action == "speed" and speed is None:
                 raise ValueError("Speed is required for speed control")
             changes: dict[str, object] = {"updated_at": utc_now()}
+            target_clock: float | None = None
             if action == "play":
                 changes["state"] = "PLAYING"
             elif action == "pause":
@@ -204,7 +239,19 @@ class Monitor:
             elif action == "speed":
                 changes["speed"] = speed
             else:
-                changes["clock_seconds"] = session.clock_seconds + source.dataset.pack.hop_seconds
+                target_clock = min(
+                    max(
+                        session.duration_seconds + source.dataset.pack.lateness_seconds,
+                        source.received_seconds[-1] if source.received_seconds else 0,
+                    ),
+                    session.clock_seconds + (
+                        step_seconds if step_seconds is not None
+                        else source.dataset.pack.hop_seconds
+                    ),
+                )
+                changes["clock_seconds"] = min(
+                    target_clock, session.clock_seconds + source.dataset.pack.hop_seconds,
+                )
             if action in ("play", "step"):
                 changes["investigation_window_id"] = None
             updated = session.model_copy(update=changes)
@@ -216,7 +263,23 @@ class Monitor:
             )
             source.anchor = time.monotonic()
             source.version = result.version
-            self._process(result, source)
+            if action != "speed":
+                source.pending_seconds = 0
+            result = self._process(result, source)
+            while (
+                target_clock is not None and result.clock_seconds < target_clock
+                and not result.investigation_window_id
+            ):
+                result = self.store.save_replay(
+                    result.model_copy(update={
+                        "clock_seconds": min(
+                            target_clock, result.clock_seconds + source.dataset.pack.hop_seconds,
+                        ),
+                    }),
+                    expected_version=result.version,
+                )
+                source.version = result.version
+                result = self._process(result, source)
             return self.store.get_replay(generation_id)
 
     def _advance(self, session: ReplaySession, source: SourceState) -> None:
@@ -224,38 +287,51 @@ class Monitor:
         if source.version != session.version:
             source.anchor = now
             source.version = session.version
+            source.pending_seconds = 0
         elapsed = now - source.anchor
         source.anchor = now
         if session.investigation_window_id:
+            source.pending_seconds = 0
             return
         if session.state == "PLAYING":
             end = max(
                 session.duration_seconds + source.dataset.pack.lateness_seconds,
                 source.received_seconds[-1] if source.received_seconds else 0,
             )
-            clock = min(end, session.clock_seconds + elapsed * session.speed)
-            if (
-                session.pause_on_anomaly
-                and session.workflow == "agent_assisted"
-                and session.last_endpoint < session.duration_seconds
-            ):
-                clock = min(
-                    clock,
-                    session.last_endpoint
-                    + source.dataset.pack.hop_seconds
-                    + source.dataset.pack.lateness_seconds,
+            source.pending_seconds += elapsed * session.speed
+            for _ in range(2):
+                clock = min(end, session.clock_seconds + source.pending_seconds)
+                check_alarm = (
+                    session.pause_on_anomaly
+                    and session.workflow == "agent_assisted"
+                    and session.last_endpoint < session.duration_seconds
                 )
-            updated = session.model_copy(
-                update={
-                    "clock_seconds": clock,
-                    "state": "COMPLETED" if clock >= end else "PLAYING",
-                    "updated_at": utc_now(),
-                }
-            )
-            saved = self.store.save_replay(updated, expected_version=session.version)
-            source.version = saved.version
-            self._process(saved, source)
+                if check_alarm:
+                    clock = min(
+                        clock,
+                        session.last_endpoint
+                        + source.dataset.pack.hop_seconds
+                        + source.dataset.pack.lateness_seconds,
+                    )
+                # Check each hop before releasing more data; retain unused wall-time credit.
+                source.pending_seconds -= clock - session.clock_seconds
+                updated = session.model_copy(
+                    update={
+                        "clock_seconds": clock,
+                        "state": "COMPLETED" if clock >= end else "PLAYING",
+                        "updated_at": utc_now(),
+                    }
+                )
+                saved = self.store.save_replay(updated, expected_version=session.version)
+                source.version = saved.version
+                session = self._process(saved, source)
+                if session.state != "PLAYING":
+                    source.pending_seconds = 0
+                    break
+                if not check_alarm or source.pending_seconds <= 0:
+                    break
         elif session.state in ("PAUSED", "COMPLETED"):
+            source.pending_seconds = 0
             self._process(session, source)
 
     def _release(self, session: ReplaySession, source: SourceState) -> list[CanonicalObservation]:
@@ -304,21 +380,27 @@ class Monitor:
                 tenant_id=session.tenant_id,
                 revision=previous.revision + 1 if previous else 1,
                 predecessor_id=previous.id if previous else None,
+                screening_only=session.workflow == "agent_assisted",
             )
         self.last_compute_seconds = time.monotonic() - started
         return result
 
-    def _process(self, session: ReplaySession, source: SourceState) -> None:
+    def _process(self, session: ReplaySession, source: SourceState) -> ReplaySession:
         if session.investigation_window_id:
-            return
+            return session
         changed = self._release(session, source)
         pack = source.dataset.pack
         watermark = session.clock_seconds - pack.lateness_seconds
         latest_id = session.latest_window_id
         endpoint = session.last_endpoint
         if changed and endpoint > 0:
-            times = [(row.observed_at - session.epoch).total_seconds() for row in changed]
-            for old in reversed(self.store.list_windows(session.id, limit=120)):
+            times = [
+                (row.observed_at - session.epoch).total_seconds()
+                for row in changed
+                if (row.observed_at - session.epoch).total_seconds() < endpoint
+            ]
+            revisions = self.store.list_windows(session.id, limit=120) if times else []
+            for old in reversed(revisions):
                 if old.end_seconds < watermark - pack.revision_seconds:
                     continue
                 if not any(
@@ -341,8 +423,9 @@ class Monitor:
             latest_id = snapshot.id
             endpoint = next_endpoint
             held = self._pause_for_investigation(session, snapshot)
-            current = self.store.get_replay(session.id)
-            self._episode(current, snapshot)
+            if session.workflow == "agent_assisted" and (held or not session.pause_on_anomaly):
+                current = self.store.get_replay(session.id)
+                self._episode(current, snapshot)
             if held:
                 break
             next_endpoint += pack.hop_seconds
@@ -356,6 +439,8 @@ class Monitor:
                 expected_version=current.version,
             )
             source.version = saved.version
+            return saved
+        return session
 
     def _pause_for_investigation(self, session: ReplaySession, snapshot: WindowSnapshot) -> bool:
         if (
@@ -372,18 +457,8 @@ class Monitor:
             pending = snapshot.end_seconds
         if not raised:
             pending = None
-        ready = bool(raised) and (
-            current.investigation_context_seconds == 0
-            or (
-                snapshot.event.persistence_seconds >= self.pack_for(session.id).persistence_seconds
-                if current.investigation_context_policy == "pressure-persistence-v1"
-                else bool(
-                    snapshot.event.eligible_location and snapshot.location
-                    and snapshot.location.status == "located"
-                )
-            )
-            or pending is not None
-            and snapshot.end_seconds - pending >= current.investigation_context_seconds
+        ready = bool(raised) and pending is not None and (
+            snapshot.end_seconds - pending >= current.investigation_context_seconds
         )
         changes: dict[str, object] = {
             "pending_pressure_alert_seconds": None if ready else pending,
@@ -447,7 +522,7 @@ class Monitor:
                     return
         material = False
         if episode is None:
-            if snapshot.event.hypothesis == "no_event" and not held:
+            if not _pressure_alert_keys(snapshot) and not held:
                 return
             episode = MonitoringEpisode(
                 id="episode-" + uuid.uuid4().hex,
@@ -455,10 +530,10 @@ class Monitor:
                 site_id=session.site_id,
                 generation_id=session.id,
                 state="COVERAGE_LOST" if snapshot.quality.status == "COVERAGE_LOST" else "ACTIVE",
-                hypothesis=snapshot.event.hypothesis,
+                hypothesis="insufficient_evidence",
                 basis_window_id=snapshot.id,
                 current_window_id=snapshot.id,
-                segment_ids=snapshot.event.segment_ids,
+                segment_ids=[],
                 first_seen_seconds=snapshot.end_seconds,
                 last_qualified_seconds=snapshot.end_seconds,
             )
@@ -466,27 +541,21 @@ class Monitor:
         else:
             old = self.store.get_window(episode.current_window_id)
             material = (
-                old.event.hypothesis != snapshot.event.hypothesis
+                _pressure_alert_keys(old) != _pressure_alert_keys(snapshot)
                 or (
                     old.quality.status != snapshot.quality.status
                     and "COVERAGE_LOST" in (old.quality.status, snapshot.quality.status)
                 )
-                or old.event.segment_ids != snapshot.event.segment_ids
                 or (held and old.id != snapshot.id)
             )
-            if old.location and old.location.best and snapshot.location and snapshot.location.best:
-                material = (
-                    material
-                    or abs(old.location.best.chainage_m - snapshot.location.best.chainage_m) > 200
-                )
             episode = episode.model_copy(update={"current_window_id": snapshot.id})
             if snapshot.quality.status == "COVERAGE_LOST":
                 episode.state = "COVERAGE_LOST"
-            elif snapshot.event.hypothesis != "no_event" or held:
+            elif _pressure_alert_keys(snapshot) or held:
                 episode.state = "ACTIVE"
                 episode.last_qualified_seconds = snapshot.end_seconds
-                episode.hypothesis = snapshot.event.hypothesis
-                episode.segment_ids = snapshot.event.segment_ids
+                episode.hypothesis = "insufficient_evidence"
+                episode.segment_ids = []
             elif (
                 snapshot.end_seconds - episode.last_qualified_seconds
                 >= load_pack(session.site_id).quiet_seconds
@@ -508,22 +577,10 @@ class Monitor:
             if (
                 not held
                 and episode.dispatch_status == "gathering_context"
-                and snapshot.event.hypothesis == "no_event"
+                and not _pressure_alert_keys(snapshot)
             ):
                 episode.pending_window_id = None
                 episode.dispatch_status = "resolved_before_dispatch"
-                self.store.save_episode(episode)
-                return
-            pack = load_pack(session.site_id)
-            if (
-                not held
-                and snapshot.event.hypothesis == "insufficient_evidence"
-                and snapshot.quality.status != "COVERAGE_LOST"
-                and snapshot.end_seconds - episode.first_seen_seconds < pack.window_seconds
-            ):
-                # Do not let a transient, unresolved job block a maturing leak alarm.
-                episode.pending_window_id = snapshot.id
-                episode.dispatch_status = "gathering_context"
                 self.store.save_episode(episode)
                 return
             if episode.dispatch_status == "gathering_context":
@@ -586,24 +643,19 @@ class Monitor:
 
     def tick(self) -> None:
         with self._lock:
-            for session in self.store.list_replays():
-                if session.source_version != SOURCE_VERSION:
-                    continue
-                if session.state not in ("PLAYING", "PAUSED", "COMPLETED"):
-                    continue
+            pack = load_pack(self.store.site_id)
+            for session in self.store.list_monitor_replays(
+                SOURCE_VERSION, pack.hop_seconds, pack.lateness_seconds,
+                sorted(UNAVAILABLE_DISPATCH),
+            ):
                 if session.investigation_window_id:
                     if self.store.acquire_monitor_lease(session.id, self.owner, ttl_seconds=10):
                         self._episode(
                             session, self.store.get_window(session.investigation_window_id)
                         )
                     continue
-                pending = any(
-                    row.pending_window_id is not None
-                    for row in self.store.list_episodes(session.id)
-                )
                 caught_up = False
                 if session.state != "PLAYING":
-                    pack = load_pack(session.site_id)
                     target = min(
                         session.duration_seconds,
                         max(
@@ -615,18 +667,20 @@ class Monitor:
                         * pack.hop_seconds,
                     )
                     caught_up = session.last_endpoint >= target
-                    if caught_up and not pending:
-                        continue
                 if self.store.acquire_monitor_lease(session.id, self.owner, ttl_seconds=10):
                     if not caught_up:
                         self._advance(session, self._source(session))
-                    current = self.store.get_replay(session.id)
-                    pending = any(
-                        row.pending_window_id is not None
-                        for row in self.store.list_episodes(session.id)
-                    )
-                    if pending and current.latest_window_id:
-                        self._episode(current, self.store.get_window(current.latest_window_id))
+                    if session.workflow == "agent_assisted" and not session.pause_on_anomaly:
+                        pending = any(
+                            row.pending_window_id is not None
+                            for row in self.store.list_episodes(session.id)
+                        )
+                        if pending:
+                            current = self.store.get_replay(session.id)
+                            if current.latest_window_id:
+                                self._episode(
+                                    current, self.store.get_window(current.latest_window_id),
+                                )
 
     def start(self) -> None:
         self._thread = threading.Thread(target=self._run, name=self.owner, daemon=True)
@@ -634,8 +688,10 @@ class Monitor:
 
     def _run(self) -> None:
         try:
-            while not self._stop.wait(0.25):
+            while not self._stop.is_set():
+                started = time.monotonic()
                 self.tick()
+                self._stop.wait(max(0.01, 0.1 - (time.monotonic() - started)))
         except Exception:
             logger.exception("Monitoring worker stopped after an unhandled failure")
             self.error = "monitor_worker_failed"

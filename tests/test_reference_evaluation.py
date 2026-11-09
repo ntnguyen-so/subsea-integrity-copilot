@@ -61,7 +61,7 @@ def test_extraction_is_truth_blind_and_rejects_invented_quotes(tmp_path: Any) ->
     )
     assert result["status"] == "completed"
     packet = json.loads(model.invoke.call_args.args[0][1].content)
-    assert set(packet) == {"public_texts", "sensor_catalog"}
+    assert set(packet) == {"public_texts", "sensor_catalog", "quote_choices"}
     assert "ground_truth" not in json.dumps(packet)
     mapping["sensor_issues"][0]["quote"]["text"] = "P1-ST1-A is definitely broken."
     with pytest.raises(ValueError, match="quote_mismatch"):
@@ -296,6 +296,7 @@ def test_invalid_check_plan_is_audited_without_reading_and_scope_still_fails(tmp
                 "arguments": arguments,
                 "result": result,
                 "error": error,
+                "diagnostic": kwargs.get("diagnostic"),
             }
         )
 
@@ -316,7 +317,8 @@ def test_invalid_check_plan_is_audited_without_reading_and_scope_still_fails(tmp
     }
     call = {"id": "bad-check", "name": "history.search", "args": arguments}
     result = gateway.dispatch(call)
-    assert result == {"result": None, "error": "knowledge_check_plan"}
+    assert result["result"] is None and result["error"] == "knowledge_check_plan"
+    assert result["rejection"]["executed"] is False
     gateway._read.assert_not_called()
     assert receipts[0]["arguments"]["check_question"] == "x" * 242
     assert gateway.dispatch(call) == result
@@ -374,6 +376,7 @@ def test_invalid_evidence_identifiers_are_repairable_but_foreign_scope_is_not(
                 "arguments": arguments,
                 "result": result,
                 "error": error,
+                "diagnostic": kwargs.get("diagnostic"),
             }
         )
 
@@ -389,9 +392,11 @@ def test_invalid_evidence_identifiers_are_repairable_but_foreign_scope_is_not(
         "ids": ["claim-000"],
     }
     call = {"id": "invalid-evidence", "name": "evidence.get", "args": arguments}
-    assert gateway.dispatch(call) == {"result": None, "error": "tool_arguments"}
+    rejected = gateway.dispatch(call)
+    assert rejected["result"] is None and rejected["error"] == "tool_arguments"
+    assert rejected["rejection"]["executed"] is False
     gateway._read.assert_not_called()
-    assert gateway.dispatch(call) == {"result": None, "error": "tool_arguments"}
+    assert gateway.dispatch(call) == rejected
     assert store.reserve_tool_call.call_count == 1
     assert store.record_tool_call.call_count == 1
     with pytest.raises(ValidationError, match="scope"):

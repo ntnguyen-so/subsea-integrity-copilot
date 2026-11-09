@@ -52,6 +52,7 @@ def score_report(report: dict[str, Any]) -> dict[str, Any]:
     reports, judged, withheld, negative_cases, controls = 0, 0, 0, 0, 0
     for row in rows:
         identity, truth = row["case_id"], row["truth"]
+        needs_review = truth.get("review_required", truth["pressure_trigger"])
         mapping = (row.get("extraction") or {}).get("mapping")
         source = truth["leak_source"]
         if source:
@@ -67,7 +68,7 @@ def score_report(report: dict[str, Any]) -> dict[str, Any]:
                 )
             if mapping["instrumentation_concern"]:
                 predicted_faults.add(identity)
-        if truth["pressure_trigger"]:
+        if needs_review:
             typed_truth.update(
                 (identity, item["sensor_id"], item["kind"]) for item in truth["sensor_issues"]
             )
@@ -116,7 +117,9 @@ def score_report(report: dict[str, Any]) -> dict[str, Any]:
                 row["status"] == "completed"
                 and not any(item["interval"] for item in (mapping or {}).get("leaks", []))
             )
-    eligible = sum(row["truth"]["pressure_trigger"] for row in rows)
+    eligible = sum(
+        row["truth"].get("review_required", row["truth"]["pressure_trigger"]) for row in rows
+    )
     groups = {
         "leak_recognition": detection_metrics(leaks, predicted_leaks),
         "agent_pipeline_identification": detection_metrics(pipelines, predicted_pipelines),

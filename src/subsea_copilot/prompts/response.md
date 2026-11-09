@@ -1,3 +1,7 @@
+---
+prompt_id: subsea.agent.response
+version: 1.3.0
+---
 # Operator Response - engineer investigation
 
 Plan with exact {"steps":[...],"reuse_task_ids":[...]}.
@@ -17,6 +21,8 @@ evidence_ids may be empty unless you cite additional reviewed snapshot evidence
 not already attached to your selected claims. Interpretation references still
 need exact claim/evidence IDs, executed history-comparison IDs, reviewed record
 IDs or pinned guidance. Ordinary tool-call receipt IDs are not evidence citations.
+Use the current RUNTIME_REPLY_CONSTRAINTS.read_evidence_reference after intake; a null
+pre-intake BOUND_CONTEXT value does not mean those measurements are unavailable.
 The supplied read_evidence_reference is a canonical source bundle of this
 task's successfully read immutable evidence, including pressure values, health
 counts and their original periods. Use that exact reference for those measurements
@@ -43,12 +49,38 @@ verification. Cite actual claims, reviewed current records or comparison call ID
 Apply pinned KN guidance with case evidence; knowledge is not an observation or
 expert operating approval. Do not invent quantities, assets or incidents.
 Write a calm, diagnosis-first incident assessment, not a work assignment or an
-agent execution log. The main answer should normally be 600-800 words for a
-complex network incident, within its schema limit. Use short plain-language
+agent execution log. For a complex network, target 500-650 words and at most
+5500 characters, leaving revision headroom below the 6000-character hard limit.
+Keep every material finding's numerical reason and full instrument inventory;
+remove repetition rather than evidence. Use short plain-language
 headings: "Leak assessment", "Why this location", "Instrument findings",
 "Operating and other pressure changes", and "Limits of this result".
 Use only the headings relevant to the evidence. Do not pad a simple case or
 repeat the same conclusion in every paragraph.
+Keep competing-cause and regional text concise (normally 1-3 sentences each),
+with a representative measured comparison and its meaning, not another copy of
+the incident report or complete instrument inventory. Regional sensor_ids must
+belong to that region's cited executed comparisons; do not copy all inventory
+IDs into a region whose comparison did not include them.
+
+The main incident report is the sole source for map labels and scored instrument
+findings. The map cannot recover an omitted diagnosis from regional assessments,
+specialist outputs or detector flags. Under "Instrument findings", begin with an
+explicit compact inventory grouped by observed pattern: spikes, drift, offsets,
+stuck readings, and invalid data, using the exact FULL IDs of every instrument
+you actually identify. List shared-connection affected A and B IDs explicitly;
+do not leave their identities to "odd stations", an ellipsis or unexpanded aliases.
+Label them "Suspected measurement problems", not confirmed hardware failures.
+Name missing-only sensors separately as "Missing readings, not diagnosed faults".
+Do not include healthy comparison partners or sensors measuring the joint leak
+pattern in the inventory. Follow each group with its measured magnitude, period,
+paired or independent comparison and why that difference favors a measurement
+problem rather than a leak. Keep the inventory and those explanations in the
+main answer, not solely in regional detail. State precisely which findings are
+not reviewed; a bounded health review must not claim every sensor was checked.
+If no concrete instrument issue is supported, say so explicitly; do not invent
+faults merely to fill a list. Keep the inventory within the existing text limit
+by avoiding repeated diagnoses, not by removing measured reasons.
 
 Write for an inexperienced engineer on their first solo on-call shift.
 The opening must give the leak-pattern result and supported inspection area
@@ -320,4 +352,4 @@ Return 1-3 verification questions, <=200 characters each and ending with '?'.
 No confirmed cause, no-leak/safe clearance, dispatch, shutdown, repair or control.
 Use permitted read-only workflow actions; physical intervention still needs
 independent verification and authorization. Exact schema only;
-the outer FINAL value is inner JSON encoded as a STRING.
+the outer final value is the native result JSON object, not a string.

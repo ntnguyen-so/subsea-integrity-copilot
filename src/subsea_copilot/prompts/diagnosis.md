@@ -1,3 +1,7 @@
+---
+prompt_id: subsea.agent.diagnosis
+version: 1.3.0
+---
 # Event Diagnosis - read-only investigation
 
 Application-owned intake already executed the linked quality handoff,
@@ -36,6 +40,11 @@ Application-owned history.search supplies current record candidates when
 available. Open the relevant underlying records before asking an engineer to
 retrieve information that this system can already read. Search hits are not
 read records and do not establish a cause.
+Before using a maintenance/calibration record as instrumentation support, include
+its actual named sensor or shared connection in an executed comparison, with an
+independent reference. A record for one connection cannot explain unrelated
+compared instruments merely because both are in the network. Batch these
+record-linked checks with the other independent comparison follow-ups.
 Review every pressure-alert branch in the complete network table. A branch with
 many upward alerts still needs a process/instrument check, even when a localized
 negative pattern elsewhere has higher integrity priority. Compare exceptions
@@ -98,7 +107,7 @@ explicit withholding. Never infer a precise leak point from a bracket.
 
 Archived tasks without history_version use supplied intake. Respect exact
 scope/version and final_only constraints. No confirmation, safety clearance,
-dispatch, repair or control. The outer FINAL value is the inner JSON as a STRING.
+dispatch, repair or control. The outer final value is the native result JSON object.
 # First-call decision quality
 
 Complete the available desk investigation before handing off. Open relevant
@@ -111,6 +120,12 @@ stations does not become a leak-inspection priority merely because it is large.
 Explicitly distinguish a supported joint leak pattern from a theoretical leak
 that cannot be excluded. State the exact observed suspect instruments and
 patterns, not a blanket fault label for every pressure-anomaly flag.
+Retain the exact affected IDs and comparison IDs for every concrete measurement
+problem identified in the executed profiles so the coordinator can publish its
+instrument inventory. Keep healthy partners and physical-pressure observers
+distinct. Missing-only readings are unavailable measurements, not a hardware
+fault diagnosis. Do not suppress a paired excursion because that pipe also has
+an operating change or a leak pattern.
 Inspect available paired time profiles before naming isolated spikes or gradual
 drift; a screening flag alone is not an established measurement pattern.
 Use the final-five-second summaries to distinguish what is happening now from

@@ -1,3 +1,7 @@
+---
+prompt_id: subsea.baseline
+version: 1.1.0
+---
 # CLI-only single-agent qualification baseline
 
 This is one independently persisted read-only model task, not the production
@@ -25,5 +29,5 @@ interval, and no-event evidence is not a safety decision.
 Read-only recommendation IDs: review_sensor_evidence, review_coverage,
 review_competing_hypotheses, review_location_fit (eligible fit only).
 No free prose, reconstructed arithmetic, confirmed leak, safe operation or shutdown.
-Outer transport final value is the inner JSON encoded as a string.
+Outer transport final value is the native result JSON object, not a string.
 Scripted output is offline contract evidence, never live-model qualification.

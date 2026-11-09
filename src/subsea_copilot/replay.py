@@ -84,6 +84,6 @@ class ReplayClock:
         return self.clock_seconds
 
     def set_speed(self, speed: int) -> None:
-        if speed not in {1, 2, 5, 10}:
-            raise ValueError("Supported replay speeds: 1, 2, 5, 10")
+        if speed not in {1, 2, 5, 10, 20, 30}:
+            raise ValueError("Supported replay speeds: 1, 2, 5, 10, 20, 30")
         self.speed = speed

@@ -1,0 +1,167 @@
+{
+  "version": "agent-reference-v1",
+  "scope": "Controlled factual and evidence-authority tasks, not field engineering judgment or full multi-agent workflow reliability.",
+  "reference_origin": "Inputs and expected structured facts authored before inference; no successful agent answers used as reference labels.",
+  "cases": [
+    {
+      "id": "AR-D1", "split": "development", "family": "measurement_facts",
+      "name": "Normalize paired measurements without inventing a cause",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P1-A", "P1-B"],
+        "measurements": [
+          {"id": "M1", "sensor_id": "P1-A", "source_seconds": 120, "value": 8000, "unit": "kPa"},
+          {"id": "M2", "sensor_id": "P1-B", "source_seconds": 120, "value": 8.05, "unit": "MPa"}
+        ], "documents": []
+      },
+      "expected": {
+        "measurements": [
+          {"sensor_id": "P1-A", "pressure_bar": 80, "status": "valid", "evidence_id": "M1"},
+          {"sensor_id": "P1-B", "pressure_bar": 80.5, "status": "valid", "evidence_id": "M2"}
+        ],
+        "instrument_findings": [
+          {"sensor_id": "P1-A", "issue": "not_established", "document_ids": []},
+          {"sensor_id": "P1-B", "issue": "not_established", "document_ids": []}
+        ],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    },
+    {
+      "id": "AR-D2", "split": "development", "family": "instrument_evidence",
+      "name": "Use a current approved instrument verification record",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P2-A"],
+        "measurements": [{"id": "M3", "sensor_id": "P2-A", "source_seconds": 115, "value": 79, "unit": "bar"}],
+        "documents": [
+          {"id": "I1", "kind": "instrument_verification", "sensor_id": "P2-A", "issue": "offset",
+           "status": "approved", "available_seconds": 110, "effective_seconds": 90}
+        ]
+      },
+      "expected": {
+        "measurements": [{"sensor_id": "P2-A", "pressure_bar": 79, "status": "valid", "evidence_id": "M3"}],
+        "instrument_findings": [{"sensor_id": "P2-A", "issue": "offset", "document_ids": ["I1"]}],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    },
+    {
+      "id": "AR-H1", "split": "held_out", "family": "leak_evidence",
+      "name": "Distinguish verified leakage from pressure-only suspicion",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P5-A"],
+        "measurements": [{"id": "M4", "sensor_id": "P5-A", "source_seconds": 120, "value": 7820, "unit": "kPa"}],
+        "documents": [
+          {"id": "L1", "kind": "leak_verification", "segment_id": "P5", "status": "approved",
+           "available_seconds": 119, "effective_seconds": 115}
+        ]
+      },
+      "expected": {
+        "measurements": [{"sensor_id": "P5-A", "pressure_bar": 78.2, "status": "valid", "evidence_id": "M4"}],
+        "instrument_findings": [{"sensor_id": "P5-A", "issue": "not_established", "document_ids": []}],
+        "leak_claim": {"status": "confirmed", "segment_id": "P5", "document_ids": ["L1"]}
+      }
+    },
+    {
+      "id": "AR-H2", "split": "held_out", "family": "source_time",
+      "name": "Exclude future readings and unavailable verification documents",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P6-A"],
+        "measurements": [
+          {"id": "M5", "sensor_id": "P6-A", "source_seconds": 110, "value": 7.98, "unit": "MPa"},
+          {"id": "M6", "sensor_id": "P6-A", "source_seconds": 121, "value": 70, "unit": "bar"}
+        ],
+        "documents": [
+          {"id": "L2", "kind": "leak_verification", "segment_id": "P6", "status": "approved",
+           "available_seconds": 121, "effective_seconds": 110},
+          {"id": "I2", "kind": "instrument_verification", "sensor_id": "P6-A", "issue": "drift",
+           "status": "draft", "available_seconds": 100, "effective_seconds": 100}
+        ]
+      },
+      "expected": {
+        "measurements": [{"sensor_id": "P6-A", "pressure_bar": 79.8, "status": "valid", "evidence_id": "M5"}],
+        "instrument_findings": [{"sensor_id": "P6-A", "issue": "not_established", "document_ids": []}],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    },
+    {
+      "id": "AR-H3", "split": "held_out", "family": "missing_invalid",
+      "name": "Disclose invalid and missing values rather than inventing pressures",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P4-A", "P4-B"],
+        "measurements": [
+          {"id": "M7", "sensor_id": "P4-A", "source_seconds": 100, "value": 80, "unit": "bar"},
+          {"id": "M8", "sensor_id": "P4-A", "source_seconds": 119, "value": "not-a-pressure", "unit": "bar"}
+        ], "documents": []
+      },
+      "expected": {
+        "measurements": [
+          {"sensor_id": "P4-A", "pressure_bar": null, "status": "invalid", "evidence_id": "M8"},
+          {"sensor_id": "P4-B", "pressure_bar": null, "status": "missing", "evidence_id": null}
+        ],
+        "instrument_findings": [
+          {"sensor_id": "P4-A", "issue": "not_established", "document_ids": []},
+          {"sensor_id": "P4-B", "issue": "not_established", "document_ids": []}
+        ],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    },
+    {
+      "id": "AR-H4", "split": "held_out", "family": "conflicting_evidence",
+      "name": "Disclose contradictory approved fault records",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P7-A"],
+        "measurements": [{"id": "M9", "sensor_id": "P7-A", "source_seconds": 118, "value": 79.25, "unit": "bar"}],
+        "documents": [
+          {"id": "I3", "kind": "instrument_verification", "sensor_id": "P7-A", "issue": "offset",
+           "status": "approved", "available_seconds": 100, "effective_seconds": 90},
+          {"id": "I4", "kind": "instrument_verification", "sensor_id": "P7-A", "issue": "drift",
+           "status": "approved", "available_seconds": 110, "effective_seconds": 95}
+        ]
+      },
+      "expected": {
+        "measurements": [{"sensor_id": "P7-A", "pressure_bar": 79.25, "status": "valid", "evidence_id": "M9"}],
+        "instrument_findings": [{"sensor_id": "P7-A", "issue": "not_established", "document_ids": ["I3", "I4"]}],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    },
+    {
+      "id": "AR-H5", "split": "held_out", "family": "superseded_evidence",
+      "name": "Use the explicit approved replacement, not an obsolete diagnosis",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P3-A"],
+        "measurements": [{"id": "M10", "sensor_id": "P3-A", "source_seconds": 120, "value": 7950, "unit": "kPa"}],
+        "documents": [
+          {"id": "I5", "kind": "instrument_verification", "sensor_id": "P3-A", "issue": "drift",
+           "status": "approved", "available_seconds": 90, "effective_seconds": 80},
+          {"id": "I6", "kind": "instrument_verification", "sensor_id": "P3-A", "issue": "offset",
+           "status": "approved", "available_seconds": 115, "effective_seconds": 110, "supersedes": "I5"}
+        ]
+      },
+      "expected": {
+        "measurements": [{"sensor_id": "P3-A", "pressure_bar": 79.5, "status": "valid", "evidence_id": "M10"}],
+        "instrument_findings": [{"sensor_id": "P3-A", "issue": "offset", "document_ids": ["I6"]}],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    },
+    {
+      "id": "AR-H6", "split": "held_out", "family": "insufficient_evidence",
+      "name": "Pressure changes alone do not establish a confirmed physical cause",
+      "input": {
+        "as_of_seconds": 120, "sensor_ids": ["P6-A", "P6-B"],
+        "measurements": [
+          {"id": "M11", "sensor_id": "P6-A", "source_seconds": 120, "value": 78.1, "unit": "bar"},
+          {"id": "M12", "sensor_id": "P6-B", "source_seconds": 120, "value": 7800, "unit": "kPa"}
+        ], "documents": []
+      },
+      "expected": {
+        "measurements": [
+          {"sensor_id": "P6-A", "pressure_bar": 78.1, "status": "valid", "evidence_id": "M11"},
+          {"sensor_id": "P6-B", "pressure_bar": 78, "status": "valid", "evidence_id": "M12"}
+        ],
+        "instrument_findings": [
+          {"sensor_id": "P6-A", "issue": "not_established", "document_ids": []},
+          {"sensor_id": "P6-B", "issue": "not_established", "document_ids": []}
+        ],
+        "leak_claim": {"status": "not_established", "segment_id": null, "document_ids": []}
+      }
+    }
+  ]
+}

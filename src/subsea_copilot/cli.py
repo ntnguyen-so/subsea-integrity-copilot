@@ -6,6 +6,8 @@ import argparse
 import json
 import logging
 import os
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -22,6 +24,18 @@ def runtime_directory() -> Path:
     return Path(os.environ["LOCALAPPDATA"]) / "SubseaCopilot"
 
 
+def build_console() -> None:
+    node = shutil.which("node")
+    if node is None:
+        raise ValueError("Node.js is required to build the dashboard before starting it.")
+    root = Path(__file__).resolve().parents[2]
+    result = subprocess.run(
+        [node, str(root / "scripts" / "build-console.cjs")], cwd=root, check=False,
+    )
+    if result.returncode:
+        raise ValueError("Console build failed; the dashboard was not started.")
+
+
 def provider_check(model_id: str | None = None) -> dict[str, object]:
     from .llm.copilot_cli import CopilotCLIChatModel
 
@@ -32,7 +46,7 @@ def provider_check(model_id: str | None = None) -> dict[str, object]:
                 content=(
                     "This is one synthetic availability check. No tools or data access "
                     "are requested. Respond with the exact outer JSON envelope "
-                    '{"kind":"final","value":"{\\"outcome\\":\\"available\\"}"}'
+                    '{"kind":"final","value":{"outcome":"available"}}'
                 )
             ),
             HumanMessage(content="Confirm the synthetic-only transport probe."),
@@ -107,6 +121,26 @@ def main() -> None:
     spatial.add_argument("--agent-model", default="gpt-6.1-sol")
     spatial.add_argument("--evaluator-model", default="gpt-6.1-terra")
     spatial.add_argument("--output", type=Path, required=True)
+    spatial.add_argument("--suite", choices=["current", "recovery", "non_leak"], default="current")
+    spatial.add_argument(
+        "--no-publish", action="store_true",
+        help="Run independently without replacing the active dashboard evaluation",
+    )
+    agent_eval = subparsers.add_parser(
+        "agent-evaluation", help="Reference-backed answers and six-dimensional quality review"
+    )
+    agent_eval.add_argument("--split", choices=["development", "held_out", "all"],
+                            default="held_out")
+    agent_eval.add_argument("--agent-model", default="gpt-6.1-sol")
+    agent_eval.add_argument("--judge-model", default="gpt-6.1-sol")
+    agent_eval.add_argument("--output", type=Path, required=True)
+    agent_audit = subparsers.add_parser(
+        "agent-audit", help="Private read-only audit; never publishes customer reliability scores"
+    )
+    agent_audit.add_argument(
+        "--suite", choices=["current", "recovery", "non_leak"], default="current"
+    )
+    agent_audit.add_argument("--output", type=Path, required=True)
     ingest.add_argument("--fixture-set", choices=["interview"], default="interview")
     ingest.add_argument(
         "--scenario", choices=["S1", "S2", "S3", "S4", "S5", "S6", "S7"], default="S1"
@@ -133,6 +167,7 @@ def main() -> None:
 
             if args.host not in ("127.0.0.1", "localhost", "::1"):
                 parser.error("Recorded QA console may bind only to loopback")
+            build_console()
             print(f"Recorded investigation console: http://{args.host}:{args.port}")
             uvicorn.run(
                 create_recorded_console(
@@ -184,12 +219,29 @@ def main() -> None:
             print(json.dumps(report, indent=2))
             if not report.get("passed"):
                 raise SystemExit(1)
+        elif args.command == "agent-evaluation":
+            from .agent_answer_quality import run_answer_quality_evaluation
+
+            report = run_answer_quality_evaluation(
+                args.output, split=args.split, model_id=args.agent_model,
+                judge_model_id=args.judge_model,
+            )
+            print(json.dumps({"run_id": report["run_id"], "metrics": report["metrics"],
+                              "answer_quality": report["answer_quality"]["metrics"]}))
+        elif args.command == "agent-audit":
+            from .temporal_evaluation import run_agent_evaluation
+
+            report = run_agent_evaluation(args.output, suite=args.suite)
+            print(json.dumps({
+                "run_id": report["run_id"], "agent_process": report["agent_process"],
+            }))
         elif args.command == "spatial-evaluation":
             from .spatial_evaluation import run_spatial_evaluation
 
             report = run_spatial_evaluation(
                 args.output, seed=args.seed, split=args.split,
                 agent_model=args.agent_model, evaluator_model=args.evaluator_model,
+                suite=args.suite, publish=not args.no_publish,
             )
             print(json.dumps({"run_id": report["run_id"], "metrics": report["metrics"]}))
             if not report["metrics"]["target_met"]:
@@ -257,6 +309,7 @@ def main() -> None:
 
             if args.host not in ("127.0.0.1", "localhost", "::1"):
                 parser.error("This installation may bind only to loopback")
+            build_console()
             print(f"Read-only pressure-monitoring console: http://{args.host}:{args.port}")
             uvicorn.run(create_app(Settings.from_env()), host=args.host, port=args.port)
         elif args.command == "ingest":

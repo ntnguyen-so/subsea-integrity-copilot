@@ -39,6 +39,7 @@ def run_checkpoint(endpoint: int, output: Path) -> dict[str, object]:
             service = AgentService(store, qualification_model_factory(settings), saver, telemetry)
             monitor = Monitor(store, service, telemetry)
             replay = monitor.create("S7", 2026, "live", "seeded-reliability")
+            replay = monitor.control(replay.id, "speed", 5, "recording-base-speed")
             source = monitor._source(replay)
             dataset_hash = content_hash({
                 "baseline": [row.model_dump(mode="json") for row in source.dataset.baseline],
@@ -94,6 +95,7 @@ def run_checkpoint(endpoint: int, output: Path) -> dict[str, object]:
                 "scope": "Fresh-agent seeded S7 development regression, not field qualification",
                 "scenario": replay.scenario,
                 "seed": replay.seed,
+                "base_playback_speed": 5,
                 "source_seconds": endpoint,
                 "dataset_sha256": dataset_hash,
                 "tenant_id": tenant,
@@ -137,15 +139,20 @@ def main() -> None:
     parser.add_argument(
         "--checkpoints", nargs="+", type=int, default=[100, 110, 120, 150, 180, 360],
     )
-    parser.add_argument("--workers", type=int, choices=(1, 2), default=2)
+    parser.add_argument(
+        "--workers", type=int,
+        help="Parallel independent roots; defaults to all requested checkpoints.",
+    )
     args = parser.parse_args()
     if any(point < 60 or point > 360 or point % 5 for point in args.checkpoints):
         parser.error("Checkpoints must be five-second endpoints between 60 and 360 seconds.")
     if len(set(args.checkpoints)) != len(args.checkpoints):
         parser.error("Checkpoint endpoints must be unique within one run.")
+    if args.workers is not None and args.workers < 1:
+        parser.error("Workers must be positive.")
     args.output.mkdir(parents=True, exist_ok=False)
     fingerprint = evaluation_implementation_hash()
-    with ThreadPoolExecutor(max_workers=args.workers) as executor:
+    with ThreadPoolExecutor(max_workers=args.workers or len(args.checkpoints)) as executor:
         cases = list(executor.map(lambda end: run_checkpoint(end, args.output), args.checkpoints))
     report = {
         "seed": 2026,

@@ -33,7 +33,24 @@ def wire(events):
 
 
 def final():
-    return json.dumps({"kind": "final", "value": '{"outcome":"supported"}'})
+    return json.dumps({"kind": "final", "value": {"outcome": "supported"}})
+
+
+@pytest.mark.parametrize(
+    ("content", "stage"),
+    [
+        ("not JSON", "outer_json"),
+        ('{"FINAL":"private-response-content"}', "envelope_shape"),
+        ('{"kind":"final","value":"{}"}', "final_value_type"),
+        ('{"kind":"final","value":[]}', "final_value_type"),
+        ('{"kind":"unknown","value":[]}', "envelope_kind"),
+    ],
+)
+def test_rejected_response_records_only_content_free_validation_stage(content, stage):
+    with pytest.raises(cli.ProviderError) as rejected:
+        cli._decode(content, set())
+    assert rejected.value.code == "invalid_structured_output"
+    assert rejected.value.metadata == {"response_validation_stage": stage}
 
 
 def stub(monkeypatch, events, inspect=None, code=0, stderr=b""):
@@ -265,16 +282,17 @@ def test_bound_context_and_intake_are_structured_without_double_json_escaping(mo
     assert history[2]["content"] == "{ ordinary non-JSON text"
 
 
-def test_final_envelope_retains_exact_inner_json_string(monkeypatch, runtime):
-    inner = json.dumps(
-        {"outcome": "supported", "limitations": ["synthetic α", "line\nbreak"]},
-        ensure_ascii=False,
-        indent=2,
-    )
+def test_native_final_round_trips_quotes_newlines_and_backslashes(monkeypatch, runtime):
+    inner = {
+        "outcome": "supported",
+        "summary": 'Check the "flatline" pattern, not confirmed hardware failure.',
+        "limitations": ["synthetic α", "line\nbreak", "original\\path"],
+    }
     stub(monkeypatch, [event(json.dumps({"kind": "final", "value": inner}))])
     response = cli.CopilotCLIChatModel(runtime_dir=runtime).invoke("synthetic")
-    assert response.content == inner
+    assert json.loads(response.content) == inner
     assert not response.tool_calls
+    assert response.response_metadata["transport_protocol"] == "native-final-object-v2"
 
 
 @pytest.mark.parametrize("model_id", [None, "auto", "synthetic-pin"])
@@ -293,12 +311,13 @@ def test_model_selection_flags(monkeypatch, runtime, model_id):
 @pytest.mark.parametrize(
     "content,code",
     [
-        ('{"kind":"final","value":{}}', "invalid_structured_output"),
+        ('{"kind":"final","value":[]}', "invalid_structured_output"),
         ('{"kind":"final","value":"not JSON"}', "invalid_structured_output"),
+        ('{"kind":"final","value":"{\\"outcome\\":\\"supported\\"}"}', "invalid_structured_output"),
         ('{"kind":"final","value":"[]"}', "invalid_structured_output"),
-        ('{"kind":"final","value":"{\\"value\\":NaN}"}', "invalid_structured_output"),
-        ('{"kind":"final","kind":"final","value":"{}"}', "invalid_structured_output"),
-        ('{"kind":"final","value":"{}","extra":1}', "invalid_structured_output"),
+        ('{"kind":"final","value":{"value":NaN}}', "invalid_structured_output"),
+        ('{"kind":"final","kind":"final","value":{}}', "invalid_structured_output"),
+        ('{"kind":"final","value":{},"extra":1}', "invalid_structured_output"),
         ("```json\n{}\n```", "invalid_structured_output"),
         ('{"kind":"tool_calls","value":[]}', "invalid_tool_call"),
         ('{"kind":"tool_calls","value":[{"name":"shell","arguments":{}}]}', "invalid_tool_call"),

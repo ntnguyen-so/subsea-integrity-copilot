@@ -253,7 +253,7 @@ class ReplaySession(Contract):
     detected_alert_keys: list[str] = Field(default_factory=list)
     state: Literal["PAUSED", "PLAYING", "COMPLETED", "FAILED"] = "PAUSED"
     clock_seconds: float = 0
-    speed: Literal[1, 2, 5, 10] = 1
+    speed: Literal[1, 2, 5, 10, 20, 30] = 1
     duration_seconds: int = 360
     epoch: datetime = datetime(2026, 1, 1, tzinfo=UTC)
     latest_window_id: str | None = None
@@ -361,11 +361,18 @@ class GroundingSupport(Contract):
     quote: str = Field(min_length=8, max_length=500)
 
 
+class GroundingCorrection(Contract):
+    excerpt: str = Field(min_length=1, max_length=300)
+    instruction: str = Field(min_length=1, max_length=500)
+    source_references: list[str] = Field(min_length=1, max_length=4)
+
+
 class GroundingCheck(Contract):
     paragraph_id: str = Field(min_length=1, max_length=50)
     verdict: Literal["supported", "unsupported", "uncertain"]
     reason: str = Field(min_length=1, max_length=350)
     support: list[GroundingSupport] = Field(default_factory=list, max_length=16)
+    corrections: list[GroundingCorrection] = Field(default_factory=list, max_length=8)
 
 
 class GroundingAssessment(Contract):
@@ -376,10 +383,11 @@ class GroundingAssessment(Contract):
 class GroundingRound(Contract):
     candidate_hash: str
     assessment: GroundingAssessment
+    material_hash: str | None = None
 
 
 class InterpretationReview(Contract):
-    protocol: Literal["grounding-v1"] = "grounding-v1"
+    protocol: Literal["grounding-v1", "semantic-grounding-v2"] = "grounding-v1"
     source_hash: str
     rounds: list[GroundingRound] = Field(min_length=1, max_length=REVIEW_ROUND_LIMIT)
 
@@ -414,8 +422,10 @@ class AgentTask(Contract):
     automatic: bool = False
     idempotency_key: str | None = None
     history_version: str | None = None
+    prompt_catalog_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     knowledge_packet: KnowledgePacket | None = None
     response_protocol: Literal["engineer-v1", "engineer-v2"] | None = None
+    decision_policy: Literal["legacy-v1", "llm-diagnosis-v1"] = "legacy-v1"
     interpretation_review: InterpretationReview | None = None
 
 

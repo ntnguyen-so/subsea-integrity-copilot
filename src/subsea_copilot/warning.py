@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from .contracts import Contract, WindowSnapshot
+from .contracts import Contract, WindowSnapshot, Workflow
 
 
 class MonitoringWarning(Contract):
@@ -23,7 +23,8 @@ class MonitoringWarning(Contract):
 
 
 def monitoring_warning(
-    snapshot: WindowSnapshot | None, *, sensor_alerts_only: bool = False
+    snapshot: WindowSnapshot | None, *, sensor_alerts_only: bool = False,
+    workflow: Workflow | None = None,
 ) -> MonitoringWarning:
     severity: Literal["attention", "warning", "info"]
     kind: Literal[
@@ -47,7 +48,7 @@ def monitoring_warning(
             "Restore observation coverage and follow the operator's review procedure. "
             "Location withheld."
         )
-    elif sensor_alerts_only:
+    elif sensor_alerts_only or workflow is not None:
         count = len(
             {
                 finding.sensor_id
@@ -61,7 +62,7 @@ def monitoring_warning(
             }
         )
         kind, severity = ("sensor_alerts", "warning") if count else ("no_sensor_alerts", "info")
-        if count and snapshot.event.hypothesis == "suspected_leak":
+        if workflow != "agent_assisted" and count and snapshot.event.hypothesis == "suspected_leak":
             severity = "attention"
         title = f"{count} SENSOR ALERTS: engineer review required" if count else "No sensor alerts"
         message = (
@@ -70,6 +71,18 @@ def monitoring_warning(
             "or select an inspection area; "
             "follow existing response procedures. No safety clearance is implied."
         )
+        if workflow == "agent_assisted":
+            title = (
+                f"{count} {'sensor' if count == 1 else 'sensors'} flagged by monitoring"
+                if count else "No sensors flagged in the latest monitoring window"
+            )
+            message = (
+                "See the agent investigation below for cause assessment and inspection "
+                "recommendations. Follow existing response procedures; "
+                "do not wait for AI before taking required action."
+                if count else
+                "Continue monitoring. Agent reports apply to their own investigation windows."
+            )
     elif snapshot.event.hypothesis == "suspected_leak":
         kind, severity = "possible_leak", "attention"
         title = "POSSIBLE LEAK: prompt integrity review required"

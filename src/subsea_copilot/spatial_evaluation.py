@@ -7,13 +7,15 @@ import os
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from .budgets import ROOT_WATCHDOG_SECONDS, WORKER_POLL_LIMIT
 from .config import Settings
-from .contracts import WindowSnapshot, utc_now
+from .contracts import SitePack, WindowSnapshot, utc_now
 from .diagnostics import analyze_window
 from .evaluation_mapping import run_mapping
 from .evaluation_metrics import score_report
@@ -22,7 +24,7 @@ from .golden_evaluation import grounded_case_evidence, install_golden_input, jud
 from .golden_judge import calibration_packets, run_judge
 from .grounding import source_texts
 from .ingest import normalize_records
-from .monitoring import AUTO_QUESTION, Monitor
+from .monitoring import AUTO_QUESTION, Monitor, instrument_signals, pressure_context_ready
 from .operations_evaluation import audit_operations
 from .qualification import TERMINALS, qualification_model_factory
 from .reference_evaluation import (
@@ -44,11 +46,51 @@ from .spatial_data import (
     spatial_cases,
     spatial_dataset,
     spatial_truth,
+    temporal_cases,
 )
 from .store import Store
 from .telemetry import Telemetry
+from .temporal_evaluation import (
+    SUITE_NAMES,
+    agent_process_metrics,
+    lifecycle_metrics,
+    publish_evaluation,
+)
 
 logger = logging.getLogger(__name__)
+
+INSTRUMENT_REVIEW_COOLDOWN_SECONDS = 60
+INSTRUMENT_REVIEW_QUESTION = (
+    AUTO_QUESTION + " Reassess instrument-quality changes using paired readings and recent "
+    "behaviour, including drift, spikes, stuck readings, invalid values and missing samples. "
+    "Identify each supported suspect instrument and issue type, and retain unresolved "
+    "concerns explicitly. A usable pressure anomaly alone does not establish an instrument fault."
+)
+
+
+@dataclass
+class InstrumentReviews:
+    checked: set[tuple[str, str]] = field(default_factory=set)
+    last_review_seconds: int | None = None
+
+    def due(self, snapshot: WindowSnapshot, pack: SitePack) -> str | None:
+        if snapshot.quality.status == "WARMING_UP":
+            return None
+        signals = instrument_signals(snapshot, pack)
+        novel = signals - self.checked
+        cooled = (
+            self.last_review_seconds is None
+            or snapshot.end_seconds - self.last_review_seconds >= INSTRUMENT_REVIEW_COOLDOWN_SECONDS
+        )
+        if cooled and novel:
+            return "automatic_instrument_context"
+        if signals & self.checked and cooled and self.last_review_seconds is not None:
+            return "periodic_instrument_review"
+        return None
+
+    def reviewed(self, snapshot: WindowSnapshot, pack: SitePack) -> None:
+        self.checked = instrument_signals(snapshot, pack)
+        self.last_review_seconds = snapshot.end_seconds
 
 
 def spatial_metrics(report: dict[str, Any]) -> dict[str, Any]:
@@ -57,8 +99,100 @@ def spatial_metrics(report: dict[str, Any]) -> dict[str, Any]:
     metrics["groups"] = {
         name: value for name, value in metrics["groups"].items() if not name.startswith("detector_")
     }
-    metrics["unit"] = "network/checkpoint; related windows are not independent trials"
+    metrics["unit"] = "network/review; related windows are not independent trials"
+    metrics["timing"] = spatial_timing(report)
+    if report.get("suite") in {"recovery", "non_leak"}:
+        metrics["temporal"] = lifecycle_metrics(report)
     return metrics
+
+
+def spatial_timing(report: dict[str, Any]) -> list[dict[str, Any]]:
+    timings = []
+    for network in report.get("networks", []):
+        frames = network.get("frames", [])
+        source = next(
+            (frame["truth"]["leak_source"] for frame in frames if frame["truth"]["leak_source"]),
+            None,
+        )
+        if not source:
+            continue
+        onset = source.get("start_seconds")
+        alert = next(
+            (frame["source_seconds"] for frame in frames
+             if (onset is None or frame["source_seconds"] >= onset)
+             and any(sensor.startswith(source["segment_id"] + "-")
+                    for sensor in frame["detector"]["pressure_anomaly_sensors"])),
+            None,
+        )
+        rows = sorted(
+            (row for row in report["cases"] if row.get("network_id") == network["id"]),
+            key=lambda row: row["source_seconds"],
+        )
+        admitted = next(
+            (row for row in rows if row.get("root_count") and onset is not None
+             and row["source_seconds"] >= onset), None,
+        )
+        recognized = next(
+            (row for row in rows if row.get("accepted_report")
+             and (onset is None or row["source_seconds"] >= onset)
+             and (row.get("extraction") or {}).get("status") == "completed"
+             and any(frame.get("review_case_id") == row["case_id"]
+                     and frame["source_seconds"] == row["source_seconds"]
+                     and frame.get("snapshot_id") == row.get("snapshot_id")
+                     and frame.get("input_hash") == row.get("input_hash")
+                     for frame in frames)
+             and any(item["segment_id"] == source["segment_id"]
+                     for item in (((row.get("extraction") or {}).get("mapping") or {})
+                                  .get("leaks", [])))), None,
+        )
+        checked_warning = next(
+            ((row, finding) for row in rows for task in row.get("agent_tasks", [])
+             if (finding := task.get("checked_finding"))
+             and task["role"] == "event_diagnosis" and task["state"] == "SUCCEEDED"
+             and task["root_id"] == row.get("root_id")
+             and task["snapshot_id"] == finding["snapshot_id"] == row.get("snapshot_id")
+             and finding["input_hash"] == row.get("input_hash")
+             and finding["hypothesis"] == "suspected_leak"
+             and finding.get("final_report") is False
+             and any(frame.get("review_case_id") == row["case_id"]
+                     and frame["source_seconds"] == row["source_seconds"]
+                     and frame.get("snapshot_id") == row.get("snapshot_id")
+                     and frame.get("input_hash") == row.get("input_hash")
+                     for frame in frames)
+             and source["segment_id"] in finding["segment_ids"]),
+            None,
+        )
+        warning_wall_seconds = None
+        if checked_warning and checked_warning[0].get("agent_started_at"):
+            warning_wall_seconds = (
+                datetime.fromisoformat(checked_warning[1]["available_at"])
+                - datetime.fromisoformat(checked_warning[0]["agent_started_at"])
+            ).total_seconds()
+        timings.append({
+            "network_id": network["id"],
+            "source_onset_seconds": onset,
+            "first_branch_alert_seconds": alert,
+            "first_agent_admission_seconds": admitted["source_seconds"] if admitted else None,
+            "first_correct_branch_review_seconds": (
+                recognized["source_seconds"] if recognized else None
+            ),
+            "admission_delay_source_seconds": (
+                admitted["source_seconds"] - onset if admitted and onset is not None else None
+            ),
+            "correct_branch_delay_source_seconds": (
+                recognized["source_seconds"] - onset
+                if recognized and onset is not None else None
+            ),
+            "correct_branch_model_wall_seconds": (
+                recognized.get("agent_elapsed_seconds") if recognized else None
+            ),
+            "first_checked_warning_source_seconds": (
+                checked_warning[0]["source_seconds"] if checked_warning else None
+            ),
+            "first_checked_warning_model_wall_seconds": warning_wall_seconds,
+            "source_frozen_during_inference": True,
+        })
+    return timings
 
 
 def frame_record(
@@ -95,11 +229,29 @@ def frame_record(
 
 def public_task(store: Store, task: dict[str, Any]) -> dict[str, Any]:
     saved = store.get_task(task["id"])
+    checked_finding = None
+    if (
+        saved.role == "event_diagnosis" and saved.state == "SUCCEEDED"
+        and saved.decision_policy == "legacy-v1"
+        and saved.result and saved.result.outcome == "supported"
+        and saved.result.hypothesis == "suspected_leak"
+    ):
+        snapshot = store.get_window(saved.snapshot_id)
+        if snapshot and snapshot.event.hypothesis == saved.result.hypothesis:
+            checked_finding = {
+                "hypothesis": saved.result.hypothesis,
+                "segment_ids": snapshot.event.segment_ids,
+                "snapshot_id": snapshot.id,
+                "input_hash": snapshot.input_hash,
+                "available_at": saved.updated_at.isoformat(),
+                "final_report": False,
+            }
     return {
         **task,
         "created_at": saved.created_at.isoformat(),
         "updated_at": saved.updated_at.isoformat(),
         "summary": saved.result.summary if saved.result else None,
+        "checked_finding": checked_finding,
     }
 
 
@@ -110,6 +262,8 @@ def run_spatial_evaluation(
     split: str,
     agent_model: str = "gpt-6.1-sol",
     evaluator_model: str = "gpt-6.1-terra",
+    suite: str = "current",
+    publish: bool = True,
 ) -> dict[str, Any]:
     if (
         os.environ.get("SUBSEA_TRACE_CONTENT") != "1"
@@ -119,16 +273,30 @@ def run_spatial_evaluation(
     if (output / "report.json").exists():
         raise ValueError("Use a fresh output directory; recorded attempts are immutable")
     prior = read_evaluation()
-    if prior["status"] == "running":
+    if publish and (prior["status"] == "running" or any(
+        item["status"] == "running" for item in prior.get("additional_evaluations", [])
+    )):
         raise ValueError("An evaluation is already active")
+    if suite not in SUITE_NAMES:
+        raise ValueError(f"Unknown spatial evaluation suite: {suite}")
+    previous = prior if suite == "current" else next(
+        (item for item in prior.get("additional_evaluations", []) if item.get("suite") == suite),
+        {"status": "not_run"},
+    )
     settings = Settings.from_env()
-    recipes = spatial_cases()
+    recipes = spatial_cases() if suite == "current" else temporal_cases(suite)
+    checkpoints = CHECKPOINTS if suite == "current" else tuple(
+        end for end in (180, 240, DURATION_SECONDS) if 60 < end <= DURATION_SECONDS
+    )
+    checkpoints = tuple(dict.fromkeys(checkpoints))
     datasets = [
         spatial_dataset(case, seed + index * 1009, settings.site_id)
         for index, case in enumerate(recipes)
     ]
     report: dict[str, Any] = {
         "version": "spatial-evaluation-v1",
+        "suite": suite,
+        "suite_name": SUITE_NAMES[suite],
         "status": "running",
         "run_id": uuid4().hex,
         "created_at": utc_now().isoformat(),
@@ -137,17 +305,23 @@ def run_spatial_evaluation(
         "agent_model": agent_model,
         "evaluator_model": evaluator_model,
         "implementation_sha256": evaluation_implementation_hash(),
-        "planned_cases": len(recipes) * (len(CHECKPOINTS) + 1),
+        "planned_cases": len(recipes) * (len(checkpoints) + 1),
         "planned_networks": len(recipes),
+        "network_workers": len(recipes),
+        "publication": "dashboard" if publish else "isolated-output-only",
         "duration_seconds": DURATION_SECONDS,
-        "checkpoints_seconds": list(CHECKPOINTS),
-        "frame_hop_seconds": 15,
+        "checkpoints_seconds": list(checkpoints),
+        "frame_hop_seconds": datasets[0].pack.hop_seconds,
+        "admission_policy": "immediate-measurement-review-v3",
+        "admission_context_seconds": 0,
+        "instrument_review_cooldown_seconds": INSTRUMENT_REVIEW_COOLDOWN_SECONDS,
+        "simulation_policy": "pause-until-result-admission-v1",
         "mapping_calibration": [],
         "judge_calibration": [],
         "previous_runs": [
-            *prior.get("previous_runs", []),
+            *previous.get("previous_runs", []),
             {
-                key: prior.get(key)
+                key: previous.get(key)
                 for key in (
                     "version",
                     "run_id",
@@ -157,19 +331,33 @@ def run_spatial_evaluation(
                     "status",
                     "metrics",
                     "implementation_sha256",
+                    "implementation_unchanged",
                 )
             },
         ]
-        if prior["status"] != "not_run"
+        if previous["status"] != "not_run"
         else [],
         "limitations": [
-            "Three independent 112-instrument, seven-segment, 11.2 km recordings of 360 seconds.",
-            "Recorded 60-second numerical windows are sampled every 15 source seconds.",
-            "Agents run at predeclared 150/360-second checkpoints only when pressure anomalies "
-            "exist. This evaluates classification/localization, not automatic admission latency.",
-            "Source ingestion is frozen during each real investigation; inference wall time "
+            f"{len(recipes)} separate synthetic 112-instrument recordings of "
+            f"{DURATION_SECONDS} source seconds; not independent field trials.",
+            "Recorded 60-second numerical windows use the site's 5-second monitoring hop.",
+            "The first pressure alert immediately admits a truth-blind review of the acquired "
+            "measurements. No numerical event, persistence or location verdict is required. "
+            + (
+                "The 150/360-second checkpoints remain for comparison."
+                if suite == "current" else
+                "Fixed quiet reassessments are recorded at 180/240/end source seconds."
+            ),
+            "New instrument-quality signals need no extra acquisition delay; persistent "
+            "concerns are refreshed with a 60-source-second review cooldown. These signals "
+            "are measurement evidence, not confirmed fault labels.",
+            "Lifecycle/control suites add fixed reassessments at 180/240/end source seconds, "
+            "even when pressure is quiet, and rearm pressure admission after alerts clear. "
+            "These declared evaluation review slots do not use hidden event labels.",
+            "Source ingestion is frozen through agent investigation, output mapping and result "
+            "admission before the next data window. Original inference wall time "
             "and source time are separate. Playback compresses time, not agent computation.",
-            "Both checkpoints and failed/withheld outputs count. Adjacent windows share data "
+            "Early reviews, checkpoints and failed/withheld outputs count. Windows share data "
             "and are not independent population trials.",
             "The broad-footprint source remains in localization recall even when its interval "
             "is withheld. The 400 m maximum interval is unchanged.",
@@ -201,18 +389,25 @@ def run_spatial_evaluation(
                 "name": f"{case['name']} at {end} s",
                 "status": "queued",
                 "dataset_sha256": dataset_hash(dataset),
-                "truth": spatial_truth(case, dataset, end),
+                "truth": {
+                    **spatial_truth(case, dataset, end),
+                    **({"review_required": True} if suite != "current" and end > 60 else {}),
+                },
+                "force_review": suite != "current" and end > 60,
+                "admission_kind": "periodic_reassessment" if suite != "current" else "checkpoint",
             }
             for case, dataset in zip(recipes, datasets, strict=True)
-            for end in (60, *CHECKPOINTS)
+            for end in (60, *checkpoints)
         ],
     }
     lock = threading.RLock()
 
     def save() -> None:
         report["metrics"] = spatial_metrics(report)
+        report["agent_process"] = agent_process_metrics(report)
         write_report(output / "report.json", report)
-        write_report(PUBLIC_REPORT, report)
+        if publish:
+            publish_evaluation(report, PUBLIC_REPORT)
 
     save()
     telemetry = Telemetry(runtime_dir=settings.runtime_dir)
@@ -331,7 +526,10 @@ def run_spatial_evaluation(
                 )
                 network["generation_id"] = replay.id
                 source = monitor._source(replay)
-                for end in range(60, DURATION_SECONDS + 1, 15):
+                first_alert: int | None = None
+                early_reviewed = False
+                instrument_reviews = InstrumentReviews()
+                for end in range(60, DURATION_SECONDS + 1, dataset.pack.hop_seconds):
                     replay = store.save_replay(
                         replay.model_copy(
                             update={"clock_seconds": end + dataset.pack.lateness_seconds}
@@ -348,6 +546,58 @@ def run_spatial_evaluation(
                         expected_version=replay.version,
                     )
                     row = rows.get(end)
+                    pressure_alert = (
+                        snapshot.quality.status != "WARMING_UP"
+                        and any(item.anomaly_count for item in snapshot.quality.findings)
+                    )
+                    if suite != "current" and not pressure_alert:
+                        early_reviewed = False
+                        first_alert = None
+                    if not early_reviewed:
+                        if not pressure_alert:
+                            first_alert = None
+                        elif first_alert is None:
+                            first_alert = end
+                        if first_alert is not None and pressure_context_ready(
+                            snapshot, dataset.pack, first_alert,
+                            context_seconds=0,
+                        ):
+                            early_reviewed = True
+                            if row is None:
+                                row = {
+                                    "case_id": f"{recipe['id']}@{end}",
+                                    "network_id": recipe["id"],
+                                    "source_seconds": end,
+                                    "name": f"{recipe['name']} first pressure review at {end} s",
+                                    "status": "queued",
+                                    "dataset_sha256": dataset_hash(dataset),
+                                    "truth": spatial_truth(recipe, dataset, end),
+                                    "admission_kind": "automatic_pressure_context",
+                                }
+                                rows[end] = row
+                                with lock:
+                                    report["cases"].append(row)
+                                    report["planned_cases"] += 1
+                    instrument_kind = instrument_reviews.due(snapshot, dataset.pack)
+                    if row is None and instrument_kind:
+                        row = {
+                            "case_id": f"{recipe['id']}@{end}",
+                            "network_id": recipe["id"],
+                            "source_seconds": end,
+                            "name": f"{recipe['name']} instrument follow-up at {end} s",
+                            "status": "queued",
+                            "dataset_sha256": dataset_hash(dataset),
+                            "truth": spatial_truth(recipe, dataset, end),
+                            "admission_kind": instrument_kind,
+                            "instrument_review_sensors": sorted({
+                                identifier for identifier, _kind
+                                in instrument_signals(snapshot, dataset.pack)
+                            }),
+                        }
+                        rows[end] = row
+                        with lock:
+                            report["cases"].append(row)
+                            report["planned_cases"] += 1
                     frame = frame_record(
                         snapshot,
                         spatial_truth(recipe, dataset, end),
@@ -367,24 +617,31 @@ def run_spatial_evaluation(
                         save()
                     if not row:
                         continue
-                    if not frame["detector"]["pressure_anomaly_sensors"]:
+                    if (
+                        not row.get("force_review")
+                        and
+                        not frame["detector"]["pressure_anomaly_sensors"]
+                        and not instrument_signals(snapshot, dataset.pack)
+                    ):
                         with lock:
                             row.update(
                                 status="completed"
-                                if not row["truth"]["pressure_trigger"]
+                                if not row["truth"]["review_required"]
                                 else "failed",
                                 error_code=None
-                                if not row["truth"]["pressure_trigger"]
-                                else "missed_pressure_trigger",
+                                if not row["truth"]["review_required"]
+                                else "missed_pressure_trigger" if row["truth"]["pressure_trigger"]
+                                else "missed_instrument_trigger",
                             )
                             save()
                         continue
                     started = time.monotonic()
                     agent_started_at = utc_now().isoformat()
+                    instrument_reviews.reviewed(snapshot, dataset.pack)
                     root = service.submit_question(
                         replay,
                         snapshot,
-                        AUTO_QUESTION,
+                        INSTRUMENT_REVIEW_QUESTION,
                         f"spatial-checkpoint-{end}",
                     )
                     with lock:
@@ -394,6 +651,7 @@ def run_spatial_evaluation(
                             root_count=1,
                             agent_started_at=agent_started_at,
                         )
+                        network["held_source_seconds"] = end
                         save()
                     for _ in range(WORKER_POLL_LIMIT):
                         if root.state in TERMINALS:
@@ -456,6 +714,13 @@ def run_spatial_evaluation(
                                 for task in audit["tasks"]
                             ],
                             status="mapping_output",
+                            agent_audit={
+                                "checks": audit["checks"],
+                                "validation_errors": audit["validation_errors"],
+                                "critic_decisions": audit["critic_decisions"],
+                                "fresh_tool_calls": audit["fresh_tool_calls"],
+                                "tool_errors": audit["tool_errors"],
+                            },
                         )
                         save()
                     if row["accepted_report"] and row["interpretation"]:
@@ -479,7 +744,9 @@ def run_spatial_evaluation(
                                     "source_truth": truth["leak_source"],
                                     "hypothesis": "suspected_leak"
                                     if truth["leak_source"]
-                                    else "sensor_or_telemetry_issue",
+                                    else "sensor_or_telemetry_issue"
+                                    if truth["sensor_issues"]
+                                    else "no_injected_leak_or_instrument_fault",
                                     "inspection_policy": (
                                         "Only measured, qualified intervals are acceptable. "
                                         "Do not demand an exact source point; any interval "
@@ -501,6 +768,8 @@ def run_spatial_evaluation(
                             row["judge"] = receipt
                             save()
                     with lock:
+                        row["result_admitted_at"] = utc_now().isoformat()
+                        row["investigation_elapsed_seconds"] = round(time.monotonic() - started, 3)
                         row["status"] = (
                             "completed"
                             if (
@@ -509,24 +778,36 @@ def run_spatial_evaluation(
                             )
                             else "failed"
                         )
+                        network["held_source_seconds"] = None
                         save()
                 with lock:
                     network["status"] = "completed"
                     save()
         except Exception as exc:
-            logger.error("Spatial network %s failed: %s", recipe["id"], type(exc).__name__)
+            logger.exception("Spatial network %s failed: %s", recipe["id"], type(exc).__name__)
             with lock:
+                failed_at = utc_now()
                 network.update(status="failed", error_code=getattr(exc, "code", type(exc).__name__))
                 for row in rows.values():
                     if row["status"] not in {"completed", "failed"}:
                         row.update(status="failed", error_code=network["error_code"])
+                        if row.get("agent_started_at"):
+                            row.update(
+                                result_admitted_at=failed_at.isoformat(),
+                                investigation_elapsed_seconds=round((
+                                    failed_at - datetime.fromisoformat(row["agent_started_at"])
+                                ).total_seconds(), 3),
+                            )
+                network["held_source_seconds"] = None
                 save()
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=len(recipes)) as executor:
         list(executor.map(run_network, range(len(recipes))))
     with lock:
         report.update(
-            status="completed",
+            status="incomplete" if any(
+                network["status"] == "failed" for network in report["networks"]
+            ) else "completed",
             completed_at=utc_now().isoformat(),
             implementation_unchanged=report["implementation_sha256"]
             == evaluation_implementation_hash(),

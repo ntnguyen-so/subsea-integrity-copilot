@@ -29,6 +29,16 @@ def decoded_output(content: str) -> dict[str, Any]:
         "columnar-shared-referenced-evidence-v3",
     }:
         output = {**output, "result": expanded_evidence(value)}
+    elif isinstance(value, dict) and "evidence_groups" in value:
+        evidence = {
+            identifier: item
+            for group in value["evidence_groups"].values()
+            for identifier, item in expanded_evidence(group)["evidence"].items()
+        }
+        output = {
+            **output,
+            "result": expanded_evidence({"evidence": evidence, "claims": value["claims"]}),
+        }
     return output
 
 
@@ -105,11 +115,17 @@ class ScriptedChatModel(BaseChatModel):
             )
             return ChatResult(generations=[ChatGeneration(message=critic_message)])
         if context["phase"] == "reflection":
-            revised_interpretation = context["proposed_interpretation"]
-            revised_interpretation["answer"]["text"] = (
-                "Offline contract example: review the cited measurements and records; "
-                "physical causes remain unconfirmed."
-            )
+            revised_interpretation = {"revisions": [
+                {
+                    "paragraph_id": identifier,
+                    "text": (
+                        "Offline contract example: review the cited measurements and records; "
+                        "physical causes remain unconfirmed."
+                    ) if not identifier.startswith("question:") else paragraph["text"],
+                    "references": paragraph["references"],
+                }
+                for identifier, paragraph in context["revision_targets"].items()
+            ]}
             return ChatResult(
                 generations=[
                     ChatGeneration(
@@ -158,7 +174,7 @@ class ScriptedChatModel(BaseChatModel):
                         "unknown",
                     )
                 )
-                or context["requires_location"]
+                or context.get("requires_location", False)
             )
             compatible_tasks = context["compatible_tasks"]
             needs_diagnosis |= bool(context.get("history_version"))
@@ -185,7 +201,7 @@ class ScriptedChatModel(BaseChatModel):
             requests = []
             names = list(context["required_tools"])
             if (self.role == "event_diagnosis" or context.get("baseline")) and (
-                context["eligible_location"]
+                context.get("eligible_location", False)
             ):
                 names.append("location.fit")
             for name in names:
@@ -256,8 +272,8 @@ class ScriptedChatModel(BaseChatModel):
                         break
             if child_abstained:
                 limitations.append("child_abstained")
-            if context["requires_location"] and (
-                not context["usable_location"]
+            if context.get("requires_location", False) and (
+                not context.get("usable_location", False)
                 or must_abstain
                 or hypothesis == "insufficient_evidence"
             ):
@@ -278,6 +294,15 @@ class ScriptedChatModel(BaseChatModel):
                 if self.role == "event_diagnosis"
                 else inherited_review,
             }
+            if (
+                context.get("decision_policy") == "llm-diagnosis-v1"
+                and self.role != "sensor_quality"
+            ):
+                result["outcome"] = "supported"
+                result["hypothesis"] = "insufficient_evidence"
+                if isinstance(result["investigation"], dict):
+                    result["investigation"]["assessment"] = "unresolved"
+                    result["investigation"]["next_action"] = "human_review"
             if context.get("response_protocol") in {"engineer-v1", "engineer-v2"}:
                 review_value = result["investigation"]
                 review = review_value if isinstance(review_value, dict) else {}
@@ -294,7 +319,7 @@ class ScriptedChatModel(BaseChatModel):
                     "operating_context"
                     if "valve" in question or "operating" in question
                     else "inspection_rationale"
-                    if context["requires_location"]
+                    if context.get("requires_location", False)
                     else "sensor_quality"
                     if "sensor" in question or "drift" in question
                     else "evidence_gaps"
@@ -478,11 +503,13 @@ class ScriptedChatModel(BaseChatModel):
                 if operation:
                     key = sensor["segment_id"]
                 elif intent == "test_instrumentation":
-                    if not sensor["quality_concern"]:
+                    if not sensor.get("quality_concern", False):
                         continue
                     key = sensor["id"].rsplit("-", 1)[0]
                 else:
-                    support = next((item for item in sensors if item["event_support"]), None)
+                    support = next(
+                        (item for item in sensors if item.get("event_support", False)), None,
+                    )
                     if support and sensor["segment_id"] != support["segment_id"]:
                         continue
                     key = sensor["id"].rsplit("-", 1)[0]
@@ -551,7 +578,7 @@ class ScriptedChatModel(BaseChatModel):
             else "review_instrumentation"
             if instrumentation
             else "inspect_supported_interval"
-            if context["inspection_interval_available"]
+            if context.get("inspection_interval_available", False)
             else "human_review",
         }
         return None, review

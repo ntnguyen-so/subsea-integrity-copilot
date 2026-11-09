@@ -172,7 +172,10 @@ or a majority vote:
    Code requires exact paragraph coverage, valid per-paragraph references and
    literal source-quote anchors. A missing, malformed or uncertain review cannot
    approve a report.
-6. Rejection permits one author revision, limited to interpretation. Any change
+6. Grounding rejection permits up to three author revisions, limited to interpretation.
+   The reviewer supplies a source-bound, actionable correction checklist for each
+   rejected unit, and the coordinator addresses all listed corrections together.
+   Acceptance stops retries immediately. Any change
    to physical claims, outcome, history assessment, recommendations or limitations
    is rejected. A fresh critic must accept every revised paragraph; otherwise
    the whole report is withheld. Numerical warnings continue independently.

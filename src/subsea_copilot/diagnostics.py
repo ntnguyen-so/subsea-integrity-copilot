@@ -55,6 +55,7 @@ def analyze_window(
     tenant_id: str = "demo",
     revision: int = 1,
     predecessor_id: str | None = None,
+    screening_only: bool = False,
 ) -> WindowSnapshot:
     if epoch.tzinfo is None or epoch.utcoffset() is None:
         raise ValueError("epoch must be timezone aware")
@@ -164,7 +165,10 @@ def analyze_window(
         times = [(row.observed_at - epoch).total_seconds() for row, _ in scores]
         readings = [row.value for row, _ in scores if row.value is not None]
         trend = False
-        if model and len(times) >= pack.persistence_seconds and len(set(times)) > 1:
+        if (
+            not screening_only and model and len(times) >= pack.persistence_seconds
+            and len(set(times)) > 1
+        ):
             ordered = sorted(zip(times, readings, strict=True))
             first = [value for _, value in ordered[: len(ordered) // 3]]
             last = [value for _, value in ordered[-len(ordered) // 3 :]]
@@ -214,8 +218,10 @@ def analyze_window(
             if model and usable
             else None,
         }
-    distances = pipeline_distances(pack)
+    distances = pipeline_distances(pack) if not screening_only else {}
     for sensor, finding in zip(pack.sensors, findings, strict=True):
+        if screening_only:
+            continue
         peer = [
             other
             for other in pack.sensors
@@ -249,7 +255,7 @@ def analyze_window(
     )
     pressure = [
         sensor
-        for sensor, finding in zip(pack.sensors, findings, strict=True)
+        for sensor, finding in ([] if screening_only else zip(pack.sensors, findings, strict=True))
         if stats[sensor.id]["duration"] >= pack.persistence_seconds
         and stats[sensor.id]["usable"] >= expected_each * pack.min_coverage
         and not finding.peer_disagreement
@@ -298,7 +304,7 @@ def analyze_window(
     ]
     sustained_changes = [
         finding
-        for finding in findings
+        for finding in ([] if screening_only else findings)
         if finding.persistence_seconds >= pack.persistence_seconds
         and finding.usable >= expected_each * pack.min_coverage
         and not finding.peer_disagreement
@@ -306,7 +312,7 @@ def analyze_window(
     broad = len(sustained_changes) >= max(pack.min_observers, len(pack.sensors) // 2)
     multiple_regions = len(components) > 1
     transient = False
-    for anchor in pack.sensors:
+    for anchor in ([] if screening_only else pack.sensors):
         for timestamp in stats[anchor.id]["excursions"]:
             group = [
                 sensor
@@ -323,7 +329,14 @@ def analyze_window(
                 break
         if transient:
             break
-    if warmup:
+    if screening_only:
+        hypothesis = "insufficient_evidence"
+        limitations = ["SYNTHETIC_UNCALIBRATED"]
+        if warmup:
+            limitations.append("WARMING_UP")
+        elif coverage < pack.min_coverage:
+            limitations.append("COVERAGE_LOST")
+    elif warmup:
         hypothesis = "insufficient_evidence"
         limitations.append("WARMING_UP")
     elif coverage < pack.min_coverage or len(domains) < pack.min_failure_domains:
@@ -360,7 +373,12 @@ def analyze_window(
         limitations.append("NO_EVENT_NOT_SAFETY")
 
     for finding in findings:
-        value = finding.model_dump(mode="json", exclude={"evidence_ids"})
+        value = finding.model_dump(
+            mode="json",
+            exclude={"evidence_ids"} | (
+                {"drift_suspected", "peer_disagreement"} if screening_only else set()
+            ),
+        )
         finding.evidence_ids = [
             ledger("sensor_health", value, "sensor_health", finding.sensor_id),
         ]
@@ -379,6 +397,7 @@ def analyze_window(
                 if reference is not None and recent
                 else None,
                 recent_usable_samples=len(recent),
+                recent_pressure_range_bar=float(max(recent) - min(recent)) if recent else None,
                 recent_period_seconds=[end_seconds - 20, end_seconds],
             )
             final_values = [
@@ -431,7 +450,8 @@ def analyze_window(
         if warmup
         else (
             "COVERAGE_LOST"
-            if coverage < pack.min_coverage or len(domains) < pack.min_failure_domains
+            if coverage < pack.min_coverage
+            or not screening_only and len(domains) < pack.min_failure_domains
             else ("DEGRADED" if degraded else "NORMAL")
         ),
         expected_samples=expected,
@@ -464,7 +484,7 @@ def analyze_window(
         set.intersection(*(stats[sensor.id]["drops"] for sensor in support)) if support else set()
     )
     persistence = _duration(sorted(joint), pack.sample_seconds)
-    event_id = ledger(
+    event_id = None if screening_only else ledger(
         "event_criteria",
         {
             "hypothesis": hypothesis,
@@ -482,16 +502,18 @@ def analyze_window(
     )
     event = EventAssessment(
         hypothesis=hypothesis,
-        eligible_hypotheses=[hypothesis, "insufficient_evidence"]
+        eligible_hypotheses=[] if screening_only else [hypothesis, "insufficient_evidence"]
         if hypothesis != "insufficient_evidence"
         else [hypothesis],
         supporting_sensor_ids=support_ids,
         failure_domain_count=failure_domain_count,
         persistence_seconds=persistence,
         segment_ids=segment_ids,
-        evidence_ids=[event_id],
+        evidence_ids=[event_id] if event_id else [],
         counterevidence=limitations[1:],
         eligible_location=hypothesis == "suspected_leak",
+        criteria_id="measurement-only-no-domain-decision"
+        if screening_only else "pressure-investigation-v2",
     )
     location = None
     if event.eligible_location:
@@ -566,7 +588,7 @@ def analyze_window(
             "input": input_hash,
             "revision": revision,
             "predecessor": predecessor_id,
-            "parameters": "pressure-window-v4",
+            "parameters": "pressure-measurements-v1" if screening_only else "pressure-window-v4",
             "baseline": "pressure-median-mad-v2",
         }
     )
@@ -582,7 +604,7 @@ def analyze_window(
         predecessor_id=predecessor_id,
         input_hash=input_hash,
         pack_version=pack.version,
-        parameter_version="pressure-window-v4",
+        parameter_version="pressure-measurements-v1" if screening_only else "pressure-window-v4",
         clock_seconds=clock_seconds,
         watermark_seconds=clock_seconds - pack.lateness_seconds,
         canonical_count=len(selected),

@@ -21,6 +21,7 @@ from subsea_copilot.contracts import (
     WindowSnapshot,
     utc_now,
 )
+from subsea_copilot.prompts import prompt_manifest_sha256
 from subsea_copilot.runtime.gateway import ToolGateway
 from subsea_copilot.runtime.registry import tool_schemas
 from subsea_copilot.runtime.workflow import AgentService
@@ -194,6 +195,7 @@ def run_single_agent_baseline(
         deadline=utc_now() + timedelta(seconds=ROOT_DEADLINE_SECONDS),
         plan=["answer"],
         idempotency_key=identifier,
+        prompt_catalog_sha256=prompt_manifest_sha256(),
     )
     started = time.monotonic()
     task = store.create_task(task)

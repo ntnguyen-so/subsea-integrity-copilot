@@ -65,6 +65,36 @@ def configured(monkeypatch, exporter):
     return kwargs
 
 
+def test_json_redaction_preserves_structure_and_unchanged_fingerprints():
+    original = '{"feedback": "token=fixture-private", "other": ["Bearer fixture-private"]}'
+    redacted = module._redact_content(original)
+    assert json.loads(redacted) == {"feedback": "[REDACTED]", "other": ["[REDACTED]"]}
+    nested = json.dumps({"content": original})
+    assert json.loads(json.loads(module._redact_content(nested))["content"]) == (
+        json.loads(redacted)
+    )
+    unchanged = '{ "feedback" : "Maintenance context must match compared instruments." }'
+    assert module._redact_content(unchanged) == unchanged
+
+
+@pytest.mark.parametrize("port", [3001, 3101])
+def test_trace_viewer_links_identify_the_run_on_the_configured_local_host(
+    monkeypatch, runtime, port
+):
+    monkeypatch.setenv(
+        "SUBSEA_LANGFUSE_OTLP_ENDPOINT",
+        f"http://127.0.0.1:{port}/api/public/otel/v1/traces",
+    )
+    telemetry = module.Telemetry(runtime)
+    try:
+        assert telemetry.trace_url("a" * 32) == (
+            f"http://127.0.0.1:{port}/project/subsea-copilot/traces/{'a' * 32}"
+        )
+        assert telemetry.trace_url("not-a-trace") is None
+    finally:
+        telemetry.close()
+
+
 def test_native_langfuse_tree_session_hash_and_visibility_separate(monkeypatch, runtime):
     exporter = Exporter()
     kwargs = configured(monkeypatch, exporter)
@@ -326,6 +356,65 @@ def test_stored_visibility_failure_is_warning(monkeypatch, runtime):
     assert telemetry.health()["stored_trace_visibility"] == "not_visible"
     assert "synthetic-secret" not in json.dumps(telemetry.health())
     telemetry.close()
+
+
+@pytest.mark.parametrize(
+    "invalid", [{"trace_id": "x", "span_id": "a" * 16}, {"trace_id": "a" * 32, "span_id": "0" * 16}]
+)
+def test_invalid_persisted_parent_does_not_start_an_unrelated_trace(runtime, invalid):
+    telemetry = module.Telemetry(runtime)
+    try:
+        with pytest.raises(ValueError, match="persisted trace context"):
+            with telemetry.span("agent.child", parent=invalid):
+                pytest.fail("Invalid persisted parent must not be accepted")
+    finally:
+        telemetry.close()
+
+
+def test_stored_investigation_tree_verification_reads_all_pages(monkeypatch, runtime):
+    configured(monkeypatch, Exporter())
+    telemetry = module.Telemetry(runtime)
+    trace_id = "a" * 32
+    root = {
+        "id": "root",
+        "type": "AGENT",
+        "traceId": trace_id,
+        "sessionId": "b" * 64,
+        "parentObservationId": None,
+    }
+    children = [
+        {**root, "id": str(index), "type": kind, "parentObservationId": "root"}
+        for index, kind in enumerate(["GENERATION", "TOOL", "GUARDRAIL"] + ["SPAN"] * 97)
+    ]
+    pages = [{"data": children, "meta": {"cursor": "next/page"}}, {"data": [root], "meta": {}}]
+    urls = []
+
+    class Response:
+        def __init__(self, value):
+            self.value = value
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def read(self, bound):
+            return json.dumps(self.value).encode()
+
+    class Opener:
+        def open(self, request, timeout):
+            urls.append(request.full_url)
+            return Response(pages.pop(0))
+
+    monkeypatch.setattr(module.urllib.request, "build_opener", lambda *args: Opener())
+    try:
+        assert telemetry.verify_trace(trace_id, ["agent", "generation", "tool", "guardrail"])
+        assert len(urls) == 2
+        assert urls[1].endswith("&cursor=next%2Fpage")
+        assert telemetry.health()["verified_observation_tree_count"] == 1
+    finally:
+        telemetry.close()
 
 
 def test_episode_session_is_stable_across_tasks_resumptions_and_generation_alias(

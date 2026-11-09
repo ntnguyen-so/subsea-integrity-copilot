@@ -65,7 +65,7 @@ def validate_interpretation(
             "Explain the application of at least one pinned knowledge card.",
         )
     if task.knowledge_packet and review and review.comparison_call_ids:
-        if not interpretation.regional_assessments:
+        if task.decision_policy == "legacy-v1" and not interpretation.regional_assessments:
             raise ValidationError(
                 "regional_analysis_required",
                 "Explain the joint sensor patterns, not only the numerical screening label.",

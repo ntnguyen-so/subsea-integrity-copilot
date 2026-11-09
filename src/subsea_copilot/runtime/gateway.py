@@ -3,11 +3,11 @@
 import json
 from typing import Any
 
+from subsea_copilot.agent_evidence import measurement_snapshot
 from subsea_copilot.budgets import (
     BUDGET_MULTIPLIER,
     CONTEXT_SENSOR_LIMIT,
     HEALTH_PAGE_SIZE,
-    HISTORY_CONTEXT_MAX_CHARS,
     HISTORY_DOCUMENT_LIMIT,
 )
 from subsea_copilot.contracts import (
@@ -16,10 +16,14 @@ from subsea_copilot.contracts import (
     QualityFinding,
     Sensor,
     WindowSnapshot,
+    content_hash,
 )
+from subsea_copilot.history import HistoryRangeCache, read_history
 from subsea_copilot.profiles import compact_comparison
 from subsea_copilot.public_activity import public_check
-from subsea_copilot.runtime.registry import REGISTRY, tool_schemas
+from subsea_copilot.runtime.diagnostics import validation_diagnostic
+from subsea_copilot.runtime.registry import role_policy, tool_schemas
+from subsea_copilot.store import BudgetExceeded
 from subsea_copilot.synthetic import generate_pack
 from subsea_copilot.validation import ValidationError, compatible
 
@@ -50,6 +54,8 @@ def ranked_findings(snapshot: WindowSnapshot) -> list[QualityFinding]:
 
 def context_sensors(snapshot: WindowSnapshot) -> list[Sensor]:
     sensors = generate_pack(snapshot.site_id, version=snapshot.pack_version).sensors
+    if snapshot.event.criteria_id == "measurement-only-no-domain-decision":
+        return sensors
     if len(sensors) <= 32 * BUDGET_MULTIPLIER:
         return sensors
     findings = {finding.sensor_id: finding for finding in ranked_findings(snapshot)}
@@ -128,7 +134,10 @@ def pressure_regions(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
 
 class ToolGateway:
     def __init__(self, store: Any, task: AgentTask, snapshot: WindowSnapshot, telemetry: Any):
+        if task.decision_policy == "llm-diagnosis-v1":
+            snapshot = measurement_snapshot(snapshot)
         self.store, self.task, self.snapshot, self.telemetry = store, task, snapshot, telemetry
+        self._history_ranges: HistoryRangeCache = {}
 
     def dependencies(self) -> list[AgentTask]:
         candidates = self.store.list_tasks(self.task.generation_id)
@@ -159,14 +168,14 @@ class ToolGateway:
         return []
 
     def _authorize(self, name: str, arguments: dict[str, Any]) -> None:
-        if name not in REGISTRY[self.task.role].tools:
+        if name not in role_policy(self.task.role, self.task.decision_policy).tools:
             raise ValidationError("tool_authority", "Tool is not allowed for this role.")
         self._validate_scope(arguments)
 
     def _argument_schemas(self) -> dict[str, Any]:
         return {
             schema["function"]["name"]: schema["function"]["parameters"]
-            for schema in tool_schemas(self.task.role)
+            for schema in tool_schemas(self.task.role, self.task.decision_policy)
         }
 
     def _validate_scope(self, arguments: dict[str, Any]) -> None:
@@ -229,6 +238,14 @@ class ToolGateway:
                 raise ValidationError("tool_arguments", "Evidence IDs must resolve within scope.")
         if "task_id" in arguments and not isinstance(arguments["task_id"], str):
             raise ValidationError("tool_arguments", "Task identity must be a string.")
+        if "receipt_id" in arguments and (
+            not isinstance(arguments["receipt_id"], str)
+            or arguments.get("ids")
+            or name != "evidence.get"
+        ):
+            raise ValidationError(
+                "tool_arguments", "Receipt retrieval requires a receipt_id string and ids=[]."
+            )
         if "offset" in arguments and (
             type(arguments["offset"]) is not int or arguments["offset"] < 0
         ):
@@ -237,17 +254,38 @@ class ToolGateway:
     def _read(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         snapshot = self.snapshot
         if name.startswith("history."):
-            from subsea_copilot.history import read_history
-
-            return read_history(self.store, self.task, snapshot, name, arguments)
+            return read_history(
+                self.store, self.task, snapshot, name, arguments, range_cache=self._history_ranges,
+            )
         ledger = {
             k: c.model_dump(mode="json")
             for k, c in snapshot.claims.items()
-            if c.kind in REGISTRY[self.task.role].claim_kinds
+            if c.kind in role_policy(self.task.role, self.task.decision_policy).claim_kinds
         }
         basic = {k: c for k, c in ledger.items() if c["kind"] in {"coverage", "limitation"}}
         event = {k: c for k, c in ledger.items() if c["kind"] in {"hypothesis", "limitation"}}
         if name == "evidence.get":
+            if "receipt_id" in arguments:
+                receipt = next(
+                    (
+                        item for item in self.store.tool_receipts(self.task.id)
+                        if item["call_id"] == arguments["receipt_id"]
+                        and not item.get("error") and item.get("result") is not None
+                    ),
+                    None,
+                )
+                if receipt is None:
+                    raise ValidationError(
+                        "receipt_scope", "Successful receipt is not available in this task."
+                    )
+                return {
+                    **receipt["result"],
+                    "retrieved_from_receipt": {
+                        "receipt_id": receipt["call_id"],
+                        "tool": receipt["name"],
+                        "result_sha256": content_hash(receipt["result"]),
+                    },
+                }
             ids = arguments.get("ids", [])
             selected = {k: c for k, c in ledger.items() if set(c["evidence_ids"]) <= set(ids)}
             return {
@@ -284,7 +322,11 @@ class ToolGateway:
                 and (c["value"].get("sensor_id"), c["value"].get("channel")) in identities
             }
             return {
-                "findings": [f.model_dump(mode="json") for f in page],
+                "findings": [f.model_dump(
+                    mode="json",
+                    exclude={"drift_suspected", "peer_disagreement"}
+                    if self.task.decision_policy == "llm-diagnosis-v1" else set(),
+                ) for f in page],
                 "pagination": {
                     "total": len(findings),
                     "offset": start,
@@ -307,7 +349,10 @@ class ToolGateway:
                 for e in snapshot.evidence.values()
                 if e.kind in {"sensor_metadata", "topology", "ontology"}
             ]
-            if len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER:
+            if (
+                self.task.decision_policy == "legacy-v1"
+                and len(snapshot.quality.findings) > 32 * BUDGET_MULTIPLIER
+            ):
                 selected_ids = {sensor.id for sensor in context_sensors(snapshot)}
                 for item in metadata:
                     value = item["value"]
@@ -323,6 +368,22 @@ class ToolGateway:
             return {
                 "metadata": metadata,
                 "failure_domain_count": snapshot.quality.failure_domains_available,
+            }
+        if name == "pressure.measurements":
+            return {
+                "evidence_ids": [
+                    identifier
+                    for identifier, item in snapshot.evidence.items()
+                    if item.kind == "channel_summary"
+                ],
+                "claims": {
+                    key: claim for key, claim in basic.items()
+                    if claim["kind"] in {"coverage", "limitation"}
+                },
+                "policy": (
+                    "Read these pressure measurements with evidence.get. "
+                    "This catalog supplies no diagnosis, fault classification or location."
+                ),
             }
         if name == "event.assess":
             return {"assessment": snapshot.event.model_dump(mode="json"), "claims": event}
@@ -386,7 +447,7 @@ class ToolGateway:
                 self.store.tool_receipts(child.id),
                 gateway.dependencies(),
             )
-            reviewed_context = None
+            reviewed_context: dict[str, Any] | None = None
             review = child.result.investigation
             if self.task.response_protocol in {"engineer-v1", "engineer-v2"} and review is not None:
                 reads = self.store.tool_receipts(child.id)
@@ -405,6 +466,16 @@ class ToolGateway:
                         and not receipt.get("error")
                     ],
                 }
+                if self.task.decision_policy == "llm-diagnosis-v1":
+                    comparisons = reviewed_context["comparisons"]
+                    offset = arguments.get("comparison_offset", 0)
+                    if offset and offset >= len(comparisons):
+                        raise ValidationError("handoff_page", "Comparison page is out of range.")
+                    reviewed_context["comparisons"] = comparisons[offset:offset + 1]
+                    reviewed_context["pagination"] = {
+                        "offset": offset, "total": len(comparisons),
+                        "next_offset": offset + 1 if offset + 1 < len(comparisons) else None,
+                    }
             return {
                 "task_id": child.id,
                 "role": child.role,
@@ -416,15 +487,49 @@ class ToolGateway:
 
     def dispatch(self, call: dict[str, Any]) -> dict[str, Any]:
         call_id, name, arguments = call["id"], call["name"], call["args"]
-        self._authorize(name, arguments)
-        for receipt in self.store.tool_receipts(self.task.id):
-            if receipt["call_id"] == call_id:
-                if receipt["name"] != name or receipt["arguments"] != arguments:
-                    raise ValidationError("receipt_conflict", "Replayed call changed its payload.")
-                return {"result": receipt.get("result"), "error": receipt.get("error")}
-        self.task = self.store.reserve_tool_call(
-            self.task.id, self.task.lease_token, REGISTRY[self.task.role].tool_limit
-        )
+        diagnostic: dict[str, Any] | None = None
+        try:
+            self._authorize(name, arguments)
+            for receipt in self.store.tool_receipts(self.task.id):
+                if receipt["call_id"] == call_id:
+                    if receipt["name"] != name or receipt["arguments"] != arguments:
+                        raise ValidationError(
+                            "receipt_conflict", "Replayed call changed its payload."
+                        )
+                    return {
+                        "result": receipt.get("result"), "error": receipt.get("error"),
+                        **(
+                            {"rejection": receipt["diagnostic"]}
+                            if receipt.get("diagnostic") else {}
+                        ),
+                    }
+            self.task = self.store.reserve_tool_call(
+                self.task.id, self.task.lease_token,
+                role_policy(self.task.role, self.task.decision_policy).tool_limit
+            )
+        except (ValidationError, BudgetExceeded) as exc:
+            assert self.task.lease_token is not None
+            diagnostic = {
+                **validation_diagnostic(
+                    ValidationError(exc.code, "Persisted tool-call budget exhausted.")
+                    if isinstance(exc, BudgetExceeded) else exc
+                ),
+                "call_id": call_id, "role": self.task.role,
+                "tool": name if name in role_policy(
+                    self.task.role, self.task.decision_policy
+                ).tools else "unauthorized",
+                "executed": False, "result_accepted": False, "repair_requested": False,
+            }
+            self.store.record_task_event(
+                self.task.id, self.task.lease_token, "tool.rejected", diagnostic
+            )
+            with self.telemetry.span("tool.rejected", {
+                "call_id": call_id, "role": self.task.role,
+            }) as span:
+                span.set_attribute("error.code", exc.code)
+                span.set_attribute("langfuse.observation.output", json.dumps(diagnostic))
+                span.record_exception(exc)
+            raise
         update = public_check(self.task.role, call_id, name, arguments)
         update["origin"] = call.get("origin", "model_request")
         self.store.publish_event(
@@ -435,6 +540,8 @@ class ToolGateway:
             snapshot_id=self.task.snapshot_id,
         )
         result, error = None, None
+        diagnostic = None
+        executed = False
         with self.telemetry.span(
             f"tool.{name}",
             {
@@ -451,6 +558,7 @@ class ToolGateway:
                     name, arguments, self._argument_schemas(),
                 )
                 self._validate_knowledge_check(name, arguments)
+                executed = True
                 result = self._read(name, arguments)
                 if name.startswith("history."):
                     result["investigation_step"] = self.task.tool_calls
@@ -460,32 +568,19 @@ class ToolGateway:
                     raise ValidationError(
                         "payload_too_large", "Required evidence exceeds the tool payload allowance."
                     )
-                if self.task.role == "event_diagnosis":
-                    from subsea_copilot.runtime.agent import model_tool_result
-
-                    delivered = [
-                        receipt["result"]
-                        for receipt in self.store.tool_receipts(self.task.id)
-                        if not receipt.get("error")
-                    ]
-                    total = sum(
-                        len(
-                            json.dumps(
-                                model_tool_result({"result": item, "error": None}),
-                                allow_nan=False,
-                                separators=(",", ":"),
-                            )
-                        )
-                        for item in [*delivered, result]
-                    )
-                    if total > HISTORY_CONTEXT_MAX_CHARS:
-                        result = None
-                        raise ValidationError(
-                            "context_budget_exceeded",
-                            "Read budget exhausted; narrow the request or report the gap.",
-                        )
             except ValidationError as exc:
                 error = exc.code
+                span.set_attribute("error.code", error)
+                span.record_exception(exc)
+                assert self.task.lease_token is not None
+                diagnostic = {
+                    **validation_diagnostic(exc), "call_id": call_id, "tool": name,
+                    "role": self.task.role, "executed": executed, "result_accepted": False,
+                    "repair_requested": False,
+                }
+                self.store.record_task_event(
+                    self.task.id, self.task.lease_token, "tool.rejected", diagnostic,
+                )
             self.store.record_tool_call(
                 self.task.id,
                 call_id,
@@ -494,6 +589,7 @@ class ToolGateway:
                 result,
                 error,
                 lease_token=self.task.lease_token,
+                diagnostic=diagnostic,
             )
             update = public_check(
                 self.task.role, call_id, name, arguments, result, error, completed=True
@@ -510,4 +606,19 @@ class ToolGateway:
                 "langfuse.observation.output",
                 json.dumps({"public_update": update, "result": result}, allow_nan=False),
             )
-        return {"result": result, "error": error}
+            span.set_attribute("outcome", "failed" if error else "completed")
+            span.set_attribute("evidence.claim_count", len(update.get("claim_refs", [])))
+            span.add_event(
+                "evidence.returned",
+                {
+                    "call_id": call_id,
+                    "tool": name,
+                    "role": self.task.role,
+                    "outcome": "failed" if error else "completed",
+                    "evidence.claim_count": len(update.get("claim_refs", [])),
+                },
+            )
+        return {
+            "result": result, "error": error,
+            **({"rejection": diagnostic} if diagnostic is not None else {}),
+        }

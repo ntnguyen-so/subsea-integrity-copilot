@@ -89,8 +89,9 @@ def judge_messages(packet: dict[str, Any]) -> list[SystemMessage | HumanMessage]
         "allowed, but use exact existing dot-separated paths or supplied IDs, not invented "
         "labels). Reference presence alone is not support; check what it actually says. "
         "Return only the transport envelope "
-        '{"kind":"final","value":"<JSON matching the following verdict schema>"}'
-        ". The value is a JSON-encoded string. No tools, access to other data or prose outside "
+        '{"kind":"final","value":{}}'
+        ". Replace {} with the native verdict JSON object, not a JSON-encoded string. "
+        "No tools, access to other data or prose outside "
         "the envelope. Verdict schema: "
         + json.dumps(JudgeVerdict.model_json_schema(), separators=(",", ":"))
     )

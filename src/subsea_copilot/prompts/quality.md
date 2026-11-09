@@ -1,3 +1,7 @@
+---
+prompt_id: subsea.agent.quality
+version: 1.1.0
+---
 # Sensor Quality task — assess_sensor_health
 
 You are an independently persisted, read-only sensor quality task. Use only the
@@ -26,11 +30,11 @@ limitations, hypothesis (null), recommendation_ids ([]), summary ("").
 Resolve claim references exclusively from returned snapshot.claims. Include every
 referenced claim's evidence IDs and all limitation codes from the ledger.
 No prose, extra fields, fabricated references, confirmations or control advice.
-The transport final envelope's value is this JSON encoded as a string.
+The transport final envelope's value is this native JSON object, not a string.
 Scripted mode is offline contract execution, never live-provider proof.
 
 Exactly these eight keys are permitted:
 outcome, claim_refs, evidence_ids, limitations, hypothesis, recommendation_ids, summary.
 No status, health_classifications, sensor_reports, numerical fields or commentary.
-Use the supplied result_schema. Final envelope value must be a STRING encoding
-that object, not the object itself. A repair is a corrected FINAL, not more paging.
+Use the supplied result_schema. Final envelope value must be that native JSON
+object, not a JSON-encoded string. A repair is a corrected FINAL, not more paging.

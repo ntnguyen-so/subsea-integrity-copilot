@@ -5,7 +5,12 @@ from datetime import datetime, timedelta
 from statistics import median
 from typing import Any
 
-from subsea_copilot.contracts import AgentTask, WindowSnapshot, content_hash
+from subsea_copilot.contracts import (
+    AgentTask,
+    CanonicalObservation,
+    WindowSnapshot,
+    content_hash,
+)
 from subsea_copilot.ingest import normalize_records
 from subsea_copilot.profiles import joint_profiles
 from subsea_copilot.store import history_search_query
@@ -26,6 +31,8 @@ INTENTS = {
     "seek_counterevidence",
 }
 
+HistoryRangeCache = dict[tuple[str, ...], tuple[list[CanonicalObservation], str]]
+
 
 def admissible(document: dict[str, Any], as_of: datetime) -> bool:
     expiry = document.get("effective_to")
@@ -40,6 +47,8 @@ def read_history(
     snapshot: WindowSnapshot,
     name: str,
     arguments: dict[str, Any],
+    *,
+    range_cache: HistoryRangeCache | None = None,
 ) -> dict[str, Any]:
     if not task.history_version:
         raise ValidationError("history_unavailable", "This archived task has no pinned corpus.")
@@ -180,17 +189,28 @@ def read_history(
             "history_range",
             "Compare a bounded sensor group in a bounded past range with two >=10s periods.",
         )
-    originals = [
-        row.original
-        for row in store.observations(
-            task.generation_id,
-            replay.epoch + timedelta(seconds=start),
-            replay.epoch + timedelta(seconds=end),
-        )
-        if row.received_at <= as_of
-    ]
-    rows = normalize_records(originals, pack)
-    rows = [row for row in rows if row.channel == "pressure"]
+    range_key = (
+        task.tenant_id, task.site_id, task.generation_id, snapshot.id,
+        snapshot.pack_version, snapshot.input_hash, task.history_version,
+        as_of.isoformat(), str(start), str(end),
+    )
+    cached = range_cache.get(range_key) if range_cache is not None else None
+    if cached is None:
+        originals = [
+            row.original
+            for row in store.observations(
+                task.generation_id,
+                replay.epoch + timedelta(seconds=start),
+                replay.epoch + timedelta(seconds=end),
+            )
+            if row.received_at <= as_of
+        ]
+        rows = [row for row in normalize_records(originals, pack) if row.channel == "pressure"]
+        input_hash = content_hash([row.model_dump(mode="json") for row in rows])
+        if range_cache is not None:
+            range_cache[range_key] = rows, input_hash
+    else:
+        rows, input_hash = cached
     profiles, joint = joint_profiles(pack, rows, ids, replay.epoch, start, split, end)
     paired_only = arguments.get("paired_only", False)
     if type(paired_only) is not bool:
@@ -252,7 +272,7 @@ def read_history(
         "split_seconds": split,
         "end_seconds": end,
         "as_of": as_of.isoformat(),
-        "input_hash": content_hash([row.model_dump(mode="json") for row in rows]),
+        "input_hash": input_hash,
         "sensors": summaries,
         "joint_pattern": joint,
         "caveat": "Before/after association is not a causal test; missing periods stay unknown.",

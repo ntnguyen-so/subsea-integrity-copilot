@@ -8,6 +8,11 @@ function display(value: Json | undefined): string {
 function object(value: Json): value is Record<string, Json> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
+function reportGoal(file: InvestigationCase): { seconds: number; met: boolean } {
+  return file.interpretation_review?.protocol === "semantic-grounding-v2"
+    ? { seconds: 300, met: file.recorded_elapsed_seconds < 300 }
+    : { seconds: file.report_target_seconds, met: file.report_target_met };
+}
 export function renderWorkflowComparison(container: HTMLElement, snapshot: WindowSnapshot, task: AgentTask,
   file: InvestigationCase | null, scenario: string, inspect: () => void): void {
   const section = node("section", "", "workflow-comparison");
@@ -50,13 +55,17 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
     : "Offline contract example. No hosted inference; not the customer's current solution or evidence of LLM performance.", "muted"));
   if (file) {
     metric(assisted, "Leak or malfunction?",
-      file.hypothesis === "suspected_leak"
+      file.decision_policy === "llm-diagnosis-v1"
+        ? "See the agent's source-grounded incident report below. No numerical classifier selects its cause assessment."
+        : file.hypothesis === "suspected_leak"
         ? `Possible leak, not confirmed: ${snapshot.event.supporting_sensor_ids.length} instruments support a related pattern across ${snapshot.event.failure_domain_count} failure domains. Other individual alerts may coexist.`
         : file.hypothesis === "sensor_or_telemetry_issue"
           ? "Sensor/telemetry issue supported; review the affected instruments. This does not clear the pipeline of a concurrent leak."
           : "Cause unresolved. Do not force a leak/malfunction choice when the evidence is insufficient.", "classification");
     metric(assisted, "Inspection recommendation",
-      file.inspection ? `${file.inspection.segment_id} ${file.inspection.start_m}-${file.inspection.end_m}m. The product correlates sensors using numerical tools; the LLM does not invent leak coordinates.`
+      file.decision_policy === "llm-diagnosis-v1"
+        ? "Only inspection areas explicitly stated in the incident report appear on the agent map; no numerical fit supplies or vetoes them."
+        : file.inspection ? `${file.inspection.segment_id} ${file.inspection.start_m}-${file.inspection.end_m}m. The product correlates sensors using numerical tools; the LLM does not invent leak coordinates.`
         : "Location withheld in this report. Review the unresolved evidence, not a presumed leak coordinate.", "interval");
     const cited = file.sources.filter(source => source.use === "cited");
     const rejected = file.sources.filter(source => source.use === "rejected");
@@ -68,11 +77,11 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
         : "No model-written interpretation in this archived report.", "causes");
     metric(assisted, "Reusable, checked handover",
       file.interpretation_review
-        ? `${file.interpretation_review.rounds.length} grounding-review round(s); exact quotes and review coverage checked by code. Sources, limitations, follow-ups and a downloadable evidence packet below. Same-model critic, not a correctness guarantee.`
+        ? `${file.interpretation_review.rounds.length} grounding-review round(s); ${file.interpretation_review.protocol === "semantic-grounding-v2" ? "review coverage and exact source-material binding" : "exact quotes and review coverage"} checked by code. Sources, limitations, follow-ups and a downloadable evidence packet below. Same-model critic, not a correctness guarantee.`
         : "This archived report has no current-protocol grounding review. Do not treat it as newly qualified.", "handover");
     metric(assisted, "Report processing time",
       file.mode === "live"
-        ? `${file.recorded_elapsed_seconds.toFixed(1)}s from admission to recorded report; ${file.report_target_seconds}s target ${file.report_target_met ? "met" : "missed"}. ${file.fresh_model_calls} fresh hosted calls; human review time is additional.`
+        ? `${file.recorded_elapsed_seconds.toFixed(1)}s from admission to recorded report; ${reportGoal(file).seconds}s demo goal ${reportGoal(file).met ? "met" : "missed"}. ${file.fresh_model_calls} fresh hosted calls; human review time is additional.`
         : "Not a live-model latency measurement. Scripted adapter calls cannot establish agent speed or reliability.", "timing");
     const link = node("a", "Review the sources, rationale and handoff below");
     link.href = "#investigation-case";
@@ -91,7 +100,7 @@ export function renderWorkflowComparison(container: HTMLElement, snapshot: Windo
   container.append(section);
 }
 export function renderCasefile(container: HTMLElement, file: InvestigationCase, actions: {
-  draft: (question: string) => void; claim: (id: string) => void;
+  claim: (id: string) => void;
 }): void {
   const card = node("section", "", "investigation-case");
   card.id = "investigation-case";
@@ -129,6 +138,7 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
       review.append(node("summary", `Independent grounding review accepted: ${file.interpretation_review.rounds.length} round(s). Not a correctness guarantee.`));
       for (const [index, round] of file.interpretation_review.rounds.entries()) {
         review.append(node("h4", `Review ${index + 1}: ${round.assessment.decision}`));
+        if (round.material_hash) review.append(node("p", `Task, candidate and original-source material SHA256: ${round.material_hash}`, "muted"));
         for (const check of round.assessment.checks) {
           review.append(node("p", `${check.paragraph_id}: ${check.verdict}. ${check.reason}`));
           for (const support of check.support) {
@@ -136,7 +146,9 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
           }
         }
       }
-      review.append(node("p", "Separate critic context, same underlying model. Exact quotes and review coverage checked by code; humans retain review authority.", "muted"));
+      review.append(node("p", file.interpretation_review.protocol === "semantic-grounding-v2"
+        ? "Separate critic context, same underlying model. Semantic verdicts cover every explanation; code checks coverage and exact material binding, not physical correctness. Humans retain review authority."
+        : "Separate critic context, same underlying model. Exact quotes and review coverage checked by code; humans retain review authority.", "muted"));
       audit.append(review);
     } else audit.append(node("p", "Archived explanation: predates independent grounding review. Do not treat it as reviewed by the current protocol.", "summary"));
     card.append(node("p", reportText(file.interpretation.answer.text, file.interpretation.answer.references), "case-assessment"));
@@ -159,14 +171,6 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
       card.append(detail);
       audit.append(node("h4", `${pipes.join(" / ")} regional references`), references(region.references));
     }
-    audit.append(node("h3", "Optional additional questions"));
-    const followups = node("div", "", "case-followups");
-    for (const question of file.interpretation.follow_up_questions) {
-      const item = node("div");
-      item.append(node("p", question), button("Draft this follow-up on the same evidence", () => actions.draft(question)));
-      followups.append(item);
-    }
-    audit.append(followups, node("p", "Drafting does not run inference. Review the question, then explicitly submit. External evidence may still be unavailable.", "muted"));
   }
   const trail = node("details", "", "case-trail");
   trail.append(node("summary", "Executed investigation checks (public actions, not hidden thoughts)"));
@@ -215,14 +219,16 @@ export function renderCasefile(container: HTMLElement, file: InvestigationCase, 
     const wrapper = node("div", "", "table-wrap"); wrapper.append(table); item.append(wrapper); audit.append(item);
   }
   const checked = node("details");
-  checked.append(node("summary", "Checked numerical claims and unresolved limitations"));
+  checked.append(node("summary", file.decision_policy === "llm-diagnosis-v1"
+    ? "Cited measurements and unresolved limitations"
+    : "Archived numerical claims and unresolved limitations"));
   checked.append(node("p", file.limitations.map(friendly).join("; "), "case-limitations"));
   for (const claim of file.checked_claims) checked.append(button(`${claim.id}: ${friendly(claim.kind)}`, () => actions.claim(claim.id), "chip rule"));
   audit.append(checked);
   audit.append(node("p",
     `${file.fresh_model_calls} fresh ${file.mode === "scripted" ? "SCRIPTED adapter calls (no hosted inference)" : "hosted model calls"} / ${file.fresh_tool_calls} fresh tool calls; recorded task span ${file.recorded_elapsed_seconds.toFixed(1)}s including queue. ${file.reused_task_ids.length} reused specialists (prior calls excluded from fresh counts). Provider monetary cost unknown.`,
     "case-work-summary"));
-  audit.append(node("p", `${file.report_target_seconds}s report-processing target: ${file.report_target_met ? "MET" : "MISSED"}. Measured from question admission to accepted result, not sensor onset or browser receipt. Correctness checks are not relaxed.`, "case-report-target"));
+  audit.append(node("p", `${reportGoal(file).seconds}s report-processing demo goal: ${reportGoal(file).met ? "MET" : "MISSED"}. Measured from question admission to accepted result, not sensor onset or browser receipt. Correctness checks are not relaxed.`, "case-report-target"));
   audit.append(node("p", `Evidence basis: ${file.snapshot_id}; ${file.window_start} to ${file.window_end}; ${file.mode.toUpperCase()}. Synthetic evidence; not field reliability.`, "muted"));
   const download = node("a", "Download this investigation handoff (JSON)");
   download.href = `/api/tasks/${encodeURIComponent(file.task_id)}/casefile`; download.download = `investigation-${file.task_id}.json`;

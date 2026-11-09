@@ -75,6 +75,29 @@ REGISTRY: dict[AgentRole, RolePolicy] = {
     ),
 }
 
+LLM_REGISTRY: dict[AgentRole, RolePolicy] = {
+    role: RolePolicy(
+        policy.purpose,
+        (
+            policy.tools - {"event.assess", "event.counterevidence", "location.fit"}
+            | {"pressure.measurements"}
+            if role == "event_diagnosis" else policy.tools - {"criteria.explain"}
+        ),
+        (
+            frozenset({"task.result", "pressure.measurements"})
+            if role == "event_diagnosis" else policy.required - {"criteria.explain"}
+        ),
+        policy.model_limit,
+        policy.tool_limit,
+        frozenset({"coverage", "sensor_health", "limitation"}),
+    )
+    for role, policy in REGISTRY.items()
+}
+
+
+def role_policy(role: AgentRole, decision_policy: str = "legacy-v1") -> RolePolicy:
+    return (LLM_REGISTRY if decision_policy == "llm-diagnosis-v1" else REGISTRY)[role]
+
 RECOMMENDATIONS = {
     "review_sensor_evidence": "Review the cited sensor evidence.",
     "review_coverage": "Review observation coverage and data gaps.",
@@ -101,7 +124,7 @@ LIMITATIONS = frozenset(
 )
 
 
-def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
+def tool_schemas(role: AgentRole, decision_policy: str = "legacy-v1") -> list[dict[str, Any]]:
     properties: dict[str, Any] = {
         "site_id": {"type": "string"},
         "snapshot_id": {"type": "string"},
@@ -110,12 +133,17 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
         "parameter_version": {"type": "string"},
     }
     schemas = []
-    for name in sorted(REGISTRY[role].tools):
+    for name in sorted(role_policy(role, decision_policy).tools):
         fields = dict(properties)
         required = list(properties)
         if name == "task.result":
             fields["task_id"] = {"type": "string"}
             required.append("task_id")
+            if decision_policy == "llm-diagnosis-v1" and role == "operator_response":
+                fields["comparison_offset"] = {
+                    "type": "integer", "minimum": 0,
+                    "description": "Read one cited comparison per bounded handoff page.",
+                }
         if name == "evidence.get":
             fields["ids"] = {
                 "type": "array",
@@ -124,6 +152,13 @@ def tool_schemas(role: AgentRole) -> list[dict[str, Any]]:
                 "description": (
                     "Immutable evidence item IDs from supplied evidence keys, never claim IDs. "
                     "Claim references belong in claim_refs, not this read's ids."
+                ),
+            }
+            fields["receipt_id"] = {
+                "type": "string",
+                "description": (
+                    "Optional successful receipt ID from this task's archived model view. "
+                    "Set ids=[] to retrieve its original result without executing its tool again."
                 ),
             }
         if name == "quality.sensor_patterns":

@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import JsonValue
 
+from .agent_evidence import measurement_snapshot
 from .contracts import (
     AgentTask,
     Claim,
@@ -56,6 +57,7 @@ class InvestigationCase(Contract):
     history_version: str | None
     disposition: str
     hypothesis: str | None
+    decision_policy: Literal["legacy-v1", "llm-diagnosis-v1"] = "legacy-v1"
     inspection: InspectionInterval | None
     next_action: str
     interpretation: EngineerInterpretation | None
@@ -86,6 +88,8 @@ def build_casefile(
     dependencies: list[AgentTask],
     receipts: list[dict[str, JsonValue]],
 ) -> InvestigationCase:
+    if task.decision_policy == "llm-diagnosis-v1":
+        snapshot = measurement_snapshot(snapshot)
     if (
         task.role != "operator_response"
         or task.response_protocol not in {"engineer-v1", "engineer-v2"}
@@ -211,6 +215,7 @@ def build_casefile(
         history_version=task.history_version,
         disposition=disposition,
         hypothesis=result.hypothesis,
+        decision_policy=task.decision_policy,
         inspection=inspection,
         next_action=ACTION_LABELS[review.next_action]
         if review

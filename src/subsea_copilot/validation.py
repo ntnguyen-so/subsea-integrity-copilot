@@ -5,14 +5,26 @@ import math
 import re
 from typing import Any, NoReturn
 
+from pydantic import JsonValue
+
+from subsea_copilot.agent_evidence import measurement_snapshot
 from subsea_copilot.contracts import AgentResult, AgentTask, Claim, WindowSnapshot, content_hash
-from subsea_copilot.runtime.registry import LIMITATIONS, RECOMMENDATIONS, REGISTRY, RolePolicy
+from subsea_copilot.runtime.registry import (
+    LIMITATIONS,
+    RECOMMENDATIONS,
+    REGISTRY,
+    RolePolicy,
+    role_policy,
+)
 
 
 class ValidationError(ValueError):
-    def __init__(self, code: str, message: str):
+    def __init__(
+        self, code: str, message: str, *, details: dict[str, JsonValue] | None = None
+    ):
         super().__init__(message)
         self.code = code
+        self.details = details
 
 
 def parse_json(value: str) -> Any:
@@ -39,6 +51,10 @@ def read_pinned_evidence(receipts: list[dict[str, Any]]) -> set[str]:
     }
 
 
+def dependency_limitations(dependencies: list[AgentTask]) -> set[str]:
+    return {code for task in dependencies if task.result for code in task.result.limitations}
+
+
 def read_evidence_reference(snapshot_id: str, receipts: list[dict[str, Any]]) -> str | None:
     read = read_pinned_evidence(receipts)
     if not read:
@@ -49,7 +65,8 @@ def read_evidence_reference(snapshot_id: str, receipts: list[dict[str, Any]]) ->
 
 
 def bind_read_claim_evidence(
-    result: AgentResult, snapshot: WindowSnapshot, receipts: list[dict[str, Any]]
+    result: AgentResult, snapshot: WindowSnapshot, receipts: list[dict[str, Any]],
+    *, include_read_kinds: frozenset[str] = frozenset(),
 ) -> AgentResult:
     """Bind existing claim sources without authorizing unread or foreign evidence."""
     required: set[str] = set()
@@ -60,8 +77,13 @@ def bind_read_claim_evidence(
         required.update(claim.evidence_ids)
     if not required <= snapshot.evidence.keys():
         raise ValidationError("evidence", "Claim evidence does not resolve in the snapshot.")
-    if not required <= read_pinned_evidence(receipts):
+    read = read_pinned_evidence(receipts)
+    if not required <= read:
         raise ValidationError("evidence_receipts", "Claim evidence must have been read.")
+    required.update(
+        ref for ref in read
+        if ref in snapshot.evidence and snapshot.evidence[ref].kind in include_read_kinds
+    )
     missing = required - set(result.evidence_ids)
     return result.model_copy(
         update={"evidence_ids": [*result.evidence_ids, *sorted(missing)]}
@@ -162,6 +184,7 @@ def compatible(task: AgentTask, other: AgentTask, snapshot: WindowSnapshot) -> b
         and other.generation_id == task.generation_id
         and other.snapshot_id == snapshot.id
         and other.mode == task.mode
+        and other.decision_policy == task.decision_policy
         and other.history_version == task.history_version
         and (other.knowledge_packet.identity() if other.knowledge_packet else None)
         == (task.knowledge_packet.identity() if task.knowledge_packet else None)
@@ -184,7 +207,7 @@ def validate_result(
         snapshot,
         receipts,
         dependencies,
-        policy=REGISTRY[task.role],
+        policy=role_policy(task.role, task.decision_policy),
         specialist_contract=True,
     )
 
@@ -220,8 +243,14 @@ def _validate_with_policy(
     policy: RolePolicy,
     specialist_contract: bool,
 ) -> AgentResult:
-    def reject(code: str, message: str) -> NoReturn:
-        raise ValidationError(code, message)
+    llm_decides = task.decision_policy == "llm-diagnosis-v1"
+    if llm_decides:
+        snapshot = measurement_snapshot(snapshot)
+
+    def reject(
+        code: str, message: str, *, details: dict[str, JsonValue] | None = None
+    ) -> NoReturn:
+        raise ValidationError(code, message, details=details)
 
     try:
         result = (
@@ -245,7 +274,10 @@ def _validate_with_policy(
         or task.knowledge_packet.pack_version != snapshot.pack_version
     ):
         reject("knowledge_scope", "Domain guidance differs from the pinned site or geometry.")
-    if result.summary not in {"", "Evidence references only."}:
+    specialist_handoff = llm_decides and task.role != "operator_response"
+    if specialist_handoff and len(result.summary) > 3000:
+        reject("certainty", "Specialist reasoning handoff exceeds its declared bound.")
+    if not specialist_handoff and result.summary not in {"", "Evidence references only."}:
         reject("certainty", "Unrestricted prose is not an accepted factual channel.")
     if task.purpose != policy.purpose:
         reject("role", "Task purpose does not match its frozen role.")
@@ -260,7 +292,7 @@ def _validate_with_policy(
     ):
         reject("required_metadata", "Quality needs pinned sensor/failure-domain metadata.")
     if task.role == "sensor_quality":
-        if quality_facts_available(snapshot) and result.outcome != "supported":
+        if not llm_decides and quality_facts_available(snapshot) and result.outcome != "supported":
             reject(
                 "quality_outcome",
                 "Grounded quality findings are supported even if physical evidence is absent.",
@@ -325,10 +357,21 @@ def _validate_with_policy(
     ):
         reject("dependency_receipts", "Response must consume every authorized specialist.")
     if specialist_contract and task.role in {"operator_response", "event_diagnosis"}:
-        required_limits = {code for d in dependencies if d.result for code in d.result.limitations}
+        required_limits = dependency_limitations(dependencies)
         if not required_limits <= set(result.limitations):
-            reject("dependency_limitations", "Dependent task must retain specialist limitations.")
-    if any(d.state == "ABSTAINED" for d in dependencies):
+            missing_limits: list[JsonValue] = [
+                code for code in sorted(required_limits - set(result.limitations))
+            ]
+            inherited_limits: list[JsonValue] = [code for code in sorted(required_limits)]
+            reject(
+                "dependency_limitations", "Dependent task must retain specialist limitations.",
+                details={
+                    "path": ["limitations"],
+                    "missing_limitations": missing_limits,
+                    "required_limitations": inherited_limits,
+                },
+            )
+    if not llm_decides and any(d.state == "ABSTAINED" for d in dependencies):
         if result.outcome != "insufficient_evidence" or "child_abstained" not in result.limitations:
             reject(
                 "abstention", "Abstained specialist permits only explicit insufficient evidence."
@@ -347,7 +390,17 @@ def _validate_with_policy(
     for ref in result.claim_refs:
         claim = snapshot.claims.get(ref)
         if claim is None or claim.id != ref or claim.kind not in policy.claim_kinds:
-            reject("citations", "Claim not in the pinned role ledger.")
+            reject(
+                "citations", "Claim not in the pinned role ledger.",
+                details={
+                    "path": ["claim_refs"],
+                    "invalid_claim_ref": ref,
+                    "instruction": (
+                        "Use actual claim IDs from the pinned ledger. A read-evidence bundle "
+                        "token is not a claim ID; keep successfully cited claims."
+                    ),
+                },
+            )
         if not set(claim.evidence_ids) <= set(result.evidence_ids):
             reject("evidence", "Every claim's source evidence must be cited.")
         if claim.kind == "location":
@@ -371,7 +424,10 @@ def _validate_with_policy(
         if c.kind == "limitation"
     }
     if not set(result.limitations) <= LIMITATIONS | ledger_codes:
-        reject("limitations", "Unknown uncertainty vocabulary.")
+        reject("limitations", "Unknown uncertainty vocabulary.", details={
+            "path": ["limitations"],
+            "unknown_limitations": [*sorted(set(result.limitations) - LIMITATIONS - ledger_codes)],
+        })
     mandatory = set(ledger_codes)
     if any(receipt.get("error") == "context_budget_exceeded" for receipt in receipts):
         mandatory.add("context_budget_exceeded")
@@ -386,8 +442,14 @@ def _validate_with_policy(
     ):
         mandatory.add("location_ambiguous")
     if not mandatory <= set(result.limitations):
-        reject("limitations", "Material computed limitations cannot be omitted.")
-    if task.role != "sensor_quality" and question_requires_location(task.question):
+        reject("limitations", "Material computed limitations cannot be omitted.", details={
+            "path": ["limitations"],
+            "missing_limitations": [*sorted(mandatory - set(result.limitations))],
+        })
+    if (
+        not llm_decides and task.role != "sensor_quality"
+        and question_requires_location(task.question)
+    ):
         has_location = any(snapshot.claims[r].kind == "location" for r in result.claim_refs)
         eligible_fit = (
             snapshot.event.eligible_location
@@ -404,7 +466,7 @@ def _validate_with_policy(
             reject("location_withheld_required", "Unavailable localization must be explicit.")
     if task.role == "sensor_quality" and result.hypothesis is not None:
         reject("hypothesis", "Quality cannot make event-hypothesis assertions.")
-    if result.hypothesis is not None:
+    if result.hypothesis is not None and not llm_decides:
         if task.role == "sensor_quality" or result.hypothesis not in (
             snapshot.event.eligible_hypotheses + ["insufficient_evidence"]
         ):
@@ -426,6 +488,7 @@ def _validate_with_policy(
     if (
         result.outcome == "supported"
         and result.hypothesis == "insufficient_evidence"
+        and not llm_decides
     ):
         if "insufficient_evidence" not in result.limitations:
             reject("limitations", "Numerical screening abstention must remain explicit.")
@@ -444,21 +507,31 @@ def _validate_with_policy(
         reject("role", "Only response selects read-only recommendation IDs.")
     if not set(result.recommendation_ids) <= set(RECOMMENDATIONS):
         reject("recommendations", "Unknown or operational recommendation.")
-    if "review_location_fit" in result.recommendation_ids and not snapshot.event.eligible_location:
+    if (
+        not llm_decides and "review_location_fit" in result.recommendation_ids
+        and not snapshot.event.eligible_location
+    ):
         reject("location", "Location recommendation requires eligible numerical fit.")
     if specialist_contract and task.role == "operator_response":
         supported = {r for d in dependencies if d.result is not None for r in d.result.claim_refs}
         if not set(result.claim_refs) <= supported:
             reject("specialist_claims", "Response cannot introduce unreviewed specialist claims.")
         diagnoses = [d for d in dependencies if d.role == "event_diagnosis"]
-        if diagnoses and result.outcome == "supported":
+        if not llm_decides and diagnoses and result.outcome == "supported":
             if not any(
                 d.result is not None and d.result.hypothesis == result.hypothesis for d in diagnoses
             ):
                 reject("diagnosis_consistency", "Response must retain the accepted diagnosis.")
         if diagnoses:
             assert diagnoses[0].result is not None
-            if result.investigation != diagnoses[0].result.investigation:
+            if llm_decides and result.investigation is not None:
+                inherited = diagnoses[0].result.investigation
+                if inherited is None or any(
+                    not set(getattr(result.investigation, field)) <= set(getattr(inherited, field))
+                    for field in ("document_ids", "rejected_document_ids", "comparison_call_ids")
+                ):
+                    reject("history_inheritance", "Only actually reviewed sources may be cited.")
+            elif not llm_decides and result.investigation != diagnoses[0].result.investigation:
                 reject("history_inheritance", "Response must retain the checked investigation.")
         elif result.investigation is not None:
             reject("history_inheritance", "A response cannot introduce unreviewed history.")
@@ -480,6 +553,13 @@ def _validate_with_policy(
 
 def render_result(result: AgentResult, task: AgentTask, snapshot: WindowSnapshot) -> str:
     """Never render model summary, raw JSON, or agent-reconstructed arithmetic."""
+    if task.decision_policy == "llm-diagnosis-v1":
+        return (
+            f"{task.mode.upper()} · READ ONLY · analysis as of {snapshot.window_end.isoformat()}\n"
+            f"Agent assessment: {result.hypothesis or result.outcome}.\n"
+            "Measurement references: " + ", ".join(result.claim_refs) + "\n"
+            "Physical cause and location require engineer verification."
+        )
     lines = [
         f"{task.mode.upper()} · READ ONLY · analysis as of {snapshot.window_end.isoformat()}",
         "Insufficient evidence."

@@ -1,0 +1,92 @@
+from datetime import timedelta
+
+import pytest
+from pydantic import ValidationError
+from test_agents import snapshot as snapshot_fixture
+
+from subsea_copilot.casefile import InvestigationCase
+from subsea_copilot.contracts import AgentResult, AgentTask, utc_now
+from subsea_copilot.playback import Recording, RecordingLibrary, load_library, save_library
+from subsea_copilot.synthetic import generate_pack
+
+
+@pytest.fixture
+def recording():
+    snapshot = snapshot_fixture.__wrapped__()
+    pack = generate_pack(snapshot.site_id)
+    snapshot = snapshot.model_copy(update={"pack_version": pack.version})
+    task = AgentTask(
+        id="saved", root_id="saved", site_id=snapshot.site_id,
+        generation_id=snapshot.generation_id, snapshot_id=snapshot.id,
+        role="operator_response", question="Where should we inspect?",
+        purpose="answer_question", mode="scripted",
+        state="SUCCEEDED", deadline=utc_now() + timedelta(seconds=300),
+        result=AgentResult(outcome="supported", claim_refs=[], limitations=[]),
+        answer="Recorded output",
+    )
+    file = InvestigationCase(
+        task_id=task.id, generation_id=task.generation_id, snapshot_id=snapshot.id,
+        question=task.question, mode=task.mode, state="SUCCEEDED",
+        window_start=snapshot.window_start.isoformat(), window_end=snapshot.window_end.isoformat(),
+        input_hash=snapshot.input_hash, pack_version=snapshot.pack_version,
+        baseline_version=snapshot.baseline_version, parameter_version=snapshot.parameter_version,
+        history_version=None, disposition="Recorded", hypothesis=None, inspection=None,
+        next_action="Review", interpretation=None, checked_claims=[], limitations=[],
+        sources=[], comparisons=[], steps=[], reused_task_ids=[], fresh_model_calls=1,
+        fresh_tool_calls=1, recorded_elapsed_seconds=1, report_target_met=True,
+    )
+    return Recording(
+        scenario="S1", seed=2026, dataset_sha256="a" * 64,
+        pack=pack, snapshot=snapshot, task=task, children=[], casefile=file,
+    )
+
+
+def test_recording_roundtrip_keeps_source_time_and_excludes_execution_tokens(recording, tmp_path):
+    path = tmp_path / "recordings.json"
+    save_library(path, RecordingLibrary(recordings=[recording]))
+    saved = load_library(path).recordings[0]
+    assert saved.snapshot == recording.snapshot
+    assert saved.summary()["source_seconds"] == recording.snapshot.end_seconds
+    assert "lease_token" not in saved.public_detail()["detail"]["task"]
+
+
+@pytest.mark.parametrize("field,value", [
+    ("input_hash", "foreign"), ("snapshot_id", "foreign"), ("pack_version", "foreign"),
+])
+def test_recording_cannot_mix_an_answer_with_another_evidence_basis(recording, field, value):
+    changed = recording.model_dump()
+    changed["casefile"][field] = value
+    with pytest.raises(ValidationError, match="immutable investigation basis"):
+        Recording.model_validate(changed)
+
+
+def test_library_rejects_duplicate_trials_and_malformed_files(recording, tmp_path):
+    with pytest.raises(ValidationError, match="Duplicate"):
+        RecordingLibrary(recordings=[recording, recording])
+    path = tmp_path / "recordings.json"
+    path.write_text('{"recordings": "broken"}')
+    with pytest.raises(ValidationError):
+        load_library(path)
+
+
+def test_failed_recording_preserves_the_failure_without_an_accepted_report(recording, tmp_path):
+    failed = recording.model_copy(update={
+        "task": recording.task.model_copy(update={
+            "state": "FAILED", "result": None, "answer": None,
+            "error_code": "grounding_rejected",
+        }),
+        "casefile": None,
+    })
+    path = tmp_path / "terminal-recordings.json"
+    save_library(path, RecordingLibrary(recordings=[failed]))
+    saved = load_library(path).recordings[0]
+    assert saved.base_playback_speed == 5
+    assert saved.public_detail()["detail"]["casefile"] is None
+    assert saved.public_detail()["detail"]["task"]["error_code"] == "grounding_rejected"
+
+
+def test_successful_recording_requires_its_accepted_report(recording):
+    payload = recording.model_dump()
+    payload["casefile"] = None
+    with pytest.raises(ValidationError, match="immutable investigation basis"):
+        Recording.model_validate(payload)

@@ -29,6 +29,15 @@ class FakeSpan:
     def set_attribute(self, *args):
         pass
 
+    def update_name(self, *args):
+        pass
+
+    def record_exception(self, *args):
+        pass
+
+    def add_event(self, *args):
+        pass
+
 
 def test_detailed_engineering_briefing_preserves_paragraphs_and_citation_checks():
     from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
@@ -80,6 +89,301 @@ def test_detailed_engineering_briefing_preserves_paragraphs_and_citation_checks(
     with pytest.raises(ValidationError, match="accepted claims") as rejected:
         validate_interpretation(result, task)
     assert "invented-evidence" in str(rejected.value)
+
+
+def revision_case():
+    from subsea_copilot.contracts import AgentResult, GroundingAssessment
+
+    result = AgentResult(
+        outcome="supported", claim_refs=["health"], evidence_ids=[], limitations=[],
+        interpretation={
+            "focus": "inspection_rationale",
+            "answer": {"text": "Inspect the bounded 700-900 m interval.", "references": ["health"]},
+            "competing_causes": [{
+                "cause": "leak", "stance": "possible",
+                "text": "A paired loss supports a possible leak.", "references": ["health"],
+            }],
+            "follow_up_questions": ["Can independent pressure measurements confirm the pattern?"],
+        },
+    )
+    assessment = GroundingAssessment(
+        decision="revise", checks=[
+            {"paragraph_id": "answer", "verdict": "unsupported",
+             "reason": "No qualified interval is available.", "support": []},
+            {"paragraph_id": "cause:leak", "verdict": "supported", "reason": "Measured pattern.",
+             "support": [{"reference": "health", "quote": "original measured facts"}]},
+            {"paragraph_id": "question:0", "verdict": "supported", "reason": "Relevant request.",
+             "support": [{"reference": "health", "quote": "original measured facts"}]},
+        ],
+    )
+    return result, assessment
+
+
+def test_fresh_main_answer_does_not_require_duplicate_regional_metadata(snapshot):
+    from subsea_copilot.contracts import AgentTask, HistoryInvestigation
+    from subsea_copilot.interpretation import validate_interpretation
+    from subsea_copilot.knowledge import load_knowledge, select_knowledge
+
+    result, _ = revision_case()
+    result.investigation = HistoryInvestigation(
+        assessment="unresolved", document_ids=[], rejected_document_ids=[],
+        comparison_call_ids=["comparison"], next_action="human_review",
+    )
+    task = AgentTask(
+        id="main-only", root_id="main-only", generation_id=snapshot.generation_id,
+        snapshot_id=snapshot.id, site_id=snapshot.site_id, role="operator_response",
+        purpose="answer_incident_question", question="Explain this measured pattern.",
+        mode="live", deadline=utc_now(), response_protocol="engineer-v2",
+        decision_policy="llm-diagnosis-v1", knowledge_packet=select_knowledge(
+            load_knowledge(), site_id=snapshot.site_id,
+            pack_version=snapshot.pack_version, as_of=utc_now(),
+        ),
+    )
+    validate_interpretation(result, task)
+    with pytest.raises(ValidationError) as rejected:
+        validate_interpretation(result, task.model_copy(update={"decision_policy": "legacy-v1"}))
+    assert rejected.value.code == "regional_analysis_required"
+
+
+def test_compact_semantic_review_is_complete_scope_bound_and_not_legacy_quote_acceptance(snapshot):
+    from subsea_copilot.agent_evidence import measurement_snapshot
+    from subsea_copilot.contracts import (
+        AgentTask,
+        GroundingAssessment,
+        GroundingRound,
+        InterpretationReview,
+        content_hash,
+    )
+    from subsea_copilot.grounding import (
+        candidate_hash,
+        paragraphs,
+        reusable_checks,
+        review_material_hash,
+        source_texts,
+        validate_assessment,
+        validate_review,
+    )
+
+    snapshot = measurement_snapshot(snapshot)
+    result, _ = revision_case()
+    task = AgentTask(
+        id="semantic", root_id="semantic", generation_id=snapshot.generation_id,
+        snapshot_id=snapshot.id, site_id=snapshot.site_id, role="operator_response",
+        purpose="answer_incident_question", question="Explain the pressure pattern.",
+        mode="live", deadline=utc_now(), response_protocol="engineer-v2",
+        decision_policy="llm-diagnosis-v1",
+    )
+    sources = source_texts(result, snapshot, [])
+    assessment = GroundingAssessment(
+        decision="accept", checks=[{
+            "paragraph_id": identifier, "verdict": "supported",
+            "reason": "Semantics checked against original case evidence.", "support": [],
+        } for identifier in paragraphs(result)],
+    )
+    task.interpretation_review = InterpretationReview(
+        protocol="semantic-grounding-v2", source_hash=content_hash(sources),
+        rounds=[GroundingRound(
+            candidate_hash=candidate_hash(result), assessment=assessment,
+            material_hash=review_material_hash(task, result, sources),
+        )],
+    )
+    validate_review(result, task, snapshot, [])
+    assert reusable_checks(
+        result, result, assessment, sources, sources, require_quotes=False,
+    ) == assessment.checks
+    assert not reusable_checks(
+        result, result, assessment, sources, {**sources, "extra": "New contradicting record."},
+        require_quotes=False,
+    )
+    changed = result.model_copy(deep=True)
+    changed.interpretation.answer.text += " Changed conclusion."
+    assert not reusable_checks(
+        result, changed, assessment, sources, sources, require_quotes=False,
+    )
+    with pytest.raises(ValidationError, match="exact source anchors"):
+        validate_assessment(assessment, result, sources)
+    with pytest.raises(ValidationError, match="material or scope changed"):
+        validate_review(
+            result, task.model_copy(update={"question": "A different customer question."}),
+            snapshot, [],
+        )
+    with pytest.raises(ValidationError, match="material or scope changed"):
+        validate_review(
+            result, task.model_copy(update={"decision_policy": "legacy-v1"}), snapshot, [],
+        )
+    incomplete = task.model_copy(deep=True)
+    incomplete.interpretation_review.rounds[-1].assessment.checks.pop()
+    with pytest.raises(ValidationError, match="Review every"):
+        validate_review(result, incomplete, snapshot, [])
+    rejected = task.model_copy(deep=True)
+    rejected.interpretation_review.rounds[-1].assessment.decision = "revise"
+    rejected.interpretation_review.rounds[-1].assessment.checks[0].verdict = "unsupported"
+    with pytest.raises(ValidationError, match="must be withheld"):
+        validate_review(result, rejected, snapshot, [])
+
+
+def test_fresh_review_withholds_after_three_revisions_and_fourth_rejection(snapshot, monkeypatch):
+    from subsea_copilot.grounding import paragraphs
+
+    _, service = service_for(snapshot)
+    task = submit(service, snapshot, "Review the incident.", "bounded-semantic-review")
+    task = task.model_copy(update={"decision_policy": "llm-diagnosis-v1"})
+    result, _ = revision_case()
+    phases = []
+
+    def graph(task, snapshot, phase, **kwargs):
+        phases.append(phase)
+        if phase.startswith("critic"):
+            return {
+                "decision": "revise", "checks": [{
+                    "paragraph_id": identifier, "verdict": "unsupported",
+                    "reason": "The source does not support this assertion.", "support": [],
+                } for identifier in paragraphs(kwargs["candidate"])],
+            }, task
+        return kwargs["candidate"].model_dump(mode="json"), task
+
+    monkeypatch.setattr(service, "_graph", graph)
+    with pytest.raises(ValidationError, match="report withheld") as rejection:
+        service._review_interpretation(task, snapshot, result)
+    assert phases == [
+        "critic-0", "reflection", "critic-1", "reflection-1",
+        "critic-2", "reflection-2", "critic-3",
+    ]
+    assert task.interpretation_review is None
+    assert rejection.value.details["phase"] == "critic-3"
+    assert rejection.value.details["review_round"] == 4
+    assert rejection.value.details["rejected_checks"]
+
+
+@pytest.mark.parametrize("repairs", [0, 1, 2, 3])
+def test_fresh_review_stops_as_soon_as_a_repair_is_accepted(snapshot, monkeypatch, repairs):
+    from subsea_copilot.grounding import paragraphs
+
+    _, service = service_for(snapshot)
+    task = submit(service, snapshot, "Review the incident.", f"repair-acceptance-{repairs}")
+    task = task.model_copy(update={"decision_policy": "llm-diagnosis-v1"})
+    result, _ = revision_case()
+    phases = []
+    reviews = 0
+
+    def graph(task, snapshot, phase, **kwargs):
+        nonlocal reviews
+        phases.append(phase)
+        if phase.startswith("critic"):
+            accepted = reviews == repairs
+            reviews += 1
+            return {
+                "decision": "accept" if accepted else "revise",
+                "checks": [{
+                    "paragraph_id": identifier,
+                    "verdict": "supported" if accepted else "unsupported",
+                    "reason": "Checked original sources.", "support": [],
+                } for identifier in paragraphs(kwargs["candidate"])],
+            }, task
+        return kwargs["candidate"].model_dump(mode="json"), task
+
+    monkeypatch.setattr(service, "_graph", graph)
+    checked, task = service._review_interpretation(task, snapshot, result)
+    assert checked == result
+    assert len(phases) == 1 + 2 * repairs
+    assert len(task.interpretation_review.rounds) == repairs + 1
+    assert task.interpretation_review.rounds[-1].assessment.decision == "accept"
+
+
+def test_reviewer_corrections_are_actionable_and_bound_to_report_and_sources():
+    from subsea_copilot.contracts import GroundingCorrection
+    from subsea_copilot.grounding import apply_revision, validate_assessment
+
+    result, assessment = revision_case()
+    sources = {"health": "original measured facts; stations are a review focus, not boundaries"}
+    with pytest.raises(ValidationError, match="actionable correction checklist"):
+        validate_assessment(
+            assessment, result, sources, require_quotes=False, require_corrections=True,
+        )
+    assessment.checks[0] = assessment.checks[0].model_copy(update={
+        "corrections": [GroundingCorrection(
+            excerpt="bounded 700-900 m interval",
+            instruction="Describe stations at 700 and 900 m as a review focus, not boundaries.",
+            source_references=["health"],
+        )],
+    })
+    validate_assessment(
+        assessment, result, sources, require_quotes=False, require_corrections=True,
+    )
+    revised = apply_revision(
+        '{"revisions":[{"paragraph_id":"answer","text":"Stations at 700 and 900 m '
+        'are a review focus, not interval boundaries.","references":["health"]}]}',
+        result, assessment,
+    )
+    assert revised.interpretation.competing_causes == result.interpretation.competing_causes
+    assert "not interval boundaries" in revised.interpretation.answer.text
+    for changes, message in [
+        ({"excerpt": "a sentence that is not in the report"}, "not in the rejected unit"),
+        ({"source_references": ["invented-source"]}, "unavailable original source"),
+    ]:
+        changed = assessment.model_copy(deep=True)
+        changed.checks[0].corrections[0] = changed.checks[0].corrections[0].model_copy(
+            update=changes,
+        )
+        with pytest.raises(ValidationError, match=message):
+            validate_assessment(
+                changed, result, sources, require_quotes=False, require_corrections=True,
+            )
+
+
+def test_revision_only_replaces_rejected_units_and_preserves_checked_result():
+    from subsea_copilot.grounding import apply_revision
+
+    result, assessment = revision_case()
+    before = result.model_dump()
+    revised = apply_revision(
+        '{"revisions":[{"paragraph_id":"answer","text":"Stations at 700 and 900 m '
+        'are a review focus, not interval boundaries.","references":["health"]}]}',
+        result, assessment,
+    )
+    assert revised.interpretation.answer.text != result.interpretation.answer.text
+    assert revised.interpretation.competing_causes == result.interpretation.competing_causes
+    assert revised.interpretation.follow_up_questions == result.interpretation.follow_up_questions
+    assert revised.model_dump(exclude={"interpretation"}) == result.model_dump(
+        exclude={"interpretation"}
+    )
+    assert result.model_dump() == before
+
+
+@pytest.mark.parametrize(
+    "targets", [["cause:leak"], ["answer", "cause:leak"], ["answer", "answer"]]
+)
+def test_revision_rejects_extra_supported_or_duplicate_targets(targets):
+    import json
+
+    from subsea_copilot.grounding import apply_revision
+
+    result, assessment = revision_case()
+    with pytest.raises(ValidationError, match="rejected unit"):
+        apply_revision(json.dumps({"revisions": [
+            {"paragraph_id": target, "text": "Replacement.", "references": ["health"]}
+            for target in targets
+        ]}), result, assessment)
+
+
+def test_grounding_reuse_requires_unchanged_unit_and_exact_source_bytes():
+    from subsea_copilot.grounding import apply_revision, reusable_checks
+
+    result, assessment = revision_case()
+    sources = {"health": "original measured facts"}
+    revised = apply_revision(
+        '{"revisions":[{"paragraph_id":"answer","text":"No qualified interval.",'
+        '"references":["health"]}]}', result, assessment,
+    )
+    retained = reusable_checks(result, revised, assessment, sources, sources)
+    assert {check.paragraph_id for check in retained} == {"cause:leak", "question:0"}
+    assert not reusable_checks(
+        result, revised, assessment, sources, {"health": "changed original measured facts"}
+    )
+    revised.interpretation.competing_causes[0].text = "Different finding."
+    assert {check.paragraph_id for check in reusable_checks(
+        result, revised, assessment, sources, sources
+    )} == {"question:0"}
 
 
 def test_baseline_citations_require_a_successful_read_and_reach_the_reviewer(snapshot):
@@ -187,6 +491,64 @@ def test_baseline_citations_require_a_successful_read_and_reach_the_reviewer(sna
             source_texts(result, snapshot, receipts)
 
 
+def test_read_evidence_bundle_is_scoped_and_contains_only_successful_reads(snapshot):
+    import json
+
+    from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
+    from subsea_copilot.grounding import source_texts
+    from subsea_copilot.interpretation import validate_interpretation
+    from subsea_copilot.profiles import expanded_evidence
+    from subsea_copilot.runtime.registry import REGISTRY
+    from subsea_copilot.validation import read_evidence_reference
+
+    pressure = EvidenceItem(
+        id="pressure-bundle-e", kind="channel_summary", sensor_id="sensor",
+        value={"recent_5s_pressure_drop_bar": 1.1, "recent_5s_period_seconds": [95, 100]},
+    )
+    unread = pressure.model_copy(update={"id": "unread-pressure-bundle-e"})
+    snapshot.evidence.update({pressure.id: pressure, unread.id: unread})
+    receipts = [{
+        "name": "evidence.get", "result": {"evidence": {
+            pressure.id: pressure.model_dump(mode="json"),
+        }},
+    }]
+    task = AgentTask(
+        id="bundle", root_id="bundle", generation_id=snapshot.generation_id,
+        snapshot_id=snapshot.id, site_id=snapshot.site_id, role="operator_response",
+        purpose=REGISTRY["operator_response"].purpose, question="What changed?",
+        mode="live", deadline=utc_now(), response_protocol="engineer-v2",
+    )
+    reference = read_evidence_reference(snapshot.id, receipts)
+    assert reference is not None
+    result = AgentResult(
+        outcome="supported", claim_refs=["health"], evidence_ids=["health-e"], limitations=[],
+        interpretation=EngineerInterpretation(
+            focus="root_cause",
+            answer={"text": "The final five-second deficit is 1.1 bar.",
+                    "references": [reference]},
+            competing_causes=[{
+                "cause": "leak", "stance": "possible",
+                "text": "Pressure loss alone does not confirm a physical leak.",
+                "references": [reference],
+            }],
+            follow_up_questions=["Is an independent pressure measurement available?"],
+        ),
+    )
+    validate_interpretation(result, task, receipts)
+    sources = source_texts(result, snapshot, receipts)
+    original = {
+        ref: item
+        for group in json.loads(sources[reference])["evidence_groups"].values()
+        for ref, item in expanded_evidence(group)["evidence"].items()
+    }
+    assert original[pressure.id] == pressure.model_dump(mode="json")
+    assert unread.id not in original
+    assert read_evidence_reference(snapshot.id + "-other", receipts) != reference
+    for failed in ([], [{**receipts[0], "error": "context_budget_exceeded"}]):
+        with pytest.raises(ValidationError, match="accepted claims"):
+            validate_interpretation(result, task, failed)
+
+
 def test_checked_health_distinguishes_unavailable_values_from_invalid_received_records(snapshot):
     from subsea_copilot.contracts import AgentResult, AgentTask
     from subsea_copilot.validation import render_result
@@ -287,9 +649,25 @@ def test_reflection_receives_bounded_specific_criticism_and_cannot_retry_forever
 
 
 class FakeTelemetry:
+    def __init__(self):
+        self.metadata = {}
+
     @contextmanager
     def span(self, *args, **kwargs):
-        yield FakeSpan()
+        previous = self.metadata
+        parent = kwargs.get("parent")
+        self.metadata = {
+            "trace_id": parent["trace_id"] if parent else uuid4().hex,
+            "span_id": uuid4().hex[:16],
+            "session_id": "f" * 64,
+        }
+        try:
+            yield FakeSpan()
+        finally:
+            self.metadata = previous
+
+    def trace_metadata(self):
+        return dict(self.metadata)
 
 
 class MemoryStore:
@@ -300,6 +678,7 @@ class MemoryStore:
         self.tasks = {}
         self.receipts = {}
         self.events = []
+        self.trace_events = []
         self.generation_model_calls = 0
         self.reuse_links = {}
         self.qualification = False
@@ -415,7 +794,8 @@ class MemoryStore:
         return self._reserve(identifier, token, limit, "tool_calls", 18)
 
     def record_tool_call(
-        self, identifier, call_id, name, arguments, result, error=None, lease_token=None
+        self, identifier, call_id, name, arguments, result, error=None, lease_token=None,
+        diagnostic=None,
     ):
         self._fence(identifier, lease_token)
         self.receipts.setdefault(identifier, []).append(
@@ -425,6 +805,7 @@ class MemoryStore:
                 "arguments": arguments,
                 "result": result,
                 "error": error,
+                **({"diagnostic": diagnostic} if diagnostic is not None else {}),
             }
         )
 
@@ -433,6 +814,27 @@ class MemoryStore:
 
     def publish_event(self, generation, name, payload, **kwargs):
         self.events.append((name, payload))
+        if name == "task.started":
+            self.trace_events.append((kwargs["task_id"], dict(payload)))
+
+    def record_task_event(self, task_id, lease_token, name, payload):
+        task = self._fence(task_id, lease_token)
+        self.publish_event(task.generation_id, name, payload, task_id=task_id)
+
+    def first_task_trace(self, identifier):
+        return next(
+            (metadata for task_id, metadata in self.trace_events if task_id == identifier), None
+        )
+
+    def latest_task_trace(self, identifier):
+        return next(
+            (
+                metadata
+                for task_id, metadata in reversed(self.trace_events)
+                if task_id == identifier
+            ),
+            None,
+        )
 
 
 @pytest.fixture
@@ -527,6 +929,326 @@ def service_for(snapshot, model_factory=None, checkpointer=None):
     return store, service
 
 
+def test_measurement_view_removes_archived_domain_decisions_without_rewriting_sources(snapshot):
+    import copy
+
+    from subsea_copilot.agent_evidence import measurement_snapshot
+
+    original = copy.deepcopy(snapshot)
+    viewed = measurement_snapshot(snapshot)
+    assert snapshot == original
+    assert viewed.event.eligible_hypotheses == []
+    assert viewed.location is None
+    assert "event" not in viewed.claims and "event-e" not in viewed.evidence
+    assert viewed.claims["health"].value == original.claims["health"].value
+    assert viewed.evidence["health-e"].value["spike_count"] == 2
+
+
+@pytest.mark.parametrize("hypothesis", ["suspected_leak", "sensor_or_telemetry_issue"])
+def test_llm_diagnosis_is_not_locked_to_the_numerical_hypothesis(snapshot, hypothesis):
+    from subsea_copilot.contracts import AgentResult, AgentTask
+    from subsea_copilot.validation import validate_result
+
+    snapshot.event.hypothesis = "no_event"
+    snapshot.event.eligible_hypotheses = ["no_event"]
+    common = dict(
+        root_id="root", parent_id="root", site_id=snapshot.site_id,
+        generation_id=snapshot.generation_id, snapshot_id=snapshot.id,
+        mode="live", deadline=utc_now(), decision_policy="llm-diagnosis-v1",
+    )
+    quality = AgentTask(
+        id="quality", role="sensor_quality", purpose="assess_sensor_health",
+        question="Check readings", state="SUCCEEDED",
+        result=AgentResult(outcome="supported", claim_refs=["health"], limitations=[]),
+        **common,
+    )
+    diagnosis = AgentTask(
+        id="diagnosis", role="event_diagnosis", purpose="assess_event_and_location",
+        question="Where is the leak or measurement problem?", **common,
+    )
+    result = AgentResult(
+        outcome="supported", hypothesis=hypothesis, claim_refs=["coverage", "health"],
+        evidence_ids=["coverage-e", "health-e"], limitations=["synthetic_data"],
+        summary="Review paired pressure before attributing these measurement concerns to a cause.",
+    )
+    receipts = [
+        {"name": "task.result", "arguments": {"task_id": quality.id}, "error": None},
+        {"name": "pressure.measurements", "error": None},
+    ]
+    accepted = validate_result(result, diagnosis, snapshot, receipts, [quality])
+    assert accepted.hypothesis == hypothesis
+    assert accepted.summary == result.summary
+
+
+def test_llm_repair_identifies_missing_limits_and_bundle_is_not_a_claim(snapshot):
+    from subsea_copilot.contracts import AgentResult, AgentTask
+    from subsea_copilot.validation import validate_result
+
+    common = dict(
+        root_id="root", parent_id="root", site_id=snapshot.site_id,
+        generation_id=snapshot.generation_id, snapshot_id=snapshot.id,
+        mode="live", deadline=utc_now(), decision_policy="llm-diagnosis-v1",
+    )
+    limits = ["synthetic_data", "read_only", "partial_health_review", "insufficient_evidence"]
+    quality = AgentTask(
+        id="quality", role="sensor_quality", purpose="assess_sensor_health",
+        question="Review readings", state="ABSTAINED",
+        result=AgentResult(
+            outcome="insufficient_evidence", claim_refs=["health"], limitations=limits,
+        ),
+        **common,
+    )
+    diagnosis = AgentTask(
+        id="diagnosis", role="event_diagnosis", purpose="assess_event_and_location",
+        question="Assess causes", **common,
+    )
+    result = AgentResult(
+        outcome="supported", hypothesis="suspected_leak", claim_refs=["coverage", "health"],
+        evidence_ids=["coverage-e", "health-e"],
+        limitations=[code for code in limits if code != "read_only"],
+    )
+    receipts = [
+        {"name": "task.result", "arguments": {"task_id": quality.id}, "error": None},
+        {"name": "pressure.measurements", "error": None},
+    ]
+    with pytest.raises(ValidationError) as missing:
+        validate_result(result, diagnosis, snapshot, receipts, [quality])
+    assert missing.value.code == "dependency_limitations"
+    assert missing.value.details["missing_limitations"] == ["read_only"]
+    result.limitations = limits
+    result.claim_refs.append("read-evidence-not-a-claim")
+    with pytest.raises(ValidationError) as invalid:
+        validate_result(result, diagnosis, snapshot, receipts, [quality])
+    assert invalid.value.code == "citations"
+    assert invalid.value.details["invalid_claim_ref"] == "read-evidence-not-a-claim"
+    result.claim_refs.remove("read-evidence-not-a-claim")
+    assert validate_result(result, diagnosis, snapshot, receipts, [quality]).hypothesis == (
+        "suspected_leak"
+    )
+
+
+def test_llm_context_has_no_forced_event_outcome_or_location_tools(snapshot):
+    from subsea_copilot.agent_evidence import measurement_snapshot
+
+    store, service = service_for(snapshot)
+    root = service.submit_question(
+        ReplaySession(id="generation", scenario="unit"), snapshot, "Where is the leak?", "llm",
+    )
+    task = root.model_copy(update={
+        "role": "event_diagnosis", "purpose": "assess_event_and_location",
+    })
+    context = service._context(task, measurement_snapshot(snapshot), "answer")
+    assert root.decision_policy == "llm-diagnosis-v1"
+    assert "const" not in context["result_schema"]["properties"]["hypothesis"]
+    assert "const" not in context["result_schema"]["properties"]["outcome"]
+    claim_ids = context["result_schema"]["properties"]["claim_refs"]["items"]["enum"]
+    assert {"health", "coverage"} <= set(claim_ids)
+    assert "event" not in claim_ids
+    assert not {"eligible_location", "usable_location", "requires_location"} & context.keys()
+    schemas = service._schemas(task)
+    tools = {schema["function"]["name"] for schema in schemas}
+    for schema in schemas:
+        assert schema["function"]["parameters"]["properties"]["snapshot_id"]["const"] == snapshot.id
+    assert "pressure.measurements" in tools
+    assert not {"event.assess", "event.counterevidence", "location.fit"} & tools
+
+
+def test_coordinator_intake_reads_every_cited_comparison_through_bounded_pages(snapshot):
+    from types import SimpleNamespace
+
+    _, service = service_for(snapshot)
+    root = service.submit_question(
+        ReplaySession(id="generation", scenario="unit"), snapshot, "Review measurements", "pages",
+    )
+    identifiers = ["comparison-0", "comparison-1", "comparison-2", "comparison-3", "comparison-4"]
+    calls = []
+
+    def dispatch(call):
+        calls.append(call)
+        offset = call["args"]["comparison_offset"]
+        return {
+            "result": {"reviewed_context": {"comparisons": [{"call_id": identifiers[offset]}]}},
+            "error": None,
+        }
+
+    context = {
+        "required_tools": ["task.result"],
+        "scope": {"site_id": snapshot.site_id, "snapshot_id": snapshot.id},
+        "compatible_tasks": [{
+            "id": "diagnosis", "role": "event_diagnosis",
+            "investigation": {"comparison_call_ids": identifiers},
+        }],
+    }
+    outputs, _ = service._required_intake(
+        root, snapshot, context, SimpleNamespace(task=root, dispatch=dispatch),
+    )
+    assert [call["args"]["comparison_offset"] for call in calls] == list(range(5))
+    assert [
+        item["output"]["result"]["reviewed_context"]["comparisons"][0]["call_id"]
+        for item in outputs
+    ] == identifiers
+
+
+def test_fresh_quality_intake_reads_only_original_sources_of_actual_reviewed_claims(snapshot):
+    from types import SimpleNamespace
+
+    _, service = service_for(snapshot)
+    root = service.submit_question(
+        ReplaySession(id="generation", scenario="unit"), snapshot, "Review readings", "sources",
+    )
+    task = root.model_copy(update={"role": "sensor_quality", "purpose": "assess_sensor_health"})
+    calls = []
+
+    def dispatch(call):
+        calls.append(call)
+        if call["name"] == "quality.sensor_patterns":
+            wrong = snapshot.claims["health"].model_dump(mode="json")
+            wrong["value"] = "foreign claim body"
+            return {"error": None, "result": {"claims": {
+                "coverage": snapshot.claims["coverage"].model_dump(mode="json"),
+                "health": wrong, "foreign": snapshot.claims["limit"].model_dump(mode="json"),
+            }}}
+        return {"error": None, "result": {"evidence": {
+            ref: snapshot.evidence[ref].model_dump(mode="json") for ref in call["args"]["ids"]
+        }}}
+
+    context = {
+        "required_tools": ["quality.sensor_patterns"], "compatible_tasks": [],
+        "scope": {"site_id": snapshot.site_id, "snapshot_id": snapshot.id},
+    }
+    outputs, _ = service._required_intake(
+        task, snapshot, context, SimpleNamespace(task=task, dispatch=dispatch),
+    )
+    assert [call["name"] for call in calls] == ["quality.sensor_patterns", "evidence.get"]
+    assert calls[-1]["args"]["ids"] == ["coverage-e"]
+    assert outputs[-1]["output"]["result"]["evidence"]["coverage-e"] == (
+        snapshot.evidence["coverage-e"].model_dump(mode="json")
+    )
+
+
+def test_fresh_diagnosis_intake_reads_quality_original_sources_not_just_summary(snapshot):
+    from types import SimpleNamespace
+
+    _, service = service_for(snapshot)
+    root = service.submit_question(
+        ReplaySession(id="generation", scenario="unit"), snapshot,
+        "Review causes", "quality-sources",
+    )
+    task = root.model_copy(update={
+        "role": "event_diagnosis", "purpose": "assess_event_and_location",
+    })
+    calls = []
+    context = {
+        "required_tools": [], "history_sensors": [],
+        "scope": {"site_id": snapshot.site_id, "snapshot_id": snapshot.id},
+        "compatible_tasks": [{
+            "id": "quality", "role": "sensor_quality", "evidence_ids": ["health-e"],
+            "summary": "Advisory, not an original source.",
+        }],
+    }
+
+    def dispatch(call):
+        calls.append(call)
+        return {"error": None, "result": {"evidence": {"health-e": {}}}}
+
+    service._required_intake(
+        task, snapshot, context, SimpleNamespace(task=task, dispatch=dispatch),
+    )
+    assert len(calls) == 1 and calls[0]["name"] == "evidence.get"
+    assert calls[0]["args"]["ids"] == ["health-e"]
+
+
+def test_fresh_diagnosis_intake_opens_original_search_hits_including_contradictions(snapshot):
+    from types import SimpleNamespace
+
+    _, service = service_for(snapshot)
+    root = submit(service, snapshot, "Inspect the measured pattern.", "original-records")
+    task = root.model_copy(update={
+        "role": "event_diagnosis", "purpose": "assess_event_and_location",
+    })
+    calls = []
+
+    def dispatch(call):
+        calls.append(call)
+        if call["name"] == "history.search":
+            return {"error": None, "result": {"documents": [
+                {"id": "approved", "admissible": True},
+                {"id": "superseded", "admissible": False},
+            ]}}
+        return {"error": None, "result": {"documents": [
+            {"id": identifier, "body": "Original recorded evidence."}
+            for identifier in call["args"]["document_ids"]
+        ]}}
+
+    context = {
+        "required_tools": ["history.search"], "compatible_tasks": [],
+        "scope": {"site_id": snapshot.site_id, "snapshot_id": snapshot.id},
+        "initial_record_search": {
+            "query": "pressure", "asset_ids": ["northsea"], "knowledge_ids": ["KN-OBSERVE"],
+            "intent": "seek_counterevidence", "check_question": "What do actual records show?",
+        },
+    }
+    outputs, _ = service._required_intake(
+        task, snapshot, context, SimpleNamespace(task=task, dispatch=dispatch),
+    )
+    assert [call["name"] for call in calls] == ["history.search", "history.read"]
+    assert calls[-1]["args"]["document_ids"] == ["approved", "superseded"]
+    assert outputs[-1]["output"]["result"]["documents"][1]["body"] == "Original recorded evidence."
+
+
+def test_fresh_specialists_bind_sources_and_audit_without_changing_model_findings(snapshot):
+    import json
+
+    class NoSourceEcho(ScriptedChatModel):
+        def _generate(self, *args, **kwargs):
+            output = super()._generate(*args, **kwargs)
+            message = output.generations[0].message
+            if self.role != "operator_response" and message.content:
+                body = json.loads(message.content)
+                body["evidence_ids"] = []
+                message.content = json.dumps(body)
+            return output
+
+    store, service = service_for(
+        snapshot, lambda role, mode: NoSourceEcho(role=role), checkpointer=InMemorySaver(),
+    )
+    root = submit(service, snapshot, "What caused this leak?")
+    drain(service)
+    assert store.get_task(root.id).state == "SUCCEEDED"
+    specialists = [task for task in store.tasks.values() if task.role != "operator_response"]
+    assert all(task.result and task.result.evidence_ids for task in specialists)
+    bindings = [payload for name, payload in store.events if name == "evidence.bound"]
+    assert len(bindings) == 2
+    assert all(binding["added_evidence_ids"] for binding in bindings)
+    assert all(
+        binding["authored_result_sha256"] != binding["bound_result_sha256"]
+        for binding in bindings
+    )
+
+
+def test_agent_screening_does_not_run_domain_classifier_or_localizer(monkeypatch):
+    from subsea_copilot import diagnostics
+    from subsea_copilot.ingest import normalize_records
+    from subsea_copilot.synthetic import generate_scenario
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Agent screening invoked numerical domain localization.")
+
+    monkeypatch.setattr(diagnostics, "locate", forbidden)
+    monkeypatch.setattr(diagnostics, "pipeline_distances", forbidden)
+    dataset = generate_scenario("S1", duration_seconds=120)
+    result = diagnostics.analyze_window(
+        dataset.pack, normalize_records(dataset.baseline, dataset.pack),
+        normalize_records(dataset.records, dataset.pack), "screening-only",
+        120, 125, dataset.epoch, screening_only=True,
+    )
+    assert any(finding.anomaly_count for finding in result.quality.findings)
+    assert not any(finding.drift_suspected or finding.peer_disagreement
+                   for finding in result.quality.findings)
+    assert result.location is None and result.event.eligible_hypotheses == []
+    assert not any(claim.kind in {"hypothesis", "location"} for claim in result.claims.values())
+
+
 def submit(service, snapshot, question, key="first"):
     return service.submit_question(
         ReplaySession(id="generation", scenario="unit"), snapshot, question, key
@@ -551,11 +1273,15 @@ def test_fresh_children_are_real_separate_graph_tasks_and_preserve_anomalies(sna
         "event_diagnosis",
     }
     assert all(t.state == "SUCCEEDED" for t in tasks), [(t.role, t.error_code) for t in tasks]
-    assert store.get_task(root.id).model_calls == 2
-    assert sum(t.model_calls for t in tasks) == 4
-    assert "2 spike-screening flags" in store.get_task(root.id).answer
+    assert store.get_task(root.id).model_calls == 3
+    assert sum(t.model_calls for t in tasks) == 5
     diagnosis = next(t for t in tasks if t.role == "event_diagnosis")
     quality = next(t for t in tasks if t.role == "sensor_quality")
+    assert next(
+        receipt["result"]["findings"][0]["spike_count"]
+        for receipt in store.tool_receipts(quality.id)
+        if receipt["name"] == "quality.sensor_patterns"
+    ) == 2
     assert any(
         r["arguments"].get("task_id") == quality.id for r in store.tool_receipts(diagnosis.id)
     )
@@ -589,11 +1315,519 @@ def test_reuse_authorizes_original_quality_diagnosis_pair_without_new_children(s
     assert {t.role for t in linked} == {"sensor_quality", "event_diagnosis"}
     assert all(t.parent_id == original.id for t in linked)
     assert len(store.tasks) == 4
-    assert store.get_task(summary.id).tool_calls == 4
+    assert store.get_task(summary.id).tool_calls == 3
     repeated = submit(service, snapshot, "What happened and where is the leak?", "repeated")
     drain(service)
     assert store.get_task(repeated.id).plan == ["reuse", "answer"]
     assert len(store.tasks) == 5
+
+
+def test_investigation_trace_survives_worker_restart_and_contains_all_agent_attempts(
+    snapshot, monkeypatch, tmp_path
+):
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from subsea_copilot.telemetry import Telemetry
+
+    monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
+    exporter = InMemorySpanExporter()
+    store = MemoryStore(snapshot)
+    def factory(role, mode):
+        return ScriptedChatModel(role=role)
+
+    checkpointer = InMemorySaver()
+    first = Telemetry(tmp_path)
+    first.provider.add_span_processor(SimpleSpanProcessor(exporter))
+    try:
+        service = AgentService(store, factory, checkpointer, first)
+        root = submit(service, snapshot, "What caused this event?")
+        service.run_once()
+        assert store.get_task(root.id).state == "WAITING_ON_CHILD"
+        original = store.first_task_trace(root.id)
+    finally:
+        first.close()
+    resumed_exporter = InMemorySpanExporter()
+    resumed = Telemetry(tmp_path)
+    resumed.provider.add_span_processor(SimpleSpanProcessor(resumed_exporter))
+    try:
+        service = AgentService(store, factory, checkpointer, resumed)
+        drain(service)
+        assert store.get_task(root.id).state in ("SUCCEEDED", "ABSTAINED")
+        spans = (*exporter.get_finished_spans(), *resumed_exporter.get_finished_spans())
+        assert {f"{span.context.trace_id:032x}" for span in spans} == {original["trace_id"]}
+        roots = [span for span in spans if span.parent is None]
+        assert len(roots) == 1
+        assert roots[0].name == "agent.investigation"
+        assert f"{roots[0].context.span_id:016x}" == original["span_id"]
+        ids = {span.context.span_id for span in spans}
+        assert all(span.parent is None or span.parent.span_id in ids for span in spans)
+        names = {span.name for span in spans}
+        assert {"agent.sensor_quality", "agent.event_diagnosis", "agent.operator_response"} <= names
+        attempts = [payload for name, payload in store.events if name == "task.started"]
+        assert len([item for item in attempts if item["role"] == "operator_response"]) > 1
+        assert {item["trace_id"] for item in attempts} == {original["trace_id"]}
+        assert len({item["span_id"] for item in attempts}) == len(attempts)
+        other = submit(service, snapshot, "A separate check of this event", key="separate")
+        drain(service)
+        assert store.first_task_trace(other.id)["trace_id"] != original["trace_id"]
+    finally:
+        resumed.close()
+
+
+@pytest.mark.parametrize("capture", [False, True])
+def test_guardrail_failures_record_codes_and_safe_feedback_before_repair(
+    snapshot, monkeypatch, tmp_path, capture
+):
+    import json
+
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from subsea_copilot.telemetry import Telemetry
+
+    monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
+    monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1" if capture else "0")
+    monkeypatch.setenv("SUBSEA_SYNTHETIC_ONLY", "1")
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    exporter = InMemorySpanExporter()
+    telemetry = Telemetry(tmp_path)
+    telemetry.provider.add_span_processor(SimpleSpanProcessor(exporter))
+    service.telemetry = telemetry
+    original = service._accept
+    failures = 0
+
+    def reject_twice(value, task, window, gateway):
+        nonlocal failures
+        if task.role == "event_diagnosis" and failures < 2:
+            failures += 1
+            raise ValidationError(
+                "history_instrumentation_support",
+                "Maintenance context must match compared instruments. token=fixture-private",
+                details={"compared_assets": ["P1-ST1-A"], "maintenance_documents": []},
+            )
+        return original(value, task, window, gateway)
+
+    monkeypatch.setattr(service, "_accept", reject_twice)
+    try:
+        root = submit(service, snapshot, "What caused this event?")
+        drain(service)
+        assert store.get_task(root.id).state in ("SUCCEEDED", "ABSTAINED")
+        guards = [
+            span
+            for span in exporter.get_finished_spans()
+            if span.attributes.get("langfuse.observation.type") == "guardrail"
+            and span.attributes.get("role") == "event_diagnosis"
+        ]
+        assert [span.attributes["validation.status"] for span in guards] == [
+            "failed",
+            "failed",
+            "passed",
+        ]
+        for span in guards[:2]:
+            assert span.attributes["error.code"] == "history_instrumentation_support"
+            assert span.attributes["phase"] == "answer"
+            output = span.attributes.get("langfuse.observation.output")
+            if capture:
+                feedback = json.loads(output)
+                assert feedback["validator_feedback"].startswith(
+                    "Maintenance context must match compared instruments."
+                )
+                assert "fixture-private" not in output
+                assert feedback["issues"][0]["details"]["compared_assets"] == ["P1-ST1-A"]
+                assert feedback["repair_requested"] is True
+                assert json.loads(span.attributes["langfuse.observation.input"])["claim_refs"]
+            else:
+                assert output is None
+                assert "langfuse.observation.input" not in span.attributes
+        generations = [
+            span
+            for span in exporter.get_finished_spans()
+            if span.attributes.get("langfuse.observation.type") == "generation"
+            and span.attributes.get("role") == "event_diagnosis"
+        ]
+        repairs = [span for span in generations if "Repair answer" in span.name]
+        assert len(repairs) == 2
+        assert [span.attributes["model.repair_attempt"] for span in repairs] == [1, 2]
+        for span in repairs:
+            if capture:
+                messages = json.loads(span.attributes["langfuse.observation.input"])
+                feedbacks = [
+                    json.loads(message["content"])
+                    for message in messages
+                    if message["role"] == "user" and '"validator_details"' in message["content"]
+                ]
+                assert feedbacks[-1]["validator_details"]["compared_assets"] == ["P1-ST1-A"]
+        agents = [
+            span
+            for span in exporter.get_finished_spans()
+            if span.attributes.get("langfuse.observation.type") == "agent"
+        ]
+        assert any(span.attributes["outcome"] == "WAITING_ON_CHILD" for span in agents)
+        assert any(span.attributes["outcome"] == "SUCCEEDED" for span in agents)
+        rejections = [
+            payload for name, payload in store.events
+            if name == "validation.rejected" and payload["role"] == "event_diagnosis"
+        ]
+        assert len(rejections) == 2
+        assert all("fixture-private" not in json.dumps(payload) for payload in rejections)
+        assert all(payload["issues"][0]["details"]["compared_assets"] for payload in rejections)
+        requested = [
+            payload for name, payload in store.events if name == "validation.repair_requested"
+        ]
+        assert {payload["rejection_id"] for payload in requested} == {
+            payload["rejection_id"] for payload in rejections
+        }
+        if capture:
+            completed = [
+                json.loads(span.attributes["langfuse.observation.output"])
+                for span in agents
+                if span.attributes["outcome"] == "SUCCEEDED"
+            ]
+            assert any(output["to_role"] == "engineer" for output in completed)
+            assert all(output["accepted_result"]["claim_refs"] for output in completed)
+            final_trace_outputs = [
+                json.loads(span.attributes["langfuse.trace.output"])
+                for span in agents if "langfuse.trace.output" in span.attributes
+            ]
+            assert len(final_trace_outputs) == 1
+            assert final_trace_outputs[0]["state"] == "SUCCEEDED"
+        else:
+            assert all("langfuse.observation.output" not in span.attributes for span in agents)
+    finally:
+        telemetry.close()
+
+
+@pytest.mark.parametrize("invalid", ["plan", "reuse"])
+def test_invalid_plan_is_traced_persisted_and_repaired_before_handoff(snapshot, invalid):
+    import json
+
+    rejected_once = False
+
+    class InvalidPlanOnce(ScriptedChatModel):
+        def _generate(self, messages, **kwargs):
+            nonlocal rejected_once
+            response = super()._generate(messages, **kwargs)
+            context = json.loads(messages[0].content.split("\nBOUND_CONTEXT\n", 1)[1])
+            if context["phase"] == "plan" and not rejected_once:
+                rejected_once = True
+                response.generations[0].message.content = (
+                    '{"steps":["answer","quality"]}' if invalid == "plan"
+                    else '{"steps":["reuse","answer"],"reuse_task_ids":["foreign-task"]}'
+                )
+            return response
+
+    store, service = service_for(
+        snapshot, lambda role, mode: InvalidPlanOnce(role=role), InMemorySaver(),
+    )
+    root = submit(service, snapshot, "What caused the event?")
+    drain(service)
+    assert store.get_task(root.id).state == "SUCCEEDED"
+    rejected = [
+        payload for name, payload in store.events
+        if name == "validation.rejected" and payload["phase"] == "plan"
+    ]
+    assert len(rejected) == 1 and rejected[0]["code"] == invalid
+    assert rejected[0]["repair_requested"] is True
+    assert rejected[0]["issues"][0]["path"] == (
+        ["steps"] if invalid == "plan" else ["reuse_task_ids"]
+    )
+    manifests = [
+        payload["harness"] for name, payload in store.events
+        if name == "model.started" and payload["phase"] == "plan"
+    ]
+    assert len(manifests) == 2 and manifests[0] == manifests[1]
+    assert manifests[0]["templates"]["schema_repair"]
+
+
+def test_authority_denial_is_durable_without_executing_or_spending_a_tool_call(snapshot):
+    store, service = service_for(snapshot)
+    submit(service, snapshot, "Health?")
+    service.run_once()
+    child = store.claim_task("unit")
+    gateway = ToolGateway(store, child, snapshot, FakeTelemetry())
+    with pytest.raises(ValidationError) as denied:
+        gateway.dispatch({"id": "denied", "name": "history.read", "args": {}})
+    assert denied.value.code == "tool_authority"
+    assert store.get_task(child.id).tool_calls == 0
+    assert not store.tool_receipts(child.id)
+    event = next(payload for name, payload in store.events if name == "tool.rejected")
+    assert event["call_id"] == "denied" and event["executed"] is False
+    assert event["repair_requested"] is False and event["issues"][0]["code"] == "tool_authority"
+
+
+def test_checkpoint_resume_preserves_harness_and_rejects_changed_policy(snapshot, monkeypatch):
+    from subsea_copilot.runtime import provenance
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    root = submit(service, snapshot, "What caused this leak?")
+    claimed = store.claim_task(service.owner)
+    first, current = service._graph(claimed, snapshot, "plan")
+    calls = current.model_calls
+    resumed, current = service._graph(current, snapshot, "plan")
+    assert resumed == first and current.model_calls == calls
+    monkeypatch.setattr(provenance, "CONTEXT_POLICY_VERSION", "changed-context-policy")
+    with pytest.raises(ValidationError) as rejected:
+        service._graph(current, snapshot, "plan")
+    assert rejected.value.code == "harness_changed"
+    assert store.get_task(root.id).model_calls == calls
+
+
+def test_interrupted_checkpoint_rejects_changed_model_input_policy(snapshot):
+    class Interrupted(ScriptedChatModel):
+        def _generate(self, messages, **kwargs):
+            raise RuntimeError("Controlled provider interruption")
+
+    class ChangedPolicy(ScriptedChatModel):
+        max_prompt_chars: int = 143999
+
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    root = submit(service, snapshot, "What caused this leak?")
+    claimed = store.claim_task(service.owner)
+    service.model_factory = lambda role, mode: Interrupted(role=role)
+    with pytest.raises(RuntimeError, match="Controlled provider interruption"):
+        service._graph(claimed, snapshot, "plan")
+    service.model_factory = lambda role, mode: ChangedPolicy(role=role)
+    current = store.get_task(root.id)
+    with pytest.raises(ValidationError) as rejected:
+        service._graph(current, snapshot, "plan")
+    assert rejected.value.code == "harness_changed"
+    assert store.get_task(root.id).model_calls == current.model_calls == 1
+
+
+@pytest.mark.parametrize("failures", [1, 2, 3, 4])
+def test_fresh_transport_retry_is_bounded_counted_and_audited(snapshot, failures):
+    import json
+
+    from subsea_copilot.llm.copilot_cli import ProviderError
+
+    observed = []
+    recorded = []
+    sources = []
+
+    class MalformedTransport(ScriptedChatModel):
+        def _generate(self, messages, **kwargs):
+            policy = json.loads(messages[-1].content.split("\n", 1)[1])
+            observed.append(policy)
+            sources.append(messages[0].content)
+            if len(observed) <= failures:
+                error = ProviderError("invalid_structured_output")
+                error.metadata["response_validation_stage"] = "final_value_type"
+                raise error
+            return super()._generate(messages, **kwargs)
+
+    store, service = service_for(
+        snapshot, lambda role, mode: MalformedTransport(role=role),
+    )
+    store.record_model_call = lambda identifier, token, call_id, metadata: recorded.append(
+        dict(metadata)
+    )
+    root = service.submit_question(
+        ReplaySession(id="generation", scenario="unit"), snapshot, "Review pressure", "llm",
+    )
+    claimed = store.claim_task(service.owner)
+    if failures <= 3:
+        result, current = service._graph(claimed, snapshot, "plan")
+        assert result["steps"] and current.model_calls == failures + 1
+        assert "error" not in recorded[-1]
+    else:
+        with pytest.raises(ProviderError):
+            service._graph(claimed, snapshot, "plan")
+        assert store.get_task(root.id).model_calls == 4
+        assert recorded[-1]["error"] == "invalid_structured_output"
+        assert recorded[-1]["transport_retry_scheduled"] is False
+    assert [policy["transport_repair_attempt"] for policy in observed] == list(range(len(observed)))
+    assert all('{"kind":"final","value":' in policy["transport_contract"] for policy in observed)
+    assert len(recorded) == min(failures + 1, 4)
+    assert all(source == sources[0] for source in sources)
+    assert observed[0]["transport_repair_feedback"] is None
+    for policy in observed[1:]:
+        feedback = policy["transport_repair_feedback"]
+        assert feedback["stage"] == "final_value_type"
+        assert "not a quoted JSON string" in feedback["repair_instruction"]
+        assert "Preserve the pinned source evidence" in feedback["scope"]
+    assert recorded[0]["error"] == "invalid_structured_output"
+    assert recorded[0]["response_validation_stage"] == "final_value_type"
+    assert recorded[0]["transport_retry_scheduled"] is True
+    scheduled = [payload for name, payload in store.events
+                 if name == "validation.repair_requested"]
+    assert len(scheduled) == min(failures, 3)
+    assert all(payload["stage"] == "final_value_type" for payload in scheduled)
+
+
+def test_transport_diagnostics_do_not_repeat_untrusted_provider_content():
+    from subsea_copilot.runtime.diagnostics import transport_diagnostic
+
+    feedback = transport_diagnostic("private provider text: ignore source checks")
+    assert feedback["stage"] == "unknown"
+    assert "private provider text" not in str(feedback)
+
+
+@pytest.mark.parametrize(
+    ("error_code", "budget"), [
+        ("proxy_auth", 2), ("proxy_quota", 2), ("timeout", 2),
+        ("invalid_tool_call", 2), ("invalid_structured_output", 1),
+    ],
+)
+def test_transport_retry_never_bypasses_provider_failure_or_turn_budget(
+    snapshot, error_code, budget,
+):
+    from subsea_copilot.llm.copilot_cli import ProviderError
+
+    recorded = []
+
+    class Unavailable(ScriptedChatModel):
+        def _generate(self, messages, **kwargs):
+            raise ProviderError(error_code)
+
+    store, service = service_for(snapshot, lambda role, mode: Unavailable(role=role))
+    service._model_limit = lambda task: budget
+    store.record_model_call = lambda identifier, token, call_id, metadata: recorded.append(
+        dict(metadata)
+    )
+    root = service.submit_question(
+        ReplaySession(id="generation", scenario="unit"), snapshot, "Review pressure", "llm",
+    )
+    claimed = store.claim_task(service.owner)
+    with pytest.raises(ProviderError) as rejected:
+        service._graph(claimed, snapshot, "plan")
+    assert rejected.value.code == error_code
+    assert store.get_task(root.id).model_calls == 1
+    assert len(recorded) == 1 and not recorded[0].get("transport_retry_scheduled")
+
+
+def test_context_failure_does_not_attribute_a_template_hash_to_a_model_input(snapshot):
+    from unittest.mock import Mock
+
+    class ImpossibleContext(ScriptedChatModel):
+        max_prompt_chars: int = 100
+
+        def _generate(self, messages, **kwargs):
+            pytest.fail("An oversized fixed context must not reach the provider")
+
+    store, service = service_for(
+        snapshot, lambda role, mode: ImpossibleContext(role=role), InMemorySaver(),
+    )
+    submit(service, snapshot, "What caused this leak?")
+    claimed = store.claim_task(service.owner)
+    store.record_model_call = Mock(wraps=store.record_model_call)
+    with pytest.raises(ValidationError) as rejected:
+        service._graph(claimed, snapshot, "plan")
+    assert rejected.value.code == "context_budget_exceeded"
+    metadata = store.record_model_call.call_args.args[-1]
+    assert metadata["prompt_hash"] is None
+    assert len(metadata["harness"]["templates"]["system"]) == 64
+
+
+def test_prompt_catalog_pin_is_inherited_and_blocks_changed_catalog_before_reads(snapshot):
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    root = submit(service, snapshot, "What caused this leak?")
+    service.run_once()
+    child = next(task for task in store.tasks.values() if task.parent_id == root.id)
+    assert child.prompt_catalog_sha256 == root.prompt_catalog_sha256
+    assert root.prompt_catalog_sha256
+    service._prompt_catalog_sha256 = "f" * 64
+    service.run_once()
+    current = store.get_task(child.id)
+    assert current.error_code == "prompt_catalog_changed"
+    assert current.model_calls == current.tool_calls == 0
+
+
+@pytest.mark.parametrize("catalog", ["f" * 64, None])
+def test_results_from_another_prompt_catalog_are_not_silently_reused(snapshot, catalog):
+    store, service = service_for(snapshot)
+    submit(service, snapshot, "Which sensors need a health review?")
+    drain(service)
+    quality = next(task for task in store.tasks.values() if task.role == "sensor_quality")
+    store.tasks[quality.id] = quality.model_copy(update={"prompt_catalog_sha256": catalog})
+    root = submit(service, snapshot, "Summarize saved findings", "new-catalog")
+    context = service._context(store.get_task(root.id), snapshot, "plan")
+    assert not context["compatible_tasks"]
+
+
+def test_changed_catalog_cannot_resume_a_checkpoint(snapshot):
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    root = submit(service, snapshot, "What caused this leak?")
+    service.run_once()
+    waiting = store.get_task(root.id)
+    assert waiting.state == "WAITING_ON_CHILD" and waiting.model_calls > 0
+    calls = waiting.model_calls
+    service._prompt_catalog_sha256 = "f" * 64
+    with pytest.raises(ValidationError) as rejected:
+        service._graph(waiting, snapshot, "plan")
+    assert rejected.value.code == "prompt_catalog_changed"
+    assert store.get_task(root.id).model_calls == calls
+
+
+def test_receipt_retrieval_is_exact_idempotent_and_cannot_read_another_task(snapshot):
+    from subsea_copilot.contracts import content_hash
+
+    store, service = service_for(snapshot)
+    root = submit(service, snapshot, "Health?")
+    service.run_once()
+    child = store.claim_task("unit")
+    gateway = ToolGateway(store, child, snapshot, FakeTelemetry())
+    scope = {
+        key: getattr(snapshot, key)
+        for key in ("site_id", "pack_version", "baseline_version", "parameter_version")
+    }
+    scope["snapshot_id"] = snapshot.id
+    original = gateway.dispatch({
+        "id": "original", "name": "evidence.get", "args": {**scope, "ids": ["coverage-e"]},
+    })
+    call = {
+        "id": "retrieve", "name": "evidence.get",
+        "args": {**scope, "ids": [], "receipt_id": "original"},
+    }
+    retrieved = gateway.dispatch(call)
+    assert retrieved["result"]["claims"] == original["result"]["claims"]
+    assert retrieved["result"]["retrieved_from_receipt"]["result_sha256"] == (
+        content_hash(original["result"])
+    )
+    assert gateway.dispatch(call) == retrieved
+    store.receipts[root.id] = [{
+        "call_id": "foreign", "name": "evidence.get", "result": original["result"], "error": None,
+    }]
+    denied = gateway.dispatch({
+        **call, "id": "foreign-retrieval", "args": {**scope, "ids": [], "receipt_id": "foreign"},
+    })
+    assert denied["result"] is None and denied["error"] == "receipt_scope"
+    assert store.tool_receipts(child.id)[0]["result"] == original["result"]
+
+
+def test_rejection_does_not_request_a_repair_when_model_budget_is_exhausted(
+    snapshot, monkeypatch
+):
+    store, service = service_for(snapshot)
+    original = service._accept
+
+    def reject_diagnosis(value, task, window, gateway):
+        if task.role == "event_diagnosis":
+            raise ValidationError("citations", "Only pinned claim identities are allowed.")
+        return original(value, task, window, gateway)
+
+    monkeypatch.setattr(service, "_accept", reject_diagnosis)
+    monkeypatch.setattr(service, "_model_limit", lambda task: 1)
+    root = submit(service, snapshot, "What caused the event?")
+    drain(service)
+    assert store.get_task(root.id).state == "FAILED"
+    rejected = [
+        payload for name, payload in store.events
+        if name == "validation.rejected" and payload["role"] == "event_diagnosis"
+    ]
+    assert len(rejected) == 1 and rejected[0]["repair_requested"] is False
+    assert not any(name == "validation.repair_requested" for name, _ in store.events)
+
+
+def test_legacy_started_investigation_keeps_separate_attempt_traces(snapshot):
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    root = submit(service, snapshot, "What caused this event?")
+    service.run_once()
+    original = store.first_task_trace(root.id)
+    original.pop("trace_layout")
+    drain(service)
+    assert store.first_task_trace(root.id) is original
+    assert store.latest_task_trace(root.id)["trace_id"] != original["trace_id"]
+    assert all("trace_layout" not in metadata for _, metadata in store.trace_events)
 
 
 def test_wait_resume_retains_budget_and_child_identity(snapshot):
@@ -607,7 +1841,7 @@ def test_wait_resume_retains_budget_and_child_identity(snapshot):
         store, service.model_factory, service.checkpointer, FakeTelemetry()
     )
     drain(resumed_service)
-    assert store.get_task(root.id).model_calls == 2
+    assert store.get_task(root.id).model_calls == 3
     assert set(child_ids) <= set(store.tasks)
     assert len([t for t in store.tasks.values() if t.parent_id]) == 2
     assert submit(service, snapshot, "What caused this event?").id == root.id
@@ -634,17 +1868,22 @@ def test_failed_child_blocks_successful_response(snapshot):
     drain(service)
     assert store.get_task(root.id).state == "FAILED"
     assert store.get_task(root.id).error_code == "child_failed"
+    child = next(task for task in store.tasks.values() if task.parent_id == root.id)
+    message = store.get_task(root.id).error_message
+    assert "Sensor Quality" in message and child.id in message and child.error_code in message
+    assert service._last_error["failed_task_id"] == child.id
+    assert service._last_error["cause_code"] == child.error_code
     assert len(store.tasks) == 2
 
 
 def test_exhausted_root_budget_is_not_reset_by_new_service(snapshot):
     store, service = service_for(snapshot)
     root = submit(service, snapshot, "Sensor health?")
-    store.tasks[root.id].model_calls = 9
+    store.tasks[root.id].model_calls = service._model_limit(root)
     service.run_once()
     assert store.get_task(root.id).state == "FAILED"
     assert store.get_task(root.id).error_code == "budget_blocked"
-    assert store.get_task(root.id).model_calls == 9
+    assert store.get_task(root.id).model_calls == service._model_limit(root)
 
 
 def test_gateway_scope_authority_and_idempotent_receipt(snapshot):
@@ -688,14 +1927,19 @@ def test_oversized_tool_result_is_recorded_as_error_not_success(snapshot, monkey
     }
     arguments["snapshot_id"] = snapshot.id
     call = {"id": "oversized", "name": "quality.coverage", "args": arguments}
-    assert gateway.dispatch(call) == {"result": None, "error": "payload_too_large"}
-    assert gateway.dispatch(call) == {"result": None, "error": "payload_too_large"}
+    rejected = gateway.dispatch(call)
+    assert rejected["result"] is None and rejected["error"] == "payload_too_large"
+    assert rejected["rejection"]["executed"] is True
+    assert rejected["rejection"]["issues"][0]["code"] == "payload_too_large"
+    assert gateway.dispatch(call) == rejected
     assert store.get_task(child.id).tool_calls == 1
     receipt = store.tool_receipts(child.id)[0]
     assert receipt["result"] is None and receipt["error"] == "payload_too_large"
 
 
-def test_diagnosis_aggregate_read_budget_records_an_explicit_gap(snapshot, monkeypatch):
+def test_diagnosis_retains_original_reads_beyond_the_old_prompt_delivery_ceiling(
+    snapshot, monkeypatch
+):
     store, service = service_for(snapshot)
     submit(service, snapshot, "What caused the event?")
     for _ in range(5):
@@ -716,11 +1960,10 @@ def test_diagnosis_aggregate_read_budget_records_an_explicit_gap(snapshot, monke
     scope["snapshot_id"] = snapshot.id
     for index in range(3):
         result = gateway.dispatch({"id": f"bounded-{index}", "name": "evidence.get", "args": scope})
-        if index < 2:
-            assert result["error"] is None
-        else:
-            assert result == {"result": None, "error": "context_budget_exceeded"}
-    assert store.tool_receipts(task.id)[-1]["error"] == "context_budget_exceeded"
+        assert result["error"] is None
+        assert len(result["result"]["payload"]) == 24 * 1024
+    assert len(store.tool_receipts(task.id)) == 3
+    assert all(row["error"] is None for row in store.tool_receipts(task.id))
 
 
 @pytest.mark.parametrize("scenario", ["S1", "S2", "S5"])
@@ -746,18 +1989,12 @@ def test_scripted_contract_smoke_with_actual_numerical_ledger(scenario):
         (t.role, t.error_code, t.model_calls, t.tool_calls) for t in store.tasks.values()
     ]
     assert len(store.tasks) == 3
-    if scenario in {"S1", "S2"}:
-        result = store.get_task(root.id).result
-        assert result is not None
-        assert (
-            result.hypothesis
-            == {
-                "S1": "suspected_leak",
-                "S2": "sensor_or_telemetry_issue",
-            }[scenario]
-        )
-        has_location = any(snapshot.claims[ref].kind == "location" for ref in result.claim_refs)
-        assert has_location == (scenario == "S1")
+    result = store.get_task(root.id).result
+    assert result is not None
+    assert result.hypothesis == "insufficient_evidence"
+    assert not any(
+        snapshot.claims[ref].kind in {"hypothesis", "location"} for ref in result.claim_refs
+    )
     assert all(
         len(str(r["result"]).encode()) <= 48 * 1024
         for task in store.tasks.values()
@@ -847,7 +2084,7 @@ def test_checkpoint_tool_interrupt_replays_receipts_without_dispatch_twice(snaps
     restarted = AgentService(store, service.model_factory, service.checkpointer, FakeTelemetry())
     drain(restarted)
     assert store.get_task(root.id).state == "SUCCEEDED"
-    assert store.get_task(quality.id).tool_calls == 4
+    assert store.get_task(quality.id).tool_calls == 5
     assert sum(r["call_id"] == first_call_id for r in store.tool_receipts(quality.id)) == 1
 
 
@@ -871,10 +2108,10 @@ def test_child_commit_survives_crash_before_runtime_returns(snapshot):
     drain(restarted)
     assert store.get_task(root.id).state == "SUCCEEDED"
     assert len(store.tasks) == 3
-    assert store.get_task(root.id).model_calls == 2
+    assert store.get_task(root.id).model_calls == 3
 
 
-def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
+def test_quality_abstention_does_not_force_the_coordinator_outcome(snapshot):
     contexts = []
 
     class InspectingAbstention(ScriptedChatModel):
@@ -922,9 +2159,8 @@ def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
     root = submit(service, snapshot, "What caused this leak?")
     drain(service)
     answer = store.get_task(root.id)
-    assert answer.state == "ABSTAINED"
-    assert "child_abstained" in answer.result.limitations
-    assert answer.result.hypothesis is None
+    assert answer.state == "SUCCEEDED"
+    assert answer.result.hypothesis == "insufficient_evidence"
     assert "event" not in answer.result.claim_refs
     assert {context["role"] for context in contexts} == {
         "event_diagnosis",
@@ -932,15 +2168,13 @@ def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
     }
     for context in contexts:
         properties = context["result_schema"]["properties"]
-        assert properties["outcome"]["const"] == "insufficient_evidence"
-        assert properties["hypothesis"] == {"type": "null"}
-        assert properties["limitations"]["contains"] == {"const": "child_abstained"}
-        assert "event" not in properties["claim_refs"]["items"]["enum"]
+        assert "const" not in properties["outcome"]
+        assert properties["hypothesis"] != {"type": "null"}
+        assert "contains" not in properties["limitations"]
     diagnosis = next(t for t in store.tasks.values() if t.role == "event_diagnosis")
     from subsea_copilot.validation import validate_result
 
-    with pytest.raises(ValidationError) as error:
-        validate_result(
+    assert validate_result(
             diagnosis.result.model_copy(
                 update={
                     "limitations": [
@@ -952,8 +2186,7 @@ def test_abstained_child_permits_only_explicit_unsupported_response(snapshot):
             snapshot,
             store.tool_receipts(diagnosis.id),
             ToolGateway(store, diagnosis, snapshot, FakeTelemetry()).dependencies(),
-        )
-    assert error.value.code == "abstention"
+        ).outcome == "supported"
 
 
 def postgres_settings():
@@ -1030,6 +2263,10 @@ def test_real_postgres_saver_runs_fresh_scripted_root_and_reopens():
                 store.create_child = original_create_child
             assert store.get_task(root.id).state == "WAITING_ON_CHILD"
             assert len(store.list_tasks(session.id)) == 2
+            assert root.prompt_catalog_sha256 and all(
+                task.prompt_catalog_sha256 == root.prompt_catalog_sha256
+                for task in store.list_tasks(session.id)
+            )
         with postgres_checkpointer(settings.checkpoint_dsn) as saver:
             restarted = AgentService(
                 store,
@@ -1041,7 +2278,8 @@ def test_real_postgres_saver_runs_fresh_scripted_root_and_reopens():
             tasks = store.list_tasks(session.id)
             assert store.get_task(root.id).state == "SUCCEEDED", restarted.health()
             assert len(tasks) == 3
-            assert sum(t.model_calls for t in tasks) == 4
+            assert all(task.prompt_catalog_sha256 == root.prompt_catalog_sha256 for task in tasks)
+            assert sum(t.model_calls for t in tasks) == 5
             assert sum(t.tool_calls for t in tasks) <= 18
             reused = restarted.submit_question(
                 session,
@@ -1052,10 +2290,11 @@ def test_real_postgres_saver_runs_fresh_scripted_root_and_reopens():
             drain(restarted)
             assert store.get_task(reused.id).state == "SUCCEEDED", restarted.health()
             assert store.get_task(reused.id).plan == ["reuse", "answer"]
-            assert any(
+            assert not any(
                 pinned.claims[ref].kind == "location"
                 for ref in store.get_task(reused.id).result.claim_refs
             )
+            assert store.get_task(reused.id).decision_policy == "llm-diagnosis-v1"
             assert len(store.list_tasks(session.id)) == 4
             from subsea_copilot.runtime.baseline import run_single_agent_baseline
 
@@ -1071,6 +2310,10 @@ def test_real_postgres_saver_runs_fresh_scripted_root_and_reopens():
             assert baseline["model_calls"] == 1
             assert baseline["child_count"] == 0
             assert len(store.list_tasks(session.id)) == 5
+            assert all(
+                task.prompt_catalog_sha256 == root.prompt_catalog_sha256
+                for task in store.list_tasks(session.id)
+            )
 
 
 @pytest.mark.integration
@@ -1210,7 +2453,7 @@ def located_snapshot(snapshot):
     return snapshot
 
 
-def test_section_question_cannot_reuse_diagnosis_that_omitted_location(snapshot):
+def test_section_question_does_not_require_a_numerical_location_claim(snapshot):
     import json
 
     from langchain_core.messages import SystemMessage
@@ -1226,7 +2469,7 @@ def test_section_question_cannot_reuse_diagnosis_that_omitted_location(snapshot)
                 )
             )
             message = result.generations[0].message
-            if not message.tool_calls and not context["requires_location"]:
+            if not message.tool_calls and not context.get("requires_location", False):
                 payload = json.loads(message.content)
                 payload["claim_refs"] = [r for r in payload["claim_refs"] if r != "location"]
                 payload["evidence_ids"] = [r for r in payload["evidence_ids"] if r != "location-e"]
@@ -1256,9 +2499,9 @@ def test_section_question_cannot_reuse_diagnosis_that_omitted_location(snapshot)
     drain(service)
     answer = store.get_task(section.id)
     assert answer.state == "SUCCEEDED"
-    assert answer.plan == ["quality", "diagnosis", "answer"]
-    assert "location" in answer.result.claim_refs
-    assert len(store.tasks) == 6
+    assert answer.plan == ["reuse", "answer"]
+    assert "location" not in answer.result.claim_refs
+    assert len(store.tasks) == 4
 
 
 @pytest.mark.parametrize("behavior", ["extra_read", "malformed_final", "never_final"])
@@ -1328,16 +2571,16 @@ def test_prefetched_quality_handles_extra_round_and_repair_without_spending_fina
     if behavior == "never_final":
         assert quality.error_code == "final_turn_reserved"
         assert quality.model_calls == 9
-        assert quality.tool_calls == 11
+        assert quality.tool_calls == 12
         assert store.get_task(root.id).state == "FAILED"
     else:
         assert store.get_task(root.id).state == "SUCCEEDED"
         assert quality.model_calls == 2
-        assert quality.tool_calls == (5 if behavior == "extra_read" else 4)
+        assert quality.tool_calls == (6 if behavior == "extra_read" else 5)
     assert sum(t.model_calls for t in store.tasks.values()) <= 10
 
 
-def test_actual_s2_quality_decline_is_repaired_without_relaxing_event_abstention():
+def test_actual_s2_quality_decline_is_not_overridden_by_numerical_rules():
     import json
 
     from langchain_core.messages import SystemMessage
@@ -1385,66 +2628,8 @@ def test_actual_s2_quality_decline_is_repaired_without_relaxing_event_abstention
     root = submit(service, snapshot, "Possible leak or instrumentation issue?")
     drain(service)
     quality = next(t for t in store.tasks.values() if t.role == "sensor_quality")
-    assert quality.state == "SUCCEEDED"
-    assert quality.model_calls == 2
+    assert quality.state == "ABSTAINED"
+    assert quality.model_calls == 1
     answer = store.get_task(root.id)
     assert answer.state == "SUCCEEDED"
-    assert answer.result.hypothesis == "sensor_or_telemetry_issue"
-
-
-def test_read_evidence_bundle_is_scoped_and_contains_only_successful_reads(snapshot):
-    import json
-
-    from subsea_copilot.contracts import AgentResult, AgentTask, EngineerInterpretation
-    from subsea_copilot.grounding import source_texts
-    from subsea_copilot.interpretation import validate_interpretation
-    from subsea_copilot.profiles import expanded_evidence
-    from subsea_copilot.runtime.registry import REGISTRY
-    from subsea_copilot.validation import read_evidence_reference
-
-    pressure = EvidenceItem(
-        id="pressure-bundle-e", kind="channel_summary", sensor_id="sensor",
-        value={"recent_5s_pressure_drop_bar": 1.1, "recent_5s_period_seconds": [95, 100]},
-    )
-    unread = pressure.model_copy(update={"id": "unread-pressure-bundle-e"})
-    snapshot.evidence.update({pressure.id: pressure, unread.id: unread})
-    receipts = [{
-        "name": "evidence.get", "result": {"evidence": {
-            pressure.id: pressure.model_dump(mode="json"),
-        }},
-    }]
-    task = AgentTask(
-        id="bundle", root_id="bundle", generation_id=snapshot.generation_id,
-        snapshot_id=snapshot.id, site_id=snapshot.site_id, role="operator_response",
-        purpose=REGISTRY["operator_response"].purpose, question="What changed?",
-        mode="live", deadline=utc_now(), response_protocol="engineer-v2",
-    )
-    reference = read_evidence_reference(snapshot.id, receipts)
-    assert reference is not None
-    result = AgentResult(
-        outcome="supported", claim_refs=["health"], evidence_ids=["health-e"], limitations=[],
-        interpretation=EngineerInterpretation(
-            focus="root_cause",
-            answer={"text": "The final five-second deficit is 1.1 bar.",
-                    "references": [reference]},
-            competing_causes=[{
-                "cause": "leak", "stance": "possible",
-                "text": "Pressure loss alone does not confirm a physical leak.",
-                "references": [reference],
-            }],
-            follow_up_questions=["Is an independent pressure measurement available?"],
-        ),
-    )
-    validate_interpretation(result, task, receipts)
-    sources = source_texts(result, snapshot, receipts)
-    original = {
-        ref: item
-        for group in json.loads(sources[reference])["evidence_groups"].values()
-        for ref, item in expanded_evidence(group)["evidence"].items()
-    }
-    assert original[pressure.id] == pressure.model_dump(mode="json")
-    assert unread.id not in original
-    assert read_evidence_reference(snapshot.id + "-other", receipts) != reference
-    for failed in ([], [{**receipts[0], "error": "context_budget_exceeded"}]):
-        with pytest.raises(ValidationError, match="accepted claims"):
-            validate_interpretation(result, task, failed)
+    assert answer.result.hypothesis == "insufficient_evidence"

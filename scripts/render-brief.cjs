@@ -52,8 +52,8 @@ async function renderBrief(name) {
     });
     const pages = pdf.toString("latin1").match(/\/Type\s*\/Page\b/g) || [];
     if (pages.length === 0) throw new Error("Brief PDF contains no pages");
-    if (name === "SUBMISSION_BRIEF" && pages.length !== 1) {
-      throw new Error(`Submission brief must be one page, found ${pages.length}`);
+    if (pages.length !== 1) {
+      throw new Error(`${name} must be one page, found ${pages.length}`);
     }
     console.log(`${name} rendered: ${pages.length} pages.`);
   } finally {

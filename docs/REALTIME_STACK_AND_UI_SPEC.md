@@ -91,7 +91,7 @@ This is bounded local concurrency, not a claim of distributed high availability.
 | Window width | 60 simulated seconds | Time interval used for current diagnostics. |
 | Hop | 5 simulated seconds | Recompute as the window slides. |
 | Allowed lateness | 5 simulated seconds | Delay before calling a window complete under the source contract. |
-| Replay speed | `1x`, with `2x`, `5x`, `10x` controls | Simulated seconds per wall-clock second, not sensor sampling changes. |
+| Replay speed | `1x`, with `2x`, `5x`, `10x`, `20x`, `30x` controls | Simulated seconds per wall-clock second, not sensor sampling changes. |
 | Active lateness/revision horizon | 120 simulated seconds | Bounded buffer for revising recent windows; older arrivals remain recorded. |
 | Warm-up | First complete 60-second window plus lateness | Incomplete history is labeled `WARMING_UP`, not "pipeline normal." |
 
