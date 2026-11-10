@@ -1,5 +1,44 @@
 # Qualification results
 
+## Recorded timeline refreshed through actual live workers
+
+All **nine** S7 seed-2026 checkpoints (+95, +100, +105, +110, +120, +135, +150,
++180 and +360 seconds) were freshly investigated through the dashboard's
+authenticated **Investigate here** endpoint, using three concurrent independent
+roots. All 27 root/specialist tasks succeeded, all 108 operational checks passed,
+and every report ended in grounding acceptance. The +110/+120/+360 reports
+required revision before acceptance; no acceptance rule was relaxed.
+
+All nine report-to-map extractions completed and all nine original stored Langfuse
+trees were verified. The library now contains **25** executions: nine new recordings
+plus all sixteen previous entries, checked unchanged. Browser navigation selected
+the new accepted reports at every checkpoint, with their corresponding trace links.
+Playback remains based on 5x source time; faster playback reuses these same results.
+The [sanitized refresh receipt](evidence/recorded-agent-refresh.json) identifies
+the executions and retained operational failures.
+
+This also verifies the **production live path**, not only a qualification factory:
+all 80 investigation model calls used `persistent-sdk`, with observed
+`gpt-6.1-sol`, observed usage and unique per-call request IDs. Readiness rounded to
+zero milliseconds on 76 calls. The owned runtime is reused across investigations
+within each server lifetime; sessions remain isolated. Mapper calls use the same
+server runtime and retain separate usage receipts.
+
+The rerun exposed a live-source preparation race: the monitor could inspect a
+partially prepared replay, conflicting with immutable windows and stopping
+monitoring. Preparation now holds the monitor's existing source lock until its
+fixed-time root is admitted. A regression reproduced the race before the fix;
+all 42 monitoring integration tests passed afterward. The task-free partial replay
+was marked failed with an audit event, not deleted or rewritten.
+
+Three accepted roots from before that control-only repair were retained. Six
+remaining roots used the repaired fingerprint; therefore this is **not one
+single-fingerprint frozen cohort**. A 90-second observer timeout during +360s
+preparation was recovered by reattaching to its original admitted task, without
+restarting inference. Original failed observer artifacts remain preserved.
+These related synthetic windows do not establish population accuracy, production
+reliability, a guaranteed latency bound or measured human-effort savings.
+
 ## Persistent-runtime optimization: two fresh accepted investigations
 
 The default hosted transport now retains one owned, installed Copilot CLI process

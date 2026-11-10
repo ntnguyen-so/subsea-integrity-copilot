@@ -568,6 +568,56 @@ def test_sensor_alert_workflow_never_admits_agents(
         )
 
 
+def test_playback_live_preparation_cannot_interleave_with_monitor_tick(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    attempting = threading.Event()
+    entered = threading.Event()
+    futures = []
+    original_snapshot = Monitor._snapshot
+    monkeypatch.setattr(AgentService, "_check_provider", lambda *args: None)
+
+    def competing_tick(monitor: Monitor) -> None:
+        attempting.set()
+        with monitor._lock:
+            entered.set()
+            monitor.tick()
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        def guarded_snapshot(self, *args, **kwargs):
+            if not futures:
+                futures.append(executor.submit(competing_tick, self))
+                assert attempting.wait(2)
+                assert not entered.wait(0.2), "Monitor entered a partially prepared live replay"
+            return original_snapshot(self, *args, **kwargs)
+
+        monkeypatch.setattr(Monitor, "_snapshot", guarded_snapshot)
+        with TestClient(create_app(settings, start_workers=False)) as client:
+            login = client.post("/api/login", json={
+                "username": "operator", "password": settings.operator_password,
+            })
+            headers = {"X-CSRF-Token": login.json()["csrf_token"]}
+            original = client.post("/api/replays", headers=headers, json={
+                "scenario": "S7", "seed": 2026, "mode": "scripted",
+                "idempotency_key": "preparation-race-original",
+            }).json()
+            response = client.post(
+                f"/api/replays/{original['id']}/investigate-here", headers=headers,
+                json={"source_seconds": 100, "idempotency_key": "preparation-race"},
+            )
+            assert response.status_code == 200, response.text
+            prepared = response.json()
+            futures[0].result(timeout=10)
+            assert entered.is_set()
+            store = client.app.state.store
+            replay = store.get_replay(prepared["replay"]["id"])
+            assert store.get_window(replay.investigation_window_id).end_seconds == 100
+            assert len(store.list_tasks(replay.id)) == 1
+
+
 @pytest.mark.parametrize("terminal", ["FAILED", "ABSTAINED"])
 def test_playback_live_override_preserves_recordings_and_retries_exact_window(
     settings: Settings, monkeypatch: pytest.MonkeyPatch, terminal: str,

@@ -676,6 +676,12 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     ) -> dict[str, object]:
         """Create a separate live generation at a selected endpoint; never mutate the recording."""
         principal(request, write=True)
+        with monitor_service()._lock:
+            return prepare_live_investigation(generation_id, form)
+
+    def prepare_live_investigation(
+        generation_id: str, form: PlaybackInvestigation,
+    ) -> dict[str, object]:
         from .contracts import content_hash
         from .monitoring import AUTO_QUESTION
 

@@ -85,13 +85,19 @@ Recorded and live views share the pipeline map, sensor table and selectable
 pressure trends, including the same numerical sensor-warning banner. Recorded
 warnings follow the selected measurement window, not the live source head or an
 older agent report; their recorded time is labelled explicitly.
+By default, automatic live investigations and **Investigate here** share the
+server's warm, owned Copilot SDK runtime, including report-to-map extraction.
+Each inference uses a separate session; neither conversation nor native tool
+authority is shared. The runtime survives completed investigations until server
+shutdown. Recorded playback still performs no inference.
 Recorded measurements are reconstructed read-only from the same
 synthetic source at each selected window's original arrival cutoff; scrubbing
 does not advance or write the source replay. The main map follows measurement
 time, while saved agent findings retain their labelled investigation time.
 Agent overlays on the main map require an exact matching evidence hash.
 
-The S7 seed 2026 recording builder targets **100, 110, 120, 150, 180 and 360s**.
+The S7 seed 2026 published timeline covers **95, 100, 105, 110, 120, 135, 150,
+180 and 360s**; pass these endpoints explicitly when rebuilding the full set.
 Between checkpoints the map and report retain their explicitly labelled original
 evidence time; later findings are never backfilled. This is not an investigation
 at every five-second window. Playback selects the latest compatible terminal trial
@@ -103,16 +109,18 @@ Each selected recording exposes **Open whole investigation in Langfuse** and
 and trace details follow the timeline without launching inference; late responses
 cannot replace a newer selection. Missing metadata or unverifiable stored traces
 are explicitly labelled, without substituting another run or hiding the report.
-The eight selected library checkpoints have verified original stored traces.
-The older database-only +135s checkpoint retains its original trace ID, but that
-trace is currently absent from Langfuse storage; its link is marked unverified.
+All nine selected checkpoints now have fresh accepted reports, completed
+report-to-map extractions and verified original stored traces. The +135s checkpoint
+is included in the exported library. An older +135s attempt still has an absent
+historical trace; it remains preserved and explicitly unverified rather than
+being relabelled as the new execution.
 
 After generating the S7 investigations with the verification command below,
 export their immutable snapshots and reports without new model calls:
 
 ```powershell
 . .\tools\load-environment.ps1
-uv run python tools\verify-s7-agents.py --output runtime\s7-check
+uv run python tools\verify-s7-agents.py --checkpoints 95 100 105 110 120 135 150 180 360 --workers 3 --output runtime\s7-check
 uv run python tools\prepare-agent-playback.py --runs runtime\s7-check
 ```
 

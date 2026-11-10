@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "scenario": "S7",
+  "seed": 2026,
+  "dataset_sha256": "935e7fd76c7a94e20baa6e73f55c634555c06b1a29df31ffc00e14e31b0f3396",
+  "execution_path": "authenticated dashboard investigate-here API and production live workers",
+  "concurrent_roots": 3,
+  "base_playback_speed": 5,
+  "transport": "persistent-sdk",
+  "observed_model": "gpt-6.1-sol",
+  "cli_version": "1.0.107",
+  "implementation_before_admission_fix": "9f87f8c9170c992d1db5c8835903c0edd656f4818e42c0844c5d47d22744e993",
+  "implementation_after_admission_fix": "876372b4cb7a58f86c29864f72816b708df7f86da13516ad8c7b5e4787ee1ecd",
+  "remaining_execution_fingerprint_unchanged": true,
+  "accepted_roots": 9,
+  "succeeded_root_and_specialist_tasks": 27,
+  "passed_operational_checks": 108,
+  "fresh_investigation_model_calls_excluding_mapper": 80,
+  "unique_investigation_request_ids": 80,
+  "all_model_identities_and_usage_observed": true,
+  "zero_millisecond_runtime_readiness_calls": 76,
+  "all_nine_original_trace_trees_verified": true,
+  "all_nine_report_mappings_completed": true,
+  "unchanged_historical_library_entries": 16,
+  "published_library_entries": 25,
+  "cases": [
+    {
+      "source_seconds": 95,
+      "root_id": "87e487d7-4bc7-5eb9-adc8-477824ec36e1",
+      "trace_id": "7d674979bac0aea1d9d64701d79cc9df",
+      "fresh_model_calls": 9,
+      "review": ["accept"],
+      "executed_before_admission_fix": true
+    },
+    {
+      "source_seconds": 100,
+      "root_id": "768d256b-aad5-5ba7-ba1c-800b37273a7f",
+      "trace_id": "0a8959fd202668739cbf0fdcb7e981cc",
+      "fresh_model_calls": 9,
+      "review": ["accept"]
+    },
+    {
+      "source_seconds": 105,
+      "root_id": "e0ba9a6b-c482-5e77-88c0-1d2790b3a25e",
+      "trace_id": "5be316f62958d9a448e7e8d55c70e7fc",
+      "fresh_model_calls": 9,
+      "review": ["accept"],
+      "executed_before_admission_fix": true
+    },
+    {
+      "source_seconds": 110,
+      "root_id": "2bcb9ce4-f81d-5f9c-88d3-7bd47dcc5846",
+      "trace_id": "ce607f226ec450cf6c59de23c8e900e9",
+      "fresh_model_calls": 9,
+      "review": ["revise", "accept"],
+      "executed_before_admission_fix": true
+    },
+    {
+      "source_seconds": 120,
+      "root_id": "8801bed8-10f2-53c1-9c08-9e8ad1dcdc2e",
+      "trace_id": "f96023e059e6586f6f9e136bf65cc8ba",
+      "fresh_model_calls": 10,
+      "review": ["revise", "accept"]
+    },
+    {
+      "source_seconds": 135,
+      "root_id": "009af418-14dd-55e9-83fd-8ddbcc13c0b4",
+      "trace_id": "d2d86cd39db950f9a733510d2b289f39",
+      "fresh_model_calls": 8,
+      "review": ["accept"]
+    },
+    {
+      "source_seconds": 150,
+      "root_id": "9f99ac27-6509-5191-9a76-157cc6ce56d6",
+      "trace_id": "538252b1f21c2ab9b7d7b1709f006302",
+      "fresh_model_calls": 8,
+      "review": ["accept"]
+    },
+    {
+      "source_seconds": 180,
+      "root_id": "66a699d9-1eb5-5d46-a2ac-95f28ec7f21f",
+      "trace_id": "7b00bfe1f09705ec270d6066a3ee3574",
+      "fresh_model_calls": 8,
+      "review": ["accept"]
+    },
+    {
+      "source_seconds": 360,
+      "root_id": "08a16643-dd31-579b-816d-967108c017d1",
+      "trace_id": "428f63750f93e990963fb16d310d624e",
+      "fresh_model_calls": 10,
+      "review": ["revise", "accept"]
+    }
+  ],
+  "retained_operational_failures": [
+    {
+      "kind": "concurrent_live_preparation",
+      "partial_replay_id": "replay-f18ef62310a81501974f2eef",
+      "resolution": "Task-free partial replay marked FAILED with audit event; immutable evidence retained. Fixed-time source preparation now shares the monitor lock."
+    },
+    {
+      "kind": "admission_observer_timeout",
+      "source_seconds": 360,
+      "observer_timeout_seconds": 90,
+      "resolution": "Reattached to the original admitted task; no new inference."
+    }
+  ],
+  "limitations": [
+    "Related windows of one synthetic scenario, not independent event trials or field qualification.",
+    "Three accepted roots precede the control-only preparation fix; six follow it.",
+    "No latency guarantee, production success-rate estimate or measured labor saving.",
+    "Recordings and complete original audits persist outside Git in the configured runtime and session artifacts."
+  ]
+}
