@@ -119,6 +119,10 @@ def build_graph(
             "calls": message.tool_calls,
             "selection_context": message.additional_kwargs.get("subsea.trace", {}),
             "decision_summaries": message.additional_kwargs.get("decision_summaries", {}),
+            "parameter_summaries": message.additional_kwargs.get("parameter_summaries", {}),
+            "decision_source_references": message.additional_kwargs.get(
+                "decision_source_references", {},
+            ),
         })
         return {"messages": response}
 

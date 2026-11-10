@@ -518,22 +518,39 @@ def _decode(content: str, allowed: set[str]) -> AIMessage:
         raise ProviderError("invalid_tool_call")
     decoded = []
     summaries = {}
+    parameter_summaries = {}
+    source_references = {}
     for call in calls:
         if (
             not isinstance(call, dict)
-            or set(call) - {"name", "arguments", "decision_summary"}
+            or set(call) - {
+                "name", "arguments", "decision_summary", "parameter_summary", "source_references",
+            }
             or not isinstance(call.get("name"), str)
             or call["name"] not in allowed
             or not isinstance(call.get("arguments"), dict)
             or not isinstance(call.get("decision_summary", ""), str)
             or len(call.get("decision_summary", "")) > 1000
+            or not isinstance(call.get("parameter_summary", ""), str)
+            or len(call.get("parameter_summary", "")) > 1000
+            or not isinstance(call.get("source_references", []), list)
+            or len(call.get("source_references", [])) > 32
+            or any(
+                not isinstance(ref, str) or not ref.strip() or len(ref) > 200
+                for ref in call.get("source_references", [])
+            )
         ):
             raise ProviderError("invalid_tool_call")
         call_id = f"subsea_{uuid.uuid4().hex}"
         decoded.append({"id": call_id, "name": call["name"], "args": call["arguments"]})
         summaries[call_id] = call.get("decision_summary", "")
+        parameter_summaries[call_id] = call.get("parameter_summary", "")
+        source_references[call_id] = call.get("source_references", [])
     return AIMessage(
-        content="", tool_calls=decoded, additional_kwargs={"decision_summaries": summaries}
+        content="", tool_calls=decoded, additional_kwargs={
+            "decision_summaries": summaries, "parameter_summaries": parameter_summaries,
+            "decision_source_references": source_references,
+        }
     )
 
 

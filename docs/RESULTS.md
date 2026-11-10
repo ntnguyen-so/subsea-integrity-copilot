@@ -7,6 +7,91 @@ are intentionally preserved in `evidence/`; some are application inputs.
 Use the [engineering report](REPORT.md) for current architecture and
 [demo reference](DEMO_DETAILS.md) for current commands.
 
+## All-agent tool selection reasons
+
+The earlier detailed-tracing implementation below captured public model decisions
+but still used generic purpose labels for application-required reads. Those labels
+did **not** explain why a particular source, time range, sensor group or evidence
+batch was chosen. This follow-up corrects that gap across all three roles and all
+14 registered tool names, including retained legacy policies.
+
+Open an individual tool's **Preview > Input**. Its first fields are
+`why_this_call` and `why_these_parameters`. Application selections expose the
+actual policy rule, trigger, monitoring window, historical comparison boundaries,
+ranked finding page, preceding search/read IDs, or source-claim batch, as applicable.
+Model selections preserve separate public purpose and parameter explanations plus
+declared motivating references from the originating generation. Missing model
+explanations remain explicitly `not_recorded`; application policy is never
+presented as a model's thought.
+
+For example, the pinned monitoring window `[60,120)` does not automatically make
+every historical comparison use those boundaries. A comparison's own lookback,
+midpoint split and sensor-group selection are now explained separately. Likewise,
+an upfront evidence batch of 24 IDs is an application intake choice, not the
+gateway's maximum allowance or a diagnostic threshold. Each selected quality
+source links back to its actual claim and originating read. Handoffs separately
+explain the specialist scope and constrained application prerequisite order.
+
+This extends the CustomerOps public-decision/correlation contract with explicit
+parameter and dependency provenance. It does not expose private reasoning or
+prove that a declared motivation is sound. Declared source references are not
+automatically validated citations. See the [operator field guide](DEMO_DETAILS.md#live-runtime-and-observability)
+for the complete tool-by-tool explanation checklist. Earlier traces remain
+unchanged; the earlier cohort below must not be mistaken for this follow-up.
+
+### Final S7 example and all-scenario refresh
+
+The new **S7 seed 2026, +120s** execution is
+[`deb0f2468efa95763be4cad515aa10f2`](http://127.0.0.1:3001/project/subsea-copilot/traces/deb0f2468efa95763be4cad515aa10f2).
+Its input hash still matches the user's original execution and the earlier
+detailed-tracing cohort: `ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00`.
+It has 65 observations, including 36 application-required and 9 model-selected
+tool reads. All stored inputs/outputs, originating model links, declared parameter
+explanations and application dependency links were checked against actual receipts.
+
+The Sensor Quality example is now directly inspectable:
+
+| Tool observation | Concrete selection detail |
+| --- | --- |
+| `b06c95d43802e8ba` / `ontology.neighbors` | Version-bound sensor positions, paired taps and shared gateways; topology is not a pressure-history range query |
+| `9d332f4cde3bfe81` / `quality.sensor_patterns` | Offset 0, page size 24, 112 findings, actual ranking priorities and selected IDs; unreturned histories are not declared healthy |
+| `2e4d22c25f813181` / first `evidence.get` | First 24 of 26 distinct quality-referenced sources, indices `[0,24)` |
+| `1f9430351925a694` / second `evidence.get` | Remaining 2 sources, indices `[24,26)`, not another discretionary search; preceding claims/read IDs explain the chosen sources |
+
+All **66 unique checkpoints** were rerun: S1-S7 at
++95/+100/+105/+110/+120/+135/+150/+180/+360s, plus S1 +115/+260s and S4 +155s.
+Eight standard workers ran alongside the three extra cases. Final outcomes are
+**41 supported reports and 25 reviewed abstentions**; all 792 operational checks
+passed. The actual stored audit covers **2,837 observations**, including
+**451 investigation generations and 1,577 tools**: 1,358 application reads and
+219 model requests. All 132 specialist handoffs include their scope explanations.
+Seven semantic revisions and all 66 final acceptances remain visible.
+Supported reports and reviewed abstentions are not confirmed leaks or measures
+of field accuracy.
+
+One initial **report-to-map extraction**, S7 +105s, failed with
+`invalid_structured_output` after its investigation had already succeeded.
+An explicit retry through the existing `retry_failed` mechanism completed that
+extraction without rerunning the agents. The original failed report/manifest,
+failed extractor receipt and both attempts' costs are retained; the final
+qualification view records this recovery rather than silently replacing history.
+All 41 final supported reports have completed map extraction.
+
+Concurrent comment-only edits in the shared workspace changed textual source
+fingerprints during the first follow-up attempt. That interrupted attempt is
+retained but was not published. The final cohort used an isolated, immutable
+source tree with fingerprint
+`7c76d07ede20af1d6f748b76b850820241d87c887742a762831c3bb063fc924c`;
+its package AST and prompt text were compared with the shared implementation.
+The final isolated regression suite passed **565 tests, with 105 skipped**;
+changed-file Ruff and strict mypy checks passed. Concurrent comments and unrelated
+UI/documentation changes are not part of this tracing change.
+
+The [selection-explanation receipt](evidence/agent-selection-reasons.json)
+retains per-checkpoint identities, representative public explanations, source
+isolation and map-recovery details. Playback publication preserves the original
+148 recordings unchanged and adds these 66 executions, for **214 total**.
+
 ## Detailed agent tracing: decisions, evidence and review corrections
 
 New synthetic investigations expose the public decision and its provenance,

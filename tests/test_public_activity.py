@@ -68,3 +68,18 @@ def test_tool_selection_does_not_invent_model_reasons_or_mislabel_required_intak
     assert required["decision_provenance"] == "application_required_intake"
     assert required["model_call_id"] is None
     assert "Not a model decision." not in required["decision_summary"]
+    assert missing["parameter_summary"] is None
+    assert missing["parameter_provenance"] == "not_recorded"
+
+
+def test_selection_keeps_parameter_reasons_and_declared_sources_separate_from_authority():
+    selection = tool_selection("event_diagnosis", {
+        "id": "compare", "name": "history.compare", "args": {},
+        "decision_summary": "Resolve whether the late change is isolated.",
+        "parameter_summary": "Compare paired taps over [100,120), split at 110.",
+        "source_references": ["prior-profile"],
+    })
+    assert selection["parameter_provenance"] == "model_public"
+    assert selection["parameter_summary"] == "Compare paired taps over [100,120), split at 110."
+    assert selection["declared_source_references"] == ["prior-profile"]
+    assert "not validated" in selection["source_reference_authority"]

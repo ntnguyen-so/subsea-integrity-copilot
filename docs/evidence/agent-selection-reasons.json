@@ -1,0 +1,2363 @@
+{
+  "schema_version": "agent-selection-reasons-v1",
+  "scope": "Seeded synthetic development recordings, not field qualification or a safety certificate",
+  "baseline_commit": "59ade7e029de849ef9b16115346376d828e57f4d",
+  "implementation_sha256": "7c76d07ede20af1d6f748b76b850820241d87c887742a762831c3bb063fc924c",
+  "implementation_unchanged_across_final_cohorts": true,
+  "source_isolation": {
+    "reason": "Concurrent comment-only edits in the shared workspace changed textual source fingerprints.",
+    "exact_pre_drift_tested_source_reconstructed": true,
+    "shared_comments_not_reverted_or_committed_by_this_task": true,
+    "final_isolated_source_compared_to_shared_package_ast": "equivalent",
+    "interrupted_attempts_not_published": true,
+    "interrupted_attempts": [
+      {
+        "cohort": "decision-reasons-all-20261110-v1",
+        "status": "stopped after shared-source drift was detected; preserved outside playback"
+      },
+      {
+        "cohort": "decision-reasons-intermediate-20261110-v1",
+        "execution_cases_completed": 3,
+        "implementation_unchanged": false,
+        "status": "not accepted as a frozen-source qualification cohort"
+      }
+    ]
+  },
+  "debugging_contract": {
+    "all_registered_policy_tool_names_checked_offline": 14,
+    "current_and_legacy_role_policies_checked": true,
+    "live_role_tool_call_counts": {
+      "operator_response": 465,
+      "event_diagnosis": 716,
+      "sensor_quality": 396
+    },
+    "live_tool_name_call_counts": {
+      "task.result": 230,
+      "evidence.get": 713,
+      "history.read": 66,
+      "pressure.measurements": 66,
+      "history.search": 69,
+      "quality.sensor_patterns": 66,
+      "quality.coverage": 66,
+      "quality.conflicts": 66,
+      "ontology.neighbors": 106,
+      "history.compare": 129
+    },
+    "model_transport_prompt_version": "2.1.0",
+    "model_parameter_explanation_provenance": "Actual model-public output, preserved through graph interrupts.",
+    "application_explanation_provenance": "Actual intake-rule execution, scope, source IDs, batches and pages; not a model thought.",
+    "missing_explanations": "Explicit not_recorded; never synthesized as a model explanation.",
+    "declared_source_references": "Declared motivation, not automatically validated citations or authorization.",
+    "handoffs": "Validated constrained plans and application prerequisite order, not invented free model choices.",
+    "customerops_comparison": "Retains the earlier public decision/correlation contract and adds explicit parameter/range explanations and dependency provenance."
+  },
+  "cohort": {
+    "case_count": 66,
+    "seed": 2026,
+    "standard_checkpoints": [
+      95,
+      100,
+      105,
+      110,
+      120,
+      135,
+      150,
+      180,
+      360
+    ],
+    "extra_checkpoints": {
+      "S1": [
+        115,
+        260
+      ],
+      "S4": [
+        155
+      ]
+    },
+    "parallel_standard_workers": 8,
+    "parallel_extra_workers": 3,
+    "states": {
+      "SUCCEEDED": 41,
+      "ABSTAINED": 25
+    },
+    "mapping_statuses": {
+      "completed": 41,
+      "not_run_abstained": 25
+    },
+    "semantic_decisions": {
+      "accept": 66,
+      "revise": 7
+    },
+    "operational_checks_passed": 792,
+    "operational_check_counts": {
+      "persisted_results_revalidated": 66,
+      "specialist_collaboration": 66,
+      "scope_and_reuse": 66,
+      "model_receipt_accounting": 66,
+      "tool_receipt_accounting": 66,
+      "read_only_role_authority": 66,
+      "pinned_tool_scope": 66,
+      "incident_time_sources": 66,
+      "observe_before_followup": 66,
+      "bounded_execution": 66,
+      "critic_and_reflection": 66,
+      "review_attestation": 66
+    },
+    "observations": 2837,
+    "observation_types": {
+      "GUARDRAIL": 347,
+      "GENERATION": 451,
+      "TOOL": 1577,
+      "AGENT": 330,
+      "SPAN": 132
+    },
+    "tool_origins": {
+      "application_required_intake": 1358,
+      "model_request": 219
+    },
+    "all_call_and_parameter_explanations_present": true,
+    "all_scope_source_and_model_correlation_checks_passed": true,
+    "all_handoff_explanations_present": true,
+    "explicit_report_mapping_recoveries": [
+      {
+        "root_id": "2a03f2b1-2034-5c07-9f76-a6e2bfdcc54f",
+        "implementation_sha256": "7c76d07ede20af1d6f748b76b850820241d87c887742a762831c3bb063fc924c",
+        "phase": "report-to-map extraction after accepted investigation",
+        "previous_status": "failed",
+        "previous_error_code": "invalid_structured_output",
+        "status": "completed",
+        "error_code": null,
+        "prior_extractions_retained": 1,
+        "all_attempt_model_calls": 2,
+        "agent_investigation_rerun": false,
+        "original_manifest_modified": false
+      }
+    ],
+    "mapping_recovery_interpretation": "Initial failed extraction artifacts, previous model receipts and their costs are retained; only the map extraction is retried, not the accepted investigation.",
+    "failed_cases": [],
+    "interpretation": "Reviewed supported reports and reviewed abstentions are not confirmed leaks or measures of field accuracy."
+  },
+  "playback_publication": {
+    "original_recordings": 148,
+    "new_recordings": 66,
+    "total_recordings": 214,
+    "original_recordings_unchanged_as_json_values": true,
+    "backup_sha256": "55d05971b2abee9ed76ad0f9e34d56394bab6d486d586a08e668ae7e85c1f0fe",
+    "library_bytes": 44505343,
+    "library_below_64000000_byte_limit": true,
+    "typed_library_validated": true,
+    "export_inference_calls": 0,
+    "running_api_selects_new_primary_and_returns_original_trace": true,
+    "running_api_content_capture_enabled": true
+  },
+  "primary_s7_120": {
+    "root_id": "b9141a41-1525-5568-ac1d-280011bcbf53",
+    "trace_id": "deb0f2468efa95763be4cad515aa10f2",
+    "url": "http://127.0.0.1:3001/project/subsea-copilot/traces/deb0f2468efa95763be4cad515aa10f2",
+    "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+    "same_input_as_previous_trace": true,
+    "previous_trace_id": "3c147782376b6ff869d073cd2848eaf5",
+    "previous_limitation": "Generic application intake labels did not explain exact range/page/source choices.",
+    "observations": 65,
+    "types": {
+      "GUARDRAIL": 5,
+      "GENERATION": 8,
+      "TOOL": 45,
+      "AGENT": 5,
+      "SPAN": 2
+    },
+    "sensor_quality_calls": [
+      {
+        "observation_id": "1f9430351925a694",
+        "role": "sensor_quality",
+        "tool": "evidence.get",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 2 of 2: 2 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [24, 26) of 26. Do not fetch all 227 snapshot evidence items.",
+        "application_selection": {
+          "rule": "application-intake-v2",
+          "rule_source": "runtime.workflow.AgentService._required_intake",
+          "trigger": "Conditional application intake derived from available source references, history context or legacy location eligibility.",
+          "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+          "required_role": "sensor_quality",
+          "decision_policy": "llm-diagnosis-v1",
+          "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 2 of 2: 2 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+          "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [24, 26) of 26. Do not fetch all 227 snapshot evidence items.",
+          "window": {
+            "start_seconds": 60.0,
+            "end_seconds": 120,
+            "duration_seconds": 60.0,
+            "source_clock_seconds": 125.0,
+            "selection": "parent_task_pinned_snapshot",
+            "boundaries": "start inclusive, end exclusive"
+          },
+          "source_tasks": [],
+          "selected_sources": [
+            {
+              "evidence_id": "ev-225",
+              "kind": "coverage",
+              "sensor_id": null
+            },
+            {
+              "evidence_id": "ev-226",
+              "kind": "limitation",
+              "sensor_id": null
+            }
+          ],
+          "batch": {
+            "number": 2,
+            "total": 2,
+            "intake_batch_size": 24,
+            "index_start": 24,
+            "index_end_exclusive": 26,
+            "total_referenced_ids": 26,
+            "selected_ids": [
+              "ev-225",
+              "ev-226"
+            ]
+          },
+          "source_claims": [
+            {
+              "claim_id": "claim-112",
+              "evidence_ids": [
+                "ev-225"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "8fb3651c-9d91-5ba1-9505-efaf88f472b1",
+                  "tool": "quality.conflicts"
+                },
+                {
+                  "call_id": "e57d6d39-fff3-5028-988c-573016a8a8ca",
+                  "tool": "quality.coverage"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-113",
+              "evidence_ids": [
+                "ev-226"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "8fb3651c-9d91-5ba1-9505-efaf88f472b1",
+                  "tool": "quality.conflicts"
+                },
+                {
+                  "call_id": "e57d6d39-fff3-5028-988c-573016a8a8ca",
+                  "tool": "quality.coverage"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "observation_id": "2e4d22c25f813181",
+        "role": "sensor_quality",
+        "tool": "evidence.get",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 1 of 2: 24 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [0, 24) of 26. Do not fetch all 227 snapshot evidence items.",
+        "application_selection": {
+          "rule": "application-intake-v2",
+          "rule_source": "runtime.workflow.AgentService._required_intake",
+          "trigger": "Conditional application intake derived from available source references, history context or legacy location eligibility.",
+          "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+          "required_role": "sensor_quality",
+          "decision_policy": "llm-diagnosis-v1",
+          "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 1 of 2: 24 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+          "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [0, 24) of 26. Do not fetch all 227 snapshot evidence items.",
+          "window": {
+            "start_seconds": 60.0,
+            "end_seconds": 120,
+            "duration_seconds": 60.0,
+            "source_clock_seconds": 125.0,
+            "selection": "parent_task_pinned_snapshot",
+            "boundaries": "start inclusive, end exclusive"
+          },
+          "source_tasks": [],
+          "selected_sources": [
+            {
+              "evidence_id": "ev-001",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST1-A"
+            },
+            {
+              "evidence_id": "ev-003",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST1-B"
+            },
+            {
+              "evidence_id": "ev-005",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST2-A"
+            },
+            {
+              "evidence_id": "ev-007",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST2-B"
+            },
+            {
+              "evidence_id": "ev-009",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST3-A"
+            },
+            {
+              "evidence_id": "ev-011",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST3-B"
+            },
+            {
+              "evidence_id": "ev-013",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST4-A"
+            },
+            {
+              "evidence_id": "ev-015",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST4-B"
+            },
+            {
+              "evidence_id": "ev-017",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST5-A"
+            },
+            {
+              "evidence_id": "ev-019",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST5-B"
+            },
+            {
+              "evidence_id": "ev-021",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST6-A"
+            },
+            {
+              "evidence_id": "ev-027",
+              "kind": "sensor_health",
+              "sensor_id": "P1-ST7-B"
+            },
+            {
+              "evidence_id": "ev-083",
+              "kind": "sensor_health",
+              "sensor_id": "P3-ST5-B"
+            },
+            {
+              "evidence_id": "ev-089",
+              "kind": "sensor_health",
+              "sensor_id": "P3-ST7-A"
+            },
+            {
+              "evidence_id": "ev-097",
+              "kind": "sensor_health",
+              "sensor_id": "P4-ST1-A"
+            },
+            {
+              "evidence_id": "ev-099",
+              "kind": "sensor_health",
+              "sensor_id": "P4-ST1-B"
+            },
+            {
+              "evidence_id": "ev-107",
+              "kind": "sensor_health",
+              "sensor_id": "P4-ST3-B"
+            },
+            {
+              "evidence_id": "ev-123",
+              "kind": "sensor_health",
+              "sensor_id": "P4-ST7-B"
+            },
+            {
+              "evidence_id": "ev-125",
+              "kind": "sensor_health",
+              "sensor_id": "P4-ST8-A"
+            },
+            {
+              "evidence_id": "ev-131",
+              "kind": "sensor_health",
+              "sensor_id": "P5-ST1-B"
+            },
+            {
+              "evidence_id": "ev-157",
+              "kind": "sensor_health",
+              "sensor_id": "P5-ST8-A"
+            },
+            {
+              "evidence_id": "ev-159",
+              "kind": "sensor_health",
+              "sensor_id": "P5-ST8-B"
+            },
+            {
+              "evidence_id": "ev-169",
+              "kind": "sensor_health",
+              "sensor_id": "P6-ST3-A"
+            },
+            {
+              "evidence_id": "ev-181",
+              "kind": "sensor_health",
+              "sensor_id": "P6-ST6-A"
+            }
+          ],
+          "batch": {
+            "number": 1,
+            "total": 2,
+            "intake_batch_size": 24,
+            "index_start": 0,
+            "index_end_exclusive": 24,
+            "total_referenced_ids": 26,
+            "selected_ids": [
+              "ev-001",
+              "ev-003",
+              "ev-005",
+              "ev-007",
+              "ev-009",
+              "ev-011",
+              "ev-013",
+              "ev-015",
+              "ev-017",
+              "ev-019",
+              "ev-021",
+              "ev-027",
+              "ev-083",
+              "ev-089",
+              "ev-097",
+              "ev-099",
+              "ev-107",
+              "ev-123",
+              "ev-125",
+              "ev-131",
+              "ev-157",
+              "ev-159",
+              "ev-169",
+              "ev-181"
+            ]
+          },
+          "source_claims": [
+            {
+              "claim_id": "claim-000",
+              "evidence_ids": [
+                "ev-001"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-001",
+              "evidence_ids": [
+                "ev-003"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-002",
+              "evidence_ids": [
+                "ev-005"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-003",
+              "evidence_ids": [
+                "ev-007"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-004",
+              "evidence_ids": [
+                "ev-009"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-005",
+              "evidence_ids": [
+                "ev-011"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-006",
+              "evidence_ids": [
+                "ev-013"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-007",
+              "evidence_ids": [
+                "ev-015"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-008",
+              "evidence_ids": [
+                "ev-017"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-009",
+              "evidence_ids": [
+                "ev-019"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-010",
+              "evidence_ids": [
+                "ev-021"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-013",
+              "evidence_ids": [
+                "ev-027"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-041",
+              "evidence_ids": [
+                "ev-083"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-044",
+              "evidence_ids": [
+                "ev-089"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-048",
+              "evidence_ids": [
+                "ev-097"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-049",
+              "evidence_ids": [
+                "ev-099"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-053",
+              "evidence_ids": [
+                "ev-107"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-061",
+              "evidence_ids": [
+                "ev-123"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-062",
+              "evidence_ids": [
+                "ev-125"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-065",
+              "evidence_ids": [
+                "ev-131"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-078",
+              "evidence_ids": [
+                "ev-157"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-079",
+              "evidence_ids": [
+                "ev-159"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-084",
+              "evidence_ids": [
+                "ev-169"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            },
+            {
+              "claim_id": "claim-090",
+              "evidence_ids": [
+                "ev-181"
+              ],
+              "source_reads": [
+                {
+                  "call_id": "fc51b446-e812-5cac-bbc7-ed93bc3d1a3b",
+                  "tool": "quality.sensor_patterns"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "observation_id": "9d332f4cde3bfe81",
+        "role": "sensor_quality",
+        "tool": "quality.sensor_patterns",
+        "why_this_call": "Aggregate coverage and conflicts cannot identify which individual histories need attention. Read the first bounded, ranked health page; selected instruments are triage candidates, not automatically faulty sensors.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. No offset was requested: start at 0, with the gateway's 24-finding page limit, out of 112 findings. Use the same ranked_findings(snapshot) ordering as the executed read: concerns before quiet histories, with sensor ID/channel tie-breaks; large layouts additionally prioritize exclusions/missingness and event support where present. Unreturned histories are not cleared.",
+        "application_selection": {
+          "rule": "application-intake-v2",
+          "rule_source": "runtime.workflow.AgentService._required_intake",
+          "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+          "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+          "required_role": "sensor_quality",
+          "decision_policy": "llm-diagnosis-v1",
+          "why_this_call": "Aggregate coverage and conflicts cannot identify which individual histories need attention. Read the first bounded, ranked health page; selected instruments are triage candidates, not automatically faulty sensors.",
+          "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. No offset was requested: start at 0, with the gateway's 24-finding page limit, out of 112 findings. Use the same ranked_findings(snapshot) ordering as the executed read: concerns before quiet histories, with sensor ID/channel tie-breaks; large layouts additionally prioritize exclusions/missingness and event support where present. Unreturned histories are not cleared.",
+          "window": {
+            "start_seconds": 60.0,
+            "end_seconds": 120,
+            "duration_seconds": 60.0,
+            "source_clock_seconds": 125.0,
+            "selection": "parent_task_pinned_snapshot",
+            "boundaries": "start inclusive, end exclusive"
+          },
+          "page": {
+            "offset": 0,
+            "limit": 24,
+            "total": 112,
+            "selected_count": 24,
+            "not_read_by_this_call": 88,
+            "ranking_source": "runtime.gateway.ranked_findings",
+            "ranking_priorities": [
+              "On layouts larger than 96: hard exclusions or missing >10% first.",
+              "On those larger layouts: event-support membership next, if any.",
+              "Any hard exclusions, spikes, drift, peer disagreement or missing >10%.",
+              "Sensor ID, then channel, ascending to break ties."
+            ],
+            "selected_findings": [
+              {
+                "sensor_id": "P1-ST7-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 10,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P3-ST5-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 10,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P4-ST8-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 8,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P6-ST6-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 10,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST6-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P3-ST7-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P4-ST1-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 4,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P4-ST1-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 4,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P4-ST3-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 2,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P4-ST7-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P5-ST1-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P5-ST8-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P5-ST8-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P6-ST3-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 1,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST1-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST1-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST2-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST2-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST3-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST3-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST4-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST4-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 0,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST5-A",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              },
+              {
+                "sensor_id": "P1-ST5-B",
+                "channel": "pressure",
+                "hard_excluded": 0,
+                "missing": 1,
+                "expected": 60,
+                "spike_count": 0,
+                "drift_suspected": false,
+                "peer_disagreement": false,
+                "in_event_support": false
+              }
+            ]
+          },
+          "request_group": {
+            "number": 1,
+            "total": 1
+          }
+        }
+      },
+      {
+        "observation_id": "5ebf8c18bd1e62fd",
+        "role": "sensor_quality",
+        "tool": "quality.coverage",
+        "why_this_call": "Establish expected, received and usable reading counts before interpreting sensor histories. Missing data must not be interpreted as zero pressure or as proof that an instrument failed.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+        "application_selection": {
+          "rule": "application-intake-v2",
+          "rule_source": "runtime.workflow.AgentService._required_intake",
+          "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+          "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+          "required_role": "sensor_quality",
+          "decision_policy": "llm-diagnosis-v1",
+          "why_this_call": "Establish expected, received and usable reading counts before interpreting sensor histories. Missing data must not be interpreted as zero pressure or as proof that an instrument failed.",
+          "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+          "window": {
+            "start_seconds": 60.0,
+            "end_seconds": 120,
+            "duration_seconds": 60.0,
+            "source_clock_seconds": 125.0,
+            "selection": "parent_task_pinned_snapshot",
+            "boundaries": "start inclusive, end exclusive"
+          },
+          "request_group": {
+            "number": 1,
+            "total": 1
+          }
+        }
+      },
+      {
+        "observation_id": "3657bcd6c1761fe2",
+        "role": "sensor_quality",
+        "tool": "quality.conflicts",
+        "why_this_call": "Separate conflicting or hard-excluded readings from usable pressure changes before assessing sensor health. Coverage alone cannot explain unusable data.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+        "application_selection": {
+          "rule": "application-intake-v2",
+          "rule_source": "runtime.workflow.AgentService._required_intake",
+          "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+          "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+          "required_role": "sensor_quality",
+          "decision_policy": "llm-diagnosis-v1",
+          "why_this_call": "Separate conflicting or hard-excluded readings from usable pressure changes before assessing sensor health. Coverage alone cannot explain unusable data.",
+          "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+          "window": {
+            "start_seconds": 60.0,
+            "end_seconds": 120,
+            "duration_seconds": 60.0,
+            "source_clock_seconds": 125.0,
+            "selection": "parent_task_pinned_snapshot",
+            "boundaries": "start inclusive, end exclusive"
+          },
+          "request_group": {
+            "number": 1,
+            "total": 1
+          }
+        }
+      },
+      {
+        "observation_id": "b06c95d43802e8ba",
+        "role": "sensor_quality",
+        "tool": "ontology.neighbors",
+        "why_this_call": "Identify sensor positions, paired taps and shared acquisition connections before attributing a reading problem to an individual sensor. Agreement between sensors sharing a gateway is not independent confirmation.",
+        "why_these_parameters": "Read layout metadata bound to the supplied pack version and snapshot; there is no caller-selected sensor or time-range filter. The associated measurement assessment is [60, 120) seconds, but topology is not a pressure-history range query.",
+        "application_selection": {
+          "rule": "application-intake-v2",
+          "rule_source": "runtime.workflow.AgentService._required_intake",
+          "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+          "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+          "required_role": "sensor_quality",
+          "decision_policy": "llm-diagnosis-v1",
+          "why_this_call": "Identify sensor positions, paired taps and shared acquisition connections before attributing a reading problem to an individual sensor. Agreement between sensors sharing a gateway is not independent confirmation.",
+          "why_these_parameters": "Read layout metadata bound to the supplied pack version and snapshot; there is no caller-selected sensor or time-range filter. The associated measurement assessment is [60, 120) seconds, but topology is not a pressure-history range query.",
+          "window": {
+            "start_seconds": 60.0,
+            "end_seconds": 120,
+            "duration_seconds": 60.0,
+            "source_clock_seconds": 125.0,
+            "selection": "parent_task_pinned_snapshot",
+            "boundaries": "start inclusive, end exclusive"
+          },
+          "request_group": {
+            "number": 1,
+            "total": 1
+          }
+        }
+      }
+    ],
+    "representative_role_tool_explanations": [
+      {
+        "observation_id": "1e9d6b62a9cdbb7a",
+        "role": "operator_response",
+        "tool": "task.result",
+        "why_this_call": "Read the compatible specialist's validated findings, original reviewed context and limitations before downstream diagnosis or final synthesis.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select compatible event_diagnosis task 1b081bb1-9a1c-5e80-9c4b-395e89536b1f, not an arbitrary historical task. Revalidate its lineage and scope. Comparison page 5 carries at most one original comparison; application intake visits every cited page instead of assuming page zero contains the complete specialist handoff."
+      },
+      {
+        "observation_id": "e6dd21a0561a6fcf",
+        "role": "operator_response",
+        "tool": "evidence.get",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold."
+      },
+      {
+        "observation_id": "7d318593246dd501",
+        "role": "event_diagnosis",
+        "tool": "history.read",
+        "why_this_call": "Open actual records returned by the preceding search, including contradictory or superseded hits; search titles alone are not evidence.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Open sorted search-hit IDs [0, 6) of 6, using the 9-document read limit. Include returned contradictions, not only admissible-looking titles."
+      },
+      {
+        "observation_id": "71b879a2ee0c414e",
+        "role": "event_diagnosis",
+        "tool": "history.compare",
+        "why_this_call": "Read paired time profiles and contrasting observers to distinguish a joint physical pressure change from an isolated measurement or acquisition problem.",
+        "why_these_parameters": "Historical range [0, 120)s is distinct from the monitoring window [60, 120) seconds. Initial history starts at max(0, window end - 900s), with the split at its integer midpoint (60s); neither boundary is a detected onset. Measurement-only policy includes all instruments; legacy policy expands flagged stations with paired taps and qualifying quiet references. Sorted IDs are divided into 5 groups of at most 24 sensors; paired-only mode retains station pairs without a cross-station matrix."
+      },
+      {
+        "observation_id": "06fbeb89bd49ef21",
+        "role": "event_diagnosis",
+        "tool": "task.result",
+        "why_this_call": "Read the compatible specialist's validated findings, original reviewed context and limitations before downstream diagnosis or final synthesis.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select compatible sensor_quality task d2b4d8ea-d017-56c8-983d-4462f14fa352, not an arbitrary historical task. Revalidate its lineage and scope. This response protocol returns the specialist result without a reviewed-comparison context."
+      },
+      {
+        "observation_id": "b00d1e21aec7f0b6",
+        "role": "event_diagnosis",
+        "tool": "pressure.measurements",
+        "why_this_call": "Read actual measured network pressure changes before choosing a physical or instrumentation explanation; numerical screening labels are not a diagnosis.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments."
+      },
+      {
+        "observation_id": "67ffd1b0b9b8e9fc",
+        "role": "event_diagnosis",
+        "tool": "history.search",
+        "why_this_call": "Seek operating, calibration and shared-gateway explanations that could contradict a leak interpretation, rather than treating an alert as its cause.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Query 'pressure calibration gateway operating valve' covers pressure, calibration, gateway and operating alternatives. The initial search selects segments containing screening anomalies, or the site scope if none exist; these are search candidates, not diagnosed faulty assets. Record validity is checked against the pinned incident, not today's wall clock."
+      },
+      {
+        "observation_id": "44e8f1f97a26cbf0",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold."
+      },
+      {
+        "observation_id": "1f9430351925a694",
+        "role": "sensor_quality",
+        "tool": "evidence.get",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 2 of 2: 2 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [24, 26) of 26. Do not fetch all 227 snapshot evidence items."
+      },
+      {
+        "observation_id": "9d332f4cde3bfe81",
+        "role": "sensor_quality",
+        "tool": "quality.sensor_patterns",
+        "why_this_call": "Aggregate coverage and conflicts cannot identify which individual histories need attention. Read the first bounded, ranked health page; selected instruments are triage candidates, not automatically faulty sensors.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. No offset was requested: start at 0, with the gateway's 24-finding page limit, out of 112 findings. Use the same ranked_findings(snapshot) ordering as the executed read: concerns before quiet histories, with sensor ID/channel tie-breaks; large layouts additionally prioritize exclusions/missingness and event support where present. Unreturned histories are not cleared."
+      },
+      {
+        "observation_id": "5ebf8c18bd1e62fd",
+        "role": "sensor_quality",
+        "tool": "quality.coverage",
+        "why_this_call": "Establish expected, received and usable reading counts before interpreting sensor histories. Missing data must not be interpreted as zero pressure or as proof that an instrument failed.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments."
+      },
+      {
+        "observation_id": "3657bcd6c1761fe2",
+        "role": "sensor_quality",
+        "tool": "quality.conflicts",
+        "why_this_call": "Separate conflicting or hard-excluded readings from usable pressure changes before assessing sensor health. Coverage alone cannot explain unusable data.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments."
+      },
+      {
+        "observation_id": "b06c95d43802e8ba",
+        "role": "sensor_quality",
+        "tool": "ontology.neighbors",
+        "why_this_call": "Identify sensor positions, paired taps and shared acquisition connections before attributing a reading problem to an individual sensor. Agreement between sensors sharing a gateway is not independent confirmation.",
+        "why_these_parameters": "Read layout metadata bound to the supplied pack version and snapshot; there is no caller-selected sensor or time-range filter. The associated measurement assessment is [60, 120) seconds, but topology is not a pressure-history range query."
+      },
+      {
+        "observation_id": "f76c2e31a018981b",
+        "role": "event_diagnosis",
+        "tool": "ontology.neighbors",
+        "why_this_call": "The supplied station positions and gateway assignments do not specify hydraulic connections between branches. Actual connectivity is needed to assess whether the weaker P4 decline can accompany P5's stronger pressure deficit and to avoid mistaking hydraulic proximity for acquisition independence.",
+        "why_these_parameters": "The pinned network topology is requested because no narrower asset selector is available. It will establish shared connections and distances relevant to P5 and contrasting branches, but cannot establish a leak location or exclude undocumented common acquisition dependencies.",
+        "declared_source_references": [
+          "PROC-EXTENDED-001",
+          "f76ac6fd-9252-5b26-a741-1abc6b12656f",
+          "d8a7c263-99a0-5bf7-9a15-bc1791703369"
+        ]
+      }
+    ],
+    "public_model_selections": [
+      {
+        "observation_id": "aef3196ad217c1ab",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "The P4/P5 comparison body remains absent. Actual paired evolution is needed to assess whether the weaker P4 changes accompany the P5 pressure footprint and whether P4-ST1 alarms represent paired physical changes rather than independently supported instrument faults.",
+        "why_these_parameters": "Retrieve the existing P4 ST1\u2013ST8 and P5 ST1\u2013ST4 comparison over source seconds 0\u2013120, split at 60. That broad within-recording contrast supplies context, not a historical normal interval; the separate 90-second split examines late onset more directly. P5 ST5\u2013ST8 are outside this receipt.",
+        "declared_source_references": [
+          "f76ac6fd-9252-5b26-a741-1abc6b12656f"
+        ]
+      },
+      {
+        "observation_id": "ca26e6b268f88d08",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "The operating and maintenance record bodies are archived, not visible. Their effective settings, periods and contradictions are needed before attributing P2 or P7 changes to operations or shared acquisition, or excluding a documented P5 explanation.",
+        "why_these_parameters": "Retrieve the already executed record read rather than repeat a search or reopen documents individually. This resolves the absent incident-time record content and admissibility decisions; it does not establish that unrecorded operations were absent.",
+        "declared_source_references": [
+          "f901b49f-4120-594d-911e-484e80afbd4b"
+        ]
+      },
+      {
+        "observation_id": "97bce56b55d45d35",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "The completed late-profile comparison body is absent. Its actual paired profiles are needed to distinguish isolated drift, impulses and frozen readings from the P5 joint decline, rather than treating screening alarms as faults.",
+        "why_these_parameters": "Retrieve the existing 70\u2013120-second comparison, split at 90 seconds to contrast the immediate pre-change period with the late changes inside the pinned recording; this is not an earlier historical baseline. It covers suspect instruments, their partners and P5 ST3\u2013ST6 across both gateways, but not every network instrument.",
+        "declared_source_references": [
+          "subsea_b56575a3fff84c5d9c900d2b0c842059"
+        ]
+      },
+      {
+        "observation_id": "0c4b9bb75d3641ce",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "P3-ST2-A intermittent negative excursions and P3-ST7-A drift have late paired evidence, but earlier behavior and neighboring P3 references are absent. P2 outer-station profiles also test the extent of the logged operating rise.",
+        "why_these_parameters": "Retrieve the executed P2-ST5\u2013ST8/P3 comparison rather than repeating it. The 0\u201360 historical interval precedes the pinned 60\u2013120 window; bucket profiles supplement the late +90-second split already read. Gateway metadata, not spatial quietness, determines reference-path distinctions.",
+        "declared_source_references": [
+          "d6e7e17c-380f-5df6-b1b7-dd606ca5221a",
+          "ev-070",
+          "claim-044",
+          "OP-P2-EXTENDED-001"
+        ]
+      },
+      {
+        "observation_id": "b0a3f16918654053",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "The late comparison shows P1-ST6-A drift and a terminal P2-ST2-A impulse, but earlier profiles and surrounding P1/P2 paired behavior are absent. They distinguish channel-specific issues from branch-wide operating change.",
+        "why_these_parameters": "Retrieve the existing P1/P2-ST1\u2013ST4 comparison. Its 60-second split separates historical 0\u201360 context from pinned 60\u2013120 monitoring; finer profiles can show whether isolated changes coexist with the logged +90-second P2 transition. No data beyond source +120 seconds is requested.",
+        "declared_source_references": [
+          "be4523fe-b600-5d4c-94f9-3cf2058bce63",
+          "OP-P2-EXTENDED-001",
+          "subsea_b56575a3fff84c5d9c900d2b0c842059"
+        ]
+      },
+      {
+        "observation_id": "e5b50cd4f89779cb",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "P6-ST8-B has a zero recent pressure range and constant late profile despite no anomaly flag. The earlier paired trajectory and P5 outer-station profiles are absent and needed to qualify frozen-reading evidence and spatial attenuation.",
+        "why_these_parameters": "Retrieve the executed P5-ST5\u2013ST8/P6 comparison over 0\u2013120, split at 60 to contrast historical first-minute behavior with the pinned second-minute monitoring window. This complements the already read 70\u201390 versus 90\u2013120 late-change comparison; it does not independently confirm hardware failure.",
+        "declared_source_references": [
+          "d8a7c263-99a0-5bf7-9a15-bc1791703369",
+          "ev-192",
+          "subsea_b56575a3fff84c5d9c900d2b0c842059"
+        ]
+      },
+      {
+        "observation_id": "0ac4ce7c20d7ba4a",
+        "role": "event_diagnosis",
+        "tool": "evidence.get",
+        "why_this_call": "P4-ST1-A/B have paired anomalies and small current deficits; their actual profiles are absent. They must be distinguished from isolated instrument faults and the P5 decline before completing the unreliable-sensor inventory.",
+        "why_these_parameters": "Retrieve the existing P4/P5 comparison, not another execution. Its 0\u201360 versus 60\u2013120 source-second comparison provides earlier context and paired profiles for P4 and P5-ST1\u2013ST4; the pinned measurement window remains 60\u2013120, and current normal-relative values remain 115\u2013120. This does not establish hydraulic causation.",
+        "declared_source_references": [
+          "f76ac6fd-9252-5b26-a741-1abc6b12656f",
+          "claim-048",
+          "claim-049"
+        ]
+      },
+      {
+        "observation_id": "f76c2e31a018981b",
+        "role": "event_diagnosis",
+        "tool": "ontology.neighbors",
+        "why_this_call": "The supplied station positions and gateway assignments do not specify hydraulic connections between branches. Actual connectivity is needed to assess whether the weaker P4 decline can accompany P5's stronger pressure deficit and to avoid mistaking hydraulic proximity for acquisition independence.",
+        "why_these_parameters": "The pinned network topology is requested because no narrower asset selector is available. It will establish shared connections and distances relevant to P5 and contrasting branches, but cannot establish a leak location or exclude undocumented common acquisition dependencies.",
+        "declared_source_references": [
+          "PROC-EXTENDED-001",
+          "f76ac6fd-9252-5b26-a741-1abc6b12656f",
+          "d8a7c263-99a0-5bf7-9a15-bc1791703369"
+        ]
+      },
+      {
+        "observation_id": "74dbac091ba65927",
+        "role": "event_diagnosis",
+        "tool": "history.compare",
+        "why_this_call": "P6-ST8-B has zero usable pressure range over the recent twenty seconds despite no screening anomaly; the full-record comparison can hide this freeze. Finer late profiles also distinguish isolated suspect-channel changes from P5's shared physical-looking decline and test cross-gateway corroboration.",
+        "why_these_parameters": "This historical comparison covers source +70\u2013120s, not the pinned +60\u2013120s monitoring window. Splitting at +90s contrasts twenty seconds preceding the logged P2/P7 activities and P5 decline with thirty seconds afterward. Eight suspect instruments retain their partners; P5 ST3\u20136 cover the peak and weaker adjacent stations across both gateways. Earlier impulses and outer P5 stations remain covered by supplied full-record comparisons rather than being reread exhaustively.",
+        "declared_source_references": [
+          "d8a7c263-99a0-5bf7-9a15-bc1791703369",
+          "be4523fe-b600-5d4c-94f9-3cf2058bce63",
+          "d6e7e17c-380f-5df6-b1b7-dd606ca5221a",
+          "f76ac6fd-9252-5b26-a741-1abc6b12656f",
+          "ev-192"
+        ]
+      }
+    ],
+    "semantic_reviews": [
+      {
+        "span_id": "641c47c0caed5547",
+        "decision": "accept",
+        "issue_count": 0
+      }
+    ]
+  },
+  "validation": {
+    "final_isolated_full_pytest": {
+      "passed": 565,
+      "skipped": 105,
+      "failed": 0
+    },
+    "focused_pytest": {
+      "passed": 183,
+      "skipped": 2,
+      "failed": 0
+    },
+    "ruff_changed_source_and_tests": "passed",
+    "strict_mypy_five_changed_source_files": "passed",
+    "unchanged_whole_project_mypy_errors": "Two baseline errors documented in detailed-agent-tracing.json; not claimed clean."
+  },
+  "privacy": {
+    "provider_private_reasoning_exported": false,
+    "credentials_exported": false,
+    "synthetic_and_capture_opt_in_gates_preserved": true,
+    "local_telemetry_audit_content_free": true
+  },
+  "cases": [
+    {
+      "scenario": "S1",
+      "source_seconds": 95,
+      "root_id": "2799a518-bfa8-51b0-932a-27f064bfe108",
+      "trace_id": "ff5caede4e02c1ed152521e4a7dcd916",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "d21b2c8d223edf73a75443f869a3b180799b8ab547a634cfee87e6b11072bc6a",
+      "model_calls": 7,
+      "tool_calls": 23,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 100,
+      "root_id": "f6415128-5120-5e70-a42b-2fa23c799ae1",
+      "trace_id": "644ffe1619b1565fef57f3f6bcbfa25c",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "ba632dc06a249d855ae8c457a190c56f766bd0b41597d87951a036283e0ec2ae",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 105,
+      "root_id": "ede1c1f8-a0bc-5d8c-b722-d3474874a3d4",
+      "trace_id": "b20acd6ee1f345cdd6e8aec9bb95ff99",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "81d8ed1e51b09983f85d5b68f16aaf7951ef7c5a09d0d71a215dbe79afa816b9",
+      "model_calls": 6,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 110,
+      "root_id": "46932bfb-178f-51c4-85e3-e0af105dcbd1",
+      "trace_id": "165efe449c8b9e588d723cb82b04e204",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "3b0d4cfc8b3ae7b2cb8723557f9f9345b19fc4ab2df37591bd82666c2ff68ffd",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 115,
+      "root_id": "e0a2b8e8-3d46-581d-8266-8ec1306d5902",
+      "trace_id": "65107f0ea563be723f674b5d067c32c4",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "86dd4823c45301310cfd65d1c0a82194318d5b72ea69e62c91c52b9728a9789c",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 120,
+      "root_id": "f4a3abec-08f8-5677-9c4a-9d8c40ccdf55",
+      "trace_id": "0a2e142252a4ec17c867e21c62137c7a",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "5dd75752ec542a5d2b6c5c671ba3b8fe39ca5e97f04602bfcece6a45b2bf2fa6",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 135,
+      "root_id": "fb0c3345-6884-56f9-8d24-2036f429b01f",
+      "trace_id": "914475f328dbf9179cdc66c28583835b",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "b6d72ecf18a6bf6152d81670c5b24d32a56b3b54331dd05d270e2f4560b7d110",
+      "model_calls": 6,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 150,
+      "root_id": "5051cfb7-1e82-5286-9169-b9fc7c95b474",
+      "trace_id": "8e193b6c86293e23111580ed12415632",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "dfa1a5afa1fe43734a31858d6c295f10b7fcb9472391d9d8b52d95d38e11939a",
+      "model_calls": 6,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 180,
+      "root_id": "d67115f4-c9fd-5046-b5bc-197f69f7a1db",
+      "trace_id": "f0ee9a9156514f447185fd16893964b1",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "c8bf8ceceeb640e3155af8c7d44f1976a04af18f60bdf0763665e6c282341b4f",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 260,
+      "root_id": "004f897f-adb7-5bb5-a767-519ff9a8f05e",
+      "trace_id": "e95e38ac69bfc6a5a178da0637aca9c8",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "490cbca730b2d7401c170c0c00c10b58773c88c32447207f9d24f8b1f64127ea",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S1",
+      "source_seconds": 360,
+      "root_id": "f90a020b-f5d2-5b4e-81e2-2b5aa1e9400c",
+      "trace_id": "4e0d881fcff4419e30c7c715efeec976",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "f527b162e5532aa9d03e95a2119dbfa65899921555bfd0eb97f7dcc86b28c4b7",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 95,
+      "root_id": "a2ca65f2-0adc-548b-8648-c77a45dfaed2",
+      "trace_id": "392432a6a013f66a4dac3331ec4d9869",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "25c04c75c8383151145b6459deb5886af4951991e821a0fed2fa0a67999eca9d",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 100,
+      "root_id": "9191b881-5eaa-59bb-b599-c503ed270e11",
+      "trace_id": "0bb1bcac0808d24e7c00c0c660674381",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "86a4dff15c6cc5bdd1ef163b23d5a2307897b396d8ce891855da30e986d5720f",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 105,
+      "root_id": "54cf8a87-cadf-5d4e-9d0e-30ee14c59c70",
+      "trace_id": "76bbbee759d6a26826ac9ada0ffdc0f6",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "274ef5c9120575205853be85c430abcb1bd3d674cdb4b08c1bad9bab835f17a4",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 110,
+      "root_id": "47058f83-c407-55d7-8bd6-fdea11d83a31",
+      "trace_id": "89759171b0b563714173158342541267",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "f0e6428aea73c33b3fd407b854ae944d2dca015152597336a91c7179abe1fd5a",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 120,
+      "root_id": "b84efef5-527b-5ba8-adad-8d1cc81bb9bc",
+      "trace_id": "beccc096986ade58b8c45016891bc6b8",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "d4b95dc63ef2b267d24e2e7202f97f21ad9ce1c1175c95f2006fcf6a5acf2181",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 135,
+      "root_id": "0afb603e-0ae1-56f3-aada-baf5894a2f50",
+      "trace_id": "2763fa7497920dd8376f65758688301c",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "8b279fc8f6adb7b3d130c0ce8f62c5b51d95b930093088081fdeb78af7e060bb",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 150,
+      "root_id": "3ae57489-dc57-5d13-95c7-efdf7ac6c5f8",
+      "trace_id": "d27ffff6de3759d7f434f4424f36c3b5",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "6400c0af501627e7531f60456d8b416df758d757dcdd57c78461583e0c312f74",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 180,
+      "root_id": "bd612dc4-aca5-5d13-8d5b-2ea933ca8a1a",
+      "trace_id": "178db8d387ae7e4d5351a9e170e5e1da",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "6c16d78e3ff52d7e9c7ffada70b9edbac0c02a74ec8062b9fa395660bfa96958",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S2",
+      "source_seconds": 360,
+      "root_id": "ac3109e4-1cb6-5231-a210-ff420c64aca0",
+      "trace_id": "681de981ee45567e00a6150b1cade229",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "b7eac786c0ee7f94bfe56f39c4b95073081651b287f5fb5135432b04d04b082d",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 95,
+      "root_id": "5fd7b019-ec99-53e1-8864-7aebd2230b74",
+      "trace_id": "602903741fa374fea32816584e3f53c1",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "2d3d9fe16c7eed603667a38800dfdf3cba86f3a27d9e5e28b8db75d8b5244491",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 100,
+      "root_id": "f8466c37-21a4-502a-af8c-a6659d5c77cd",
+      "trace_id": "6fcf027011e7a93764f7ab5e0018402e",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "8411f254ac1cb6ef669e7c2bf11b346a53031286953ac2ee2a7de7612c5153c5",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 105,
+      "root_id": "1f096100-c3cb-512b-babc-bd5e62958ba7",
+      "trace_id": "e379e1cf35072c300156220ffb32e628",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "c836ed6432bfc3d81b74629a9d303f3810c6376b8bd5ec00a0746486ea08d48d",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 110,
+      "root_id": "63f08427-e3b2-5c7a-bb28-e709ad35bb0a",
+      "trace_id": "d4e5da138fb96275a77d8ca923d0ac99",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "ab05355959f70f19294a3be009a8fb498b6d3c2dc9137997d65c42015474081b",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 120,
+      "root_id": "8d231b5a-d6f0-5cfa-b506-ce3085c1b7d6",
+      "trace_id": "fb3b0219861a90d8aa372cc0d4d690cc",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "cf5e97717334f31f050c62640e614d12e1c13b5e8cbcd2211e96ff3ee7ec48d2",
+      "model_calls": 8,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 135,
+      "root_id": "b57897e7-12ac-577a-a5e7-90e9d24a75bf",
+      "trace_id": "9d09b94363b7bc35b1f22d3b22ba64cc",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "a5be7b0b9831bd8dad621991555246382d3cbf9247b134a82c2ed8b2b190596a",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 150,
+      "root_id": "05c2c75f-9ab6-59ff-9dc8-fed2f5dc0d04",
+      "trace_id": "996422ac7053ceebd6b6e683b23f5b72",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "00904e851fca014fc6b67ce9eca7d38d2092d2e85884dc33262ed6eba4392b0a",
+      "model_calls": 7,
+      "tool_calls": 19,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 180,
+      "root_id": "1ea0e5a0-054c-5935-ac89-9c389c719a98",
+      "trace_id": "22bf45f706ca9cf526d59d4b2407ca6c",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "00904e851fca014fc6b67ce9eca7d38d2092d2e85884dc33262ed6eba4392b0a",
+      "model_calls": 7,
+      "tool_calls": 19,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S3",
+      "source_seconds": 360,
+      "root_id": "42d29995-b658-5fae-9b6d-25f153bf0898",
+      "trace_id": "536daade18a8b8489f10f683e4741f48",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "00904e851fca014fc6b67ce9eca7d38d2092d2e85884dc33262ed6eba4392b0a",
+      "model_calls": 7,
+      "tool_calls": 19,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 95,
+      "root_id": "e023ce9e-2aa7-58e2-88f3-0640d97a7c1a",
+      "trace_id": "7d00e8a813e8e95b3f9ac155860db4d1",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "23e17014a3706c62d86b6a9ecc6c083e8f6645dcfe2b44e1c3817d7bde9264b0",
+      "model_calls": 7,
+      "tool_calls": 23,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 100,
+      "root_id": "b6e9a560-fd61-53b4-a440-17926635029a",
+      "trace_id": "d88a52a48dba5eada8515c8eb2fc7e44",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "e6f3aafa21849a777f56a4f4c0537cb51e0d06839006b0c6cbe72aa62ab9ea2b",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 105,
+      "root_id": "26dcc012-17ba-5b82-9b29-976f777e6366",
+      "trace_id": "bad93cc24038a7f4f2e5583484ad36ed",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "81b83f2c90f5c4d9142612b143fb402c21dc8557714ac85cc3e1bbea4a373010",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 110,
+      "root_id": "3c737fc5-4a01-5af9-abc3-47bf9c5b343e",
+      "trace_id": "b189e06bfe414e3d7187b810f00c603a",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "787b64d4c38363d6f52cfeaef1b660ed31ec71075b22cebe9d4708fd8e3b0c39",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 120,
+      "root_id": "33b7dbc9-5377-5c30-a3be-aed814a5f804",
+      "trace_id": "cc60a9c607a5d3641805ff9e7169655d",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "ff7c605f3fa6037523a755d9593ec5d85ea844c4a4a86fd843cf2bf6e6422592",
+      "model_calls": 8,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 135,
+      "root_id": "a05a0311-ba9f-5309-8b98-4b96c161b906",
+      "trace_id": "73a454cc51b09ce3ab835c557bb4fa0d",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "3b209f746cae92f2ab914135c5634d0fcc5b175ac33d32e82369a471e1cc674f",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 150,
+      "root_id": "338b3eea-16f4-57c3-b9e2-853698001a94",
+      "trace_id": "69947eaa4399db7ca66cdb62e77fabf9",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "455082147e9692eef14d266998924c75a77dea75967ec518beb3b06d18594af5",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 155,
+      "root_id": "c5ee110e-28a6-5c0a-9b1b-963274d35880",
+      "trace_id": "1278c391f49a0188c6c48188121d7582",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "3453718ec85348fb1251f3f6039395a4ed79e091ef8168030c36dc0b67e99bef",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 180,
+      "root_id": "3b2810ef-eaa0-502f-999f-6f8e557594fd",
+      "trace_id": "7f4eefc443c68a3727d96cf78a8e2112",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "4826228727e5047e97b330ee414f5f153ccd0cf21c661bdf7d1697df92ce8e76",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S4",
+      "source_seconds": 360,
+      "root_id": "475f6a51-e09e-5f5e-8ec7-4e1243de5260",
+      "trace_id": "38f4a95a0377330478daaefe577cbc68",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "c9bb96f9b91aec111e3e777a8ea7a8497a54950cac276e69154f5bd2947c2d92",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 95,
+      "root_id": "c6a77c54-d820-5315-8e57-2f1c8aa50152",
+      "trace_id": "9116df3477dc401f95168eca1c9fff8d",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "d787a7004f7e9a0bc5048fdb424d0074f886fc101841b136a1aae812780dbe4d",
+      "model_calls": 7,
+      "tool_calls": 23,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 100,
+      "root_id": "dd587791-4fa5-54a4-9888-967920f10ecc",
+      "trace_id": "5c87391796cf3be1606a249f2f587a90",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "2c0504eca30b373a33d3045f791e58774b029dc83d4c652495a44458899f6e47",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 105,
+      "root_id": "855dab33-27d8-5ee9-b4cf-89d7b9979b26",
+      "trace_id": "e99dac28b001fee9d814238c6518c995",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "13555b26b7d7e6c8a8775719e22e96ed8151a831d5df32c556b655f249d1cea3",
+      "model_calls": 6,
+      "tool_calls": 23,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 110,
+      "root_id": "d947bb2b-65e5-5d45-97d6-3e059a9c9eb6",
+      "trace_id": "efedb65d1aa226de229b85488b6d60f5",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "aaa8728e54a5a260c79ed6dfba39b631fea313e9e74a8fef33bacb6d540ae751",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 120,
+      "root_id": "56ae6e82-a379-5abd-8e6d-b28692a69365",
+      "trace_id": "7a12c9da76fa678eaf68f4a191c832ba",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "05f2c54d83bbf404d196c866617dbbfbd5553a43461f1df517f16464326acaec",
+      "model_calls": 6,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 135,
+      "root_id": "f05baae3-79d0-5446-bf6f-3c90625c8b21",
+      "trace_id": "708c35d31c0e4a29d470539d7bd67b97",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "c09630733207a38235aa476c04d4bb74168af7cf316b715bc06456f7ca749170",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 150,
+      "root_id": "6926388b-2dd1-5c59-8711-9b09eeea8fe8",
+      "trace_id": "d4d3e77763e5e0330d9b8c6dafd2dae7",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "02e65f175278b1747803c2182df2c859a44ba281966b6df15b15153e9b0bcd97",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 180,
+      "root_id": "7bf19be1-30be-5ac3-9b52-7f3025af5fdf",
+      "trace_id": "ab1fd1f410620cb41009599aef3cfb0c",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "474b673119ea954eb22209bd14392ae19b9cd6f6ce2589716cecef664037d979",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S5",
+      "source_seconds": 360,
+      "root_id": "f4f090a3-6222-5f3d-9607-58bec34fc05f",
+      "trace_id": "6bfcff81d230b70b5da6b4893acb2ebe",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "daddc8502f4584edbcbf363a132382fa2a9d6b3e6c66958366c1f612433bde55",
+      "model_calls": 6,
+      "tool_calls": 20,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 95,
+      "root_id": "79eedef3-0b0a-5a4d-a64b-199e6a788104",
+      "trace_id": "df0abf612d8dfab73f8134aa3b8416f1",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "8133bf4392c55075941818fcf1620d4553ca889fec7a9b6208c7dca1db3425d1",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 100,
+      "root_id": "687fc35b-a432-5893-b954-f4cdf04fe653",
+      "trace_id": "e67af5cac547b477108cb763cb9e8267",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "553ee39f6a2dd8ea93a60d8c432ab55817d4ae10885d41b30f35d52858c3e3d7",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 105,
+      "root_id": "6612a13c-43fb-576d-9efe-654681c92691",
+      "trace_id": "5dc36c716eee7de524a3d0d1949cc13b",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "ddf10febff4f1a31a975f560376a8bc9a5dcfd869598bd8128ea322754b520d1",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 110,
+      "root_id": "7ee531d6-e6fb-5c69-8c7a-6ea1c5950d03",
+      "trace_id": "040b209c4a84d637da24306e93c9226f",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "93ed40b11d50dddd6273282cee643ff495f40e333e2e6a02d2f6ea42988fd438",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 120,
+      "root_id": "9e3c1278-f544-59bb-875e-5e0f3dcd4849",
+      "trace_id": "dd139a12b2235c0e781f6e00ccdc5d83",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "055eed9ef92a571c1374b07797b56ff13a23927f55d7bb8c239f8d38c4180f47",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 135,
+      "root_id": "c02ea3c0-5c70-5ab2-a543-47008bf3e2d7",
+      "trace_id": "6a26f846a0f787b79daf8133e8f0cf1b",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "4cec9d06354788ac9b6e038fb0dab8a398a954953552529fb0c8c5df12bee86a",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 150,
+      "root_id": "dd785f57-855a-5cea-ade4-8295fcc04c95",
+      "trace_id": "5e373f74523e195fb7c30ec251776b60",
+      "state": "ABSTAINED",
+      "mapping_status": "not_run_abstained",
+      "input_hash": "8a194260f0fb3b59957489cfb18b7b3b394b1ea3041dd381d358d8255d1c1264",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 180,
+      "root_id": "f430378a-fbfd-564e-ab72-33e30e2579b0",
+      "trace_id": "539d3ba1f9bb39c61af88c1f723c4119",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "afd20b594bed730c592fcbedeeb3eee9379fa22ef23eb555583e201c9eae5ae8",
+      "model_calls": 7,
+      "tool_calls": 22,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S6",
+      "source_seconds": 360,
+      "root_id": "ea4caeeb-757e-5918-b865-fd3e0a4955c8",
+      "trace_id": "8106c77d7faac9c6152204e1e14fd91d",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "83d59060347a2b5dd6a8d1d7952cc9eff8887dc3c6724c535d02fe0aa94ba9d8",
+      "model_calls": 7,
+      "tool_calls": 21,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 95,
+      "root_id": "28e2fce1-7733-55fb-8c8d-952af738ed3e",
+      "trace_id": "c8fb7cd1aa670c96358165d5e848e7c8",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "b3a197ddbb0c67096cc94190fa7a0dae35af33c273a91442882b791c25c804bf",
+      "model_calls": 11,
+      "tool_calls": 45,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 100,
+      "root_id": "804fcf91-d3ed-5b6b-9b4c-7c9f79479886",
+      "trace_id": "b08920eaf3ba9b149a9fd3cf6cfb9f11",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "76860eee7a62b22538b9dc283a948c2b219f6fa2fb59cd6359f3ebfadc1ced38",
+      "model_calls": 8,
+      "tool_calls": 36,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 105,
+      "root_id": "2a03f2b1-2034-5c07-9f76-a6e2bfdcc54f",
+      "trace_id": "ed150909906a4bbd47018ff805748b0b",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "3e9ff52bb965c029eba415193edac7cf63696400fd77cfcd92e437e54f90aea4",
+      "model_calls": 9,
+      "tool_calls": 41,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 110,
+      "root_id": "10b122c8-711b-5ca1-837f-10de61f41b35",
+      "trace_id": "b517499636abbeec291d38f1a0fca88d",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "9cb2ffd2ed28941ba03ed49c12b520bf999ff03d7ed06edc15d0482dbf7ee9f6",
+      "model_calls": 8,
+      "tool_calls": 45,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 120,
+      "root_id": "b9141a41-1525-5568-ac1d-280011bcbf53",
+      "trace_id": "deb0f2468efa95763be4cad515aa10f2",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+      "model_calls": 8,
+      "tool_calls": 45,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 135,
+      "root_id": "e2818360-ff04-586a-8edf-984883bc56d8",
+      "trace_id": "bf17a5f4482c9a394f596fb937df70b6",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "6471ab22f7f0bf4a02c34887abeee512a1c7929604806bb1316279a21ef70c9c",
+      "model_calls": 10,
+      "tool_calls": 40,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 150,
+      "root_id": "b7b93881-ec08-57cf-9971-ba0013ede797",
+      "trace_id": "194fe97e5c1944460d8bc3902619ca92",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "d850d63c14e39d61f2f0473601ada208988ab67105de915bbdb85244e6790ab6",
+      "model_calls": 8,
+      "tool_calls": 42,
+      "semantic_decisions": [
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 180,
+      "root_id": "7b0fc7b2-ecc8-5071-9e02-5347e226a4c0",
+      "trace_id": "f7031adffe3dcd7928885d83a8654eba",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "442a4cee3f7504fb35dd0e7e3943e4ff4dcc0cb690d9a5df11a16bd5058fdf00",
+      "model_calls": 10,
+      "tool_calls": 40,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    },
+    {
+      "scenario": "S7",
+      "source_seconds": 360,
+      "root_id": "c992252e-9b3c-5ac1-93ac-3db4c86045ec",
+      "trace_id": "b39d8d3873b2554b3c0d6f44a71fef60",
+      "state": "SUCCEEDED",
+      "mapping_status": "completed",
+      "input_hash": "7f14f668a9f4514c57d6b67d05b57ed7b47b842db477d8d9458544a497ffb14f",
+      "model_calls": 11,
+      "tool_calls": 45,
+      "semantic_decisions": [
+        "revise",
+        "accept"
+      ],
+      "call_scope_dependency_and_handoff_explanations_verified": true
+    }
+  ]
+}

@@ -150,6 +150,15 @@ To debug a **new** detailed trace, open the individual observation's Preview:
   model call/span/turn. `arguments` and `scope` show the actual requested read,
   pinned input hash, simulation window and source clock. A declared purpose is
   not proof that the call or its eventual interpretation was appropriate.
+  Start with the top-level **`why_this_call`** and **`why_these_parameters`**.
+  A tool's generic purpose is not its selection justification.
+  For model requests, `parameter_provenance` and `declared_source_references`
+  preserve the actual public parameter explanation and its stated motivating
+  sources; missing explanations remain `not_recorded`, never inferred.
+  Declared references are not automatically validated citations.
+  For application intake, `selection.application_selection` records the rule,
+  trigger and exact source/range/page/batch selection. This is application policy,
+  not a fabricated model choice. No extra inference is added to narrate it.
 - **Generation Input and Metadata:** Input is the actual message view;
   `model.context.input` records available tool schemas, transport instructions,
   receipt identities, context limits, and archived/consolidated receipts.
@@ -165,6 +174,39 @@ To debug a **new** detailed trace, open the individual observation's Preview:
 - **Failures and repairs:** inspect `error.code`, the failed phase, safe exception
   type/SQLSTATE when available, structured validation feedback and the next
   repair observation. Transport repair consumes the same persisted call budget.
+
+The explanations cover **all registered tools and roles**, including the retained
+legacy policy; not only Sensor Quality:
+
+| Read | What its selection explanation must distinguish |
+| --- | --- |
+| `ontology.neighbors` | Version-bound sensor/tap/gateway layout, not a pressure-history range query |
+| `quality.coverage` | Expected/received/usable counts for the inherited window; absence is not zero |
+| `quality.conflicts` | Conflicts and hard exclusions versus usable anomalous readings; a mandatory check does not imply a conflict exists |
+| `quality.sensor_patterns` | Ranked finding IDs, concern priorities, offset/page size and histories not read by this page |
+| `pressure.measurements` | Actual pinned network measurements before choosing a cause; no screening hypothesis supplied as a diagnosis |
+| `evidence.get` | Explicit sources, source tasks or quality-claim/read links, batch boundaries, and archived-receipt retrieval when model-requested |
+| `task.result` | Compatible specialist identity and precise comparison delivery: one-page current policy, all cited comparisons in legacy reviewed context, or result-only protocols |
+| `history.search` | Concrete operating/calibration counter-question, chosen query/assets and incident-time validity |
+| `history.read` | Actual preceding search hits, original bodies including contradictions, source search-call IDs and bounded document groups |
+| `history.compare` | Chosen sensor group, actual historical start/split/end, paired-only choice and why these differ from the monitoring window |
+| `event.assess` / `event.counterevidence` | Legacy screening prerequisites and opposing evidence, not physical confirmation |
+| `location.fit` | Legacy eligibility gate and fit limitations, not an exact proven leak point |
+| `criteria.explain` | Legacy publication/decision limits, not permission to override an unresolved cause |
+
+For example, at a pinned monitoring window `[60,120)` and source clock `125s`,
+the tool must not describe a history comparison as necessarily using the same
+60 seconds. Initial comparisons have their own bounded lookback and midpoint
+split; model-requested comparisons must explain their actual chosen boundaries.
+Likewise, two initial `evidence.get` calls may be disjoint groups of 24 and 2
+sources referenced by completed quality reads. **24 is the application's upfront
+batch size**, not the gateway's maximum ID allowance or a diagnostic threshold.
+The trace links each selected source back to the returned claim and source call.
+
+Open each **handoff Input** for `why_this_handoff` and `why_this_scope`.
+The validated plan and application prerequisite order are distinct from a free
+model choice; constrained plans must not be narrated as independent model insight.
+Older traces are not rewritten when these explanations are added.
 
 Captured fields are redacted and capped at **524,288 characters per field**.
 Oversized captures remain valid JSON with an explicit `capture.truncated` flag,

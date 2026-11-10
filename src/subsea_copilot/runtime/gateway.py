@@ -502,9 +502,7 @@ class ToolGateway:
     def _trace_attributes(self, call: dict[str, Any]) -> dict[str, Any]:
         selection = tool_selection(self.task.role, call)
         name = (
-            call["name"] if call["name"] in role_policy(
-                self.task.role, self.task.decision_policy
-            ).tools else "unauthorized"
+            call["name"] if call["name"] in self._argument_schemas() else "unauthorized"
         )
         return {
             "task_id": self.task.id,
@@ -518,6 +516,8 @@ class ToolGateway:
             "model.turn.index": selection["model_turn_index"] or 0,
             "tool.selection.input": json.dumps(selection, allow_nan=False),
             "langfuse.observation.input": json.dumps({
+                "why_this_call": selection["decision_summary"],
+                "why_these_parameters": selection["parameter_summary"],
                 "tool": name,
                 "arguments": call["args"],
                 "selection": selection,

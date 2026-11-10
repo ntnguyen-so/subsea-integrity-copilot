@@ -36,6 +36,7 @@ from subsea_copilot.budgets import (
     BUDGET_MULTIPLIER,
     FRESH_REFLECTION_LIMIT,
     GRAPH_RECURSION_LIMIT,
+    HEALTH_PAGE_SIZE,
     HISTORY_DOCUMENT_LIMIT,
     HISTORY_RANGE_SECONDS,
     MODEL_TIMEOUT_SECONDS,
@@ -82,7 +83,7 @@ from subsea_copilot.runtime.agent import (
 )
 from subsea_copilot.runtime.context import model_context
 from subsea_copilot.runtime.diagnostics import transport_diagnostic, validation_diagnostic
-from subsea_copilot.runtime.gateway import ToolGateway, context_sensors
+from subsea_copilot.runtime.gateway import ToolGateway, context_sensors, ranked_findings
 from subsea_copilot.runtime.provenance import (
     BOUND_ENVELOPE,
     RUNTIME_ENVELOPE,
@@ -382,6 +383,238 @@ class AgentService:
             gateway.dependencies(),
         )
 
+    @staticmethod
+    def _intake_selection(
+        task: AgentTask, snapshot: WindowSnapshot, name: str, arguments: dict[str, Any],
+        context: dict[str, Any],
+    ) -> dict[str, Any]:
+        duration = (snapshot.window_end - snapshot.window_start).total_seconds()
+        start = snapshot.end_seconds - duration
+        window = f"[{start:g}, {snapshot.end_seconds:g}) seconds"
+        reasons = {
+            "ontology.neighbors": (
+                "Identify sensor positions, paired taps and shared acquisition connections "
+                "before attributing a reading problem to an individual sensor. Agreement "
+                "between sensors sharing a gateway is not independent confirmation."
+            ),
+            "quality.conflicts": (
+                "Separate conflicting or hard-excluded readings from usable pressure changes "
+                "before assessing sensor health. Coverage alone cannot explain unusable data."
+            ),
+            "quality.coverage": (
+                "Establish expected, received and usable reading counts before interpreting "
+                "sensor histories. Missing data must not be interpreted as zero pressure "
+                "or as proof that an instrument failed."
+            ),
+            "quality.sensor_patterns": (
+                "Aggregate coverage and conflicts cannot identify which individual histories "
+                "need attention. Read the first bounded, ranked health page; selected "
+                "instruments are triage candidates, not automatically faulty sensors."
+            ),
+            "evidence.get": (
+                "Open original measurement or specialist-cited sources, rather than "
+                "making an assessment from summaries or reference IDs alone."
+            ),
+            "pressure.measurements": (
+                "Read actual measured network pressure changes before choosing a physical "
+                "or instrumentation explanation; numerical screening labels are not a diagnosis."
+            ),
+            "task.result": (
+                "Read the compatible specialist's validated findings, original reviewed "
+                "context and limitations before downstream diagnosis or final synthesis."
+            ),
+            "history.search": (
+                "Seek operating, calibration and shared-gateway explanations that could "
+                "contradict a leak interpretation, rather than treating an alert as its cause."
+            ),
+            "history.read": (
+                "Open actual records returned by the preceding search, including "
+                "contradictory or superseded hits; search titles alone are not evidence."
+            ),
+            "history.compare": (
+                "Read paired time profiles and contrasting observers to distinguish a joint "
+                "physical pressure change from an isolated measurement or acquisition problem."
+            ),
+            "event.assess": (
+                "Read the legacy numerical event screening and its prerequisites; "
+                "a computed screening hypothesis is not physical confirmation."
+            ),
+            "event.counterevidence": (
+                "Read legacy screening counterevidence and alternative explanations "
+                "before deciding whether its event hypothesis can support an answer."
+            ),
+            "location.fit": (
+                "The legacy snapshot is eligible for location fitting. Read its fit and "
+                "limitations before offering an inspection interval; eligibility alone "
+                "does not establish an exact leak point."
+            ),
+            "criteria.explain": (
+                "Read legacy decision and publication limits before final synthesis, "
+                "so unsupported causes or locations remain unresolved."
+            ),
+        }
+        details: dict[str, Any] = {
+            "rule": "application-intake-v2",
+            "rule_source": "runtime.workflow.AgentService._required_intake",
+            "trigger": (
+                "Required by the role's tool policy; not triggered by a newly detected "
+                "anomaly or conflict."
+                if name in context["required_tools"] else
+                "Conditional application intake derived from available source references, "
+                "history context or legacy location eligibility."
+            ),
+            "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+            "required_role": task.role,
+            "decision_policy": task.decision_policy,
+            "why_this_call": reasons[name],
+            "why_these_parameters": (
+                f"Inherit the parent task's immutable {window} window ({duration:g} seconds); "
+                "this tool does not choose a new time range. The window end is "
+                f"{snapshot.end_seconds:g}s, not the source clock "
+                f"{snapshot.clock_seconds:g}s. Keep the pinned snapshot and version arguments."
+            ),
+            "window": {
+                "start_seconds": start, "end_seconds": snapshot.end_seconds,
+                "duration_seconds": duration, "source_clock_seconds": snapshot.clock_seconds,
+                "selection": "parent_task_pinned_snapshot",
+                "boundaries": "start inclusive, end exclusive",
+            },
+        }
+        if name == "task.result":
+            source = next(
+                item for item in context["compatible_tasks"]
+                if item["id"] == arguments["task_id"]
+            )
+            comparisons = (source.get("investigation") or {}).get("comparison_call_ids", [])
+            offset = arguments.get("comparison_offset", 0)
+            reviewed = (
+                task.response_protocol in {"engineer-v1", "engineer-v2"}
+                and source.get("investigation") is not None
+            )
+            paged = reviewed and task.decision_policy == "llm-diagnosis-v1"
+            details["source_task"] = {
+                "task_id": source["id"], "role": source["role"],
+                "comparison_offset": offset, "total_cited_comparisons": len(comparisons),
+                "comparison_delivery": (
+                    "single_comparison_page" if paged else
+                    "all_cited_comparisons" if reviewed else "specialist_result_only"
+                ),
+                "comparison_call_ids_on_page": (
+                    comparisons[offset:offset + 1] if paged else comparisons if reviewed else []
+                ),
+            }
+            details["why_these_parameters"] += (
+                f" Select compatible {source['role']} task {source['id']}, not an arbitrary "
+                "historical task. Revalidate its lineage and scope."
+            )
+            details["why_these_parameters"] += (
+                " "
+                f"Comparison page {offset} carries at most one original comparison; "
+                "application intake visits every cited page instead of assuming page zero "
+                "contains the complete specialist handoff."
+                if paged else
+                " Legacy reviewed context returns all cited comparisons together, not a "
+                "single-comparison page."
+                if reviewed else
+                " This response protocol returns the specialist result without a "
+                "reviewed-comparison context."
+            )
+        if name == "history.search":
+            details["selected_assets"] = arguments["asset_ids"]
+            details["why_these_parameters"] += (
+                f" Query {arguments['query']!r} covers pressure, calibration, gateway and "
+                "operating alternatives. The initial search selects segments containing "
+                "screening anomalies, or the site scope if none exist; these are search "
+                "candidates, not diagnosed faulty assets. Record validity is checked "
+                "against the pinned incident, not today's wall clock."
+            )
+        if name == "history.compare":
+            groups = context["initial_pressure_comparisons"]
+            details["comparison_scope"] = {
+                key: arguments[key] for key in (
+                    "sensor_ids", "start_seconds", "split_seconds", "end_seconds", "paired_only",
+                )
+            }
+            details["why_these_parameters"] = (
+                f"Historical range [{arguments['start_seconds']}, "
+                f"{arguments['end_seconds']})s is distinct from the monitoring window "
+                f"{window}. Initial history starts at max(0, window end - "
+                f"{HISTORY_RANGE_SECONDS}s), with the split at its integer midpoint "
+                f"({arguments['split_seconds']}s); neither boundary is a detected onset. "
+                "Measurement-only policy includes all instruments; legacy policy expands "
+                "flagged stations with paired taps and qualifying quiet references. "
+                f"Sorted IDs are divided into {len(groups)} groups of at most 24 sensors; "
+                "paired-only mode retains station pairs without a cross-station matrix."
+            )
+        if name == "evidence.get":
+            selected = set(arguments["ids"])
+            details["source_tasks"] = [
+                {
+                    "task_id": item["id"], "role": item["role"],
+                    "selected_evidence_ids": sorted(selected.intersection(item["evidence_ids"])),
+                }
+                for item in context["compatible_tasks"]
+                if selected.intersection(item["evidence_ids"])
+            ]
+            details["selected_sources"] = [
+                {
+                    "evidence_id": ref, "kind": snapshot.evidence[ref].kind,
+                    "sensor_id": snapshot.evidence[ref].sensor_id,
+                }
+                for ref in arguments["ids"]
+            ]
+            details["why_these_parameters"] += (
+                " Select the explicit referenced sources, including pressure summaries "
+                "for diagnosis and location-fit sources for legacy synthesis where present; "
+                "not every evidence item in the snapshot. Intake uses batches of at most "
+                "24 IDs to bound upfront payloads, grouping large coordinator reads by "
+                "evidence kind. This is an application batching choice, not the gateway's "
+                "maximum ID allowance or a diagnostic threshold."
+            )
+        if name == "ontology.neighbors":
+            details["why_these_parameters"] = (
+                "Read layout metadata bound to the supplied pack version and snapshot; "
+                "there is no caller-selected sensor or time-range filter. "
+                f"The associated measurement assessment is {window}, "
+                "but topology is not a pressure-history range query."
+            )
+        if name == "quality.sensor_patterns":
+            offset = arguments.get("offset", 0)
+            findings = ranked_findings(snapshot)
+            page = findings[offset:offset + HEALTH_PAGE_SIZE]
+            details["why_these_parameters"] += (
+                f" No offset was requested: start at {offset}, with the gateway's "
+                f"{HEALTH_PAGE_SIZE}-finding page limit, out of {len(findings)} findings. "
+                "Use the same ranked_findings(snapshot) ordering as the executed read: "
+                "concerns before quiet histories, with sensor ID/channel tie-breaks; "
+                "large layouts additionally prioritize exclusions/missingness and event "
+                "support where present. Unreturned histories are not cleared."
+            )
+            details["page"] = {
+                "offset": offset, "limit": HEALTH_PAGE_SIZE, "total": len(findings),
+                "selected_count": len(page), "not_read_by_this_call": len(findings) - len(page),
+                "ranking_source": "runtime.gateway.ranked_findings",
+                "ranking_priorities": [
+                    "On layouts larger than "
+                    f"{32 * BUDGET_MULTIPLIER}: hard exclusions or missing >10% first.",
+                    "On those larger layouts: event-support membership next, if any.",
+                    "Any hard exclusions, spikes, drift, peer disagreement or missing >10%.",
+                    "Sensor ID, then channel, ascending to break ties.",
+                ],
+                "selected_findings": [
+                    {
+                        "sensor_id": item.sensor_id, "channel": item.channel,
+                        "hard_excluded": item.hard_excluded, "missing": item.missing,
+                        "expected": item.expected, "spike_count": item.spike_count,
+                        "drift_suspected": item.drift_suspected,
+                        "peer_disagreement": item.peer_disagreement,
+                        "in_event_support": item.sensor_id in snapshot.event.supporting_sensor_ids,
+                    }
+                    for item in page
+                ],
+            }
+        return details
+
     def _required_intake(
         self,
         task: AgentTask,
@@ -460,7 +693,7 @@ class AgentService:
                         )),
                     ))
                 ]
-            for target in targets:
+            for target_index, target in enumerate(targets):
                 arguments = dict(context["scope"])
                 if target is not None and name == "task.result":
                     arguments["task_id"] = target["id"]
@@ -493,6 +726,12 @@ class AgentService:
                     "name": name,
                     "args": arguments,
                     "origin": "application_required_intake",
+                }
+                call["intake_context"] = self._intake_selection(
+                    task, snapshot, name, arguments, context,
+                )
+                call["intake_context"]["request_group"] = {
+                    "number": target_index + 1, "total": len(targets),
                 }
                 output = gateway.dispatch(call)
                 if output["error"]:
@@ -530,6 +769,27 @@ class AgentService:
                     "id": str(uuid5(NAMESPACE_URL, identity)), "name": "history.read",
                     "args": arguments, "origin": "application_required_intake",
                 }
+                call["intake_context"] = self._intake_selection(
+                    task, snapshot, "history.read", arguments, context,
+                )
+                call["intake_context"]["why_these_parameters"] += (
+                    f" Open sorted search-hit IDs [{start}, "
+                    f"{start + len(arguments['document_ids'])}) of {len(document_ids)}, "
+                    f"using the {HISTORY_DOCUMENT_LIMIT}-document read limit. "
+                    "Include returned contradictions, not only admissible-looking titles."
+                )
+                call["intake_context"]["source_reads"] = [
+                    {
+                        "call_id": item["call_id"], "tool": item["name"],
+                        "selected_document_ids": sorted(
+                            set(arguments["document_ids"]).intersection(
+                                document["id"] for document in
+                                item["output"]["result"].get("documents", [])
+                            )
+                        ),
+                    }
+                    for item in outputs if item["name"] == "history.search"
+                ]
                 output = gateway.dispatch(call)
                 if output["error"]:
                     raise ValidationError(output["error"], "Original record intake read failed.")
@@ -564,6 +824,51 @@ class AgentService:
                     "args": arguments,
                     "origin": "application_required_intake",
                 }
+                selection = self._intake_selection(
+                    task, snapshot, "evidence.get", arguments, context,
+                )
+                batch = start // 24 + 1
+                batches = (len(ids) + 23) // 24
+                selected_ids = set(arguments["ids"])
+                selected_claims = sorted(
+                    ref for ref in reviewed_claims
+                    if selected_ids.intersection(snapshot.claims[ref].evidence_ids)
+                )
+                selection["why_this_call"] += (
+                    f" This is batch {batch} of {batches}: {len(selected_ids)} of "
+                    f"{len(ids)} distinct referenced sources, using the application's "
+                    "24-ID intake batch size (not the gateway maximum). "
+                    "It is not a second discretionary search or a new measurement."
+                )
+                selection["why_these_parameters"] += (
+                    f" Sort only the referenced IDs and take indices "
+                    f"[{start}, {start + len(selected_ids)}) of {len(ids)}. "
+                    f"Do not fetch all {len(snapshot.evidence)} snapshot evidence items."
+                )
+                selection["batch"] = {
+                    "number": batch, "total": batches, "intake_batch_size": 24,
+                    "index_start": start, "index_end_exclusive": start + len(selected_ids),
+                    "total_referenced_ids": len(ids), "selected_ids": arguments["ids"],
+                }
+                selection["source_claims"] = [
+                    {
+                        "claim_id": ref,
+                        "evidence_ids": sorted(
+                            selected_ids.intersection(snapshot.claims[ref].evidence_ids)
+                        ),
+                        "source_reads": [
+                            {"call_id": item["call_id"], "tool": item["name"]}
+                            for item in outputs
+                            if item["name"] in {
+                                "quality.coverage", "quality.conflicts", "quality.sensor_patterns",
+                            }
+                            and (item["output"]["result"].get("claims") or {}).get(ref)
+                            == snapshot.claims[ref].model_dump(mode="json")
+                        ],
+                    }
+                    for ref in selected_claims
+                ]
+                call["intake_context"] = selection
                 output = gateway.dispatch(call)
                 if output["error"]:
                     raise ValidationError(output["error"], "Reviewed quality source read failed.")
@@ -1775,6 +2080,12 @@ class AgentService:
                             "decision_summaries", {},
                         )
                         decisions = decisions if isinstance(decisions, dict) else {}
+                        parameters = response.additional_kwargs.get("parameter_summaries", {})
+                        parameters = parameters if isinstance(parameters, dict) else {}
+                        references = response.additional_kwargs.get(
+                            "decision_source_references", {},
+                        )
+                        references = references if isinstance(references, dict) else {}
                         selections = [{
                             "call_id": tool_call["id"],
                             "tool": tool_call["name"],
@@ -1782,6 +2093,8 @@ class AgentService:
                                 **tool_call,
                                 **response.additional_kwargs["subsea.trace"],
                                 "decision_summary": decisions.get(tool_call["id"] or ""),
+                                "parameter_summary": parameters.get(tool_call["id"] or ""),
+                                "source_references": references.get(tool_call["id"] or "", []),
                             }),
                         } for tool_call in response.tool_calls]
                         for tool_call, selection in zip(
@@ -1794,9 +2107,7 @@ class AgentService:
                                     "model_call_id": call_id,
                                     "tool": (
                                         tool_call["name"]
-                                        if tool_call["name"] in role_policy(
-                                            task.role, task.decision_policy
-                                        ).tools
+                                        if tool_call["name"] in gateway._argument_schemas()
                                         else "unauthorized tool"
                                     ),
                                     "source": "observed_model_tool_request",
@@ -1901,10 +2212,14 @@ class AgentService:
             else:
                 selection_context = request.get("selection_context", {})
                 decisions = request.get("decision_summaries", {})
+                parameters = request.get("parameter_summaries", {})
+                references = request.get("decision_source_references", {})
                 results = [gateway.dispatch({
                     **call,
                     **selection_context,
                     "decision_summary": decisions.get(call["id"]),
+                    "parameter_summary": parameters.get(call["id"]),
+                    "source_references": references.get(call["id"], []),
                 }) for call in request["calls"]]
                 task = gateway.task
                 resumed = tool_messages(request["calls"], results)
@@ -2105,15 +2420,29 @@ class AgentService:
             )
             with self.telemetry.span("handoff", {
                 "task_id": task.id, "child_id": child.id, "role": role,
-                "selection.provenance": "validated_model_plan",
+                "selection.provenance": "validated_plan_application_policy",
                 "langfuse.observation.input": json.dumps({
+                    "why_this_handoff": (
+                        "Assess measurement quality first so missing or unreliable readings "
+                        "are not treated as physical pressure evidence."
+                        if role == "sensor_quality" else
+                        "Diagnose physical and operating alternatives using the completed "
+                        "quality assessment, while preserving its uncertainty and exclusions."
+                    ),
+                    "why_this_scope": (
+                        "Carry the parent's exact question, immutable snapshot and deadline; "
+                        "a handoff cannot choose a different site, time window or data version."
+                    ),
                     "plan": task.plan, "step_index": index, "step": step,
                     "child_task_id": child.id, "role": role, "question": task.question,
                     "snapshot_id": snapshot.id, "purpose": REGISTRY[role].purpose,
                     "policy": "Serial prerequisites: quality before diagnosis, then synthesis. "
                     "The gateway revalidates accepted prerequisites before their use.",
-                    "provenance": "Validated model-selected plan; execution order is "
-                    "application policy.",
+                    "provenance": (
+                        "Validated plan executed by application policy. Allowed plans are "
+                        "constrained by the supplied schema; this is not proof of a free "
+                        "model choice or an unrecorded per-step model justification."
+                    ),
                 }),
             }) as handoff:
                 self.store.create_child(child, index, plan_revision=1, lease_token=task.lease_token)

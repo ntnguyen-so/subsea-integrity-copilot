@@ -1092,6 +1092,12 @@ def test_coordinator_intake_reads_every_cited_comparison_through_bounded_pages(s
         item["output"]["result"]["reviewed_context"]["comparisons"][0]["call_id"]
         for item in outputs
     ] == identifiers
+    for offset, call in enumerate(calls):
+        selection = call["intake_context"]
+        assert selection["source_task"]["comparison_offset"] == offset
+        assert selection["source_task"]["comparison_call_ids_on_page"] == [identifiers[offset]]
+        assert selection["request_group"] == {"number": offset + 1, "total": 5}
+        assert "every cited page" in selection["why_these_parameters"]
 
 
 def test_fresh_quality_intake_reads_only_original_sources_of_actual_reviewed_claims(snapshot):
@@ -1129,6 +1135,12 @@ def test_fresh_quality_intake_reads_only_original_sources_of_actual_reviewed_cla
     assert outputs[-1]["output"]["result"]["evidence"]["coverage-e"] == (
         snapshot.evidence["coverage-e"].model_dump(mode="json")
     )
+    selection = calls[-1]["intake_context"]
+    assert selection["batch"]["total_referenced_ids"] == 1
+    assert selection["source_claims"] == [{
+        "claim_id": "coverage", "evidence_ids": ["coverage-e"],
+        "source_reads": [{"call_id": calls[0]["id"], "tool": "quality.sensor_patterns"}],
+    }]
 
 
 def test_fresh_diagnosis_intake_reads_quality_original_sources_not_just_summary(snapshot):
@@ -1199,6 +1211,111 @@ def test_fresh_diagnosis_intake_opens_original_search_hits_including_contradicti
     assert [call["name"] for call in calls] == ["history.search", "history.read"]
     assert calls[-1]["args"]["document_ids"] == ["approved", "superseded"]
     assert outputs[-1]["output"]["result"]["documents"][1]["body"] == "Original recorded evidence."
+    selection = calls[-1]["intake_context"]
+    assert selection["source_reads"] == [{
+        "call_id": calls[0]["id"], "tool": "history.search",
+        "selected_document_ids": ["approved", "superseded"],
+    }]
+    assert "including" in selection["why_this_call"]
+
+
+def test_all_registered_tools_have_scope_specific_intake_explanations(snapshot):
+    from subsea_copilot.runtime.registry import role_policy
+
+    _, service = service_for(snapshot)
+    root = submit(service, snapshot, "Review the evidence", "selection-matrix")
+    reference = next(iter(snapshot.evidence))
+    context = {
+        "required_tools": [],
+        "compatible_tasks": [{
+            "id": "quality", "role": "sensor_quality", "evidence_ids": [reference],
+            "investigation": {"comparison_call_ids": ["comparison"]},
+        }],
+        "initial_pressure_comparisons": [{"sensor_ids": ["A", "B"]}],
+    }
+    arguments = {
+        "task_id": "quality", "ids": [reference], "asset_ids": [snapshot.site_id],
+        "query": "pressure calibration gateway operating valve", "sensor_ids": ["A", "B"],
+        "start_seconds": 0, "split_seconds": 30, "end_seconds": 60, "paired_only": True,
+    }
+    covered = set()
+    for policy in ("legacy-v1", "llm-diagnosis-v1"):
+        for role in ("sensor_quality", "event_diagnosis", "operator_response"):
+            task = root.model_copy(update={"role": role, "decision_policy": policy})
+            context["required_tools"] = sorted(role_policy(role, policy).required)
+            for name in role_policy(role, policy).tools:
+                details = service._intake_selection(task, snapshot, name, arguments, context)
+                assert details["why_this_call"]
+                assert details["why_these_parameters"]
+                assert details["required_role"] == role
+                assert details["window"]["end_seconds"] == snapshot.end_seconds
+                if name == "history.compare":
+                    assert details["comparison_scope"]["start_seconds"] == 0
+                    assert "distinct from the monitoring window" in details["why_these_parameters"]
+                covered.add(name)
+    assert {"history.read", "criteria.explain", "pressure.measurements", "location.fit"} <= covered
+
+
+def test_quality_source_batches_explain_distinct_ids_and_actual_source_call(snapshot):
+    from types import SimpleNamespace
+
+    _, service = service_for(snapshot)
+    root = submit(service, snapshot, "Review data", "batch-reasons")
+    task = root.model_copy(update={"role": "sensor_quality"})
+    identifiers = [f"source-{i:02}" for i in range(26)]
+    source = next(iter(snapshot.evidence.values()))
+    snapshot = snapshot.model_copy(update={
+        "evidence": {ref: source.model_copy(update={"id": ref}) for ref in identifiers},
+        "claims": {"coverage": snapshot.claims["coverage"].model_copy(
+            update={"evidence_ids": identifiers},
+        )},
+    })
+    calls = []
+
+    def dispatch(call):
+        calls.append(call)
+        return {"error": None, "result": {
+            "claims": {"coverage": snapshot.claims["coverage"].model_dump(mode="json")}
+            if call["name"] == "quality.coverage" else {},
+        }}
+
+    service._required_intake(task, snapshot, {
+        "required_tools": ["quality.coverage"], "compatible_tasks": [], "scope": {},
+    }, SimpleNamespace(task=task, dispatch=dispatch))
+    assert [call["name"] for call in calls] == ["quality.coverage", "evidence.get", "evidence.get"]
+    for number, call in enumerate(calls[1:], 1):
+        selection = call["intake_context"]
+        assert selection["batch"]["number"] == number
+        assert selection["batch"]["total"] == 2
+        assert selection["batch"]["selected_ids"] == call["args"]["ids"]
+        assert selection["source_claims"][0]["source_reads"][0]["call_id"] == calls[0]["id"]
+        assert "not the gateway maximum" in selection["why_this_call"]
+    assert len(calls[1]["args"]["ids"]) == 24 and len(calls[2]["args"]["ids"]) == 2
+
+
+@pytest.mark.parametrize(
+    ("policy", "protocol", "expected", "delivery"),
+    [
+        ("llm-diagnosis-v1", "engineer-v2", ["compare-0"], "single_comparison_page"),
+        ("legacy-v1", "engineer-v2", ["compare-0", "compare-1"], "all_cited_comparisons"),
+        ("legacy-v1", "structured-v1", [], "specialist_result_only"),
+    ],
+)
+def test_handoff_selection_explains_actual_policy_specific_delivery(
+    snapshot, policy, protocol, expected, delivery,
+):
+    _, service = service_for(snapshot)
+    root = submit(service, snapshot, "Review sources", "handoff-selection")
+    task = root.model_copy(update={"decision_policy": policy, "response_protocol": protocol})
+    context = {"required_tools": ["task.result"], "compatible_tasks": [{
+        "id": "diagnosis", "role": "event_diagnosis",
+        "investigation": {"comparison_call_ids": ["compare-0", "compare-1"]},
+    }]}
+    selected = service._intake_selection(
+        task, snapshot, "task.result", {"task_id": "diagnosis"}, context,
+    )
+    assert selected["source_task"]["comparison_call_ids_on_page"] == expected
+    assert selected["source_task"]["comparison_delivery"] == delivery
 
 
 def test_fresh_specialists_bind_sources_and_audit_without_changing_model_findings(snapshot):
@@ -1406,7 +1523,9 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
                     }],
                     additional_kwargs={"decision_summaries": {
                         "public-read": "Verify the cited measurement. password=fixture-private",
-                    }},
+                    }, "parameter_summaries": {
+                        "public-read": "Read only the unresolved supplied evidence ID.",
+                    }, "decision_source_references": {"public-read": ["coverage"]}},
                 ))])
             return super()._generate(messages, **kwargs)
 
@@ -1452,6 +1571,18 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
                 "Verify the cited measurement."
             )
             assert "fixture-private" not in json.dumps(request)
+            assert request["why_these_parameters"] == (
+                "Read only the unresolved supplied evidence ID."
+            )
+            assert request["selection"]["declared_source_references"] == ["coverage"]
+            for span in required:
+                intake = json.loads(span.attributes["langfuse.observation.input"])
+                assert intake["why_this_call"]
+                assert intake["why_these_parameters"]
+                assert intake["selection"]["parameter_provenance"] == "application_required_intake"
+                assert (
+                    intake["selection"]["application_selection"]["rule"] == "application-intake-v2"
+                )
             decision = json.loads(model.attributes["langfuse.observation.output"])
             assert decision["tool_decisions"][0]["call_id"] == "public-read"
             assert "available_tools" in json.loads(model.attributes["model.context.input"])

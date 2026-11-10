@@ -79,19 +79,41 @@ def tool_selection(role: str, call: dict[str, Any]) -> dict[str, Any]:
     summary = summary.strip() if isinstance(summary, str) else ""
     arguments = call["args"] if isinstance(call["args"], dict) else {}
     required = origin == "application_required_intake"
+    intake = call.get("intake_context") if required else None
+    intake = intake if isinstance(intake, dict) else None
+    parameters = call.get("parameter_summary") if not required else None
+    parameters = parameters.strip() if isinstance(parameters, str) else ""
     return {
         "origin": origin,
         "title": title,
         "purpose": purpose,
         "decision_summary": (
+            intake["why_this_call"] if intake else
             f"Application-required intake for {ROLE_NAMES[role]}. {purpose}"
             if required else summary or None
+        ),
+        "application_selection": intake,
+        "parameter_summary": (
+            intake["why_these_parameters"] if intake else parameters or None
+        ),
+        "parameter_provenance": (
+            "application_required_intake" if intake else "model_public" if parameters
+            else "not_recorded"
+        ),
+        "declared_source_references": (
+            call.get("source_references", []) if not required else []
+        ),
+        "source_reference_authority": (
+            "Model-declared motivation only; not validated citations or tool authorization."
         ),
         "decision_provenance": (
             "application_required_intake" if required else "model_public" if summary
             else "not_recorded"
         ),
-        "selection_rule": "required-intake-v1" if required else "observed_model_tool_request",
+        "selection_rule": (
+            intake["rule"] if intake else "required-intake-v1" if required
+            else "observed_model_tool_request"
+        ),
         "model_call_id": None if required else call.get("model_call_id"),
         "model_span_id": None if required else call.get("model_span_id"),
         "model_turn_index": None if required else call.get("model_turn_index"),

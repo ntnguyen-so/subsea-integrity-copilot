@@ -64,6 +64,37 @@ def test_rejected_response_records_only_content_free_validation_stage(content, s
     assert rejected.value.metadata == {"response_validation_stage": stage}
 
 
+def test_tool_envelope_preserves_public_parameter_reason_and_triggering_references():
+    result = cli._decode(json.dumps({"kind": "tool_calls", "value": [{
+        "name": "history.compare", "arguments": {"start_seconds": 100, "end_seconds": 120},
+        "decision_summary": "Resolve an unexplained late paired decline.",
+        "parameter_summary": "Use the final 20s to separate it from the earlier operating step.",
+        "source_references": ["original-profile"],
+    }]}), {"history.compare"})
+    identifier = result.tool_calls[0]["id"]
+    assert result.additional_kwargs["parameter_summaries"][identifier].startswith(
+        "Use the final 20s"
+    )
+    assert result.additional_kwargs["decision_source_references"][identifier] == [
+        "original-profile"
+    ]
+    assert "parameter_summary" not in result.tool_calls[0]["args"]
+
+
+@pytest.mark.parametrize("extra", [
+    {"parameter_summary": 4}, {"parameter_summary": "x" * 1001},
+    {"source_references": "not-a-list"}, {"source_references": [None]},
+    {"source_references": [""]}, {"source_references": ["x" * 201]},
+    {"source_references": ["ref"] * 33},
+])
+def test_tool_envelope_rejects_malformed_public_selection_details(extra):
+    with pytest.raises(cli.ProviderError) as rejected:
+        cli._decode(json.dumps({"kind": "tool_calls", "value": [{
+            "name": "evidence.get", "arguments": {}, **extra,
+        }]}), {"evidence.get"})
+    assert rejected.value.code == "invalid_tool_call"
+
+
 def stub(monkeypatch, events, inspect=None, code=0, stderr=b""):
     calls = []
     monkeypatch.setattr(cli.shutil, "which", lambda name: str(Path(sys.executable)))

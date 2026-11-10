@@ -168,8 +168,17 @@ def test_new_branch_labels_and_drift_are_declared_from_source_not_predictions() 
 
 
 def test_diagnosis_intake_reads_baseline_sources_without_a_model_round_trip() -> None:
-    task = Mock(role="event_diagnosis", id="task", history_version="history-v1")
-    snapshot = Mock(id="window", event=SimpleNamespace(eligible_location=False))
+    task = Mock(
+        role="event_diagnosis", id="task", history_version="history-v1",
+        decision_policy="legacy-v1",
+    )
+    snapshot = Mock(
+        id="window", event=SimpleNamespace(eligible_location=False),
+        window_start=datetime(2026, 1, 1, tzinfo=UTC),
+        window_end=datetime(2026, 1, 1, 0, 1, tzinfo=UTC), end_seconds=60, clock_seconds=65,
+        evidence={ref: SimpleNamespace(kind="channel_summary", sensor_id=ref)
+                  for ref in ("priority-pressure", "quiet-pressure")},
+    )
     context = {
         "scope": {"snapshot_id": "window"},
         "required_tools": [],
@@ -196,13 +205,20 @@ def test_diagnosis_intake_reads_baseline_sources_without_a_model_round_trip() ->
 
 
 def test_extended_intake_reads_original_pressure_sources_in_bounded_batches() -> None:
-    task = Mock(role="event_diagnosis", id="task", history_version="history-v1")
+    task = Mock(
+        role="event_diagnosis", id="task", history_version="history-v1",
+        decision_policy="legacy-v1",
+    )
     evidence = {
-        f"pressure-{index:03}": SimpleNamespace(id=f"pressure-{index:03}", kind="channel_summary")
+        f"pressure-{index:03}": SimpleNamespace(
+            id=f"pressure-{index:03}", kind="channel_summary", sensor_id=f"sensor-{index}",
+        )
         for index in range(112)
     }
     snapshot = Mock(
-        id="window", evidence=evidence, event=SimpleNamespace(eligible_location=False)
+        id="window", evidence=evidence, event=SimpleNamespace(eligible_location=False),
+        window_start=datetime(2026, 1, 1, tzinfo=UTC),
+        window_end=datetime(2026, 1, 1, 0, 1, tzinfo=UTC), end_seconds=60, clock_seconds=65,
     )
     context = {
         "scope": {"snapshot_id": "window"}, "required_tools": [], "compatible_tasks": [],
@@ -220,21 +236,30 @@ def test_extended_intake_reads_original_pressure_sources_in_bounded_batches() ->
 
 
 def test_coordinator_groups_mixed_evidence_for_lossless_bounded_delivery() -> None:
-    task = Mock(role="operator_response", id="root")
+    task = Mock(role="operator_response", id="root", decision_policy="legacy-v1")
     evidence = {
         f"ev-{index:03}": SimpleNamespace(
             id=f"ev-{index:03}", kind="channel_summary" if index % 2 else "sensor_health",
             value={"baseline_median": 80, "recent_5s_pressure_drop_bar": 1.5},
+            sensor_id=f"sensor-{index}",
         )
         for index in range(224)
     }
     evidence["location"] = SimpleNamespace(
         id="location", kind="location_fit", value={"status": "withheld", "reason": "too wide"},
+        sensor_id=None,
     )
-    snapshot = SimpleNamespace(id="window", evidence=evidence)
+    snapshot = SimpleNamespace(
+        id="window", evidence=evidence,
+        window_start=datetime(2026, 1, 1, tzinfo=UTC),
+        window_end=datetime(2026, 1, 1, 0, 1, tzinfo=UTC), end_seconds=60, clock_seconds=65,
+    )
     context = {
         "scope": {"snapshot_id": "window"}, "required_tools": ["evidence.get"],
-        "compatible_tasks": [{"evidence_ids": [key for key in evidence if key != "location"]}],
+        "compatible_tasks": [{
+            "id": "diagnosis", "role": "event_diagnosis",
+            "evidence_ids": [key for key in evidence if key != "location"],
+        }],
     }
     gateway = Mock(task=task)
     def dispatch(call: dict[str, Any]) -> dict[str, Any]:
