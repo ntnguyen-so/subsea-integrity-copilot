@@ -95,6 +95,10 @@ supporting evidence.
 
 ## Run the demo
 
+**Prerequisite for agent-assisted mode:** A GitHub Copilot account with access to
+**`gpt-6.1-sol`**. Sign in through the Copilot CLI in step 3 before running new
+AI investigations.
+
 You can explore the included Detection evaluation and run sensor-only monitoring
 **without a Copilot account**.
 
