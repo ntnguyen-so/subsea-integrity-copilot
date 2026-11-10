@@ -241,6 +241,19 @@ physical fault exists. The engineer-v2 coordinator has a separate semantic
 review before publishing its report. Finally, the **agent Output >
 `execution_summary`** explains completion and the next recipient.
 
+For the CustomerOps-style **Attributes** view, expand **Metadata**. Agent spans
+expose `agent.goal`, `agent.purpose`, `agent.procedure` and `agent.tools.input`.
+Generations expose `model.selection.summary`, numbered
+`model.tool_decision.N.*` explanations (including parameter choices and
+provenance), and `model.next_step`. Tool spans expose `tool.goal`,
+`selection.summary`, `selection.parameter.summary` and `tool.result.summary`.
+Guardrails expose `guardrail.goal`, `guardrail.validator.name`,
+`guardrail.result.summary` and `guardrail.next_step`; handoffs expose their goal
+and next step too. These are projections of the same captured decisions and
+application rules, not newly inferred model reasoning. Full Input/Output remains
+available. Explanatory content still requires synthetic content-capture opt-in,
+is redacted and bounded, and is excluded from the content-free local audit.
+
 Captured fields are redacted and capped at **524,288 characters per field**.
 Oversized captures remain valid JSON with an explicit `capture.truncated` flag,
 a redacted-content fingerprint and a partial `preview`; they are not full

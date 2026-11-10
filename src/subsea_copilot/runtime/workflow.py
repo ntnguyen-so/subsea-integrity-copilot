@@ -1578,6 +1578,13 @@ class AgentService:
             with self.telemetry.span(
                 "guardrail", {"task_id": task.id, "role": task.role, "phase": phase}
             ) as guardrail:
+                contract = self._validation_contract(task, phase)
+                guardrail.set_attribute("guardrail.goal", contract["contract"])
+                guardrail.set_attribute("guardrail.procedure", contract["why_this_check"])
+                guardrail.set_attribute("guardrail.validator.name", contract["validator"])
+                guardrail.set_attribute(
+                    "guardrail.authority.source", contract["execution_authority"],
+                )
                 guardrail.set_attribute("langfuse.observation.input", value)
                 try:
                     accepted: BaseModel
@@ -1633,6 +1640,15 @@ class AgentService:
                         "validation.repair_requested", repair_available
                     )
                     guardrail.set_attribute(
+                        "guardrail.result.summary",
+                        f"Candidate rejected: {code}. No result is accepted by this check.",
+                    )
+                    guardrail.set_attribute(
+                        "guardrail.next_step",
+                        "Return validator feedback for a bounded model repair."
+                        if repair_available else "Fail this phase; no repair budget remains.",
+                    )
+                    guardrail.set_attribute(
                         "langfuse.observation.output",
                         json.dumps(
                             {
@@ -1655,11 +1671,21 @@ class AgentService:
                     )
                     raise
                 guardrail.set_attribute("validation.status", "passed")
+                guardrail.set_attribute(
+                    "guardrail.result.summary",
+                    "Candidate passed this phase's structural/domain validation. "
+                    + contract["does_not_prove"],
+                )
+                guardrail.set_attribute("guardrail.next_step", contract["on_pass"])
                 guardrail.update_name(f"{ROLE_NAMES[task.role]} / {phase} check: passed")
                 if isinstance(accepted, GroundingAssessment):
                     issues = sum(check.verdict != "supported" for check in accepted.checks)
                     guardrail.set_attribute("review.decision", accepted.decision)
                     guardrail.set_attribute("review.issue_count", issues)
+                    guardrail.set_attribute(
+                        "guardrail.next_step",
+                        f"Reviewer decision: {accepted.decision}. {contract['on_pass']}",
+                    )
                     guardrail.update_name(
                         f"{ROLE_NAMES[task.role]} / semantic review: "
                         f"{accepted.decision} ({issues} issues)"
@@ -2067,6 +2093,9 @@ class AgentService:
                             "context.stage": view.stage,
                             "context.original_chars": view.original_chars,
                             "context.prompt_chars": len(view.prompt),
+                            "model.final_only": call_policy["final_only"],
+                            "model.tools_available": len(schemas),
+                            "model.remaining_calls": remaining_turns,
                             "langfuse.observation.input": json.dumps(
                                 [
                                     {
@@ -2188,6 +2217,47 @@ class AgentService:
                                 "source_references": references.get(tool_call["id"] or "", []),
                             }),
                         } for tool_call in response.tool_calls]
+                        span.set_attribute(
+                            "model.selection.provenance",
+                            "model_public"
+                            if selections and all(
+                                item["decision_provenance"] == "model_public"
+                                for item in selections
+                            ) else "observed_model_tool_request"
+                            if selections else "observed_response_and_application_routing",
+                        )
+                        span.set_attribute(
+                            "model.selection.summary",
+                            "\n".join(
+                                f"{item['tool']}: "
+                                + (item["decision_summary"] or
+                                   "No public selection explanation was recorded.")
+                                for item in selections
+                            ) if selections else
+                            f"The response requested no tools and submitted a {phase} candidate. "
+                            "Application code routes it to the phase validator; submission "
+                            "does not mean acceptance. "
+                            "The model's stopping reason is not recorded.",
+                        )
+                        span.set_attribute(
+                            "model.next_step",
+                            "Dispatch requested tools through the gateway, "
+                            "then call the model again."
+                            if selections else "Parse the candidate and run the phase validator.",
+                        )
+                        for index, selection in enumerate(selections, 1):
+                            prefix = f"model.tool_decision.{index}"
+                            for suffix, value in {
+                                "tool": selection["tool"],
+                                "call_id": selection["call_id"],
+                                "provenance": selection["decision_provenance"],
+                                "summary": selection["decision_summary"] or
+                                "No public selection explanation was recorded.",
+                                "parameter.summary": selection["parameter_summary"] or
+                                "No public parameter explanation was recorded.",
+                                "parameter.provenance": selection["parameter_provenance"],
+                            }.items():
+                                span.set_attribute(f"{prefix}.{suffix}", value)
                         for tool_call, selection in zip(
                             response.tool_calls, selections, strict=True,
                         ):
@@ -2533,17 +2603,23 @@ class AgentService:
                 knowledge_packet=task.knowledge_packet,
                 decision_policy=task.decision_policy,
             )
+            handoff_goal = (
+                "Assess measurement quality first so missing or unreliable readings "
+                "are not treated as physical pressure evidence."
+                if role == "sensor_quality" else
+                "Diagnose physical and operating alternatives using the completed "
+                "quality assessment, while preserving its uncertainty and exclusions."
+            )
             with self.telemetry.span("handoff", {
                 "task_id": task.id, "child_id": child.id, "role": role,
                 "selection.provenance": "validated_plan_application_policy",
+                "handoff.goal": handoff_goal,
+                "handoff.next_step": (
+                    "Queue the specialist and wait for its compatible validated result "
+                    "before resuming the parent."
+                ),
                 "langfuse.observation.input": json.dumps({
-                    "why_this_handoff": (
-                        "Assess measurement quality first so missing or unreliable readings "
-                        "are not treated as physical pressure evidence."
-                        if role == "sensor_quality" else
-                        "Diagnose physical and operating alternatives using the completed "
-                        "quality assessment, while preserving its uncertainty and exclusions."
-                    ),
+                    "why_this_handoff": handoff_goal,
                     "why_this_scope": (
                         "Carry the parent's exact question, immutable snapshot and deadline; "
                         "a handoff cannot choose a different site, time window or data version."
@@ -2666,20 +2742,39 @@ class AgentService:
                     snapshot = measurement_snapshot(snapshot)
                 if task.deadline <= utc_now():
                     raise ValidationError("deadline", "Root workflow deadline exhausted.")
+                role_goal = {
+                    "sensor_quality": "Assess reading availability and quality; "
+                    "do not diagnose a physical leak or clear every sensor.",
+                    "event_diagnosis": "Compare pressure, instrument dependencies "
+                    "and operating records to assess competing causes.",
+                    "operator_response": "Plan compatible specialist work, "
+                    "synthesize checked evidence and answer the engineer.",
+                }[task.role]
+                policy = role_policy(task.role, task.decision_policy)
+                agent_span.set_attribute("agent.goal", role_goal)
+                agent_span.set_attribute("agent.purpose", task.purpose)
+                agent_span.set_attribute(
+                    "agent.procedure",
+                    "Application code performs mandatory intake before the first answer-model "
+                    "turn. The model may request additional authorized reads, then submit a "
+                    "candidate. Application validation and any required semantic review decide "
+                    "whether the workflow can advance; tool count alone is not model reasoning.",
+                )
+                agent_span.set_attribute("agent.tools.input", json.dumps({
+                    "allowed": sorted(policy.tools),
+                    "required": sorted(policy.required),
+                    "model_call_limit": self._model_limit(task),
+                    "tool_call_limit": policy.tool_limit,
+                    "note": "Role authority, not the phase-specific bound tool catalog. "
+                    "See model.context.input for the tools actually offered on each turn.",
+                }))
                 agent_span.set_attribute(
                     "langfuse.observation.input",
                     json.dumps(
                         {
                             "question": task.question,
                             "execution_procedure": {
-                                "role_goal": {
-                                    "sensor_quality": "Assess reading availability and quality; "
-                                    "do not diagnose a physical leak or clear every sensor.",
-                                    "event_diagnosis": "Compare pressure, instrument dependencies "
-                                    "and operating records to assess competing causes.",
-                                    "operator_response": "Plan compatible specialist work, "
-                                    "synthesize checked evidence and answer the engineer.",
-                                }[task.role],
+                                "role_goal": role_goal,
                                 "who_runs_the_tools": (
                                     "Application code performs mandatory intake before the "
                                     "first answer-model turn. Subsequent tool requests, if any, "
@@ -2736,6 +2831,10 @@ class AgentService:
                     if task is None:
                         coordinator = self.store.get_task(coordinator_id)
                         agent_span.set_attribute("outcome", coordinator.state)
+                        agent_span.set_attribute(
+                            "agent.next_step",
+                            "Wait for the prerequisite specialist, then resume this coordinator.",
+                        )
                         agent_span.set_attribute(
                             "langfuse.observation.output",
                             json.dumps(
@@ -2834,6 +2933,12 @@ class AgentService:
                     },
                 )
                 agent_span.set_attribute("outcome", task.state)
+                agent_span.set_attribute(
+                    "agent.result.summary",
+                    f"Saved {task.state} result after validation; return it to {recipient}. "
+                    "Completion is not physical confirmation or exhaustive sensor review.",
+                )
+                agent_span.set_attribute("agent.next_step", f"Return the result to {recipient}.")
                 agent_span.set_attribute(
                     "langfuse.observation.output",
                     json.dumps(

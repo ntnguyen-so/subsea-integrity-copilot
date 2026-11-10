@@ -1576,6 +1576,23 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
                 "Read only the unresolved supplied evidence ID."
             )
             assert request["selection"]["declared_source_references"] == ["coverage"]
+            assert selected.attributes["selection.summary"].startswith(
+                "Verify the cited measurement."
+            )
+            assert "fixture-private" not in selected.attributes["selection.summary"]
+            assert selected.attributes["selection.parameter.summary"] == (
+                request["why_these_parameters"]
+            )
+            assert selected.attributes["tool.result.summary"]
+            assert model.attributes["model.selection.provenance"] == "model_public"
+            assert model.attributes["model.tool_decision.1.summary"] == (
+                selected.attributes["selection.summary"]
+            )
+            assert model.attributes["model.tool_decision.1.parameter.summary"] == (
+                request["why_these_parameters"]
+            )
+            assert model.attributes["model.tool_decision.1.call_id"] == "public-read"
+            assert "evidence.get:" in model.attributes["model.selection.summary"]
             for span in required:
                 intake = json.loads(span.attributes["langfuse.observation.input"])
                 assert intake["why_this_call"]
@@ -1583,6 +1600,10 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
                 assert intake["selection"]["parameter_provenance"] == "application_required_intake"
                 assert (
                     intake["selection"]["application_selection"]["rule"] == "application-intake-v2"
+                )
+                assert span.attributes["selection.summary"] == intake["why_this_call"]
+                assert span.attributes["selection.parameter.summary"] == (
+                    intake["why_these_parameters"]
                 )
             decision = json.loads(model.attributes["langfuse.observation.output"])
             assert decision["tool_decisions"][0]["call_id"] == "public-read"
@@ -1600,6 +1621,20 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
             assert procedure["required_read_names"] == sorted(
                 role_policy("sensor_quality").required
             )
+            agents = [
+                span for span in spans
+                if span.attributes.get("langfuse.observation.type") == "agent"
+            ]
+            assert {span.attributes["role"] for span in agents} == {
+                "sensor_quality", "event_diagnosis", "operator_response",
+            }
+            for span in agents:
+                body = json.loads(span.attributes["langfuse.observation.input"])
+                assert span.attributes["agent.goal"] == body["execution_procedure"]["role_goal"]
+                assert span.attributes["agent.procedure"]
+                assert json.loads(span.attributes["agent.tools.input"])["required"] == (
+                    body["execution_procedure"]["required_read_names"]
+                )
             intake = json.loads(agent.attributes["workflow.intake.input"])
             assert intake["actual_call_count"] == len([
                 span for span in required
@@ -1619,6 +1654,12 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
             ]
             assert route["next_step"] == "parse_and_validate_candidate"
             assert route["model_reason_for_stopping"] == "not_recorded"
+            assert "stopping reason is not recorded" in (
+                final_generation.attributes["model.selection.summary"]
+            )
+            assert final_generation.attributes["model.selection.provenance"] == (
+                "observed_response_and_application_routing"
+            )
             guard = next(
                 span for span in spans
                 if span.attributes.get("task_id") == selected.attributes["task_id"]
@@ -1628,6 +1669,13 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
             assert gate["execution_authority"] == "application_code_not_an_additional_model_call"
             assert gate["validator"] == "AgentService._accept + validation.validate_result"
             assert "not independently reviewed" in gate["does_not_prove"]
+            assert guard.attributes["guardrail.goal"] == gate["contract"]
+            assert guard.attributes["guardrail.next_step"] == gate["on_pass"]
+            assert guard.attributes["guardrail.validator.name"] == gate["validator"]
+            assert all(
+                span.attributes["handoff.goal"] and span.attributes["handoff.next_step"]
+                for span in spans if span.name == "handoff"
+            )
             assert "available_tools" in json.loads(model.attributes["model.context.input"])
             assert any(
                 entry["call_id"] == "public-read"
@@ -1638,6 +1686,13 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
             assert "langfuse.observation.input" not in selected.attributes
             assert "model.context.input" not in model.attributes
             assert all("workflow.intake.input" not in span.attributes for span in spans)
+            assert all(
+                not any(
+                    key.endswith((".summary", ".goal", ".procedure", ".next_step"))
+                    for key in span.attributes
+                )
+                for span in spans
+            )
         task = store.get_task(selected.attributes["task_id"])
         receipt = next(
             row for row in store.tool_receipts(task.id) if row["call_id"] == "public-read"

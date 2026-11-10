@@ -511,6 +511,15 @@ class ToolGateway:
             "call_id": call["id"],
             "dispatch_origin": selection["origin"],
             "selection.provenance": selection["decision_provenance"],
+            "tool.goal": selection["purpose"],
+            "selection.summary": selection["decision_summary"] or (
+                "The model requested this tool; no public selection explanation was recorded."
+            ),
+            "selection.parameter.summary": selection["parameter_summary"] or (
+                "No public explanation of the parameter choice was recorded."
+            ),
+            "selection.parameter.provenance": selection["parameter_provenance"],
+            "selection.rule.name": selection["selection_rule"],
             "model_call_id": selection["model_call_id"] or "",
             "model_span_id": selection["model_span_id"] or "",
             "model.turn.index": selection["model_turn_index"] or 0,
@@ -556,6 +565,9 @@ class ToolGateway:
             "outcome", "failed" if error else "replayed" if replayed else "completed",
         )
         span.set_attribute("evidence.claim_count", len(update.get("claim_refs", [])))
+        span.set_attribute(
+            "tool.result.summary", update.get("observation", "No result body was recorded."),
+        )
         span.set_attribute(
             "langfuse.observation.output",
             json.dumps({
@@ -622,6 +634,10 @@ class ToolGateway:
                 span.set_attribute("error.code", exc.code)
                 span.set_attribute("tool.executed", False)
                 span.set_attribute("tool.accepted", False)
+                span.set_attribute(
+                    "tool.result.summary",
+                    f"Rejected before execution: {exc.code}. No accepted evidence was produced.",
+                )
                 span.set_attribute("langfuse.observation.output", json.dumps(diagnostic))
                 span.record_exception(exc)
             raise

@@ -29,7 +29,7 @@ from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerProvider
+from opentelemetry.sdk.trace import ReadableSpan, Span, SpanLimits, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
     SimpleSpanProcessor,
@@ -44,7 +44,11 @@ from subsea_copilot.redaction import redact_content as _redact_content
 _SCOPE: contextvars.ContextVar[dict[str, str]] = contextvars.ContextVar("subsea_trace_scope")
 _IDENTITIES = {"tenant_id", "site_id", "replay_generation_id", "generation_id", "episode_id"}
 _SESSION_IDENTITIES = ("tenant_id", "site_id", "replay_generation_id", "episode_id")
-_CONTENT = re.compile(r"prompt(?![._](?:hash|sha256|chars))|content|input$|output$|reasoning", re.I)
+_CONTENT = re.compile(
+    r"prompt(?![._](?:hash|sha256|chars))|content|input$|output$|reasoning|"
+    r"(?:^|[._])(?:goal|summary|procedure|next_step)$",
+    re.I,
+)
 _SAFE_STRING = re.compile(
     r"(?:^|[._])(?:id|hash|sha256|name|role|phase|mode|purpose|outcome|status|code|model|source|tool|"
     r"version|requested_model|observed_model|model_identity_source|error|type|session|"
@@ -302,7 +306,10 @@ class Telemetry:
             "SUBSEA_SYNTHETIC_ONLY"
         )
         self.synchronous_export = _enabled("SUBSEA_TRACE_SYNC")
-        self.provider = TracerProvider(resource=Resource.create({"service.name": "subsea-copilot"}))
+        self.provider = TracerProvider(
+            resource=Resource.create({"service.name": "subsea-copilot"}),
+            span_limits=SpanLimits(max_attributes=512),
+        )
         self.tracer = self.provider.get_tracer("subsea.agent")
         self._exporters: dict[str, _ObservedExporter] = {}
         self._configuration: dict[str, dict[str, object]] = {}

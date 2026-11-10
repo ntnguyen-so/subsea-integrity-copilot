@@ -1,0 +1,68 @@
+{
+  "scope": "Synthetic S7 @120 development execution; not field qualification",
+  "reference": {
+    "project": "customerops",
+    "trace_id": "dfdea1abd764ae90ca45c0cf875a7cb3",
+    "agent_observation_id": "02abfed31767acbd",
+    "model_observation_id": "3b6dc3ad0da6a9a1",
+    "pattern": "Explicit model.selection.summary and indexed per-tool public explanations in Attributes, separate from full Input/Output and private reasoning."
+  },
+  "baseline_commit": "02cdb5b7cd45be9788d9b1ee41d12ab07670a260",
+  "implementation_sha256": "62d28ed6f090b94acc8b6878326e7591eff94228ac764bb1452c83ff36d19d97",
+  "implementation_unchanged": true,
+  "root_id": "56fe41ba-f6e5-5fe3-b0aa-a45b9ccfa1d4",
+  "trace_id": "f3f719030d7472e9f4f68181f90e53a6",
+  "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+  "state": "SUCCEEDED",
+  "observations": 65,
+  "types": {
+    "GUARDRAIL": 5,
+    "GENERATION": 8,
+    "TOOL": 45,
+    "AGENT": 5,
+    "SPAN": 2
+  },
+  "examples": {
+    "guardrail": "9bc13fc311eb69a3",
+    "tool": "976275bde9499fd7",
+    "operator_response": "db2a88d919689f6e",
+    "model_tool_selection": "6786821bfd25f774",
+    "event_diagnosis": "635a3a38ffeed717",
+    "handoff": "a59038f8a5eec396",
+    "sensor_quality": "a61efb9b09768c67"
+  },
+  "all_agent_goals_and_role_tools_match_captured_procedure": true,
+  "all_flat_model_tool_explanations_match_captured_public_decisions": true,
+  "all_flat_tool_reasons_parameters_and_origins_match_captured_reads": true,
+  "all_flat_phase_guardrails_explain_contract_validator_and_next_step": true,
+  "all_flat_handoff_goals_match_captured_prerequisite_policy": true,
+  "original_receipt_fidelity_and_model_tool_links_verified": true,
+  "private_model_stopping_reasons_not_invented": true,
+  "validation": {
+    "agent_and_telemetry_tests": {
+      "passed": 120,
+      "skipped": 2
+    },
+    "ruff_and_strict_changed_production_file_mypy": "passed",
+    "summary_capture_opt_out_redaction_and_content_free_audit": "passed",
+    "full_24_call_batch_preserves_input_and_lineage": "passed"
+  },
+  "publication": {
+    "previous_recordings": 215,
+    "total_recordings": 216,
+    "all_previous_recordings_unchanged": true,
+    "backup_sha256": "4d10ae0ba0dba77b6542c15b94b80ee4599445e681a60cf8fca4e26d0cbd1022",
+    "live_api_selects_new_example": true,
+    "owned_server_restarted_after_no_active_task_check": true,
+    "deployed_package_ast_matches_qualified_source": true,
+    "content_capture_enabled": true
+  },
+  "browser_verification": {
+    "project": "subsea-copilot",
+    "observation_id": "6786821bfd25f774",
+    "attributes_tab": true,
+    "model_selection_summary_visible": true,
+    "three_indexed_tool_decisions_with_parameter_explanations_visible": true,
+    "example_scope_explanation": "80-120 s comparison split at 100 s; distinguished from historical normal data."
+  }
+}

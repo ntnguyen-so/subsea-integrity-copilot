@@ -232,6 +232,14 @@ def test_decision_events_are_redacted_opt_in_and_absent_from_local_audit(monkeyp
         monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1" if capture else "0")
         telemetry = module.Telemetry(runtime)
         with telemetry.span("tool.read", root=True) as span:
+            span.set_attribute(
+                "selection.summary",
+                "Check the shared gateway. " + "bounded explanation " * 20
+                + "password=fixture-private",
+            )
+            span.set_attribute("agent.goal", "Check the shared gateway.")
+            span.set_attribute("agent.procedure", "Check the shared gateway.")
+            span.set_attribute("guardrail.next_step", "Check the shared gateway.")
             span.add_event("tool.activity", {
                 "dispatch_origin": "model_request",
                 "selection.provenance": "model_public",
@@ -249,6 +257,12 @@ def test_decision_events_are_redacted_opt_in_and_absent_from_local_audit(monkeyp
             assert "Check the shared gateway." in content
             assert "fixture-private" not in content
             assert "provider-private" not in content
+        attributes = exporter.spans[-1].attributes
+        for key in ("selection.summary", "agent.goal", "agent.procedure", "guardrail.next_step"):
+            assert (key in attributes) is capture
+        if capture:
+            assert len(attributes["selection.summary"]) > 200
+            assert "fixture-private" not in attributes["selection.summary"]
         telemetry.close()
     audit = (runtime / "telemetry-audit.jsonl").read_text(encoding="utf-8")
     assert "fixture-private" not in audit
@@ -271,6 +285,32 @@ def test_exception_message_not_exported_and_root_trace_separation(monkeypatch, r
         exporter.spans[-1].attributes["langfuse.session.id"]
         == (exporter.spans[-2].attributes["langfuse.session.id"])
     )
+    telemetry.close()
+
+
+def test_tool_decision_attributes_do_not_evict_model_input_or_lineage(monkeypatch, runtime):
+    exporter = Exporter()
+    configured(monkeypatch, exporter)
+    monkeypatch.setenv("SUBSEA_SYNTHETIC_ONLY", "1")
+    monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1")
+    telemetry = module.Telemetry(runtime)
+    with telemetry.span("generation", {
+        "task_id": "task", "role": "event_diagnosis",
+        "langfuse.observation.input": '[{"role":"user","content":"Check this window."}]',
+    }, root=True) as span:
+        for index in range(24):
+            for suffix in (
+                "tool", "call_id", "provenance", "summary",
+                "parameter.summary", "parameter.provenance",
+            ):
+                span.set_attribute(f"model.tool_decision.{index}.{suffix}", "synthetic")
+    attributes = exporter.spans[-1].attributes
+    assert attributes["task_id"] == "task"
+    assert attributes["role"] == "event_diagnosis"
+    assert json.loads(attributes["langfuse.observation.input"])[0]["content"] == (
+        "Check this window."
+    )
+    assert attributes["model.tool_decision.23.parameter.summary"] == "synthetic"
     telemetry.close()
 
 
