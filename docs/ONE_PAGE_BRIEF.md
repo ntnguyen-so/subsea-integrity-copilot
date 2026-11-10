@@ -1,22 +1,28 @@
 # Subsea Integrity Copilot - Customer Brief
 
-**Customer and problem.** NorthSea Integrity Operations is a fictional offshore gas operator. Existing detectors flag unusual readings across its pipeline network. Engineers must connect sensor histories, timing, topology, shared gateways and operating records: leaks, sensor faults and operating changes can overlap. An alert is not a diagnosis. This work depends on experienced engineers and is difficult to hand over. Missed leaks risk environmental releases and disruption; false diagnoses can trigger costly vessel or ROV inspections.
+**The problem.** A pipeline can raise many anomaly alerts without revealing what caused them. Missing data, instrument faults, changes in measurement conditions or operations, and genuine leaks can look similar. Integrity engineers must correlate readings across many sensors and branches, check their timing and reliability, and consult operating and maintenance records. This is time-consuming work requiring domain knowledge: a leak and instrument problems can occur together.
 
-**Same data, different investigation.** Actual dashboard crops below share S7, seed 2026, source +50 to +110 seconds, measurements and detector alerts. This is an evidence window, not a measured event-onset time. The alert-only workflow illustrates the assumed customer process.
+**1. Cause:** Is the anomaly a leak, a disturbance affecting the measurements, or an instrument problem?
+
+**2. Location:** If a leak is suspected, which pipeline branch and section should be inspected?
+
+**3. Evidence:** Which readings and records support the leak or instrument-fault conclusion, and what must be verified before deploying maintenance teams?
+
+**Why S7 is difficult.** This simulated network has seven connected sections and 112 instruments over 11.2 km. In the illustrated minute, 69 instruments are flagged. A simulated P5 leak overlaps with spikes, gradual reading drift, missing or frozen values, and a shared connection problem affecting several P7 sensors. Engineers must compare nearby and paired sensors, timing and operating context to distinguish a leak pattern from a shared fault. Counting alerts is not enough.
 
 | Sensor alerts only | Agent-assisted investigation |
 |---|---|
 | ![Dashboard crop: individual pressure alerts and missing readings across seven pipeline segments](assets/brief-sensor-alerts.png) | ![Dashboard crop: suspected P5 leak, report-stated inspection priority and separate instrument issues](assets/brief-agent-assisted.png) |
-| **112 instruments; 69 flagged.** Orange = pressure alert; dashed outline = missing/invalid. The engineer must compare histories, retrieve records and connect the dots. No combined diagnosis or inspection area. | **An investigation to review.** Red = suspected P5 leak; green = report-stated 700-900 m inspection priority; purple = reported instrument issues. Not a confirmed leak location. |
+| **The engineer connects the dots.** Orange = pressure alert; dashed outline = missing/invalid. No combined diagnosis or inspection priority. | **A focused investigation to review.** Red = suspected P5 leak; green = reported 700-900 m inspection priority; purple = reported instrument issues. |
 
-**Three questions to test.** "Leak or faulty sensors?" "Where should we inspect, and why?" "What supports this, and what remains unknown?" Open measured comparisons, cited records, competing explanations and verification steps. A grounding reviewer checks source support; rejected reports are withheld. Unsupported locations stay withheld. Detector warnings never wait for AI. Detection evaluation uses pre-authored synthetic truth; answer-quality ratings are advisory model opinions.
+**How the system helps.** It monitors incoming measurements on an ongoing basis and assists the engineer by correlating sensor readings with relevant records. It explains competing causes, recommends inspection priorities and provides evidence and uncertainties for maintenance planning. The aim is faster, better-supported action, not simply more alerts or automatic deployment.
 
-**Buyers and objections.** The **Head of Subsea Operations** asks whether effort saved justifies integration, inference and review costs. The **Lead Subsea Integrity & Instrumentation Engineer** asks whether conclusions survive dirty data, conflicting records and reproduction from source. A cheaper fixed workflow may suffice; AI can be wrong; data access and accountability require approval.
+**Timeliness.** Numerical alerts do not wait for AI. Two controlled S7 rehearsals produced reviewed reports in about 2.5-2.8 minutes, excluding map updates. This is not a production response-time guarantee.
 
-**Offer and buying gate.** Propose a four-week, read-only shadow evaluation on one pipeline, starting after data/security readiness. Before authorization, sign scope, owners, acceptance thresholds and a total-spend cap covering actual Copilot entitlement/usage, hosting, integration, review and support; all prices/effort remain unknown. Compare blinded manual, strong-fixed and agent workflows on independent event-level cases, including all failures and total human handling time. Proposed gates and readiness checklist: [report](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/REPORT.md#commercial-and-meeting-contract). Too few cases means extend or stop, not pass. No savings or response-time guarantee.
+**Why it matters.** A missed leak can damage the marine environment, interrupt production and trigger regulatory action, potentially including loss of operating permissions. False diagnoses can cause unnecessary vessel or remotely operated vehicle deployments.
 
-**Why this problem.** My PhD studied marine data quality, anomaly detection and translating expert requirements into reviewable software.
+**Next step.** A read-only pilot with the Head of Subsea Operations and Lead Integrity Engineer should compare evidence quality, total engineer handling time, response time and cost against manual and fixed workflows.
 
-**Limits.** Synthetic data, not hydraulic validation or field reliability. Images show a selected recording, not new inference or labor savings. Fresh runs have a 900s deadline, not a response-time guarantee; [measured cohorts and failures](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/RESULTS.md) retain their original conditions. Inspection priorities are not dispatch authorization. Connectors, expert-approved knowledge and human safety authority remain customer prerequisites.
+**Scope.** Illustrative synthetic data, not field validation or proven labor savings. Both dashboard crops use identical measurements and alerts. Inspection priorities are not confirmed leak coordinates or deployment authorization; humans retain safety authority.
 
-**Demo and run instructions:** [github.com/ntnguyen-so/subsea-integrity-copilot](https://github.com/ntnguyen-so/subsea-integrity-copilot). [Capture evidence](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/evidence/brief-dashboard-comparison.json).
+**Demo:** [run instructions](https://github.com/ntnguyen-so/subsea-integrity-copilot). [Dashboard evidence](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/evidence/brief-dashboard-comparison.json). [Timing and limitations](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/RESULTS.md).
