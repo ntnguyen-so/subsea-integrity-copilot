@@ -66,7 +66,8 @@ $env:SUBSEA_RUNTIME_DIR = $root
 $env:LANGSMITH_TRACING = "false"
 $env:LANGCHAIN_TRACING_V2 = "false"
 $env:SUBSEA_SYNTHETIC_ONLY = "1"
-$env:SUBSEA_TRACE_CONTENT = "0"
+# This owned environment contains synthetic demo data only. Preserve an explicit opt-out.
+if (-not $env:SUBSEA_TRACE_CONTENT) { $env:SUBSEA_TRACE_CONTENT = "1" }
 $env:SUBSEA_TELEMETRY_ENABLED = "1"
 $env:SUBSEA_LANGFUSE_ENABLED = "1"
 $env:SUBSEA_TRACE_SYNC = "0"

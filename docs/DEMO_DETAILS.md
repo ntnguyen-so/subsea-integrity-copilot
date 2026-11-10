@@ -136,6 +136,42 @@ does not prove a trace is stored: use the task's original trace link/verificatio
 The console shows reported usage and a labelled API-equivalent cost estimate,
 **not a Copilot bill**; missing telemetry is unknown, not zero.
 
+The owned environment loader now enables detailed capture for this synthetic demo.
+Set `$env:SUBSEA_TRACE_CONTENT = '0'` **before** dot-sourcing it to opt out.
+Ordinary application defaults still require both capture and synthetic-only flags.
+Restart existing API/worker processes after changing code or capture settings;
+old traces are not backfilled.
+
+To debug a **new** detailed trace, open the individual observation's Preview:
+
+- **Tool Input:** `selection` separates application-required intake from a
+  model-public `decision_summary`, or explicitly marks it `not_recorded`.
+  It includes the intended check, applicable knowledge IDs and the originating
+  model call/span/turn. `arguments` and `scope` show the actual requested read,
+  pinned input hash, simulation window and source clock. A declared purpose is
+  not proof that the call or its eventual interpretation was appropriate.
+- **Generation Input and Metadata:** Input is the actual message view;
+  `model.context.input` records available tool schemas, transport instructions,
+  receipt identities, context limits, and archived/consolidated receipts.
+  An available receipt is not necessarily a source used in the answer.
+- **Tool Output:** `execution` distinguishes accepted, executed, replayed and
+  new progress. `result` contains the returned evidence or handoff, including
+  original references and comparison pagination. A failed read exposes its
+  diagnostic instead of a successful finding; unexpected errors are re-raised.
+- **Review Output:** structural/domain validation `passed` is separate from
+  semantic `accept`/`revise`. Review observations expose every verdict, reason,
+  support reference and correction, plus the candidate hash. A reviewer allowing
+  publication does not bypass the remaining publication gates.
+- **Failures and repairs:** inspect `error.code`, the failed phase, safe exception
+  type/SQLSTATE when available, structured validation feedback and the next
+  repair observation. Transport repair consumes the same persisted call budget.
+
+Captured fields are redacted and capped at **524,288 characters per field**.
+Oversized captures remain valid JSON with an explicit `capture.truncated` flag,
+a redacted-content fingerprint and a partial `preview`; they are not full
+transcripts. Provider-private reasoning and credentials are excluded, and the
+local telemetry audit remains content-free.
+
 When a server holds Python executables open on Windows, use `--no-sync` for
 auxiliary commands. Install/restore dependencies before starting the server.
 

@@ -4,7 +4,7 @@ Local payload fixtures require no model/tool execution; failed reads must never
 publish successful findings or unchecked claim references.
 """
 
-from subsea_copilot.public_activity import public_check
+from subsea_copilot.public_activity import public_check, tool_selection
 
 
 def test_public_checks_separate_agent_question_from_observed_output():
@@ -45,3 +45,26 @@ def test_failed_public_check_does_not_publish_success_or_unchecked_claims():
     assert failed["status"] == "failed"
     assert "No successful finding" in failed["observation"]
     assert "claim_refs" not in failed
+
+
+def test_tool_selection_does_not_invent_model_reasons_or_mislabel_required_intake():
+    call = {"id": "call", "name": "history.compare", "args": {
+        "check_question": "Do independent neighbors change together?", "intent": "test_leak",
+    }}
+    missing = tool_selection("event_diagnosis", call)
+    assert missing["decision_summary"] is None
+    assert missing["decision_provenance"] == "not_recorded"
+    assert missing["check_question"] == call["args"]["check_question"]
+    public = tool_selection("event_diagnosis", {
+        **call, "decision_summary": "Compare the independent reference pair.",
+        "model_call_id": "turn", "model_span_id": "span", "model_turn_index": 2,
+    })
+    assert public["decision_provenance"] == "model_public"
+    assert public["model_call_id"] == "turn"
+    required = tool_selection("event_diagnosis", {
+        **call, "origin": "application_required_intake",
+        "decision_summary": "Not a model decision.", "model_call_id": "not-applicable",
+    })
+    assert required["decision_provenance"] == "application_required_intake"
+    assert required["model_call_id"] is None
+    assert "Not a model decision." not in required["decision_summary"]

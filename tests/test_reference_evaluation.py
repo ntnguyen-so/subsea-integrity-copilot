@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import Mock
@@ -263,6 +264,7 @@ def test_coordinator_groups_mixed_evidence_for_lossless_bounded_delivery() -> No
 def test_invalid_check_plan_is_audited_without_reading_and_scope_still_fails(tmp_path: Any) -> None:
     task = Mock(
         role="event_diagnosis",
+        decision_policy="legacy-v1",
         id="task",
         generation_id="generation",
         snapshot_id="window",
@@ -280,6 +282,11 @@ def test_invalid_check_plan_is_audited_without_reading_and_scope_still_fails(tmp
         pack_version="pack",
         baseline_version="baseline",
         parameter_version="parameters",
+        input_hash="pinned-input",
+        window_start=datetime(2026, 1, 1, tzinfo=UTC),
+        window_end=datetime(2026, 1, 1, 0, 1, tzinfo=UTC),
+        end_seconds=120,
+        clock_seconds=125,
     )
     store = Mock()
     receipts: list[dict[str, Any]] = []
@@ -346,6 +353,7 @@ def test_invalid_evidence_identifiers_are_repairable_but_foreign_scope_is_not(
 ) -> None:
     task = Mock(
         role="event_diagnosis",
+        decision_policy="legacy-v1",
         id="task",
         generation_id="generation",
         snapshot_id="window",
@@ -360,6 +368,11 @@ def test_invalid_evidence_identifiers_are_repairable_but_foreign_scope_is_not(
         baseline_version="baseline",
         parameter_version="parameters",
         evidence={"ev-current": Mock()},
+        input_hash="pinned-input",
+        window_start=datetime(2026, 1, 1, tzinfo=UTC),
+        window_end=datetime(2026, 1, 1, 0, 1, tzinfo=UTC),
+        end_seconds=120,
+        clock_seconds=125,
     )
     store = Mock()
     receipts: list[dict[str, Any]] = []

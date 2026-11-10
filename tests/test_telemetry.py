@@ -217,8 +217,42 @@ def test_detailed_json_capture_preserves_safe_bytes_and_redacts_private_fields()
     assert "synthetic-test-only" not in captured
     assert "private-provider-thought" not in captured
     assert "Missing readings stay unknown." in captured
-    oversized = str(module._safe("input", "x" * 400000, True))
-    assert "[Capture truncated at 196608 characters]" in oversized
+    oversized = str(module._safe("input", "x" * (module.TRACE_CONTENT_LIMIT * 2), True))
+    payload = json.loads(oversized)
+    assert payload["capture"]["truncated"] is True
+    assert payload["capture"]["redacted_chars"] == module.TRACE_CONTENT_LIMIT * 2
+    assert len(oversized) <= module.TRACE_CONTENT_LIMIT
+
+
+def test_decision_events_are_redacted_opt_in_and_absent_from_local_audit(monkeypatch, runtime):
+    exporter = Exporter()
+    configured(monkeypatch, exporter)
+    monkeypatch.setenv("SUBSEA_SYNTHETIC_ONLY", "1")
+    for capture in (False, True):
+        monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1" if capture else "0")
+        telemetry = module.Telemetry(runtime)
+        with telemetry.span("tool.read", root=True) as span:
+            span.add_event("tool.activity", {
+                "dispatch_origin": "model_request",
+                "selection.provenance": "model_public",
+                "tool.selection.input": json.dumps({
+                    "decision_summary": "Check the shared gateway. password=fixture-private",
+                    "reasoning": "Never export provider-private thoughts.",
+                }),
+            })
+        event = exporter.spans[-1].events[-1]
+        assert event.attributes["dispatch_origin"] == "model_request"
+        assert event.attributes["selection.provenance"] == "model_public"
+        content = event.attributes.get("tool.selection.input")
+        assert bool(content) is capture
+        if capture:
+            assert "Check the shared gateway." in content
+            assert "fixture-private" not in content
+            assert "provider-private" not in content
+        telemetry.close()
+    audit = (runtime / "telemetry-audit.jsonl").read_text(encoding="utf-8")
+    assert "fixture-private" not in audit
+    assert "Check the shared gateway." not in audit
 
 
 def test_exception_message_not_exported_and_root_trace_separation(monkeypatch, runtime):

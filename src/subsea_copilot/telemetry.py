@@ -47,9 +47,10 @@ _SESSION_IDENTITIES = ("tenant_id", "site_id", "replay_generation_id", "episode_
 _CONTENT = re.compile(r"prompt(?![._](?:hash|sha256|chars))|content|input$|output$|reasoning", re.I)
 _SAFE_STRING = re.compile(
     r"(?:^|[._])(?:id|hash|sha256|name|role|phase|mode|purpose|outcome|status|code|model|source|tool|"
-    r"version|requested_model|observed_model|model_identity_source|error|type|session)$"
+    r"version|requested_model|observed_model|model_identity_source|error|type|session|"
+    r"origin|provenance|relationship|reference|decision)$"
 )
-TRACE_CONTENT_LIMIT = 192 * 1024
+TRACE_CONTENT_LIMIT = 512 * 1024
 
 
 def _enabled(name: str, default: bool = False) -> bool:
@@ -86,14 +87,20 @@ def _safe(key: str, value: object, content_enabled: bool) -> object | None:
         if not content_enabled or not isinstance(value, str):
             return None
         value = _redact_content(value)
-        return (
-            value
-            if len(value) <= TRACE_CONTENT_LIMIT
-            else (
-                value[:TRACE_CONTENT_LIMIT]
-                + f"\n[Capture truncated at {TRACE_CONTENT_LIMIT} characters]"
-            )
-        )
+        if len(value) <= TRACE_CONTENT_LIMIT:
+            return value
+        capture = {
+            "truncated": True,
+            "redacted_chars": len(value),
+            "redacted_sha256": _hash(value),
+            "note": f"[Capture truncated at {TRACE_CONTENT_LIMIT} characters]",
+        }
+        preview = value[:TRACE_CONTENT_LIMIT // 2]
+        while True:
+            bounded = json.dumps({"capture": capture, "preview": preview}, ensure_ascii=False)
+            if len(bounded) <= TRACE_CONTENT_LIMIT:
+                return bounded
+            preview = preview[:len(preview) // 2]
     if type(value) in {bool, int, float}:
         if isinstance(value, float) and not math.isfinite(value):
             return None

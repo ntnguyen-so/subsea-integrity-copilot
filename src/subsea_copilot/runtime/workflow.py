@@ -71,7 +71,7 @@ from subsea_copilot.grounding import (
 from subsea_copilot.investigation import history_reference_ids
 from subsea_copilot.knowledge import KnowledgePacket, load_knowledge, select_knowledge
 from subsea_copilot.prompts import load_prompt, prompt_manifest_sha256
-from subsea_copilot.public_activity import ROLE_NAMES
+from subsea_copilot.public_activity import ROLE_NAMES, tool_selection
 from subsea_copilot.runtime.agent import (
     WorkPlan,
     build_graph,
@@ -1296,6 +1296,14 @@ class AgentService:
                     raise
                 guardrail.set_attribute("validation.status", "passed")
                 guardrail.update_name(f"{ROLE_NAMES[task.role]} / {phase} check: passed")
+                if isinstance(accepted, GroundingAssessment):
+                    issues = sum(check.verdict != "supported" for check in accepted.checks)
+                    guardrail.set_attribute("review.decision", accepted.decision)
+                    guardrail.set_attribute("review.issue_count", issues)
+                    guardrail.update_name(
+                        f"{ROLE_NAMES[task.role]} / semantic review: "
+                        f"{accepted.decision} ({issues} issues)"
+                    )
                 resolved = [
                     identifier
                     for message in output.get("messages", [])
@@ -1308,7 +1316,21 @@ class AgentService:
                 ]
                 guardrail.set_attribute(
                     "langfuse.observation.output",
-                    json.dumps({"status": "passed", "resolved_rejection_ids": resolved}),
+                    json.dumps({
+                        "status": "passed",
+                        "meaning": "The response passed this phase's structural/domain validator.",
+                        "phase": phase,
+                        "resolved_rejection_ids": resolved,
+                        "validated_output": accepted.model_dump(mode="json"),
+                        **({
+                            "semantic_decision": accepted.decision,
+                            "publication_allowed": accepted.decision == "accept",
+                            "candidate_hash": candidate_hash(candidate),
+                            "source_references": sorted(sources),
+                            "note": "Valid review output does not mean the draft was accepted.",
+                        } if isinstance(accepted, GroundingAssessment)
+                           and candidate is not None else {}),
+                    }),
                 )
                 self._harness_event(current, "validation.passed", {
                     "phase": phase, "role": task.role, "candidate_sha256": content_hash(value),
@@ -1673,13 +1695,45 @@ class AgentService:
                             ),
                         },
                     ) as span:
+                        span.set_attribute("model.context.input", json.dumps({
+                            **view.metadata(),
+                            "serialized_prompt_sha256": hashlib.sha256(
+                                view.prompt.encode("utf-8")
+                            ).hexdigest(),
+                            "transport_instructions": load_prompt("transport").content,
+                            "available_tools": schemas,
+                            "receipt_sources": [{
+                                "call_id": receipt["call_id"],
+                                "tool": receipt["name"],
+                                "accepted": not bool(receipt.get("error")),
+                                "result_sha256": content_hash(receipt.get("result")),
+                            } for receipt in receipts],
+                            "note": "Receipt availability is not proof of use in the answer. "
+                            "Archived/consolidated lists and actual input show the model view.",
+                        }, allow_nan=False))
                         remaining = (task.deadline - utc_now()).total_seconds()
                         if remaining <= 0:
                             raise ValidationError("deadline", "Root elapsed-time bound exhausted.")
-                        response = model.invoke(
-                            invocation_messages,
-                            timeout=min(float(MODEL_TIMEOUT_SECONDS), remaining),
-                        )
+                        try:
+                            response = model.invoke(
+                                invocation_messages,
+                                timeout=min(float(MODEL_TIMEOUT_SECONDS), remaining),
+                            )
+                        except Exception as exc:
+                            failure_code = getattr(exc, "code", "model_failed")
+                            failure_metadata = getattr(exc, "metadata", {})
+                            span.set_attribute("error.code", failure_code)
+                            span.set_attribute("langfuse.observation.output", json.dumps({
+                                "status": "failed",
+                                "error_code": failure_code,
+                                "exception_type": type(exc).__name__,
+                                "response_validation_stage": failure_metadata.get(
+                                    "response_validation_stage"
+                                ),
+                                "note": "No model response was accepted. Subsequent repair "
+                                "decisions are separate guardrail observations.",
+                            }))
+                            raise
                         requested_tools = list(
                             dict.fromkeys(
                                 call["name"]
@@ -1709,7 +1763,30 @@ class AgentService:
                         )
                         span.set_attribute("model.repair_attempt", len(repair_feedback))
                         span.set_attribute("model.tool_count", len(response.tool_calls))
-                        for tool_call in response.tool_calls:
+                        trace_context: dict[str, Any] = getattr(
+                            self.telemetry, "trace_metadata", lambda: {},
+                        )()
+                        response.additional_kwargs["subsea.trace"] = {
+                            "model_call_id": call_id,
+                            "model_span_id": trace_context.get("span_id"),
+                            "model_turn_index": task.model_calls,
+                        }
+                        decisions: dict[str, Any] = response.additional_kwargs.get(
+                            "decision_summaries", {},
+                        )
+                        decisions = decisions if isinstance(decisions, dict) else {}
+                        selections = [{
+                            "call_id": tool_call["id"],
+                            "tool": tool_call["name"],
+                            **tool_selection(task.role, {
+                                **tool_call,
+                                **response.additional_kwargs["subsea.trace"],
+                                "decision_summary": decisions.get(tool_call["id"] or ""),
+                            }),
+                        } for tool_call in response.tool_calls]
+                        for tool_call, selection in zip(
+                            response.tool_calls, selections, strict=True,
+                        ):
                             span.add_event(
                                 "model.tool_selected",
                                 {
@@ -1724,6 +1801,8 @@ class AgentService:
                                     ),
                                     "source": "observed_model_tool_request",
                                     "model.turn.index": task.model_calls,
+                                    "selection.provenance": selection["decision_provenance"],
+                                    "tool.selection.input": json.dumps(selection),
                                 },
                             )
                         if response.usage_metadata:
@@ -1740,6 +1819,7 @@ class AgentService:
                                     "repair_codes": repair_feedback,
                                     "content": response.content,
                                     "tool_calls": response.tool_calls,
+                                    "tool_decisions": selections,
                                 },
                                 allow_nan=False,
                             ),
@@ -1789,6 +1869,24 @@ class AgentService:
                                 "repair_limit": SCHEMA_REPAIR_LIMIT,
                             },
                         )
+                        with self.telemetry.span("guardrail", {
+                            "task_id": task.id, "role": task.role, "phase": phase,
+                            "model_call_id": call_id, "error.code": metadata["error"],
+                            "validation.status": "failed",
+                            "validation.repair_requested": retry,
+                            "langfuse.observation.output": json.dumps({
+                                **transport_feedback,
+                                "source_model_call_id": call_id,
+                                "repair_requested": retry,
+                                "repair_attempt": transport_repairs + 1,
+                                "remaining_model_turns": remaining_turns,
+                                "repair_limit": SCHEMA_REPAIR_LIMIT,
+                            }),
+                        }) as repair_span:
+                            repair_span.update_name(
+                                "Transport envelope / "
+                                + ("repair requested" if retry else "rejected")
+                            )
                         if retry:
                             transport_repairs += 1
                             continue
@@ -1801,7 +1899,13 @@ class AgentService:
                     else:
                         self._event(task, "model.completed", metadata)
             else:
-                results = [gateway.dispatch(call) for call in request["calls"]]
+                selection_context = request.get("selection_context", {})
+                decisions = request.get("decision_summaries", {})
+                results = [gateway.dispatch({
+                    **call,
+                    **selection_context,
+                    "decision_summary": decisions.get(call["id"]),
+                }) for call in request["calls"]]
                 task = gateway.task
                 resumed = tool_messages(request["calls"], results)
             output = graph.invoke(Command(resume=resumed), config)
@@ -1999,7 +2103,26 @@ class AgentService:
                 knowledge_packet=task.knowledge_packet,
                 decision_policy=task.decision_policy,
             )
-            self.store.create_child(child, index, plan_revision=1, lease_token=task.lease_token)
+            with self.telemetry.span("handoff", {
+                "task_id": task.id, "child_id": child.id, "role": role,
+                "selection.provenance": "validated_model_plan",
+                "langfuse.observation.input": json.dumps({
+                    "plan": task.plan, "step_index": index, "step": step,
+                    "child_task_id": child.id, "role": role, "question": task.question,
+                    "snapshot_id": snapshot.id, "purpose": REGISTRY[role].purpose,
+                    "policy": "Serial prerequisites: quality before diagnosis, then synthesis. "
+                    "The gateway revalidates accepted prerequisites before their use.",
+                    "provenance": "Validated model-selected plan; execution order is "
+                    "application policy.",
+                }),
+            }) as handoff:
+                self.store.create_child(child, index, plan_revision=1, lease_token=task.lease_token)
+                handoff.set_attribute("outcome", "WAITING_ON_CHILD")
+                handoff.set_attribute("langfuse.observation.output", json.dumps({
+                    "child_task_id": child.id, "child_state": "QUEUED",
+                    "parent_state": self.store.get_task(task.id).state,
+                    "resume_condition": "Child reaches a compatible, validated terminal result.",
+                }))
             parent = self.store.get_task(task.id)
             if parent.state not in {
                 "WAITING_ON_CHILD",

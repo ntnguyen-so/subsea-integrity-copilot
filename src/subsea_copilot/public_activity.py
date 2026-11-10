@@ -16,6 +16,10 @@ ROLE_NAMES = {
     "operator_response": "Response Coordinator",
 }
 TOOL_PURPOSES = {
+    "pressure.measurements": (
+        "Read the measured pressure pattern",
+        "Compare usable pressure measurements without treating a screening alert as a diagnosis.",
+    ),
     "quality.coverage": ("Check available readings", "Missing readings stay unknown, not zero."),
     "quality.conflicts": (
         "Check unusable or conflicting readings",
@@ -63,6 +67,39 @@ TOOL_PURPOSES = {
         "Verify the evidence before writing a recommendation.",
     ),
 }
+
+
+def tool_selection(role: str, call: dict[str, Any]) -> dict[str, Any]:
+    """Keep application policy, model-public explanations and missing explanations distinct."""
+    origin = call.get("origin", "model_request")
+    title, purpose = TOOL_PURPOSES.get(
+        call["name"], ("Read scoped evidence", "Check only authorized evidence.")
+    )
+    summary = call.get("decision_summary")
+    summary = summary.strip() if isinstance(summary, str) else ""
+    arguments = call["args"] if isinstance(call["args"], dict) else {}
+    required = origin == "application_required_intake"
+    return {
+        "origin": origin,
+        "title": title,
+        "purpose": purpose,
+        "decision_summary": (
+            f"Application-required intake for {ROLE_NAMES[role]}. {purpose}"
+            if required else summary or None
+        ),
+        "decision_provenance": (
+            "application_required_intake" if required else "model_public" if summary
+            else "not_recorded"
+        ),
+        "selection_rule": "required-intake-v1" if required else "observed_model_tool_request",
+        "model_call_id": None if required else call.get("model_call_id"),
+        "model_span_id": None if required else call.get("model_span_id"),
+        "model_turn_index": None if required else call.get("model_turn_index"),
+        "check_question": arguments.get("check_question"),
+        "declared_intent": arguments.get("intent"),
+        "knowledge_ids": arguments.get("knowledge_ids", []),
+        "authority": "A selection is a request, not authorization or evidence of correctness.",
+    }
 
 
 def public_check(

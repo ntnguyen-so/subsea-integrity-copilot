@@ -114,7 +114,12 @@ def build_graph(
     def tools(state: GraphState) -> dict[str, Any]:
         message = state["messages"][-1]
         assert isinstance(message, AIMessage)
-        response = interrupt({"kind": "tools", "calls": message.tool_calls})
+        response = interrupt({
+            "kind": "tools",
+            "calls": message.tool_calls,
+            "selection_context": message.additional_kwargs.get("subsea.trace", {}),
+            "decision_summaries": message.additional_kwargs.get("decision_summaries", {}),
+        })
         return {"messages": response}
 
     def parse(state: GraphState) -> dict[str, Any]:

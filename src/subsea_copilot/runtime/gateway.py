@@ -26,7 +26,7 @@ from subsea_copilot.contracts import (
 )
 from subsea_copilot.history import HistoryRangeCache, read_history
 from subsea_copilot.profiles import compact_comparison
-from subsea_copilot.public_activity import public_check
+from subsea_copilot.public_activity import public_check, tool_selection
 from subsea_copilot.runtime.diagnostics import validation_diagnostic
 from subsea_copilot.runtime.registry import role_policy, tool_schemas
 from subsea_copilot.store import BudgetExceeded
@@ -499,6 +499,78 @@ class ToolGateway:
             }
         raise ValidationError("tool_authority", "Unknown read.")
 
+    def _trace_attributes(self, call: dict[str, Any]) -> dict[str, Any]:
+        selection = tool_selection(self.task.role, call)
+        name = (
+            call["name"] if call["name"] in role_policy(
+                self.task.role, self.task.decision_policy
+            ).tools else "unauthorized"
+        )
+        return {
+            "task_id": self.task.id,
+            "role": self.task.role,
+            "tool": name,
+            "call_id": call["id"],
+            "dispatch_origin": selection["origin"],
+            "selection.provenance": selection["decision_provenance"],
+            "model_call_id": selection["model_call_id"] or "",
+            "model_span_id": selection["model_span_id"] or "",
+            "model.turn.index": selection["model_turn_index"] or 0,
+            "tool.selection.input": json.dumps(selection, allow_nan=False),
+            "langfuse.observation.input": json.dumps({
+                "tool": name,
+                "arguments": call["args"],
+                "selection": selection,
+                "scope": {
+                    "snapshot_id": self.snapshot.id,
+                    "input_hash": self.snapshot.input_hash,
+                    "window_start_seconds": self.snapshot.end_seconds - (
+                        self.snapshot.window_end - self.snapshot.window_start
+                    ).total_seconds(),
+                    "window_end_seconds": self.snapshot.end_seconds,
+                    "source_clock_seconds": self.snapshot.clock_seconds,
+                    "decision_policy": self.task.decision_policy,
+                },
+            }, allow_nan=False),
+        }
+
+    def _trace_outcome(
+        self, span: Any, call: dict[str, Any], result: dict[str, Any] | None,
+        error: str | None, diagnostic: dict[str, Any] | None, *,
+        executed: bool, replayed: bool = False,
+    ) -> None:
+        update = public_check(
+            self.task.role, call["id"], call["name"], call["args"],
+            result, error, completed=True,
+        )
+        execution = {
+            "executed": executed,
+            "accepted": error is None,
+            "replayed": replayed,
+            "progress": error is None and not replayed,
+            "execution_order": None if replayed else self.task.tool_calls,
+        }
+        for key, value in execution.items():
+            span.set_attribute(f"tool.{key}", value)
+        span.set_attribute(
+            "outcome", "failed" if error else "replayed" if replayed else "completed",
+        )
+        span.set_attribute("evidence.claim_count", len(update.get("claim_refs", [])))
+        span.set_attribute(
+            "langfuse.observation.output",
+            json.dumps({
+                "public_update": update, "execution": execution,
+                "result": result, "error": error, "rejection": diagnostic,
+            }, allow_nan=False),
+        )
+        span.add_event("tool.activity", {
+            "call_id": call["id"], "tool": call["name"], "role": self.task.role,
+            "tool.accepted": error is None, "tool.executed": executed,
+            "tool.replayed": replayed,
+            "tool.selection.input": json.dumps(tool_selection(self.task.role, call)),
+            "tool.result.output": json.dumps(update),
+        })
+
     def dispatch(self, call: dict[str, Any]) -> dict[str, Any]:
         """Authorize, replay-or-reserve, execute and persist a bounded read outcome."""
         call_id, name, arguments = call["id"], call["name"], call["args"]
@@ -511,6 +583,13 @@ class ToolGateway:
                     if receipt["name"] != name or receipt["arguments"] != arguments:
                         raise ValidationError(
                             "receipt_conflict", "Replayed call changed its payload."
+                        )
+                    with self.telemetry.span(
+                        f"tool.{name}", self._trace_attributes(call),
+                    ) as span:
+                        self._trace_outcome(
+                            span, call, receipt.get("result"), receipt.get("error"),
+                            receipt.get("diagnostic"), executed=False, replayed=True,
                         )
                     return {
                         "result": receipt.get("result"), "error": receipt.get("error"),
@@ -539,10 +618,10 @@ class ToolGateway:
             self.store.record_task_event(
                 self.task.id, self.task.lease_token, "tool.rejected", diagnostic
             )
-            with self.telemetry.span("tool.rejected", {
-                "call_id": call_id, "role": self.task.role,
-            }) as span:
+            with self.telemetry.span("tool.rejected", self._trace_attributes(call)) as span:
                 span.set_attribute("error.code", exc.code)
+                span.set_attribute("tool.executed", False)
+                span.set_attribute("tool.accepted", False)
                 span.set_attribute("langfuse.observation.output", json.dumps(diagnostic))
                 span.record_exception(exc)
             raise
@@ -560,14 +639,7 @@ class ToolGateway:
         executed = False
         with self.telemetry.span(
             f"tool.{name}",
-            {
-                "task_id": self.task.id,
-                "role": self.task.role,
-                "tool": name,
-                "call_id": call_id,
-                "dispatch_origin": call.get("origin", "model_request"),
-                "langfuse.observation.input": json.dumps(arguments, allow_nan=False),
-            },
+            self._trace_attributes(call),
         ) as span:
             try:
                 # Argument failures consume the reserved attempt but yield no accepted evidence.
@@ -598,6 +670,20 @@ class ToolGateway:
                 self.store.record_task_event(
                     self.task.id, self.task.lease_token, "tool.rejected", diagnostic,
                 )
+            except Exception as exc:
+                error = getattr(exc, "code", "tool_failed")
+                span.set_attribute("error.code", error)
+                self._trace_outcome(
+                    span, call, None, error, {
+                        "code": error,
+                        "exception_type": type(exc).__name__,
+                        "sqlstate": getattr(exc, "sqlstate", None),
+                        "executed": executed,
+                        "result_accepted": False,
+                        "repair_requested": False,
+                    }, executed=executed,
+                )
+                raise
             self.store.record_tool_call(
                 self.task.id,
                 call_id,
@@ -619,12 +705,7 @@ class ToolGateway:
                 task_id=self.task.id,
                 snapshot_id=self.task.snapshot_id,
             )
-            span.set_attribute(
-                "langfuse.observation.output",
-                json.dumps({"public_update": update, "result": result}, allow_nan=False),
-            )
-            span.set_attribute("outcome", "failed" if error else "completed")
-            span.set_attribute("evidence.claim_count", len(update.get("claim_refs", [])))
+            self._trace_outcome(span, call, result, error, diagnostic, executed=executed)
             span.add_event(
                 "evidence.returned",
                 {

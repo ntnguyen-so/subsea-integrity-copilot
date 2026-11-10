@@ -7,6 +7,115 @@ are intentionally preserved in `evidence/`; some are application inputs.
 Use the [engineering report](REPORT.md) for current architecture and
 [demo reference](DEMO_DETAILS.md) for current commands.
 
+## Detailed agent tracing: decisions, evidence and review corrections
+
+New synthetic investigations expose the public decision and its provenance,
+not just tool names and handoffs. This follows the current CustomerOps tracing
+contract; it does not request or export provider-private chain-of-thought.
+The [retained comparison and recording receipt](evidence/detailed-agent-tracing.json)
+distinguishes source-contract comparison, observed stored content and run outcomes.
+
+| Debugging question | CustomerOps reference contract | New Subsea trace |
+| --- | --- | --- |
+| Why request this tool? | Public per-call decision and explicit missing provenance | `Input.selection.decision_summary`, `decision_provenance`, declared check and knowledge IDs |
+| Was it the model's choice? | Model/tool selection relationship | `application_required_intake` versus `model_request`; mandatory reads never acquire an invented model explanation |
+| What could the model see? | Captured prompt, context ledger and source-call links | Actual Generation Input plus `model.context.input`: schemas, transport instructions, limits, archived/consolidated receipts and source receipt IDs |
+| Which turn requested this read? | Model-turn reference and tool-call ID | Exact `model_span_id`, `model_call_id`, turn index and call ID, preserved across graph interrupts |
+| What came back, and was it accepted? | Public tool activity, evidence references, accepted/replayed/progress | Full Tool Output, original evidence/handoff references, execution flags and diagnostics; cached replay is not new progress |
+| Why was an answer blocked? | Structured checker diagnostics and repair guidance | Actual semantic `accept`/`revise`, per-unit verdicts, reasons, source references and corrections, separate from valid review JSON |
+| Where did execution fail? | Failure stage, safe diagnostics and repair status | Model/tool error code, safe exception type, SQLSTATE when available, validation feedback, and explicit bounded repair observations |
+
+The comparison inspected current CustomerOps implementation points
+`_model_public_tool_decisions`, `_record_tool_activity`, `_record_model_span`
+and `record_validation_content`, plus an actual stored CustomerOps execution
+`608e89b197110fc13fb40d1efb977465`. That historical reference has different
+capture coverage; its observation count is not a target, performance baseline
+or evidence that every current reference field was captured in the past.
+
+### A concrete S7 correction visible without opening PostgreSQL
+
+The refreshed timeline execution is **S7, seed 2026, +120s**, with pinned
+window **[60,120)** and source clock **125s**:
+[open its actual Langfuse trace](http://127.0.0.1:3001/project/subsea-copilot/traces/3c147782376b6ff869d073cd2848eaf5).
+Its input hash exactly matches the original user-supplied `f96023...` execution:
+`ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00`.
+It is a new execution, not a rewrite of the earlier trace.
+
+All **69 observations** have stored input and output: 5 AGENT, 10 GENERATION,
+45 TOOL, 7 GUARDRAIL and 2 handoff SPAN observations. The 45 reads comprise
+**36 application-required** reads and **9 model-selected** reads. Their
+actual arguments and results were compared with the original scoped receipts;
+the model/tool identity links and complete, untruncated model contexts were
+also checked against stored observations.
+
+One model-selected comparison's public purpose is:
+**"Resolve the unflagged constant-reading concern and refine paired artifact and physical-pattern contrasts."**
+Its `model_span_id` is `eb339af31c08aa77`; tool observation `6296be26ebcab617`
+and the corresponding Generation Output contain the same call ID and explanation.
+
+The review observation
+[`8a874003dff88d99`](http://127.0.0.1:3001/project/subsea-copilot/traces/3c147782376b6ff869d073cd2848eaf5?observation=8a874003dff88d99)
+is visibly named **"Response Coordinator / semantic review: revise (1 issues)"**.
+Its Output says `publication_allowed: false` and exposes the rejected `answer`
+unit and its corrections. The reviewer objects to an unsupported
+**"Only 24/112 instruments received health review; unlisted instruments are not cleared."**
+sentence. Its correction cites `read-evidence-12b98f1e4d6dd1fa4fce8a88`
+and distinguishes the supplied bundle's 19 health entries from any unknown wider
+review scope. This is the reviewer's source-bound objection, not a new independent
+measurement of how many instruments were reviewed.
+
+After revision, review `8848e99c68d69830` accepts the result with zero issues,
+and the root succeeds. The report-to-map extraction completes separately.
+Here, structurally valid reviews exist on both sides of a semantic rejection;
+the trace no longer labels that sequence merely as generic passed checks.
+
+Implementation entry points are
+[public selection provenance](../src/subsea_copilot/public_activity.py#L72),
+[gateway input/outcome capture](../src/subsea_copilot/runtime/gateway.py#L502),
+[checkpointed tool context](../src/subsea_copilot/runtime/agent.py#L114),
+[model context and selection](../src/subsea_copilot/runtime/workflow.py#L1698),
+[semantic review output](../src/subsea_copilot/runtime/workflow.py#L1298)
+and [bounded/redacted capture](../src/subsea_copilot/telemetry.py#L76).
+The [operator debugging instructions](DEMO_DETAILS.md#live-runtime-and-observability)
+explain capture opt-out and field locations.
+
+Declared intent, gateway acceptance and reviewer acceptance are different forms
+of evidence. None is a field-safety certificate or a guarantee that a model's
+physical interpretation is correct. Old traces remain unchanged; full private
+transcripts are not backfilled.
+
+### Full parallel refresh and retained history
+
+After comparing the detailed S7 rehearsal with CustomerOps, all **66 unique
+scenario/checkpoint combinations** in the existing library were freshly run:
+S1-S7 at +95/+100/+105/+110/+120/+135/+150/+180/+360s, plus S1 +115/+260s
+and S4 +155s. The standard cohort used **8 parallel workers**, with the three
+intermediate runs also executed concurrently. The implementation fingerprint
+remained unchanged across both cohorts.
+
+All **792 operational checks** passed, all original stored trace trees were
+verified, and every final report received semantic acceptance. Results comprise
+**38 supported reports and 28 reviewed abstentions**, with **zero failed cases**.
+All 38 supported reports have completed report-to-map extraction; abstentions
+correctly retain `not_run_abstained`, not an invented diagnosis overlay.
+Ten intermediate semantic `revise` decisions remain visible alongside the
+66 final `accept` decisions.
+
+The stored-content audit checked **2,837 observations**, including **453
+investigation generations** and **1,571 tool observations**. Every observation
+has input and output; all actual model inputs and context metadata are
+untruncated. Tool arguments and results match the redacted original scoped
+receipts. All **205 model-selected** calls have their actual public decision
+and originating model identity; the other **1,366 reads** are explicitly
+application-required, not presented as model choices. The separate mapper is
+excluded from the investigation generation count.
+
+Publication added all 66 recordings without inference and retained the original
+82 recordings **unchanged as JSON values**, for **148 executions**. The running
+API was checked to select the refreshed S7 +120s report and return its original
+new trace link. The older `f96023...` trace remains unchanged and still lacks the
+new capture fields; open the new trace above to debug the refreshed execution.
+
 ## All seven scenarios have recorded main-timeline investigations
 
 Added **57 fresh S1-S6 investigations**: nine seed-2026 checkpoints per scenario

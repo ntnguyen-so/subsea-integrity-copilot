@@ -1381,6 +1381,195 @@ def test_investigation_trace_survives_worker_restart_and_contains_all_agent_atte
 
 
 @pytest.mark.parametrize("capture", [False, True])
+def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interrupts(
+    snapshot, monkeypatch, tmp_path, capture,
+):
+    import json
+
+    from langchain_core.outputs import ChatGeneration, ChatResult
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from subsea_copilot.telemetry import Telemetry
+
+    class PublicDecisionModel(ScriptedChatModel):
+        def _generate(self, messages, **kwargs):
+            context = json.loads(messages[0].content.split("\nBOUND_CONTEXT\n", 1)[1])
+            if self.role == "sensor_quality" and context["phase"] == "answer" and not any(
+                isinstance(message, ToolMessage) and message.tool_call_id == "public-read"
+                for message in messages
+            ):
+                return ChatResult(generations=[ChatGeneration(message=AIMessage(
+                    content="", tool_calls=[{
+                        "id": "public-read", "name": "evidence.get",
+                        "args": {**context["scope"], "ids": [next(iter(snapshot.evidence))]},
+                    }],
+                    additional_kwargs={"decision_summaries": {
+                        "public-read": "Verify the cited measurement. password=fixture-private",
+                    }},
+                ))])
+            return super()._generate(messages, **kwargs)
+
+    monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
+    monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1" if capture else "0")
+    monkeypatch.setenv("SUBSEA_SYNTHETIC_ONLY", "1")
+    store, service = service_for(
+        snapshot, lambda role, mode: PublicDecisionModel(role=role), InMemorySaver(),
+    )
+    exporter = InMemorySpanExporter()
+    telemetry = Telemetry(tmp_path)
+    telemetry.provider.add_span_processor(SimpleSpanProcessor(exporter))
+    service.telemetry = telemetry
+    try:
+        root = submit(service, snapshot, "What caused this event?")
+        drain(service)
+        assert store.get_task(root.id).state == "SUCCEEDED"
+        spans = exporter.get_finished_spans()
+        selected = next(
+            span for span in spans
+            if span.attributes.get("call_id") == "public-read"
+        )
+        assert selected.attributes["dispatch_origin"] == "model_request"
+        assert selected.attributes["selection.provenance"] == "model_public"
+        model = next(
+            span for span in spans
+            if span.attributes.get("call_id") == selected.attributes["model_call_id"]
+        )
+        assert selected.attributes["model_span_id"] == f"{model.context.span_id:016x}"
+        required = [
+            span for span in spans
+            if span.attributes.get("dispatch_origin") == "application_required_intake"
+        ]
+        assert required
+        assert all(
+            span.attributes["selection.provenance"] == "application_required_intake"
+            and not span.attributes["model_call_id"]
+            for span in required
+        )
+        if capture:
+            request = json.loads(selected.attributes["langfuse.observation.input"])
+            assert request["selection"]["decision_summary"].startswith(
+                "Verify the cited measurement."
+            )
+            assert "fixture-private" not in json.dumps(request)
+            decision = json.loads(model.attributes["langfuse.observation.output"])
+            assert decision["tool_decisions"][0]["call_id"] == "public-read"
+            assert "available_tools" in json.loads(model.attributes["model.context.input"])
+            assert any(
+                entry["call_id"] == "public-read"
+                for span in spans if span.attributes.get("model.context.input")
+                for entry in json.loads(span.attributes["model.context.input"])["receipt_sources"]
+            )
+        else:
+            assert "langfuse.observation.input" not in selected.attributes
+            assert "model.context.input" not in model.attributes
+        task = store.get_task(selected.attributes["task_id"])
+        receipt = next(
+            row for row in store.tool_receipts(task.id) if row["call_id"] == "public-read"
+        )
+        before = task.tool_calls
+        gateway = ToolGateway(store, task, snapshot, telemetry)
+        replay = gateway.dispatch({
+            "id": receipt["call_id"], "name": receipt["name"], "args": receipt["arguments"],
+            "model_call_id": selected.attributes["model_call_id"],
+        })
+        assert replay["result"] == receipt["result"]
+        cached = exporter.get_finished_spans()[-1]
+        assert cached.attributes["tool.replayed"] is True
+        assert cached.attributes["tool.executed"] is False
+        assert cached.attributes["tool.progress"] is False
+        assert store.get_task(task.id).tool_calls == before
+    finally:
+        telemetry.close()
+
+
+def test_schema_valid_review_exposes_semantic_rejection_in_guardrail(
+    snapshot, monkeypatch, tmp_path,
+):
+    import json
+
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from subsea_copilot.telemetry import Telemetry
+
+    monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
+    monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1")
+    monkeypatch.setenv("SUBSEA_SYNTHETIC_ONLY", "1")
+    store, service = service_for(snapshot, checkpointer=InMemorySaver())
+    exporter = InMemorySpanExporter()
+    telemetry = Telemetry(tmp_path)
+    telemetry.provider.add_span_processor(SimpleSpanProcessor(exporter))
+    service.telemetry = telemetry
+    try:
+        submit(service, snapshot, "Explain this event.")
+        claimed = store.claim_task("unit")
+        candidate, _ = revision_case()
+        parsed, _ = service._graph(claimed, snapshot, "critic-0", candidate=candidate)
+        assert parsed["decision"] == "revise"
+        guard = next(
+            span for span in exporter.get_finished_spans()
+            if span.attributes.get("review.decision")
+        )
+        assert guard.attributes["validation.status"] == "passed"
+        assert guard.attributes["review.decision"] == "revise"
+        assert "semantic review: revise" in guard.name
+        output = json.loads(guard.attributes["langfuse.observation.output"])
+        assert output["publication_allowed"] is False
+        assert output["validated_output"]["checks"]
+        assert output["source_references"]
+    finally:
+        telemetry.close()
+
+
+def test_unexpected_tool_failure_is_visible_without_an_accepted_receipt(
+    snapshot, monkeypatch, tmp_path,
+):
+    import json
+
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from subsea_copilot.telemetry import Telemetry
+
+    monkeypatch.setenv("SUBSEA_TELEMETRY_ENABLED", "0")
+    monkeypatch.setenv("SUBSEA_TRACE_CONTENT", "1")
+    monkeypatch.setenv("SUBSEA_SYNTHETIC_ONLY", "1")
+    store, service = service_for(snapshot)
+    submit(service, snapshot, "Health?")
+    service.run_once()
+    child = store.claim_task("unit")
+    exporter = InMemorySpanExporter()
+    telemetry = Telemetry(tmp_path)
+    telemetry.provider.add_span_processor(SimpleSpanProcessor(exporter))
+    gateway = ToolGateway(store, child, snapshot, telemetry)
+    scope = {
+        "site_id": snapshot.site_id, "snapshot_id": snapshot.id,
+        "pack_version": snapshot.pack_version, "baseline_version": snapshot.baseline_version,
+        "parameter_version": snapshot.parameter_version,
+    }
+
+    def broken_read(*args):
+        raise RuntimeError("password=fixture-private")
+
+    monkeypatch.setattr(gateway, "_read", broken_read)
+    try:
+        with pytest.raises(RuntimeError):
+            gateway.dispatch({"id": "broken", "name": "quality.coverage", "args": scope})
+        span = exporter.get_finished_spans()[-1]
+        assert span.attributes["error.code"] == "tool_failed"
+        assert span.attributes["tool.executed"] is True
+        assert span.attributes["tool.accepted"] is False
+        output = json.loads(span.attributes["langfuse.observation.output"])
+        assert output["rejection"]["exception_type"] == "RuntimeError"
+        assert output["result"] is None
+        assert "fixture-private" not in json.dumps(output)
+        assert not store.tool_receipts(child.id)
+    finally:
+        telemetry.close()
+
+
+@pytest.mark.parametrize("capture", [False, True])
 def test_guardrail_failures_record_codes_and_safe_feedback_before_repair(
     snapshot, monkeypatch, tmp_path, capture
 ):
