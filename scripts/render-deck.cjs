@@ -1,4 +1,4 @@
-// Rebuild shared figures and print the local HTML deck to docs/INTERVIEW_DECK.pdf.
+// Rebuild figures, embed the deck's screenshots and print docs/INTERVIEW_DECK.pdf.
 // Requires uv/project Python and Chrome/Playwright, not backend services or inference.
 // Reruns overwrite assets/PDF; a slide/page mismatch deletes the invalid PDF.
 const fs = require("node:fs/promises");
@@ -9,16 +9,30 @@ const { renderTopology } = require("./render-topology.cjs");
 
 async function main() {
   await renderTopology();
+  const source = path.join(__dirname, "..", "docs", "INTERVIEW_DECK.html");
+  let html = await fs.readFile(source, "utf8");
+  for (const asset of ["brief-sensor-alerts.png", "brief-agent-assisted.png"]) {
+    const pattern = new RegExp(`<img\\s+data-asset="${asset.replaceAll(".", "\\.")}"\\s+src="[^"]*"(\\s+[^>]*>)\\s*`);
+    if (!pattern.test(html)) throw new Error(`Missing embedded-image marker: ${asset}`);
+    const image = await fs.readFile(path.join(__dirname, "..", "docs", "assets", asset));
+    html = html.replace(pattern, (_, attributes) =>
+      `<img data-asset="${asset}"\n        src="data:image/png;base64,${image.toString("base64")}"\n        ${attributes.trimStart()}\n      `);
+  }
+  await fs.writeFile(source, html);
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
-    const source = path.join(__dirname, "..", "docs", "INTERVIEW_DECK.html");
     await page.goto(pathToFileURL(source).href);
     await page.locator("img").evaluateAll(images => Promise.all(images.map(image => image.decode())));
     if (errors.length) throw new Error(errors.join("\n"));
     const expected = await page.locator(".slide").count();
+    await page.emulateMedia({ media: "print" });
+    const overflow = await page.locator(".slide").evaluateAll(slides => slides
+      .filter(slide => slide.scrollHeight > slide.clientHeight + 1 ||
+        slide.scrollWidth > slide.clientWidth + 1).map(slide => slide.id));
+    if (overflow.length) throw new Error(`Print overflow: ${overflow.join(", ")}`);
     // Printed relative references need a stable repository URL, not a local file URL.
     await page.locator("a[href]").evaluateAll(anchors => {
       for (const anchor of anchors) {
@@ -39,7 +53,7 @@ async function main() {
       await fs.unlink(output);
       throw new Error(`Deck has ${pages.length} PDF pages; expected ${expected}. Check print overflow.`);
     }
-    console.log(`Rendered ${expected} widescreen slides: 18 timed slides + 4 on-demand appendices.`);
+    console.log(`Rendered ${expected} reader-first pages and embedded both screenshots in the standalone HTML.`);
   } finally {
     await browser.close();
   }

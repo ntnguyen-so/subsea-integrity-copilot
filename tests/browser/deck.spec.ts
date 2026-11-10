@@ -1,6 +1,6 @@
 /**
- * Offline deck/figure contract: source-pack geometry and identities, interview clock/
- * navigation, readable responsive layout and one-slide-per-print-page containment.
+ * Offline deck/figure contract: source-pack geometry, reader navigation,
+ * portable images, no-script reading and one-chapter-per-print-page containment.
  * Opens local presentation assets, not the console or a hosted inference session.
  */
 import { test, expect } from "@playwright/test";
@@ -99,103 +99,138 @@ test("topology depicts the source pack's connectivity, station distribution and 
       await expect(panel.locator(`[data-sensor-id="${sensor}"]`)).toHaveAttribute("fill", "#efb735");
     }
   }
-  await page.goto(deck + "#demo-contract");
-  await expect(page.locator(".topology img")).toBeVisible();
-  expect(await page.locator(".topology img").evaluate(image =>
+  await page.goto(deck + "#manual-reading");
+  await expect(page.locator("#manual-reading img")).toBeVisible();
+  expect(await page.locator("#manual-reading img").evaluate(image =>
     image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0)).toBe(true);
 });
 
-test("deck follows the interview schedule and supports chapter, keyboard and notes navigation", async ({ page }) => {
+test("reader navigation supports contents, deep links, history and an all-pages mode", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(deck);
-  const budgets = await page.locator(".slide:not([data-chapter=appendix])").evaluateAll(slides =>
-    slides.reduce<Record<string, number>>((totals, slide) => {
-      const chapter = slide.getAttribute("data-chapter")!;
-      totals[chapter] = (totals[chapter] || 0) + Number(slide.getAttribute("data-minutes"));
-      return totals;
-    }, {}));
-  expect(budgets).toEqual({ problem: 5, demo: 10, technical: 30, business: 10, questions: 5 });
-  await expect(page.locator(".slide")).toHaveCount(22);
+  const ids = await page.locator(".slide").evaluateAll(slides => slides.map(slide => slide.id));
+  const destinations = await page.locator(".toc a").evaluateAll(anchors =>
+    anchors.map(anchor => anchor.getAttribute("href")!.slice(1)));
+  expect(destinations).toEqual(ids.slice(1));
+  expect(new Set(ids).size).toBe(ids.length);
   await expect(page.locator(".slide:visible")).toHaveCount(1);
-  await expect(page.locator("#position")).toHaveText("1 / 18");
+  await expect(page.locator("#contents")).toBeVisible();
+  await expect(page.locator("#position")).toHaveText(`1 / ${ids.length}`);
   await expect(page.locator("#previous")).toBeDisabled();
-  await page.locator("h1:visible").click();
+  await page.locator("#contents h1").click();
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator("#risk")).toBeVisible();
-  await page.keyboard.press("n");
-  await expect(page.locator("#speaker-panel")).toBeVisible();
-  await expect(page.locator("#notes-body")).toContainText("Do not invent vessel rates");
-  await page.locator("[data-jump=architecture]").click();
-  await expect(page.locator("#architecture")).toBeVisible();
-  await expect(page.locator("[data-jump=architecture]")).toHaveAttribute("aria-current", "step");
-  await expect(page.locator("#notes-body")).toContainText("two loops");
-  await page.locator("#slide-select").selectOption("localization");
-  await expect(page.locator("#localization")).toBeVisible();
-  await page.locator("#notes-toggle").click();
-  await expect(page.locator("#speaker-panel")).toBeHidden();
-  await page.getByRole("button", { name: "Appendix", exact: true }).click();
-  await expect(page.locator("#quality-appendix")).toBeVisible();
-  await expect(page.locator("#position")).toHaveText("A1 / 4");
-  await page.locator("h1:visible").click();
-  await page.keyboard.press("End");
-  await expect(page.locator("#questions")).toBeVisible();
+  await expect(page.locator("#problem")).toBeVisible();
+  await expect(page.locator("#problem h1")).toBeFocused();
+  await page.getByRole("button", { name: "Contents", exact: true }).click();
+  await page.locator('.toc a[href="#roles"]').click();
+  await expect(page.locator("#roles")).toBeVisible();
+  await page.goBack();
+  await expect(page.locator("#contents")).toBeVisible();
+  await page.goForward();
+  await expect(page.locator("#roles")).toBeVisible();
+  await page.getByRole("combobox", { name: "Go to page" }).selectOption(String(ids.indexOf("review")));
+  await expect(page.locator("#review")).toBeVisible();
+  await page.getByRole("button", { name: "Read all", exact: true }).click();
+  await expect(page.locator(".slide:visible")).toHaveCount(ids.length);
+  await expect(page.locator("#reading-mode")).toHaveAttribute("aria-pressed", "true");
+  await page.locator('.toc a[href="#mapping"]').click();
+  await expect(page.locator("#position")).toHaveText(`${ids.indexOf("mapping") + 1} / ${ids.length}`);
+  await page.getByRole("button", { name: "One page", exact: true }).click();
+  await expect(page.locator(".slide:visible")).toHaveCount(1);
+  await expect(page.locator("#mapping")).toBeVisible();
+  await page.goto(deck + "#boundaries");
+  await expect(page.locator("#boundaries")).toBeVisible();
+  await expect(page.locator("#next")).toBeDisabled();
   await page.goto(deck + "#not-a-slide");
-  await expect(page.locator("#promise")).toBeVisible();
-  await expect(page).toHaveURL(/#promise$/);
+  await expect(page.locator("#contents")).toBeVisible();
   expect(errors).toEqual([]);
 });
 
-test("interview clock survives navigation, pauses and resets without real waiting", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-01-01T00:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-01-01T00:00:01Z"));
+test("deck is portable offline and embeds the unmodified source screenshots", async ({ page }) => {
+  const externalRequests: string[] = [];
+  page.on("request", request => {
+    if (/^https?:/i.test(request.url())) externalRequests.push(request.url());
+  });
+  await page.context().setOffline(true);
   await page.goto(deck);
-  await page.locator("#timer-toggle").click();
-  await page.clock.runFor(2100);
-  await expect(page.locator("#clock")).toHaveText("00:02 / 60:00");
-  await page.locator("#slide-select").selectOption("pilot");
-  await expect(page.locator("#clock")).toHaveText("00:02 / 60:00");
-  await page.locator("#timer-toggle").click();
-  await page.clock.runFor(2100);
-  await expect(page.locator("#clock")).toHaveText("00:02 / 60:00");
-  await page.locator("#timer-toggle").click();
-  await page.clock.fastForward(3_600_000);
-  await expect(page.locator("#clock")).toHaveClass(/over/);
-  await page.locator("#timer-reset").click();
-  await expect(page.locator("#clock")).toHaveText("00:00 / 60:00");
-  await expect(page.locator("#clock")).not.toHaveClass(/over/);
-  await expect(page.locator("#timer-toggle")).toHaveText("Start clock");
+  const receipt = JSON.parse(readFileSync(path.join(process.cwd(), "docs", "evidence",
+    "brief-dashboard-comparison.json"), "utf8"));
+  for (const capture of receipt.captures as { file: string }[]) {
+    const asset = path.basename(capture.file);
+    const image = page.locator(`img[data-asset="${asset}"]`);
+    const src = await image.getAttribute("src");
+    expect(src).toMatch(/^data:image\/png;base64,/);
+    expect(Buffer.from(src!.split(",")[1], "base64"))
+      .toEqual(readFileSync(path.join(process.cwd(), "docs", "assets", asset)));
+    expect(await image.evaluate(image =>
+      image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0)).toBe(true);
+  }
+  await page.getByRole("button", { name: "Read all", exact: true }).click();
+  await expect(page.locator("#assisted-reading")).toContainText("700-900 m");
+  await expect(page.locator("#evaluation-results")).toContainText("not 72 independent physical faults");
+  expect(externalRequests).toEqual([]);
 });
 
-test("all slides fit desktop presentation and print pages, with readable mobile scrolling", async ({ page }) => {
+test("reading is complete without JavaScript and page scrolling keeps its normal keyboard behavior", async ({ browser, page }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  try {
+    const noScript = await context.newPage();
+    await noScript.goto(deck);
+    const count = await noScript.locator(".slide").count();
+    await expect(noScript.locator(".slide:visible")).toHaveCount(count);
+    await expect(noScript.locator(".controls")).toBeHidden();
+    await expect(noScript.locator("#review")).toContainText("source content");
+    await expect(noScript.locator("#boundaries")).toBeVisible();
+  } finally {
+    await context.close();
+  }
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.goto(deck + "#contents");
+  await page.locator("#contents h1").click();
+  await page.keyboard.press("Space");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await expect(page).toHaveURL(/#contents$/);
+  await page.keyboard.press("PageDown");
+  await expect(page).toHaveURL(/#contents$/);
+  await page.locator("#next").focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page).toHaveURL(/#contents$/);
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#problem")).toBeVisible();
+});
+
+test("chapters remain readable on desktop and mobile and fit separate print pages", async ({ page }) => {
   await page.goto(deck);
   const ids = await page.locator(".slide").evaluateAll(slides => slides.map(slide => slide.id));
-  for (const viewport of [{ width: 1600, height: 900 }, { width: 1280, height: 720 }]) {
+  for (const viewport of [
+    { width: 1600, height: 900 }, { width: 1280, height: 720 }, { width: 390, height: 844 },
+  ]) {
     await page.setViewportSize(viewport);
-    for (const id of ids) {
-      await page.locator("#slide-select").selectOption(id);
+    for (const [index, id] of ids.entries()) {
+      await page.getByRole("combobox", { name: "Go to page" }).selectOption(String(index));
       await expect(page.locator("#" + id)).toBeVisible();
-      const bounds = await page.locator("#" + id).boundingBox();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        `${id} at ${viewport.width}px has no document-level horizontal overflow`).toBe(true);
+      await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+      const last = await page.locator("#" + id + " > :last-child").boundingBox();
       const controls = await page.locator(".controls").boundingBox();
-      expect(bounds, id).not.toBeNull();
+      expect(last, id).not.toBeNull();
       expect(controls, id).not.toBeNull();
-      expect(bounds!.y + bounds!.height, `${id} fits above presentation controls`).toBeLessThanOrEqual(controls!.y + 1);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), id).toBe(true);
+      expect(last!.y + last!.height, `${id} can be scrolled clear of navigation`)
+        .toBeLessThanOrEqual(controls!.y + 1);
     }
-  }
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const id of ids) {
-    await page.locator("#slide-select").selectOption(id);
-    await expect(page.locator("#" + id)).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${id} mobile overflow`).toBe(true);
   }
   await page.setViewportSize({ width: 1600, height: 900 });
   await page.emulateMedia({ media: "print" });
-  await expect(page.locator(".slide:visible")).toHaveCount(22);
+  await expect(page.locator(".slide:visible")).toHaveCount(ids.length);
   await expect(page.locator(".controls")).toBeHidden();
   for (const id of ids) {
     const overflow = await page.locator("#" + id).evaluate(slide =>
       slide.scrollHeight > slide.clientHeight + 1 || slide.scrollWidth > slide.clientWidth + 1);
     expect(overflow, `${id} print overflow`).toBe(false);
   }
+  await page.setViewportSize({ width: 800, height: 900 });
+  expect(await page.locator("#review .flow > div:nth-child(2)").evaluate(step =>
+    getComputedStyle(step, "::after").content)).toBe('"\u2192"');
 });
