@@ -275,6 +275,7 @@ test(`${workflow} inspection and comparison work on unflagged readings without a
   });
   await page.goto("/?replay=" + encodeURIComponent(window.generation_id) + "&view=live");
   await expect(page.locator(".rail [role=tab]")).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "Follow current", exact: true })).toHaveCount(0);
   await expect(page.getByRole("tab", { name: "Inspect", exact: true })).toHaveCount(0);
   await page.locator("#tab-live").focus();
   await page.keyboard.press("ArrowDown");

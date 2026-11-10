@@ -1963,7 +1963,6 @@ select("inspection-peer").addEventListener("change", () => {
   inspectionPeerKey = null; inspectionPeer = null; inspectionPeerError = null; inspectionPeerLoading = false;
   renderInspectionWorkspace();
 });
-controlButton("follow-live").addEventListener("click", () => { void chooseWindow(""); });
 controlButton("inspect-raw").addEventListener("click", () => {
   if (!openSensorInspection()) return;
   text("evidence-detail", selectedSensorId ? `${selectedSensorId} / pinned window ${selectedWindow?.id}. Original records and transformations are available below.` : "Choose a sensor to inspect its original observations.");
