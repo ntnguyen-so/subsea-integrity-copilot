@@ -33,7 +33,8 @@ async function renderBrief(name) {
   const paragraphs = source.trim().split(/\r?\n\s*\r?\n/);
   const title = paragraphs.shift().replace(/^#\s+/, "");
   const parts = [];
-  for (const paragraph of paragraphs) {
+  for (let index = 0; index < paragraphs.length; index++) {
+    const paragraph = paragraphs[index];
     if (paragraph === "---") {
       parts.push('<div class="page-break"></div>');
       continue;
@@ -54,7 +55,15 @@ async function renderBrief(name) {
     }
     const image = await imageMarkup(paragraph);
     if (image) {
-      parts.push(`<figure>${image}</figure>`);
+      const caption = paragraphs[index + 1];
+      if (caption && /^Figure \d+\.\s/.test(caption)) {
+        parts.push(`<figure class="captioned-figure">${image}<figcaption>${
+          inline(caption.replace(/\r?\n/g, " "))
+        }</figcaption></figure>`);
+        index++;
+      } else {
+        parts.push(`<figure>${image}</figure>`);
+      }
     } else {
       parts.push(`<p>${inline(paragraph.replace(/\r?\n/g, " "))}</p>`);
     }
@@ -68,6 +77,7 @@ async function renderBrief(name) {
       body{font:10pt/1.25 Arial,sans-serif;color:#17212b}
       h1{font-size:18pt;margin:0 0 8pt}p{margin:0 0 6pt;break-inside:avoid}
       figure{margin:0 0 6pt;break-inside:avoid}figure img{display:block;width:100%;height:auto}
+      .captioned-figure{display:grid;grid-template-columns:45% 1fr;gap:12pt;align-items:start;margin-bottom:10pt}
       table{width:100%;border-collapse:collapse;margin:0 0 6pt;table-layout:fixed;break-inside:avoid}
       th,td{border:1px solid #c9d6e2;padding:6pt;text-align:left;vertical-align:top}
       td img{display:block;width:100%;height:auto}

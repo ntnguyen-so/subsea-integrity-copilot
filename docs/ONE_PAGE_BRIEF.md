@@ -10,14 +10,15 @@ Pressure-monitoring alerts do not explain their cause. Missing readings, instrum
 
 3. Which readings and records support the leak or instrument-fault conclusion, and what must be verified before deploying maintenance teams?
 
-Subsea Integrity Copilot combines ongoing monitoring with AI-assisted investigation. It correlates sensor readings with relevant records, explains competing causes, recommends inspection priorities and provides evidence and uncertainties for maintenance planning. The aim is faster, better-supported action, not simply more alerts or automatic deployment.
+The S7 scenario makes this concrete: a simulated 11.2 km network with seven connected pipe sections (P1-P7) and 112 pressure instruments. A P5 leak overlaps with spikes, drift, missing or frozen readings, and a shared connection problem on P7. The following dashboard crops use identical readings and alerts.
 
-The S7 scenario illustrates this challenge in a simulated 11.2 km network with seven connected pipe sections (P1-P7) and 112 pressure instruments. In the illustrated minute, 69 are flagged. A P5 leak overlaps with spikes, drift, missing or frozen readings, and a shared connection problem on P7. Nearby and paired sensors must be compared with timing and operating records: several alerts can reflect one shared fault, not independent leak evidence. Both diagrams show identical readings and alerts.
+![Dashboard crop: individual pressure alerts and missing readings across seven pipeline segments](assets/brief-sensor-alerts.png)
 
-| Sensor alerts only | Agent-assisted investigation |
-|---|---|
-| ![Dashboard crop: individual pressure alerts and missing readings across seven pipeline segments](assets/brief-sensor-alerts.png) | ![Dashboard crop: suspected P5 leak, report-stated inspection priority and separate instrument issues](assets/brief-agent-assisted.png) |
-| Lines are pipes; paired dots are instruments. Orange marks unusual pressure; dashed outlines mark missing/invalid readings. Hollow dots have no pressure alert, not a guarantee of health. The blue ring selects one instrument. The engineer must connect these observations; no leak diagnosis or inspection priority is supplied. | Red flags P5 as the suspected branch, not the entire branch as leaking. Green marks the report's inspection priority, 700-900 m from P5's start. Purple rings identify reported instrument/data concerns. A leak and faulty readings can coexist. These are reviewed report findings, not confirmed faults, exact leak coordinates or deployment authorization. |
+Figure 1. Sensor alerts only. In this one-minute window, 69 instruments are flagged. The engineer must open and align pressure histories, compare neighboring and paired sensors, check shared connections, and read operating and maintenance records. Orange dots indicate unusual pressure; dashed dots indicate missing or invalid readings, not where a leak is. Separating P5's leak pattern from P7's connection problem and individual faults requires repeated cross-checking and domain knowledge. This manual correlation, not spotting colored markers, consumes the engineer's time.
+
+![Dashboard crop: suspected P5 leak, report-stated inspection priority and separate instrument issues](assets/brief-agent-assisted.png)
+
+Figure 2. Agent-assisted investigation. Subsea Integrity Copilot's AI agents compare related measurements, check records and assemble cited findings for the engineer. Red identifies P5 as the suspected branch; green focuses inspection planning on 700-900 m from its start. Purple rings retain separate instrument/data concerns. Instead of starting from individual alerts, the engineer reviews an organized explanation, competing causes, supporting evidence and next verification steps. The system supports ongoing investigation; it does not confirm exact leak coordinates or authorize automatic deployment.
 
 Numerical alerts do not wait for AI. Two controlled S7 rehearsals produced reviewed reports in about 2.5-2.8 minutes, excluding map updates. This is not a production response-time guarantee.
 
