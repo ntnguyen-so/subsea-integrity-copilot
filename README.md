@@ -83,24 +83,17 @@ supporting evidence.
 
 **Synthetic-data demonstration. Engineers review findings before acting.**
 
-## Documentation
-
-| Read | Purpose |
-|---|---|
-| [Customer brief](docs/ONE_PAGE_BRIEF.pdf) ([source](docs/ONE_PAGE_BRIEF.md)) | One-page problem, illustrated investigation and evaluation results. |
-| [Engineering report](docs/REPORT.md) | Architecture, implementation and [30-minute code walkthrough](docs/REPORT.md#30-minute-technical-code-route). |
-| [Demo reference](docs/DEMO_DETAILS.md) | Recording, evaluation, development and document-export commands. |
-| [Evaluation results](docs/RESULTS.md) | Test methods, measurements and supporting evidence. |
-| [Interview deck](docs/INTERVIEW_DECK.html) ([PDF](docs/INTERVIEW_DECK.pdf)) | Presentation and appendix for the full interview. |
-
 ## Run the demo
 
-**Prerequisite for agent-assisted mode:** A GitHub Copilot account with access to
-**`gpt-6.1-sol`**. Sign in through the Copilot CLI in step 3 before running new
-AI investigations.
+**A Copilot account is required only to generate new AI investigations.**
 
-You can explore the included Detection evaluation and run sensor-only monitoring
-**without a Copilot account**.
+| Mode | Copilot account needed? |
+|---|---|
+| Replay recorded agent-assisted investigations | **No.** Reuses saved reports; recordings must be available locally. |
+| Run live sensor-only monitoring | **No.** Displays readings and sensor alerts without running agents. |
+| Generate new agent-assisted investigations | **Yes.** Requires a GitHub Copilot account with access to **`gpt-6.1-sol`** and Copilot CLI sign-in (step 3). |
+
+The included **Detection evaluation** also works without a Copilot account.
 
 ### 1. Install the Windows tools
 
