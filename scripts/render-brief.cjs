@@ -7,8 +7,8 @@ const path = require("node:path");
 const { chromium } = require("@playwright/test");
 const { renderTopology } = require("./render-topology.cjs");
 
-// Escape text first; only HTTPS links and bounded local SVG/PNG illustrations are
-// expanded. The final page-count assertion catches layout drift on repeated renders.
+// Escape text first; links are HTTPS or the loopback dashboard, and illustrations
+// stay inside docs. The page-count assertion catches layout drift.
 async function renderBrief(name) {
   const docs = path.join(__dirname, "..", "docs");
   const source = await fs.readFile(
@@ -18,7 +18,8 @@ async function renderBrief(name) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[character]);
   const inline = value => escape(value)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\(((?:https:\/\/|http:\/\/127\.0\.0\.1(?::\d+)?\/)[^)\s]+)\)/g,
+      '<a href="$2">$1</a>');
   async function imageMarkup(value) {
     const image = value.match(/^!\[([^\]]+)\]\(([^)]+)\)$/);
     if (!image) return null;

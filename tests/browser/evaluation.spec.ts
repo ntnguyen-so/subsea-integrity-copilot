@@ -1,10 +1,56 @@
 /**
- * Authenticated recorded evaluation integration: opening findings submits no inference,
- * monitoring stays truth-blind and recorded evidence remains inspectable. Explicit
- * local-credential opt-in; this verifies UI isolation, not the correctness of labels.
+ * Workspace links use mocked sessions; recorded evaluation integration requires
+ * explicit local-credential opt-in. Opening findings submits no inference and
+ * monitoring stays truth-blind. This checks UI isolation, not label correctness.
  */
 import { test, expect } from "@playwright/test";
 import type { EvaluationReport } from "../../web/ts/evaluation";
+
+test("evaluation deep link opens the workspace and retains it through sign-in", async ({ page }) => {
+  let evaluationReads = 0;
+  await page.route("**/api/**", async route => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/session") return route.fulfill({
+      json: { authenticated: false, csrf_token: null, username: null },
+    });
+    if (path === "/api/login") return route.fulfill({
+      json: { authenticated: true, csrf_token: "test-csrf", username: "operator" },
+    });
+    if (path === "/api/evaluation") {
+      evaluationReads++;
+      return route.fulfill({
+        json: { version: "reference-evaluation-v1", status: "not_run", cases: [], metrics: null },
+      });
+    }
+    if (path === "/api/replays") return route.fulfill({ json: { replays: [] } });
+    return route.fulfill({ status: 503, json: { detail: "Live catalog unavailable in this test." } });
+  });
+  await page.goto("/?tab=evaluation");
+  await expect(page.getByRole("tab", { name: "Evaluation", exact: true }))
+    .toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#panel-evaluation")).toBeVisible();
+  await expect(page.locator("#evaluation-results")).toContainText("Sign in");
+  await page.locator("#password").fill("test-only");
+  await page.locator("#login-form").getByRole("button", { name: "Sign in" }).click();
+  await expect(page.locator("#login-panel")).toBeHidden();
+  await expect.poll(() => evaluationReads).toBeGreaterThan(0);
+  await expect(page.getByRole("tab", { name: "Evaluation", exact: true }))
+    .toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#panel-evaluation")).toBeVisible();
+});
+
+for (const tab of ["live", "unknown"]) {
+  test(`dashboard link defaults safely to Live for tab=${tab}`, async ({ page }) => {
+    await page.route("**/api/session", route => route.fulfill({
+      json: { authenticated: false, csrf_token: null, username: null },
+    }));
+    await page.goto(`/?tab=${tab}`);
+    await expect(page.getByRole("tab", { name: "Live", exact: true }))
+      .toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#panel-live")).toBeVisible();
+    await expect(page.locator("#panel-evaluation")).toBeHidden();
+  });
+}
 
 test("evaluation opens authenticated recordings without submitting inference or exposing labels to monitoring", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Explicit local evaluation UI opt-in.");

@@ -65,7 +65,7 @@ let connectionState = "Not connected";
 let createRetry: { bodyKey: string; id: string } | null = null;
 let controlRetry: { bodyKey: string; id: string } | null = null;
 let liveHereRetry: { bodyKey: string; id: string } | null = null;
-let activeTab = "live";
+let activeTab = new URLSearchParams(location.search).get("tab") === "evaluation" ? "evaluation" : "live";
 let recordedAnchor: { id: string; seconds: number; speed: number } | null = null;
 let liveSelection: number | null = null;
 let sourceHistory = false;
@@ -195,6 +195,7 @@ function updateSession(): void {
   box("login-panel").hidden = session.authenticated;
   text("operator", session.authenticated ? session.username || "Operator" : "Signed out");
   updateControls();
+  if (session.authenticated && activeTab === "evaluation") void loadEvaluation();
 }
 function setConnection(value: string): void {
   connectionState = value;
@@ -1878,6 +1879,7 @@ controlButton("view-langfuse").addEventListener("click", () => {
   }
 });
 bindTabs();
+if (activeTab === "evaluation") switchTab(activeTab);
 element("login-form", HTMLFormElement).addEventListener("submit", event => {
   event.preventDefault();
   const password = input("password").value;

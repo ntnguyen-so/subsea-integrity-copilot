@@ -22,8 +22,8 @@ Subsea Lens organizes these cross-checks with **three AI agents working in seque
 
 Figure 2. The agents add an explanation to the alerts in Figure 1. Red highlights P5 because the report finds evidence of a possible leak there. Green narrows the inspection priority to 700-900 m from P5's start. Purple rings identify separate sensor or data concerns. These markings summarize the report. The report explains which readings and records support each finding, considers other possible causes and lists the next checks. The engineer can follow those references, challenge the reasoning and decide what to inspect, instead of assembling the investigation from individual alerts.
 
-This handoff also needs to be timely. In two controlled tests of this simulated scenario, reviewed reports were ready in about 2.5-2.8 minutes of elapsed time.
+Subsea Lens can generate reviewed reports in about **2.5-2.8 minutes**, as observed in two controlled tests, helping engineers respond promptly to pipeline issues.
 
 To test the system's answers, we compared its findings with known leaks and instrument problems that were hidden from the agents. Across all evaluated snapshots in the held-out synthetic detection test, leak detection achieved **100% precision and recall, with no false leak alarms**. Identifying affected instruments and classifying their problems also achieved **100% precision and recall**.
 
-[Run the demo](https://github.com/ntnguyen-so/subsea-integrity-copilot). [Dashboard evidence](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/evidence/brief-dashboard-comparison.json). [Evaluation and timing results](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/RESULTS.md).
+[Dashboard (local)](http://127.0.0.1:8086/?tab=live). [Evaluation (local)](http://127.0.0.1:8086/?tab=evaluation). [Run the demo](https://github.com/ntnguyen-so/subsea-integrity-copilot). [Evidence and results](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/RESULTS.md).
