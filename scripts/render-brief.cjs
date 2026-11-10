@@ -1,5 +1,5 @@
 // Offline document export: regenerate shared topology/evidence assets, then convert
-// the two existing brief Markdown sources into one-page PDFs in docs (overwriting).
+// the canonical customer/submission brief into its one-page PDF (overwriting).
 // Requires uv/project Python and installed Chrome/Playwright; no hosted model calls.
 // This is a deliberately small Markdown subset, not a general Markdown/HTML engine.
 const fs = require("node:fs/promises");
@@ -93,7 +93,7 @@ async function renderBrief(name) {
 
 async function main() {
   await renderTopology();
-  for (const name of ["ONE_PAGE_BRIEF", "SUBMISSION_BRIEF"]) await renderBrief(name);
+  await renderBrief("ONE_PAGE_BRIEF");
 }
 
 main().catch(error => { console.error(error.message); process.exitCode = 1; });

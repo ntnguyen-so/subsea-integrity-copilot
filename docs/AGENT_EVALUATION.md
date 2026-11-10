@@ -1,5 +1,10 @@
 # Agent operations evaluation
 
+**Historical matched benchmark.** Results below retain their original policy,
+300-second root budget and recorded attempts. They do not measure the current
+SDK transport or 900-second runtime. See the [engineering report](REPORT.md) for
+current behavior and [qualification ledger](RESULTS.md) for subsequent cohorts.
+
 ## Measured result: first attempts and explicit retries
 
 The genuine hosted cohort completed all **18 planned attempts**. **15/18**

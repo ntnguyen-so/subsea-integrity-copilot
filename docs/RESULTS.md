@@ -1,5 +1,12 @@
 # Qualification results
 
+This is the retained qualification ledger, not the operating guide. The newest
+cohort is first; older sections describe the code, policies and limits used for
+those runs, not necessarily today's defaults. Raw receipts and failed attempts
+are intentionally preserved in `evidence/`; some are application inputs.
+Use the [engineering report](REPORT.md) for current architecture and
+[demo reference](DEMO_DETAILS.md) for current commands.
+
 ## All seven scenarios have recorded main-timeline investigations
 
 Added **57 fresh S1-S6 investigations**: nine seed-2026 checkpoints per scenario
