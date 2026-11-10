@@ -1635,12 +1635,51 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
                 assert json.loads(span.attributes["agent.tools.input"])["required"] == (
                     body["execution_procedure"]["required_read_names"]
                 )
+                if "agent.tool_calls.input" not in span.attributes:
+                    continue
+                dispatches = json.loads(span.attributes["agent.tool_calls.input"])
+                actual = [
+                    tool for tool in spans
+                    if tool.attributes.get("dispatch_origin")
+                    and tool.parent.span_id == span.context.span_id
+                ]
+                assert dispatches["actual_call_count"] == len(actual)
+                by_call = {tool.attributes["call_id"]: tool for tool in actual}
+                for index, call in enumerate(dispatches["calls"], 1):
+                    tool = by_call[call["call_id"]]
+                    request = json.loads(tool.attributes["langfuse.observation.input"])
+                    assert call["arguments"] == request["arguments"]
+                    assert call["why_this_call"] == request["why_this_call"]
+                    assert call["why_these_parameters"] == request["why_these_parameters"]
+                    assert call["application_selection"] == (
+                        request["selection"]["application_selection"]
+                    )
+                    assert call["model_span_id"] == request["selection"]["model_span_id"]
+                    assert call["origin"] == request["selection"]["origin"]
+                    assert call["trigger"] and call["result_use"]
+                    assert call["execution"]["accepted"] is True
+                    assert span.attributes[f"agent.tool_call.{index}.summary"] == (
+                        tool.attributes["selection.summary"]
+                    )
+                    assert call["why_this_call"] in span.attributes["agent.selection.summary"]
+                assert "fixture-private" not in json.dumps(dispatches)
+                assert "fixture-private" not in span.attributes["agent.selection.summary"]
             intake = json.loads(agent.attributes["workflow.intake.input"])
             assert intake["actual_call_count"] == len([
                 span for span in required
                 if span.attributes["task_id"] == selected.attributes["task_id"]
             ])
             assert all(item["call_id"] != "public-read" for item in intake["calls"])
+            assert all(
+                item["why_this_call"] and item["why_these_parameters"]
+                and item["application_selection"]["rule"] == "application-intake-v2"
+                for item in intake["calls"]
+            )
+            parent_calls = json.loads(agent.attributes["agent.tool_calls.input"])["calls"]
+            model_read = next(item for item in parent_calls if item["call_id"] == "public-read")
+            assert model_read["origin"] == "model_request"
+            assert model_read["declared_source_references"] == ["coverage"]
+            assert model_read["model_span_id"] == f"{model.context.span_id:016x}"
             assert json.loads(agent.attributes["langfuse.observation.output"])[
                 "execution_summary"
             ]["next_recipient"] == "event_diagnosis"
@@ -1686,6 +1725,7 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
             assert "langfuse.observation.input" not in selected.attributes
             assert "model.context.input" not in model.attributes
             assert all("workflow.intake.input" not in span.attributes for span in spans)
+            assert all("agent.tool_calls.input" not in span.attributes for span in spans)
             assert all(
                 not any(
                     key.endswith((".summary", ".goal", ".procedure", ".next_step"))
@@ -1698,17 +1738,29 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
             row for row in store.tool_receipts(task.id) if row["call_id"] == "public-read"
         )
         before = task.tool_calls
-        gateway = ToolGateway(store, task, snapshot, telemetry)
-        replay = gateway.dispatch({
-            "id": receipt["call_id"], "name": receipt["name"], "args": receipt["arguments"],
-            "model_call_id": selected.attributes["model_call_id"],
-        })
+        with telemetry.span("agent.replay_attempt", {"task_id": task.id}) as parent:
+            gateway = ToolGateway(store, task, snapshot, telemetry, activity_span=parent)
+            for _ in range(70 if capture else 1):
+                replay = gateway.dispatch({
+                    "id": receipt["call_id"], "name": receipt["name"], "args": receipt["arguments"],
+                    "model_call_id": selected.attributes["model_call_id"],
+                })
+            cached = exporter.get_finished_spans()[-1]
         assert replay["result"] == receipt["result"]
-        cached = exporter.get_finished_spans()[-1]
         assert cached.attributes["tool.replayed"] is True
         assert cached.attributes["tool.executed"] is False
         assert cached.attributes["tool.progress"] is False
         assert store.get_task(task.id).tool_calls == before
+        if capture:
+            parent_attributes = exporter.get_finished_spans()[-1].attributes
+            parent_calls = json.loads(parent_attributes["agent.tool_calls.input"])["calls"]
+            assert len(parent_calls) == 70
+            assert all(item["execution"]["replayed"] is True for item in parent_calls)
+            assert all(item["execution"]["executed"] is False for item in parent_calls)
+            assert all(item["execution"]["progress"] is False for item in parent_calls)
+            assert parent_attributes["task_id"] == task.id
+            assert parent_attributes["agent.tool_call.64.summary"]
+            assert "agent.tool_call.65.summary" not in parent_attributes
     finally:
         telemetry.close()
 
@@ -1784,9 +1836,14 @@ def test_unexpected_tool_failure_is_visible_without_an_accepted_receipt(
 
     monkeypatch.setattr(gateway, "_read", broken_read)
     try:
-        with pytest.raises(RuntimeError):
-            gateway.dispatch({"id": "broken", "name": "quality.coverage", "args": scope})
-        span = exporter.get_finished_spans()[-1]
+        with telemetry.span("agent.failed_attempt", {}) as parent:
+            gateway.activity_span = parent
+            with pytest.raises(RuntimeError):
+                gateway.dispatch({"id": "broken", "name": "quality.coverage", "args": scope})
+            with pytest.raises(ValidationError):
+                gateway.dispatch({"id": "denied", "name": "not-an-authorized-tool", "args": scope})
+        spans = exporter.get_finished_spans()
+        span = next(item for item in spans if item.attributes.get("call_id") == "broken")
         assert span.attributes["error.code"] == "tool_failed"
         assert span.attributes["tool.executed"] is True
         assert span.attributes["tool.accepted"] is False
@@ -1795,6 +1852,14 @@ def test_unexpected_tool_failure_is_visible_without_an_accepted_receipt(
         assert output["result"] is None
         assert "fixture-private" not in json.dumps(output)
         assert not store.tool_receipts(child.id)
+        calls = json.loads(spans[-1].attributes["agent.tool_calls.input"])["calls"]
+        assert [item["status"] for item in calls] == ["failed", "failed"]
+        assert [item["execution"]["executed"] for item in calls] == [True, False]
+        assert all(item["execution"]["accepted"] is False for item in calls)
+        assert all(item["provenance"] == "not_recorded" for item in calls)
+        assert calls[1]["tool"] == "unauthorized"
+        assert "No successful finding is inferred" in calls[0]["result_summary"]
+        assert "fixture-private" not in json.dumps(calls)
     finally:
         telemetry.close()
 

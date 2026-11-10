@@ -1524,6 +1524,7 @@ class AgentService:
     ) -> tuple[dict[str, Any], AgentTask]:
         """Run or resume one phase, fulfilling bounded interrupts and auditing every attempt."""
         gateway = self._gateway(task, snapshot)
+        gateway.activity_span = activity_span
 
         critic = phase.startswith("critic-")
         reflection = phase.startswith("reflection")
@@ -1911,10 +1912,7 @@ class AgentService:
                             "reads before asking the model to interpret it."
                         ),
                         "actual_call_count": len(intake),
-                        "calls": [
-                            {"call_id": item["call_id"], "tool": item["name"]}
-                            for item in intake
-                        ],
+                        "calls": list(gateway.trace_calls),
                         "why_this_count": (
                             "Count actual dispatches, not distinct required tool names. "
                             "Referenced evidence, search-hit bodies and specialist comparison "
@@ -2758,7 +2756,9 @@ class AgentService:
                     "Application code performs mandatory intake before the first answer-model "
                     "turn. The model may request additional authorized reads, then submit a "
                     "candidate. Application validation and any required semantic review decide "
-                    "whether the workflow can advance; tool count alone is not model reasoning.",
+                    "whether the workflow can advance; tool count alone is not model reasoning. "
+                    "Read agent.selection.summary and agent.tool_calls.input for each actual "
+                    "call's authority, trigger, public reason, exact parameters and outcome.",
                 )
                 agent_span.set_attribute("agent.tools.input", json.dumps({
                     "allowed": sorted(policy.tools),

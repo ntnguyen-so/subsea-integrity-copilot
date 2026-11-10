@@ -1,0 +1,1021 @@
+{
+  "scope": "Synthetic S7 @120 development execution, not field qualification",
+  "previous_commit": "e25a8403e6b570dcbe2688d3e796d154ac2441df",
+  "previous_trace_id": "ab9159d0c0e6f72b3ba870f3f54b5423",
+  "previous_sensor_quality_observation": "945a77b3b4736980",
+  "customerops_reference_trace_id": "dfdea1abd764ae90ca45c0cf875a7cb3",
+  "customerops_contract": "Public selection summaries and tool decisions, not private reasoning",
+  "implementation_sha256": "7fc5dd78fbb7dcd30b07b10a578f2643af38c068e787f9bfe820833015a06dcc",
+  "implementation_unchanged": true,
+  "root_id": "be536b40-c0ff-54e4-8107-ca6c8bd42c83",
+  "trace_id": "f6eb4e26acda6332b2a4323f3a982d92",
+  "state": "SUCCEEDED",
+  "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+  "observations": 61,
+  "parent_agents": {
+    "operator_response": {
+      "observation_id": "886167b209d64cae",
+      "actual_call_count": 11,
+      "application_intake_count": 11
+    },
+    "event_diagnosis": {
+      "observation_id": "6e592ec2b376ed07",
+      "actual_call_count": 24,
+      "application_intake_count": 15
+    },
+    "sensor_quality": {
+      "observation_id": "29c6724f4fc4d0ff",
+      "actual_call_count": 6,
+      "application_intake_count": 6
+    }
+  },
+  "parent_tool_origins": {
+    "application_required_intake": 32,
+    "model_request": 9
+  },
+  "all_parent_calls_match_actual_child_spans_and_original_receipts": true,
+  "all_intake_lists_include_exact_reasons_parameters_and_source_selections": true,
+  "all_parent_model_choices_match_actual_public_decisions": true,
+  "intake_does_not_change_model_messages_or_authority": true,
+  "no_private_reasoning_captured": true,
+  "sensor_quality_required_intake_example": [
+    {
+      "tool": "ontology.neighbors",
+      "why_this_call": "Identify sensor positions, paired taps and shared acquisition connections before attributing a reading problem to an individual sensor. Agreement between sensors sharing a gateway is not independent confirmation.",
+      "why_these_parameters": "Read layout metadata bound to the supplied pack version and snapshot; there is no caller-selected sensor or time-range filter. The associated measurement assessment is [60, 120) seconds, but topology is not a pressure-history range query.",
+      "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+      "origin": "application_required_intake",
+      "application_selection": {
+        "rule": "application-intake-v2",
+        "rule_source": "runtime.workflow.AgentService._required_intake",
+        "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+        "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+        "required_role": "sensor_quality",
+        "decision_policy": "llm-diagnosis-v1",
+        "why_this_call": "Identify sensor positions, paired taps and shared acquisition connections before attributing a reading problem to an individual sensor. Agreement between sensors sharing a gateway is not independent confirmation.",
+        "why_these_parameters": "Read layout metadata bound to the supplied pack version and snapshot; there is no caller-selected sensor or time-range filter. The associated measurement assessment is [60, 120) seconds, but topology is not a pressure-history range query.",
+        "window": {
+          "start_seconds": 60,
+          "end_seconds": 120,
+          "duration_seconds": 60,
+          "source_clock_seconds": 125,
+          "selection": "parent_task_pinned_snapshot",
+          "boundaries": "start inclusive, end exclusive"
+        },
+        "request_group": {
+          "number": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "tool": "quality.conflicts",
+      "why_this_call": "Separate conflicting or hard-excluded readings from usable pressure changes before assessing sensor health. Coverage alone cannot explain unusable data.",
+      "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+      "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+      "origin": "application_required_intake",
+      "application_selection": {
+        "rule": "application-intake-v2",
+        "rule_source": "runtime.workflow.AgentService._required_intake",
+        "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+        "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+        "required_role": "sensor_quality",
+        "decision_policy": "llm-diagnosis-v1",
+        "why_this_call": "Separate conflicting or hard-excluded readings from usable pressure changes before assessing sensor health. Coverage alone cannot explain unusable data.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+        "window": {
+          "start_seconds": 60,
+          "end_seconds": 120,
+          "duration_seconds": 60,
+          "source_clock_seconds": 125,
+          "selection": "parent_task_pinned_snapshot",
+          "boundaries": "start inclusive, end exclusive"
+        },
+        "request_group": {
+          "number": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "tool": "quality.coverage",
+      "why_this_call": "Establish expected, received and usable reading counts before interpreting sensor histories. Missing data must not be interpreted as zero pressure or as proof that an instrument failed.",
+      "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+      "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+      "origin": "application_required_intake",
+      "application_selection": {
+        "rule": "application-intake-v2",
+        "rule_source": "runtime.workflow.AgentService._required_intake",
+        "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+        "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+        "required_role": "sensor_quality",
+        "decision_policy": "llm-diagnosis-v1",
+        "why_this_call": "Establish expected, received and usable reading counts before interpreting sensor histories. Missing data must not be interpreted as zero pressure or as proof that an instrument failed.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments.",
+        "window": {
+          "start_seconds": 60,
+          "end_seconds": 120,
+          "duration_seconds": 60,
+          "source_clock_seconds": 125,
+          "selection": "parent_task_pinned_snapshot",
+          "boundaries": "start inclusive, end exclusive"
+        },
+        "request_group": {
+          "number": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "tool": "quality.sensor_patterns",
+      "why_this_call": "Aggregate coverage and conflicts cannot identify which individual histories need attention. Read the first bounded, ranked health page; selected instruments are triage candidates, not automatically faulty sensors.",
+      "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. No offset was requested: start at 0, with the gateway's 24-finding page limit, out of 112 findings. Use the same ranked_findings(snapshot) ordering as the executed read: concerns before quiet histories, with sensor ID/channel tie-breaks; large layouts additionally prioritize exclusions/missingness and event support where present. Unreturned histories are not cleared.",
+      "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+      "origin": "application_required_intake",
+      "application_selection": {
+        "rule": "application-intake-v2",
+        "rule_source": "runtime.workflow.AgentService._required_intake",
+        "trigger": "Required by the role's tool policy; not triggered by a newly detected anomaly or conflict.",
+        "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+        "required_role": "sensor_quality",
+        "decision_policy": "llm-diagnosis-v1",
+        "why_this_call": "Aggregate coverage and conflicts cannot identify which individual histories need attention. Read the first bounded, ranked health page; selected instruments are triage candidates, not automatically faulty sensors.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. No offset was requested: start at 0, with the gateway's 24-finding page limit, out of 112 findings. Use the same ranked_findings(snapshot) ordering as the executed read: concerns before quiet histories, with sensor ID/channel tie-breaks; large layouts additionally prioritize exclusions/missingness and event support where present. Unreturned histories are not cleared.",
+        "window": {
+          "start_seconds": 60,
+          "end_seconds": 120,
+          "duration_seconds": 60,
+          "source_clock_seconds": 125,
+          "selection": "parent_task_pinned_snapshot",
+          "boundaries": "start inclusive, end exclusive"
+        },
+        "page": {
+          "offset": 0,
+          "limit": 24,
+          "total": 112,
+          "selected_count": 24,
+          "not_read_by_this_call": 88,
+          "ranking_source": "runtime.gateway.ranked_findings",
+          "ranking_priorities": [
+            "On layouts larger than 96: hard exclusions or missing >10% first.",
+            "On those larger layouts: event-support membership next, if any.",
+            "Any hard exclusions, spikes, drift, peer disagreement or missing >10%.",
+            "Sensor ID, then channel, ascending to break ties."
+          ],
+          "selected_findings": [
+            {
+              "sensor_id": "P1-ST7-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 10,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P3-ST5-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 10,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P4-ST8-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 8,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P6-ST6-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 10,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST6-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P3-ST7-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P4-ST1-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 4,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P4-ST1-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 4,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P4-ST3-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 2,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P4-ST7-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P5-ST1-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P5-ST8-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P5-ST8-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P6-ST3-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 1,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST1-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST1-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST2-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST2-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST3-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST3-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST4-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST4-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 0,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST5-A",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            },
+            {
+              "sensor_id": "P1-ST5-B",
+              "channel": "pressure",
+              "hard_excluded": 0,
+              "missing": 1,
+              "expected": 60,
+              "spike_count": 0,
+              "drift_suspected": false,
+              "peer_disagreement": false,
+              "in_event_support": false
+            }
+          ]
+        },
+        "request_group": {
+          "number": 1,
+          "total": 1
+        }
+      }
+    },
+    {
+      "tool": "evidence.get",
+      "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 1 of 2: 24 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+      "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [0, 24) of 26. Do not fetch all 227 snapshot evidence items.",
+      "trigger": "Conditional application intake derived from available source references, history context or legacy location eligibility.",
+      "origin": "application_required_intake",
+      "application_selection": {
+        "rule": "application-intake-v2",
+        "rule_source": "runtime.workflow.AgentService._required_intake",
+        "trigger": "Conditional application intake derived from available source references, history context or legacy location eligibility.",
+        "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+        "required_role": "sensor_quality",
+        "decision_policy": "llm-diagnosis-v1",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 1 of 2: 24 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [0, 24) of 26. Do not fetch all 227 snapshot evidence items.",
+        "window": {
+          "start_seconds": 60,
+          "end_seconds": 120,
+          "duration_seconds": 60,
+          "source_clock_seconds": 125,
+          "selection": "parent_task_pinned_snapshot",
+          "boundaries": "start inclusive, end exclusive"
+        },
+        "source_tasks": [],
+        "selected_sources": [
+          {
+            "evidence_id": "ev-001",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST1-A"
+          },
+          {
+            "evidence_id": "ev-003",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST1-B"
+          },
+          {
+            "evidence_id": "ev-005",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST2-A"
+          },
+          {
+            "evidence_id": "ev-007",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST2-B"
+          },
+          {
+            "evidence_id": "ev-009",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST3-A"
+          },
+          {
+            "evidence_id": "ev-011",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST3-B"
+          },
+          {
+            "evidence_id": "ev-013",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST4-A"
+          },
+          {
+            "evidence_id": "ev-015",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST4-B"
+          },
+          {
+            "evidence_id": "ev-017",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST5-A"
+          },
+          {
+            "evidence_id": "ev-019",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST5-B"
+          },
+          {
+            "evidence_id": "ev-021",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST6-A"
+          },
+          {
+            "evidence_id": "ev-027",
+            "kind": "sensor_health",
+            "sensor_id": "P1-ST7-B"
+          },
+          {
+            "evidence_id": "ev-083",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST5-B"
+          },
+          {
+            "evidence_id": "ev-089",
+            "kind": "sensor_health",
+            "sensor_id": "P3-ST7-A"
+          },
+          {
+            "evidence_id": "ev-097",
+            "kind": "sensor_health",
+            "sensor_id": "P4-ST1-A"
+          },
+          {
+            "evidence_id": "ev-099",
+            "kind": "sensor_health",
+            "sensor_id": "P4-ST1-B"
+          },
+          {
+            "evidence_id": "ev-107",
+            "kind": "sensor_health",
+            "sensor_id": "P4-ST3-B"
+          },
+          {
+            "evidence_id": "ev-123",
+            "kind": "sensor_health",
+            "sensor_id": "P4-ST7-B"
+          },
+          {
+            "evidence_id": "ev-125",
+            "kind": "sensor_health",
+            "sensor_id": "P4-ST8-A"
+          },
+          {
+            "evidence_id": "ev-131",
+            "kind": "sensor_health",
+            "sensor_id": "P5-ST1-B"
+          },
+          {
+            "evidence_id": "ev-157",
+            "kind": "sensor_health",
+            "sensor_id": "P5-ST8-A"
+          },
+          {
+            "evidence_id": "ev-159",
+            "kind": "sensor_health",
+            "sensor_id": "P5-ST8-B"
+          },
+          {
+            "evidence_id": "ev-169",
+            "kind": "sensor_health",
+            "sensor_id": "P6-ST3-A"
+          },
+          {
+            "evidence_id": "ev-181",
+            "kind": "sensor_health",
+            "sensor_id": "P6-ST6-A"
+          }
+        ],
+        "batch": {
+          "number": 1,
+          "total": 2,
+          "intake_batch_size": 24,
+          "index_start": 0,
+          "index_end_exclusive": 24,
+          "total_referenced_ids": 26,
+          "selected_ids": [
+            "ev-001",
+            "ev-003",
+            "ev-005",
+            "ev-007",
+            "ev-009",
+            "ev-011",
+            "ev-013",
+            "ev-015",
+            "ev-017",
+            "ev-019",
+            "ev-021",
+            "ev-027",
+            "ev-083",
+            "ev-089",
+            "ev-097",
+            "ev-099",
+            "ev-107",
+            "ev-123",
+            "ev-125",
+            "ev-131",
+            "ev-157",
+            "ev-159",
+            "ev-169",
+            "ev-181"
+          ]
+        },
+        "source_claims": [
+          {
+            "claim_id": "claim-000",
+            "evidence_ids": [
+              "ev-001"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-001",
+            "evidence_ids": [
+              "ev-003"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-002",
+            "evidence_ids": [
+              "ev-005"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-003",
+            "evidence_ids": [
+              "ev-007"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-004",
+            "evidence_ids": [
+              "ev-009"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-005",
+            "evidence_ids": [
+              "ev-011"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-006",
+            "evidence_ids": [
+              "ev-013"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-007",
+            "evidence_ids": [
+              "ev-015"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-008",
+            "evidence_ids": [
+              "ev-017"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-009",
+            "evidence_ids": [
+              "ev-019"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-010",
+            "evidence_ids": [
+              "ev-021"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-013",
+            "evidence_ids": [
+              "ev-027"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-041",
+            "evidence_ids": [
+              "ev-083"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-044",
+            "evidence_ids": [
+              "ev-089"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-048",
+            "evidence_ids": [
+              "ev-097"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-049",
+            "evidence_ids": [
+              "ev-099"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-053",
+            "evidence_ids": [
+              "ev-107"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-061",
+            "evidence_ids": [
+              "ev-123"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-062",
+            "evidence_ids": [
+              "ev-125"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-065",
+            "evidence_ids": [
+              "ev-131"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-078",
+            "evidence_ids": [
+              "ev-157"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-079",
+            "evidence_ids": [
+              "ev-159"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-084",
+            "evidence_ids": [
+              "ev-169"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-090",
+            "evidence_ids": [
+              "ev-181"
+            ],
+            "source_reads": [
+              {
+                "call_id": "0d271a7c-91d0-5ebe-9d2b-3460519bde47",
+                "tool": "quality.sensor_patterns"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "tool": "evidence.get",
+      "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 2 of 2: 2 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+      "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [24, 26) of 26. Do not fetch all 227 snapshot evidence items.",
+      "trigger": "Conditional application intake derived from available source references, history context or legacy location eligibility.",
+      "origin": "application_required_intake",
+      "application_selection": {
+        "rule": "application-intake-v2",
+        "rule_source": "runtime.workflow.AgentService._required_intake",
+        "trigger": "Conditional application intake derived from available source references, history context or legacy location eligibility.",
+        "execution_stage": "Before the first answer-model turn, not a model-selected call.",
+        "required_role": "sensor_quality",
+        "decision_policy": "llm-diagnosis-v1",
+        "why_this_call": "Open original measurement or specialist-cited sources, rather than making an assessment from summaries or reference IDs alone. This is batch 2 of 2: 2 of 26 distinct referenced sources, using the application's 24-ID intake batch size (not the gateway maximum). It is not a second discretionary search or a new measurement.",
+        "why_these_parameters": "Inherit the parent task's immutable [60, 120) seconds window (60 seconds); this tool does not choose a new time range. The window end is 120s, not the source clock 125s. Keep the pinned snapshot and version arguments. Select the explicit referenced sources, including pressure summaries for diagnosis and location-fit sources for legacy synthesis where present; not every evidence item in the snapshot. Intake uses batches of at most 24 IDs to bound upfront payloads, grouping large coordinator reads by evidence kind. This is an application batching choice, not the gateway's maximum ID allowance or a diagnostic threshold. Sort only the referenced IDs and take indices [24, 26) of 26. Do not fetch all 227 snapshot evidence items.",
+        "window": {
+          "start_seconds": 60,
+          "end_seconds": 120,
+          "duration_seconds": 60,
+          "source_clock_seconds": 125,
+          "selection": "parent_task_pinned_snapshot",
+          "boundaries": "start inclusive, end exclusive"
+        },
+        "source_tasks": [],
+        "selected_sources": [
+          {
+            "evidence_id": "ev-225",
+            "kind": "coverage",
+            "sensor_id": null
+          },
+          {
+            "evidence_id": "ev-226",
+            "kind": "limitation",
+            "sensor_id": null
+          }
+        ],
+        "batch": {
+          "number": 2,
+          "total": 2,
+          "intake_batch_size": 24,
+          "index_start": 24,
+          "index_end_exclusive": 26,
+          "total_referenced_ids": 26,
+          "selected_ids": [
+            "ev-225",
+            "ev-226"
+          ]
+        },
+        "source_claims": [
+          {
+            "claim_id": "claim-112",
+            "evidence_ids": [
+              "ev-225"
+            ],
+            "source_reads": [
+              {
+                "call_id": "14e96a33-37ca-52da-a836-a5bfbc3dc76f",
+                "tool": "quality.conflicts"
+              },
+              {
+                "call_id": "a6c36c1f-3a09-5652-97aa-e9313a94a04d",
+                "tool": "quality.coverage"
+              }
+            ]
+          },
+          {
+            "claim_id": "claim-113",
+            "evidence_ids": [
+              "ev-226"
+            ],
+            "source_reads": [
+              {
+                "call_id": "14e96a33-37ca-52da-a836-a5bfbc3dc76f",
+                "tool": "quality.conflicts"
+              },
+              {
+                "call_id": "a6c36c1f-3a09-5652-97aa-e9313a94a04d",
+                "tool": "quality.coverage"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "validation": {
+    "tests_passed": 120,
+    "tests_skipped": 2,
+    "ruff_and_strict_changed_file_mypy": "passed",
+    "content_capture_off_and_redaction": "passed",
+    "parent_denials_unexpected_failures_and_replays": "passed",
+    "seventy_replays_keep_full_call_list_and_parent_identity": "passed"
+  },
+  "publication": {
+    "previous_recordings": 282,
+    "total_recordings": 283,
+    "all_previous_recordings_unchanged": true,
+    "live_api_selects_new_example": true,
+    "backup_sha256": "ce34b06db94037b647f8ec17115567015472581722b70e3276e4a01524f29d32",
+    "owned_server_restarted_after_no_active_task_check": true,
+    "shared_package_ast_matches_qualified_source": true
+  },
+  "browser_verification": {
+    "trace_id": "f6eb4e26acda6332b2a4323f3a982d92",
+    "observation_id": "29c6724f4fc4d0ff",
+    "attributes_tab": true,
+    "parent_selection_summary_visible": true,
+    "workflow_intake_calls_expanded": true,
+    "why_this_call_and_why_these_parameters_visible": true,
+    "application_policy_trigger_visible": true
+  }
+}

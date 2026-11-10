@@ -243,6 +243,14 @@ review before publishing its report. Finally, the **agent Output >
 
 For the CustomerOps-style **Attributes** view, expand **Metadata**. Agent spans
 expose `agent.goal`, `agent.purpose`, `agent.procedure` and `agent.tools.input`.
+For the reason behind **each actual call without opening child spans**, read
+`agent.selection.summary`, numbered `agent.tool_call.N.*` previews and
+`agent.tool_calls.input.calls`. Every call includes its application/model origin,
+public reason, parameter explanation, exact arguments, trigger, source selection,
+result and execution status. `workflow.intake.input.calls` includes the same
+details for upfront intake only; those calls are application policy, **not model
+choices**. Preview indices stop at 64 to preserve span attributes; the structured
+call list retains all dispatches within the explicit content-capture size bound.
 Generations expose `model.selection.summary`, numbered
 `model.tool_decision.N.*` explanations (including parameter choices and
 provenance), and `model.next_step`. Tool spans expose `tool.goal`,

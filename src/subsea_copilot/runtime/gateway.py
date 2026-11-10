@@ -143,11 +143,16 @@ def pressure_regions(snapshot: WindowSnapshot) -> list[dict[str, Any]]:
 
 class ToolGateway:
     """Enforce reads against one leased task and its pinned immutable evidence view."""
-    def __init__(self, store: Any, task: AgentTask, snapshot: WindowSnapshot, telemetry: Any):
+    def __init__(
+        self, store: Any, task: AgentTask, snapshot: WindowSnapshot, telemetry: Any,
+        *, activity_span: Any = None,
+    ):
         if task.decision_policy == "llm-diagnosis-v1":
             snapshot = measurement_snapshot(snapshot)
         self.store, self.task, self.snapshot, self.telemetry = store, task, snapshot, telemetry
         self._history_ranges: HistoryRangeCache = {}
+        self.activity_span = activity_span
+        self.trace_calls: list[dict[str, Any]] = []
 
     def dependencies(self) -> list[AgentTask]:
         """Return compatible accepted tasks constrained by sibling/child or authorized reuse."""
@@ -543,6 +548,73 @@ class ToolGateway:
             }, allow_nan=False),
         }
 
+    def _trace_parent_call(
+        self, call: dict[str, Any], update: dict[str, Any], execution: dict[str, Any],
+    ) -> None:
+        if self.activity_span is None:
+            return
+        selection = tool_selection(self.task.role, call)
+        application = selection["application_selection"]
+        entry = {
+            "call_id": call["id"],
+            "tool": call["name"] if call["name"] in self._argument_schemas() else "unauthorized",
+            "origin": selection["origin"],
+            "provenance": selection["decision_provenance"],
+            "purpose": selection["purpose"],
+            "why_this_call": selection["decision_summary"] or (
+                "The model requested this tool; no public selection explanation was recorded."
+            ),
+            "why_these_parameters": selection["parameter_summary"] or (
+                "No public explanation of the parameter choice was recorded."
+            ),
+            "trigger": application["trigger"] if application else (
+                "Actual model tool request; see its public explanation and declared "
+                "references. These are not independently validated motivations."
+            ),
+            "arguments": call["args"],
+            "application_selection": application,
+            "declared_source_references": selection["declared_source_references"],
+            "model_call_id": selection["model_call_id"],
+            "model_span_id": selection["model_span_id"],
+            "result_summary": update.get("observation", "No result body was recorded."),
+            "status": update["status"],
+            "execution": execution,
+            "result_use": (
+                "Return the scoped receipt to this role's answer conversation. Only "
+                "successful reads can support validated claims; a read alone does not "
+                "establish a physical cause or instrument fault."
+            ),
+        }
+        self.trace_calls.append(entry)
+        index = len(self.trace_calls)
+        prefix = f"agent.tool_call.{index}"
+        if index <= 64:
+            for suffix, value in {
+                "call_id": entry["call_id"],
+                "tool": entry["tool"],
+                "provenance": entry["provenance"],
+                "summary": entry["why_this_call"],
+                "parameter.summary": entry["why_these_parameters"],
+                "result.summary": entry["result_summary"],
+            }.items():
+                self.activity_span.set_attribute(f"{prefix}.{suffix}", value)
+        self.activity_span.set_attribute("agent.tool_calls.input", json.dumps({
+            "scope": "Actual gateway dispatches in this agent attempt, not prior attempts.",
+            "authority_notice": (
+                "Application intake is policy-owned. Only model_request entries are "
+                "model-selected; public explanations are not private model reasoning."
+            ),
+            "actual_call_count": index,
+            "indexed_call_limit": 64,
+            "index_limit_note": "All dispatches remain in calls; indexed previews stop at 64.",
+            "calls": self.trace_calls,
+        }, allow_nan=False))
+        self.activity_span.set_attribute("agent.selection.summary", "\n".join(
+            f"{number}. {item['tool']} [{item['origin']}]: {item['why_this_call']} "
+            f"Parameters: {item['why_these_parameters']} Result: {item['result_summary']}"
+            for number, item in enumerate(self.trace_calls, 1)
+        ))
+
     def _trace_outcome(
         self, span: Any, call: dict[str, Any], result: dict[str, Any] | None,
         error: str | None, diagnostic: dict[str, Any] | None, *,
@@ -582,6 +654,7 @@ class ToolGateway:
             "tool.selection.input": json.dumps(tool_selection(self.task.role, call)),
             "tool.result.output": json.dumps(update),
         })
+        self._trace_parent_call(call, update, execution)
 
     def dispatch(self, call: dict[str, Any]) -> dict[str, Any]:
         """Authorize, replay-or-reserve, execute and persist a bounded read outcome."""
@@ -640,6 +713,15 @@ class ToolGateway:
                 )
                 span.set_attribute("langfuse.observation.output", json.dumps(diagnostic))
                 span.record_exception(exc)
+                self._trace_parent_call(
+                    call,
+                    public_check(
+                        self.task.role, call_id, name, arguments, error=exc.code,
+                        completed=True,
+                    ),
+                    {"executed": False, "accepted": False, "replayed": False,
+                     "progress": False, "execution_order": None},
+                )
             raise
         update = public_check(self.task.role, call_id, name, arguments)
         update["origin"] = call.get("origin", "model_request")
