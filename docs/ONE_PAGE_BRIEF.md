@@ -24,6 +24,6 @@ Figure 2. Agent-assisted investigation. For question 1, the report separates a s
 
 This handoff also needs to be timely. In two controlled tests of this simulated scenario, reviewed reports were ready in about 2.5-2.8 minutes of elapsed time.
 
-To test the system's answers, we compared its findings with known leaks and instrument problems that were hidden from the agents. Across all evaluated snapshots in the held-out synthetic detection test, leak detection achieved **100% precision and recall, with no false leak alarms**. Identifying affected instruments and classifying their problems also achieved **100% precision and recall**. These results assess diagnosis on simulated data, not detection speed or field reliability.
+To test the system's answers, we compared its findings with known leaks and instrument problems that were hidden from the agents. Across all evaluated snapshots in the held-out synthetic detection test, leak detection achieved **100% precision and recall, with no false leak alarms**. Identifying affected instruments and classifying their problems also achieved **100% precision and recall**.
 
 [Run the demo](https://github.com/ntnguyen-so/subsea-integrity-copilot). [Dashboard evidence](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/evidence/brief-dashboard-comparison.json). [Evaluation and timing results](https://github.com/ntnguyen-so/subsea-integrity-copilot/blob/main/docs/RESULTS.md).
