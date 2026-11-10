@@ -98,31 +98,53 @@ supporting evidence.
 You can explore the included Detection evaluation and run sensor-only monitoring
 **without a Copilot account**.
 
-### Prerequisites
+### 1. Install the Windows tools
 
-Use **Windows with PowerShell 7 (`pwsh`)**. Install
-[Git](https://git-scm.com/downloads/win), [uv](https://docs.astral.sh/uv/getting-started/installation/),
-[Node.js 22+](https://nodejs.org/en/download) (includes npm) and
-[Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/).
-Start Docker Desktop and select **Linux containers**. uv manages Python 3.11 and
-the project environment.
-
-### Install dependencies
-
-Run these commands in PowerShell 7:
+Open **PowerShell as Administrator** and paste this block. Approve the
+installation and local-script prompts. It installs WSL, PowerShell 7, Git, uv,
+Node.js (including npm) and Docker Desktop.
 
 ```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Install-PackageProvider -Name NuGet -Force | Out-Null
+    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery
+    Repair-WinGetPackageManager -AllUsers
+}
+
+wsl --install --no-distribution
+winget install --id Microsoft.PowerShell --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id astral-sh.uv --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id OpenJS.NodeJS.LTS --exact --source winget --accept-package-agreements --accept-source-agreements
+winget install --id Docker.DockerDesktop --exact --source winget --accept-package-agreements --accept-source-agreements
+```
+
+Restart Windows after installation. Then open **PowerShell 7** from the Start
+menu under your usual Windows account.
+
+### 2. Install and start Subsea Lens
+
+Paste this block into PowerShell 7. Complete Docker Desktop's first-run prompts
+when it opens. The commands download the project, install Python 3.11 and the
+project dependencies, create local credentials, prepare the database and start
+the dashboard.
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
+wsl --update
+docker desktop start --timeout 180
+docker desktop engine use linux
+
+Set-Location $HOME
 git clone https://github.com/ntnguyen-so/subsea-integrity-copilot.git
 Set-Location subsea-integrity-copilot
 uv sync --locked --python 3.11
 npm ci
-```
 
-### Create credentials and start the application
-
-Keep using the **same terminal**, in the cloned repository:
-
-```powershell
 $secretFile = Join-Path $env:LOCALAPPDATA 'SubseaCopilot\secrets.json'
 if (-not (Test-Path -LiteralPath $secretFile)) {
     .\tools\bootstrap.ps1
@@ -131,39 +153,49 @@ if (-not (Test-Path -LiteralPath $secretFile)) {
 $env:SUBSEA_TELEMETRY_ENABLED = '0'
 docker compose up -d --wait db
 uv run --no-sync subsea migrate
+
+Write-Host "Dashboard: http://127.0.0.1:8086"
+Write-Host "Username: operator"
+Write-Host "Password: $env:SUBSEA_OPERATOR_PASSWORD"
 uv run --no-sync subsea serve
 ```
 
-Keep that terminal open. Visit **http://127.0.0.1:8086** and sign in as
-**`operator`**. Open a second PowerShell 7 terminal **in the repository root** and
-display your generated password locally:
-
-```powershell
-. .\tools\load-environment.ps1
-$env:SUBSEA_OPERATOR_PASSWORD
-```
+Keep the terminal open. Visit **http://127.0.0.1:8086** and sign in as
+**`operator`**, using the password printed in the terminal.
 
 Keep your credentials private. They are stored locally in
 `%LOCALAPPDATA%\SubseaCopilot\secrets.json` and reused on subsequent starts.
-In each new application terminal, run `. .\tools\load-environment.ps1` and set
-`$env:SUBSEA_TELEMETRY_ENABLED = '0'` before starting the demo.
-
 The frontend builds automatically when the server starts.
 
-### Optional: generate new AI reports
+### 3. Optional: install and enable AI report generation
 
-For new agent-assisted reports, install the
-[GitHub Copilot CLI](https://github.com/github/copilot-cli) and sign in with access
-to **`gpt-6.1-sol`**, under the same Windows account used to run the dashboard.
-Investigations and the availability check below use your Copilot allowance.
+For new agent-assisted reports, use a Copilot account with access to
+**`gpt-6.1-sol`**. Investigations and the availability check below use your
+Copilot allowance.
 
 Stop the server with **Ctrl+C** first; leave the database running. In the loaded
-repository terminal, sign in and check model access. Restart the dashboard after
-the check reports `"outcome": "available"`:
+repository terminal, paste the following and complete the sign-in prompts.
+The dashboard restarts after a successful model-access check:
 
 ```powershell
+npm install --global @github/copilot
 copilot login
 uv run --no-sync subsea provider-check --mode live --model gpt-6.1-sol
+uv run --no-sync subsea serve
+```
+
+### Start the demo again
+
+For later sessions, open PowerShell 7 and paste:
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+Set-Location (Join-Path $HOME 'subsea-integrity-copilot')
+. .\tools\load-environment.ps1
+$env:SUBSEA_TELEMETRY_ENABLED = '0'
+docker desktop start --timeout 180
+docker compose up -d --wait db
 uv run --no-sync subsea serve
 ```
 
