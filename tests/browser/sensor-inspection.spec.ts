@@ -69,6 +69,23 @@ function inspectionBundle(): string {
     bundle: true, write: false, format: "iife", globalName: "InspectionFixture" }).outputFiles[0].text;
 }
 
+test("sensor-only inspection excludes both live and recorded agent explanations", async ({ page }) => {
+  const state: Omit<SensorInspection, "openReport" | "inspectWindow"> = {
+    pack, window, sensor, readings: [reading(sensor.id, 0, 70)],
+    loading: false, error: null, peer: null, peerSensor: null, peerLoading: false,
+    peerError: null, reportError: null, reports: [report], pending: false,
+    recordedReport: { snapshot: window, detail: report }, agentAssisted: false,
+  };
+  await page.setContent('<main id="inspection"></main>');
+  await page.addScriptTag({ content: `${inspectionBundle()}
+    InspectionFixture.renderSensorInspection(document.getElementById("inspection"),
+      { ...${JSON.stringify(state)}, openReport: () => {}, inspectWindow: () => {} });` });
+  await expect(page.locator(".inspection-samples tbody tr")).toHaveCount(1);
+  await expect(page.locator(".inspection-metrics")).toBeVisible();
+  await expect(page.locator(".inspection-agent")).toHaveCount(0);
+  await expect(page.locator("#inspection")).not.toContainText(answer);
+});
+
 test("readings distinguish unreceived and unusable data, compare one scale, and attach only matching accepted findings", async ({ page }) => {
   const bundle = inspectionBundle();
   const state: Omit<SensorInspection, "openReport" | "inspectWindow"> = { pack, window, sensor,
@@ -180,7 +197,8 @@ test("a novice can choose a sensor, compare readings and inspect the report wind
   page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
   await page.goto("/");
   await page.goto("/?replay=" + encodeURIComponent(file.generation_id) + "&view=live");
-  await page.getByRole("tab", { name: "Inspect", exact: true }).click();
+  await expect(page.locator("#channel-charts svg")).not.toHaveCount(0);
+  await page.locator("#inspect-raw").click();
   await expect(page.locator("#inspection-sensor")).toBeEnabled();
   await expect(page.locator(".inspection-samples tbody tr")).not.toHaveCount(0);
   await expect(page.locator("#source-audit")).not.toHaveAttribute("open");
@@ -203,25 +221,32 @@ test("a novice can choose a sensor, compare readings and inspect the report wind
   expect(errors).toEqual([]); expect(writes).toEqual([]);
 });
 
-test("inspection controls pin readings, retain sensor choices and expose source audit using explicit synthetic API fixtures", async ({ page }) => {
+for (const workflow of ["sensor_alerts", "agent_assisted"] as const) {
+test(`${workflow} inspection and comparison work on unflagged readings without agent assistance`, async ({ page }) => {
   const errors: string[] = [], unexpected: string[] = [], writes: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   page.on("request", request => { if (request.method() !== "GET") writes.push(request.url()); });
   const other: Sensor = { ...sensor, id: "P2-ST1-A", segment_id: "P2", station_id: "P2-ST1" };
   const fixturePack: SitePack = { ...pack, sensors: [sensor, peer, other],
     segments: [...pack.segments, { ...pack.segments[0]!, id: "P2", name: "Pipeline 2" }] };
-  const fixtureWindow: WindowSnapshot = { ...window, evidence: {
+  const fixtureWindow: WindowSnapshot = { ...window, quality: {
+    ...window.quality, expected_samples: 12, received_samples: 12, usable_samples: 12, coverage: 1,
+    findings: fixturePack.sensors.map(item => ({
+      ...window.quality.findings[0]!, sensor_id: item.id, received: 4, usable: 4,
+      missing: 0, hard_excluded: 0,
+    })),
+  }, evidence: {
     "pressure-source": { id: "pressure-source", sensor_id: sensor.id, channel: "pressure",
       kind: "channel_summary", value: { baseline_median: 75, baseline_scale: 1, anomaly_threshold: 3 } },
   } };
   const projection: Projection = { pack: fixturePack, latest_window: fixtureWindow,
     replay: { id: window.generation_id, site_id: window.site_id, scenario: "fixture", source_version: "pressure-v3",
-      seed: 1, mode: "live", workflow: "agent_assisted", pause_on_anomaly: false,
+      seed: 1, mode: "live", workflow, pause_on_anomaly: false,
       investigation_window_id: null, detected_alert_keys: [], state: "PAUSED", clock_seconds: 4,
       speed: 1, duration_seconds: 360, epoch: window.window_start, latest_window_id: window.id,
       version: 1, updated_at: window.window_end, error: null },
     warning: { kind: "fixture", severity: "info", snapshot_id: window.id, title: "Synthetic inspection fixture", message: "" },
-    episodes: [], tasks: [task], cursor: 0,
+    episodes: [], tasks: workflow === "agent_assisted" ? [task] : [], cursor: 0,
     health: { agent: "running", monitor: "running", observability: {} }, server_time: window.window_end };
   await page.route("http://127.0.0.1:8086/**", async route => {
     const path = new URL(route.request().url()).pathname;
@@ -238,19 +263,36 @@ test("inspection controls pin readings, retain sensor choices and expose source 
       "/api/tasks/root": report,
       "/api/tasks/root/trace": {},
       "/api/windows/snapshot": fixtureWindow,
+      "/api/evaluation": { version: "reference-evaluation-v1", status: "not_run", cases: [], metrics: null },
     };
     if (path.endsWith("/recordings")) return route.fulfill({ json: { base_playback_speed: 5, recordings: [] } });
     const chosen = fixturePack.sensors.find(item => path === `/api/windows/snapshot/sensors/${item.id}`);
     if (chosen) return route.fulfill({ json: { sensor: chosen,
-      observations: [reading(chosen.id, 0, chosen.id === peer.id ? 80 : 70), reading(chosen.id, 1, null)] } });
+      observations: [0, 1, 2, 3].map(second => reading(chosen.id, second, chosen.id === peer.id ? 80 : 70)) } });
     if (path in responses) return route.fulfill({ json: responses[path] });
     unexpected.push(path);
     return route.fulfill({ status: 404, json: { detail: `No synthetic fixture for ${path}` } });
   });
   await page.goto("/?replay=" + encodeURIComponent(window.generation_id) + "&view=live");
-  await page.getByRole("tab", { name: "Inspect", exact: true }).click();
-  await expect(page.locator(".inspection-samples tbody tr")).toHaveCount(2);
-  await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "matched");
+  await expect(page.locator(".rail [role=tab]")).toHaveCount(2);
+  await expect(page.getByRole("tab", { name: "Inspect", exact: true })).toHaveCount(0);
+  await page.locator("#tab-live").focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.locator("#tab-evaluation")).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(page.locator("#tab-live")).toBeFocused();
+  await expect(page.locator("#channel-charts svg")).not.toHaveCount(0);
+  await page.locator("#compare-sensors").click();
+  await expect(page.locator("#comparison-charts article")).toHaveCount(3);
+  await expect(page.locator("#comparison-charts svg")).toHaveCount(3);
+  await expect(page.locator("#window-history")).toHaveValue(fixtureWindow.id);
+  await page.locator("#inspect-raw").click();
+  await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".manual-panel #panel-evidence")).toBeVisible();
+  await expect(page.locator("#sensor-inspection-title")).toBeFocused();
+  await expect(page.locator(".inspection-samples tbody tr")).toHaveCount(4);
+  if (workflow === "agent_assisted") await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "matched");
+  else await expect(page.locator(".inspection-agent")).toHaveCount(0);
   await expect(page.locator("#source-audit")).not.toHaveAttribute("open");
   await expect(page.locator(".inspection-trends svg")).toHaveCount(2);
   await page.locator("#inspection-pipeline").selectOption("P2");
@@ -266,13 +308,35 @@ test("inspection controls pin readings, retain sensor choices and expose source 
   await page.locator("#inspection-peer").selectOption(peer.id);
   await expect(page.locator(".inspection-trends svg")).toHaveCount(2);
   await expect(page.locator("#sensor-inspection-workspace")).toContainText("paired agreement is not independent verification");
+  await page.getByRole("checkbox", { name: `Compare ${sensor.id}`, exact: true }).check();
+  await page.getByRole("checkbox", { name: `Compare ${peer.id}`, exact: true }).check();
+  await page.locator("#compare-sensors").click();
+  await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".manual-panel #comparison-panel")).toBeVisible();
+  await expect(page.locator("#comparison-title")).toBeFocused();
+  await expect(page.locator("#panel-evidence")).toBeHidden();
+  await expect(page.locator("#comparison-charts article > h3")).toHaveText([
+    `${sensor.id} / ${sensor.failure_domain_id}`, `${peer.id} / ${peer.failure_domain_id}`,
+  ]);
+  await expect(page.locator("#window-history")).toHaveValue(fixtureWindow.id);
+  await page.locator("#inspect-raw").click();
+  await expect(page.locator(".manual-panel #panel-evidence")).toBeVisible();
+  await expect(page.locator("#comparison-panel")).toBeHidden();
+  await expect(page.locator("#inspection-sensor")).toHaveValue(sensor.id);
+  await expect(page.locator(".inspection-trends svg")).toHaveCount(2);
   await page.screenshot({ path: test.info().outputPath("sensor-inspection-desktop.png"), fullPage: true });
   await page.locator("#source-audit > summary").click();
   await expect(page.locator("#raw-table table")).toBeVisible();
   await expect(page.locator("#raw-table")).toContainText("psi");
+  await page.locator("#evidence-chips button").first().click();
+  await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".manual-panel #panel-evidence")).toBeVisible();
+  await expect(page.locator("#source-audit")).toHaveAttribute("open");
+  await expect(page.locator("#evidence-detail")).toContainText("pressure-source");
   await page.locator("#source-audit > summary").click();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.screenshot({ path: test.info().outputPath("sensor-inspection-mobile.png"), fullPage: true });
   expect(errors).toEqual([]); expect(unexpected).toEqual([]); expect(writes).toEqual([]);
 });
+}

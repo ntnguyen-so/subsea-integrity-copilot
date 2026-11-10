@@ -16,7 +16,7 @@ test("dashboard removes Audit and the rail note while preserving live updates an
     username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
   } });
   const { replays }: { replays: ReplaySession[] } = await (await page.request.get("/api/replays")).json();
-  const replay = replays.find(row => row.latest_window_id);
+  const replay = replays.find(row => row.latest_window_id && row.workflow === "agent_assisted");
   expect(replay).toBeDefined();
   const projection: Projection = await (await page.request.get(`/api/replays/${replay!.id}/projection`)).json();
   const event: ConsoleEvent = {
@@ -38,14 +38,13 @@ test("dashboard removes Audit and the rail note while preserving live updates an
   await expect.poll(() => projections).toBeGreaterThan(1);
   await expect(page.locator("#connection-state")).toContainText("reconnecting");
   await expect(page.locator("#notice")).not.toContainText(/Malformed backend event|Event scope mismatch|Required console element missing/);
-  await expect(page.locator(".rail [role=tab]")).toContainText(["Live", "Inspect", "Evaluation"]);
+  await expect(page.locator(".rail [role=tab]")).toContainText(["Live", "Evaluation"]);
   await expect(page.locator("#tab-audit, #panel-audit, #tab-agents, #panel-agents, #event-feed, .rail-note")).toHaveCount(0);
   await page.locator("#tab-evaluation").focus();
   await page.keyboard.press("Home");
   await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
-  await page.locator("#system-details > summary").click();
-  await expect(page.locator("#system-connection")).toHaveText(await page.locator("#connection-state").innerText());
-  await expect(page.locator("#health-state")).toBeVisible();
+  await expect(page.locator("#system-details")).toHaveCount(0);
+  await expect(page.locator("#connection-state")).toBeVisible();
   await page.locator("#investigation-technical > summary").click();
   await expect(page.locator("#view-langfuse")).toBeVisible();
   expect(errors).toEqual([]);

@@ -112,7 +112,6 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
       elements => elements.map(element => element.outerHTML)),
     sensors: await page.locator("#sensor-list").innerText(),
     summary: await page.locator("#event-summary").innerText(),
-    metrics: await page.locator("#domain-count,#sample-coverage,#window-state,#detector-stage").allTextContents(),
     tabs: await page.getByRole("tablist", { name: "Console workspace" }).getByRole("tab").allTextContents(),
     comparison: await page.locator("#compare-sensors").innerText(),
     header: await page.locator("#inference-mode").innerText(),
@@ -134,7 +133,7 @@ test("both workflows expose identical monitoring interfaces and sensor evidence"
   const alerts = await markerState();
   const baselineInterface = await sharedInterface();
   await expect(page.locator("#agent-activity")).toHaveCount(0);
-  await expect(page.locator(".agent-status-panel")).toBeVisible();
+  await expect(page.locator(".agent-status-panel")).toBeHidden();
   await expect(page.locator("#tab-agents")).toHaveCount(0);
   await expect(page.locator(".engineer-details")).toHaveCount(0);
   await expect(page.locator("#question-tools")).toHaveCount(0);
@@ -429,7 +428,7 @@ test("missing-only coverage loss stays visible without pausing for agents", asyn
   expect(view.episodes).toEqual([]);
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "coverage_lost");
   await expect(page.locator("#topology .sensor.missing")).toHaveCount(24);
-  await expect(page.locator("#agent-stage")).toHaveText("Waiting for a pressure anomaly");
+  await expect(page.locator("#automatic-state")).toHaveText("Waiting for a pressure anomaly");
   await expect(page.locator("#automatic-conclusion")).toContainText("Missing values alone do not start agents");
   await expect(page.locator("#map-legend .spatial-legend-label strong")).toHaveText(["Pressure alert", "Missing / invalid", "No pressure alert", "Selected sensor"]);
   await expect(page.locator("#play")).toBeEnabled();
@@ -584,23 +583,23 @@ test("server-confirmed clock and selected trends stay live; only explicit review
     element.getAttribute("data-seconds"), element.getAttribute("data-confirmed-seconds"),
   ]);
   expect(values[0]).toBe(values[1]);
-  await expect(page.locator("#clock-basis")).toContainText("Server-confirmed");
+  await expect(page.locator("#source-clock")).toHaveAttribute("title", /Server-confirmed/);
   await page.locator("#inspect-raw").click();
   const pinned = await page.locator("#selected-basis").textContent();
-  const latest = await page.locator("#live-bounds").textContent();
+  const latest = await page.locator("#source-clock").getAttribute("data-confirmed-seconds");
   await expect(page.locator("#raw-table tbody tr")).not.toHaveCount(0);
-  await expect(page.locator("#live-bounds")).not.toHaveText(latest!);
+  await expect(page.locator("#source-clock")).not.toHaveAttribute("data-confirmed-seconds", latest!);
   await expect(page.locator("#selected-basis")).toHaveText(pinned!);
   await page.unrouteAll({ behavior: "wait" });
   await page.context().setOffline(true);
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "unavailable");
-  await expect(page.locator("#clock-basis")).toContainText("NOT CURRENT");
+  await expect(page.locator("#source-clock")).toHaveAttribute("title", /NOT CURRENT/);
   await page.waitForTimeout(1000);
   const offlineClock = await page.locator("#source-clock").evaluate(element => [
     element.getAttribute("data-seconds"), element.getAttribute("data-confirmed-seconds"),
   ]);
   expect(offlineClock[0]).toBe(offlineClock[1]);
-  await expect(page.locator("#clock-basis")).toContainText("NOT CURRENT");
+  await expect(page.locator("#source-clock")).toHaveAttribute("title", /NOT CURRENT/);
   await page.context().setOffline(false);
   await expect(page.locator("#connection-state")).toContainText("Connected", { timeout: 30_000 });
   const stopped = await page.request.post(`/api/replays/${id}/control`, {
@@ -856,7 +855,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#inference-mode")).toContainText("EVIDENCE");
   await expect(page.locator("#manual-workflow")).toHaveCount(0);
   await expect(page.locator("#monitoring-warning")).not.toContainText(/\bdemo\b/i);
-  await expect(page.locator(".agent-status-panel")).toBeVisible();
+  await expect(page.locator(".agent-status-panel")).toBeHidden();
   await expect(page.locator("#agent-activity")).toHaveCount(0);
   await expect(page.locator("#question-tools, #tab-agents")).toHaveCount(0);
   await expect(page.locator("#automatic-progress .agent-role")).toHaveCount(4);
@@ -864,8 +863,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await expect(page.locator("#map-legend .spatial-legend-label strong")).toHaveText(["Pressure alert", "Missing / invalid", "No pressure alert", "Selected sensor"]);
   await expect(page.locator("#sensor-list")).not.toContainText("Overlapping pressure drop");
   await expect(page.locator("#event-summary")).toContainText("do not establish cause or location");
-  await expect(page.locator("#domain-count")).toContainText("instrument domains available");
-  await expect(page.locator("#agent-stage")).toContainText("execution off");
+  await expect(page.locator("#automatic-state")).toContainText("execution off");
   await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
   const before: Projection = await (await page.request.get(`/api/replays/${baseline.id}/projection`)).json();
   expect(before.tasks).toEqual([]);
@@ -875,7 +873,7 @@ test("two customer modes keep one interface and add only reviewed investigation 
   await page.locator("#source-audit > summary").click();
   await expect(page.locator("#evidence-chips")).toContainText("CLAIM");
   await expect(page.locator("#raw-table table")).toBeVisible();
-  await page.locator("#tab-evidence").focus();
+  await page.locator("#tab-live").focus();
   await page.keyboard.press("ArrowDown");
   await expect(page.locator("#tab-evaluation")).toHaveAttribute("aria-selected", "true");
   const assisted = await prepare(page, "S1", 23);

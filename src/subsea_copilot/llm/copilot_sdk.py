@@ -37,6 +37,8 @@ from .copilot_cli import (
 LOGGER = logging.getLogger(__name__)
 _HOSTS: dict[Path, RuntimeHost] = {}
 _HOST_LOCK = threading.Lock()
+_CLEANUP_TIMEOUT_SECONDS = 3.0
+_SESSION_CLEANUP_TIMEOUT_SECONDS = 30.0
 
 
 class RuntimeHost:
@@ -50,9 +52,27 @@ class RuntimeHost:
         self.thread.start()
         self.client: CopilotClient | None = None
         self.start_lock = asyncio.Lock()
+        self.cleanup_lock = asyncio.Lock()
         self.job: _WindowsJob | None = None
         self.version: str | None = None
         self.process: subprocess.Popen[bytes] | None = None
+
+    async def _retire_client(self, client: CopilotClient) -> None:
+        if self.client is not client:
+            return
+        self.client = None
+        job, self.job = self.job, None
+        process, self.process = self.process, None
+        if job:
+            job.close()
+        if process is not None and process.poll() is None:
+            process.kill()
+        try:
+            async with asyncio.timeout(_CLEANUP_TIMEOUT_SECONDS):
+                await client.force_stop()
+        except Exception:
+            LOGGER.error("Owned SDK runtime cleanup failed")
+            raise ProviderError("capture_cleanup_failed") from None
 
     async def _client(self) -> CopilotClient:
         async with self.start_lock:
@@ -80,11 +100,7 @@ class RuntimeHost:
                         self.job = _WindowsJob(process)
                     self.version = (await client.get_status()).version
                 except BaseException:
-                    self.client = None
-                    await client.force_stop()
-                    if self.job:
-                        self.job.close()
-                        self.job = None
+                    await self._retire_client(client)
                     raise
             return self.client
 
@@ -93,13 +109,15 @@ class RuntimeHost:
     ) -> tuple[str, dict[str, Any]]:
         started = time.monotonic()
         remaining = deadline - started
-        cleanup_budget = min(3.0, remaining * 0.1)
+        cleanup_budget = min(_CLEANUP_TIMEOUT_SECONDS, remaining * 0.25)
         events: list[dict[str, Any]] = []
         size = 0
         rejected: ProviderError | None = None
         session = None
         completed = False
         creation_started = False
+        client: CopilotClient | None = None
+        metadata: dict[str, Any] = {}
 
         def observe(event: Any) -> None:
             nonlocal size, rejected
@@ -178,20 +196,47 @@ class RuntimeHost:
         except TimeoutError:
             raise ProviderError("timeout") from None
         finally:
-            if creation_started and self.client is not None:
+            if creation_started and client is not None:
+                cleanup_started = time.monotonic()
                 try:
                     async with asyncio.timeout(max(0.001, deadline - time.monotonic())):
-                        if session is not None and not completed:
-                            await session.abort()
-                        await self.client.delete_session(request_id)
-                except Exception:
-                    LOGGER.error("Owned SDK session cleanup failed request_id=%s", request_id)
-                    client, self.client = self.client, None
-                    if self.job:
-                        self.job.close()
-                        self.job = None
-                    await client.force_stop()
-                    raise ProviderError("capture_cleanup_failed") from None
+                        # The CLI serializes session-file deletion; queue cleanup, not inference.
+                        async with self.cleanup_lock:
+                            operation_budget = (
+                                _SESSION_CLEANUP_TIMEOUT_SECONDS if completed else cleanup_budget
+                            )
+                            metadata["cleanup_queue_ms"] = round(
+                                (time.monotonic() - cleanup_started) * 1000, 3,
+                            )
+                            async with asyncio.timeout(
+                                max(0.001, min(
+                                    operation_budget,
+                                    deadline - time.monotonic(),
+                                ))
+                            ):
+                                if session is not None and not completed:
+                                    await session.abort()
+                                await client.delete_session(request_id)
+                            metadata["runtime_cleanup_ms"] = round(
+                                (time.monotonic() - cleanup_started) * 1000, 3,
+                            )
+                except Exception as exc:
+                    detail = str(exc).lower()
+                    reason = "timeout" if isinstance(exc, TimeoutError) else next(
+                        (key for key in ("busy", "not found", "disconnected", "permission")
+                         if key in detail),
+                        "other",
+                    )
+                    LOGGER.error(
+                        "Owned SDK session cleanup failed request_id=%s type=%s reason=%s",
+                        request_id, type(exc).__name__, reason,
+                    )
+                    await self._retire_client(client)
+                    error = ProviderError("capture_cleanup_failed")
+                    error.metadata.update(
+                        cleanup_error_type=type(exc).__name__, cleanup_reason=reason,
+                    )
+                    raise error from None
 
     def close(self, *, graceful: bool = True) -> None:
         async def shutdown() -> None:

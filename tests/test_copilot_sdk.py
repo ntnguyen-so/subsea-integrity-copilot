@@ -3,6 +3,7 @@
 import asyncio
 import json
 import subprocess
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -202,3 +203,107 @@ def test_creation_timeout_deletes_known_session_even_without_returned_handle(
     assert failure.value.code == "timeout"
     assert clients[0].deleted == [clients[0].sessions[0]["session_id"]]
     assert clients[0].aborted == []
+
+
+def test_stalled_session_cleanup_is_bounded_and_retires_only_its_host(
+    clients, tmp_path, monkeypatch,
+):
+    model = CopilotCLIChatModel(runtime_dir=tmp_path)
+    model.invoke("first snapshot")
+    monkeypatch.setattr(sdk, "_SESSION_CLEANUP_TIMEOUT_SECONDS", 0.05)
+
+    async def stalled_delete(session_id):
+        await asyncio.sleep(10)
+
+    monkeypatch.setattr(clients[0], "delete_session", stalled_delete)
+    with pytest.raises(ProviderError) as failure:
+        model.invoke("second snapshot", timeout=1)
+    assert failure.value.code == "capture_cleanup_failed"
+    assert clients[0].stopped
+    assert model.invoke("fresh snapshot").content == '{"outcome":"supported"}'
+    assert len(clients) == 2 and not clients[1].stopped
+
+
+def test_cleanup_queue_does_not_limit_parallel_inference(clients, tmp_path, monkeypatch):
+    ready = asyncio.Event()
+    active = maximum = deleting = maximum_deleting = 0
+    original_create = sdk.CopilotClient.create_session
+    original_delete = sdk.CopilotClient.delete_session
+
+    async def create(self, **options):
+        session = await original_create(self, **options)
+        original_send = session.send_and_wait
+
+        async def send(prompt, **kwargs):
+            nonlocal active, maximum
+            active += 1
+            maximum = max(maximum, active)
+            if active == 3:
+                ready.set()
+            await asyncio.wait_for(ready.wait(), timeout=2)
+            result = await original_send(prompt, **kwargs)
+            active -= 1
+            return result
+
+        session.send_and_wait = send
+        return session
+
+    async def delete(self, session_id):
+        nonlocal deleting, maximum_deleting
+        deleting += 1
+        maximum_deleting = max(maximum_deleting, deleting)
+        try:
+            await asyncio.sleep(0.02)
+            await original_delete(self, session_id)
+        finally:
+            deleting -= 1
+
+    monkeypatch.setattr(sdk.CopilotClient, "create_session", create)
+    monkeypatch.setattr(sdk.CopilotClient, "delete_session", delete)
+    model = CopilotCLIChatModel(runtime_dir=tmp_path)
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        list(executor.map(lambda index: model.invoke(f"snapshot {index}"), range(3)))
+    assert maximum == 3
+    assert maximum_deleting == 1
+    assert len(clients) == 1 and len(clients[0].deleted) == 3
+
+
+def test_late_cleanup_from_retired_client_cannot_kill_replacement(
+    clients, tmp_path, monkeypatch,
+):
+    from contextlib import nullcontext
+
+    model = CopilotCLIChatModel(runtime_dir=tmp_path)
+    model.invoke("first snapshot")
+    monkeypatch.setattr(sdk._HOSTS[tmp_path.resolve()], "cleanup_lock", nullcontext())
+    old = clients[0]
+    waiting = threading.Event()
+    release = threading.Event()
+    attempts = 0
+
+    async def failed_delete(session_id):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            waiting.set()
+            while not release.is_set():
+                await asyncio.sleep(0.001)
+        raise RuntimeError("private cleanup failure")
+
+    monkeypatch.setattr(old, "delete_session", failed_delete)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        late = executor.submit(model.invoke, "old in-flight snapshot")
+        try:
+            assert waiting.wait(timeout=2)
+            with pytest.raises(ProviderError, match="cleanup"):
+                model.invoke("retire old runtime")
+            model.invoke("replacement snapshot")
+            assert len(clients) == 2 and not clients[1].stopped
+        finally:
+            release.set()
+        with pytest.raises(ProviderError, match="cleanup"):
+            late.result(timeout=2)
+    assert old.stopped
+    assert not clients[1].stopped
+    model.invoke("reuse replacement")
+    assert len(clients) == 2

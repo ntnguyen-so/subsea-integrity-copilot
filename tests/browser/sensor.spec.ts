@@ -1,11 +1,13 @@
 /**
- * Owned local integration: displayed counters come from the actual projection and
+ * Owned local integration: monitoring loads without the removed System details and
  * sensor charts survive refresh while pinned to immutable evidence. Requires loaded
  * operator credentials and an existing backend/run, not a fabricated browser dataset.
  */
 import { test, expect } from "@playwright/test";
 
-test("actual projection counters remain explicit without the removed context section", async ({ page }) => {
+test("System details are removed without breaking monitoring", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
   const password = process.env.SUBSEA_OPERATOR_PASSWORD;
   if (!password) throw new Error("Load the owned environment before browser qualification");
   const login = await page.context().request.post("/api/login", {
@@ -23,11 +25,13 @@ test("actual projection counters remain explicit without the removed context sec
   const projectionResponse = page.waitForResponse(response =>
     new URL(response.url()).pathname === `/api/replays/${replay.id}/projection`);
   await page.goto("/?replay=" + encodeURIComponent(replay.id) + "&view=live");
-  const projection: { pack: { segments: { id: string }[] }; tasks: { state: string; model_calls: number }[] } = await (await projectionResponse).json();
-  const calls = projection.tasks.reduce((sum, task) => sum + task.model_calls, 0);
-  await expect(page.locator("#budget-usage")).toContainText(`${calls} model calls in listed tasks`);
-  await expect(page.locator("#budget-usage")).toContainText("generation model-call limit: unknown");
+  const projection: { pack: { sensors: { id: string }[] } } = await (await projectionResponse).json();
+  await expect(page.locator("#system-details, #system-connection, #budget-usage")).toHaveCount(0);
+  await expect(page.locator("#topology [data-sensor]")).toHaveCount(projection.pack.sensors.length);
+  await expect(page.locator("#source-clock")).toContainText("UTC");
+  await expect(page.locator("#connection-state")).toBeVisible();
   await expect(page.locator(".engineer-details")).toHaveCount(0);
+  expect(errors).toEqual([]);
 });
 
 test("real sensor charts survive projection refreshes on a pinned window", async ({ page }) => {

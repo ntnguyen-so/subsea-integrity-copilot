@@ -133,6 +133,7 @@ function enc(id: string): string { return encodeURIComponent(id); }
 function modeName(mode: Mode): string { return mode === "live" ? "COPILOT HOSTED" : "SCRIPTED"; }
 function sensorAlertsOnly(): boolean { return projection?.replay.workflow === "sensor_alerts"; }
 function automaticRoot(): AgentTask | null {
+  if (sensorAlertsOnly()) return null;
   if (liveSelection !== null) {
     const snapshot = projection?.latest_window;
     if (snapshot?.end_seconds !== liveSelection) return null;
@@ -199,7 +200,7 @@ function updateSession(): void {
 }
 function setConnection(value: string): void {
   connectionState = value;
-  text("connection-state", value); text("system-connection", value);
+  text("connection-state", value);
   renderMonitoringWarning();
 }
 function updateControls(): void {
@@ -228,12 +229,14 @@ function updateControls(): void {
   const selectedRoot = automaticRoot();
   const selectedRunning = selectedRoot
     && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(selectedRoot.state);
-  controlButton("investigate-live-here").hidden = playback.enabled || !replay;
-  controlButton("investigate-live-here").disabled = !allowed || playback.loading
+  controlButton("investigate-live-here").hidden = sensorAlertsOnly() || playback.enabled || !replay;
+  controlButton("investigate-live-here").disabled = sensorAlertsOnly() || !allowed || playback.loading
     || selectedTime < 60 || Boolean(selectedRunning);
   controlButton("investigate-live-here").textContent = `Run agents at +${selectedTime}s`;
-  controlButton("investigation-mode").disabled = !allowed || !replay || playback.loading;
-  controlButton("load-recording").disabled = !allowed;
+  controlButton("investigation-mode").disabled = sensorAlertsOnly() || !allowed || !replay || playback.loading;
+  const recordingAllowed = select("workflow").value === "agent_assisted";
+  controlButton("load-recording").hidden = !recordingAllowed;
+  controlButton("load-recording").disabled = !allowed || !recordingAllowed;
   if (liveSelection !== null && !playback.enabled) {
     controlButton("play").disabled = true;
     controlButton("step").disabled = !allowed || playback.loading
@@ -262,16 +265,21 @@ function switchTab(name: string, focus = false): void {
     if (selected && focus) tab.focus();
   }
   if (name === "evaluation") void loadEvaluation();
-  box("evidence-selection").hidden = name === "live"
-    && (playback.enabled || liveSelection !== null);
-  if (name === "evidence") {
-    pinVisibleWindow();
-    const sensor = projection?.pack.sensors.find(item => item.id === selectedSensorId && item.channels.includes("pressure"))
-      || projection?.pack.sensors.find(item => item.channels.includes("pressure"));
-    if (sensor && sensor.id !== selectedSensorId) selectSensor(sensor.id);
-    else if (sensor) void loadSensor();
-    renderInspectionWorkspace();
-  }
+  renderBasis();
+}
+function openSensorInspection(): boolean {
+  if (!pinVisibleWindow()) { notify("No completed window to inspect.", true); return false; }
+  box("comparison-panel").hidden = true;
+  box("panel-evidence").hidden = false;
+  switchTab("live");
+  const sensor = projection?.pack.sensors.find(item => item.id === selectedSensorId && item.channels.includes("pressure"))
+    || projection?.pack.sensors.find(item => item.channels.includes("pressure"));
+  if (sensor && sensor.id !== selectedSensorId) selectSensor(sensor.id);
+  else if (sensor) void loadSensor();
+  renderInspectionWorkspace();
+  box("sensor-inspection-title").focus();
+  box("sensor-inspection-title").scrollIntoView({ block: "nearest" });
+  return true;
 }
 async function loadEvaluation(): Promise<void> {
   if (evaluationLoading) return;
@@ -345,20 +353,20 @@ async function loadCatalogData(): Promise<void> {
 }
 async function loadScenarioRecording(): Promise<void> {
   const scenario = select("scenario").value, seed = Number(input("seed").value);
+  const workflow = select("workflow").value === "sensor_alerts" ? "sensor_alerts" : "agent_assisted";
   if (!scenario || !Number.isSafeInteger(seed)) throw new Error("Choose a scenario and integer seed.");
   const matches = replays.filter(replay => replay.scenario === scenario && replay.seed === seed
-    && replay.source_version === currentSource);
-  let replay = matches.filter(row => row.workflow === "agent_assisted")
-    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] || matches[0];
+    && replay.source_version === currentSource && replay.workflow === workflow);
+  let replay = matches.sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0];
   if (!replay) {
     replay = await request<ReplaySession>("/api/replays", {
-      scenario, seed, mode: "live", workflow: "agent_assisted",
+      scenario, seed, mode: "live", workflow,
       idempotency_key: crypto.randomUUID(),
     });
     replays.unshift(replay);
   }
   playback.setSpeed(5);
-  await chooseReplay(replay.id);
+  await chooseReplay(replay.id, workflow === "agent_assisted");
 }
 function closeStream(): void {
   source?.close(); source = null;
@@ -405,7 +413,7 @@ function moveTime(direction: -1 | 1): void {
 }
 function renderInvestigationTime(): void {
   const seconds = timelineSeconds(), slider = input("investigation-time");
-  slider.disabled = !projection || commandBusy || playback.loading;
+  slider.disabled = sensorAlertsOnly() || !projection || commandBusy || playback.loading;
   slider.value = String(seconds);
   text("investigation-time-label", `+${seconds}s`);
   const toggle = controlButton("investigation-mode");
@@ -423,7 +431,7 @@ function renderInvestigationTime(): void {
   }
 }
 async function switchInvestigationMode(): Promise<void> {
-  if (!projection || !currentReplayId || commandBusy) return;
+  if (sensorAlertsOnly() || !projection || !currentReplayId || commandBusy) return;
   if (playback.enabled) {
     recordedAnchor = { id: currentReplayId, seconds: playback.seconds, speed: playback.speed };
     liveSelection = timelineSeconds();
@@ -478,9 +486,9 @@ function resetView(): void {
   renderInspectionWorkspace();
   element("investigation-technical", HTMLDetailsElement).open = false;
   renderMonitoringWarning();
-  text("source-clock", "Not reported"); text("server-clock", "Not reported");
-  text("clock-basis", "No received telemetry"); text("trend-basis", "No received telemetry");
-  for (const id of ["stream-stage", "detector-stage", "agent-stage", "automatic-state"]) text(id, "Awaiting telemetry");
+  text("source-clock", "Not reported"); box("source-clock").title = "No received telemetry";
+  text("trend-basis", "No received telemetry");
+  text("automatic-state", "Awaiting telemetry");
   for (const id of ["automatic-timeline", "automatic-progress", "automatic-actions", "sensor-list"]) box(id).replaceChildren();
   box("comparison-charts").replaceChildren();
   text("sensor-list-basis", "Awaiting a completed window");
@@ -494,7 +502,6 @@ function resetView(): void {
   traceLink.hidden = true; traceLink.removeAttribute("href"); delete traceLink.dataset.task;
   text("automatic-trace-status", "");
   delete box("automatic-state").dataset.task;
-  text("live-bounds", "Awaiting telemetry"); text("health-state", "Not reported");
   text("event-summary", "Waiting for backend assessment.");
   text("location-summary", ""); text("sensor-title", "Select a sensor"); text("sensor-meta", "No sensor selected");
   box("channel-charts").replaceChildren(node("p", "No observations loaded.", "empty"));
@@ -502,7 +509,6 @@ function resetView(): void {
   box("evidence-chips").replaceChildren(); box("raw-table").replaceChildren();
   box("task-tree").replaceChildren(); box("task-detail").replaceChildren();
   text("answer-preview", "No accepted answer loaded.");
-  for (const id of ["sample-coverage", "domain-count", "window-state", "budget-usage"]) text(id, "Not reported");
   const map = document.getElementById("topology");
   if (map) delete map.dataset.snapshot;
   delete box("channel-charts").dataset.snapshot;
@@ -641,8 +647,16 @@ function isConsoleEvent(value: unknown): value is ConsoleEvent {
 /** Fan out one coherent projection to the view modules; detailed evidence loads remain scoped. */
 function renderProjection(): void {
   if (!projection) return;
-  const { replay, pack, latest_window: latest, health } = projection;
+  const { replay, pack, latest_window: latest } = projection;
   playback.load(projection);
+  const sensorOnly = sensorAlertsOnly();
+  document.querySelector<HTMLElement>(".investigation-time-control")!.hidden = sensorOnly;
+  document.querySelector<HTMLElement>(".agent-status-panel")!.hidden = sensorOnly;
+  box("review-agent-findings").hidden = sensorOnly;
+  box("location-summary").hidden = sensorOnly;
+  text("inspection-mode-label", sensorOnly ? "READINGS FIRST / SENSOR ALERTS ONLY" : "READINGS FIRST / AGENT FINDINGS ALONGSIDE");
+  text("inspection-intro", `Choose a sensor and measurement window, compare its pressure with another instrument${sensorOnly
+    ? "." : ", then check the agent's explanation against those readings."} Orange alerts identify unusual readings, not their cause. Missing data is unknown, never zero.`);
   document.querySelector<HTMLElement>(".live-grid")!.hidden = false;
   syncTimelineWindow();
   text("inference-mode", "EVIDENCE → ENGINEER REVIEW");
@@ -665,8 +679,6 @@ function renderProjection(): void {
         : "Agent investigations pause the simulated source; recorded runs retain their playback policy.");
   renderClocks();
   renderInvestigationTime();
-  text("live-bounds", latest ? `${bounds(latest.window_start, latest.window_end)} · ${latest.quality.status}` : `WARMING_UP / no completed window · width ${pack.window_seconds}s + lateness ${pack.lateness_seconds}s`);
-  text("health-state", `${health.monitor} / ${health.agent} / export: ${jsonText(health.observability.status)} · stored visibility: ${jsonText(health.observability.stored_trace_visibility)}`);
   const speedControl = select("speed"), currentSpeed = String(navigationSpeed());
   speedControl.querySelector("[data-legacy-speed]")?.remove();
   if (!Array.from(speedControl.options).some(option => option.value === currentSpeed)) {
@@ -679,7 +691,7 @@ function renderProjection(): void {
   const stepSeconds = navigationSpeed();
   controlButton("step-back").textContent = `Back ${stepSeconds}s`;
   controlButton("step").textContent = `Forward ${stepSeconds}s`;
-  renderMonitoringWarning(); renderBasis(); renderMap(); renderSensorList(); renderAutomaticInvestigation(); syncComparisonWindow(); renderEvidenceChips(); renderTasks(); renderAnswer(); renderMetrics();
+  renderMonitoringWarning(); renderBasis(); renderMap(); renderSensorList(); renderAutomaticInvestigation(); syncComparisonWindow(); renderEvidenceChips(); renderTasks(); renderAnswer();
   playback.dataChanged(); renderClocks(); updateControls();
   if (replay.error) notify(`Replay ${replay.state}: ${replay.error}`, true);
 }
@@ -754,14 +766,13 @@ function renderClocks(): void {
       : `${time(sourceTime)} · +${seconds.toFixed(1)}s · ${friendly(replay.state)} · target ${replay.speed}×`);
   box("source-clock").dataset.seconds = String(seconds);
   box("source-clock").dataset.confirmedSeconds = String(replay.clock_seconds);
-  text("clock-basis", playback.enabled
+  box("source-clock").title = playback.enabled
     ? playback.waiting
       ? "Waiting for measurements, pressure trends and saved investigation evidence to finish loading. Playback resumes when ready; loading time is not fast-forwarded."
       : "Load-aware recorded playback. Selected speed is the maximum pace; every measurement window loads before advancing. No new model calls."
     : liveSelection !== null
       ? `Selected fixed investigation endpoint. Underlying source last confirmed at +${replay.clock_seconds}s; selecting a time does not create telemetry or launch agents.`
-      : `${current ? "Server-confirmed source time" : "NOT CURRENT; last confirmed source time"} · ${pack.sample_seconds}s samples / ${pack.hop_seconds}s window hop. No browser-generated telemetry. Processing load can slow the target pace; agent execution stays real time.`);
-  text("server-clock", `${time(projection.server_time)} · projection received ${Math.floor(age / 1000)}s ago`);
+      : `${current ? "Server-confirmed source time" : "NOT CURRENT; last confirmed source time"} · ${pack.sample_seconds}s samples / ${pack.hop_seconds}s window hop. No browser-generated telemetry. Processing load can slow the target pace; agent execution stays real time.`;
 }
 function renderMonitoringWarning(): void {
   const banner = box("monitoring-warning");
@@ -803,7 +814,8 @@ function renderBasis(): void {
   const newer = window && latest && window.id !== latest.id;
   const held = Boolean(projection?.replay.investigation_window_id);
   box("evidence-selection").hidden = activeTab === "live"
-    && (playback.enabled || liveSelection !== null);
+    && (playback.enabled || liveSelection !== null)
+    && box("panel-evidence").hidden && box("comparison-panel").hidden;
   box("evidence-selection").dataset.following = String(followCurrent);
   box("evidence-selection").dataset.updating = String(Boolean(newer));
   box("evidence-selection").dataset.snapshotId = window?.id || "";
@@ -855,7 +867,7 @@ async function chooseWindow(id: string): Promise<void> {
   } catch (error) { if (token === windowToken) showError(error); }
 }
 function reviewedCaseForWindow(): InvestigationCase | null {
-  if (!projection || !selectedWindow || automaticReadError) return null;
+  if (sensorAlertsOnly() || !projection || !selectedWindow || automaticReadError) return null;
   const active = automaticRoot();
   if (active?.snapshot_id === selectedWindow.id
     && !["SUCCEEDED", "ABSTAINED"].includes(active.state)) return null;
@@ -881,6 +893,7 @@ function sensorFlags(window: WindowSnapshot | null, id: string): { assessed: boo
   };
 }
 function reviewedLabelsForWindow(): NonNullable<TaskDetail["output_mapping"]>["mapping"] {
+  if (sensorAlertsOnly()) return null;
   if (playback.enabled) {
     const frame = playback.currentFrame();
     return frame?.detail.task.state === "SUCCEEDED" && frame.detail.casefile
@@ -903,7 +916,9 @@ function renderMap(): void {
   const { pack } = projection;
   const window = selectedWindow;
   text("map-time-basis", window
-    ? `${playback.enabled ? "Recorded" : "Selected"} measurements · +${window.end_seconds}s · ${time(window.window_end)}. Agent overlays require this exact evidence; the saved investigation below retains its own timestamp.`
+    ? `${playback.enabled ? "Recorded" : "Selected"} measurements · +${window.end_seconds}s · ${time(window.window_end)}.${sensorAlertsOnly()
+      ? " Pressure anomalies and missing values only; no cause or leak location is inferred."
+      : " Agent overlays require this exact evidence; the saved investigation below retains its own timestamp."}`
     : "No completed measurement window selected. Grey instruments are unassessed, not healthy.");
   map.dataset.sourceSeconds = window ? String(window.end_seconds) : "";
   const extended = pack.sensors.length > 32;
@@ -981,7 +996,8 @@ function renderMap(): void {
     if (selected) { group.classList.add("selected"); group.querySelector(".eval-selection")?.classList.add("selection-ring"); }
     group.setAttribute("role", "button"); group.setAttribute("tabindex", "0");
     const agentIssues = issues.map(issue => `${issue.kind} (${issue.assertion})`).join(", ");
-    group.setAttribute("aria-label", `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}. ${support ? "Agent-reviewed pressure pattern; cause unconfirmed." : "No agent leak-pattern finding recorded."}${agentIssues ? ` Agent instrument finding: ${agentIssues}.` : ""}`);
+    group.setAttribute("aria-label", `${sensor.id}, ${sensor.segment_id}, ${sensor.chainage_m}m. ${health}.${sensorAlertsOnly()
+      ? "" : ` ${support ? "Agent-reviewed pressure pattern; cause unconfirmed." : "No agent leak-pattern finding recorded."}${agentIssues ? ` Agent instrument finding: ${agentIssues}.` : ""}`}`);
     group.setAttribute("aria-pressed", String(selectedSensorId === sensor.id)); group.dataset.sensor = sensor.id;
     group.dataset.issueKinds = issues.map(item => item.kind).join(",");
     const labelOnLeft = sensor.segment_id === "P2" || sensor.segment_id === "P4";
@@ -1150,8 +1166,6 @@ function renderAutomaticInvestigation(): void {
     return;
   }
   const { replay, latest_window: latest, pack } = projection;
-  text("stream-stage", `${replay.state} · received through +${replay.clock_seconds.toFixed(1)}s · ${pack.sensors.length} instruments`);
-  text("detector-stage", latest ? `Pressure / quality screening · window ends +${latest.end_seconds}s` : `Warming up · ${pack.window_seconds}s window / ${pack.hop_seconds}s hop`);
   const root = automaticRoot();
   refreshHeaderTrace(root || [...projection.tasks].filter(task => !task.parent_id)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))[0] || null);
@@ -1166,7 +1180,6 @@ function renderAutomaticInvestigation(): void {
     playback.draw(pack, latest, null);
     renderIdleAgentWork(progress, box("agent-findings"), !sensorAlertsOnly());
     if (incident?.dispatch_status === "gathering_context") {
-      text("agent-stage", "Evidence triage · collecting unresolved context");
       text("automatic-state", "TRIAGE · NOT AN LLM REPORT");
       const boundary = new Date(Date.parse(replay.epoch) + (incident.first_seen_seconds + pack.window_seconds) * 1000).toISOString();
       const item = node("div");
@@ -1177,7 +1190,7 @@ function renderAutomaticInvestigation(): void {
       return;
     }
     const state = sensorAlertsOnly() ? "Agent execution off · no model calls" : unavailable ? `Not queued: ${unavailable}` : "Waiting for a pressure anomaly";
-    text("agent-stage", state); text("automatic-state", state);
+    text("automatic-state", state);
     text("automatic-conclusion", sensorAlertsOnly()
       ? "No agent diagnosis or localization has been produced. The same sensor histories, quality flags, comparisons and evidence remain available for engineer review."
       : unavailable
@@ -1193,7 +1206,6 @@ function renderAutomaticInvestigation(): void {
   const state = accepted ? `${modeName(root.mode)} · REPORT AVAILABLE${root.state === "ABSTAINED" ? " · FURTHER EVIDENCE NEEDED" : ""}`
     : failed ? `${modeName(root.mode)} · REPORT WITHHELD (${root.error_code || root.state})`
       : `${modeName(root.mode)} · ${friendly(root.state)}`;
-  text("agent-stage", `${state}${pending ? " · newer warning awaiting analysis" : ""}`);
   text("automatic-state", state);
   const basis = windows.find(window => window.id === root.snapshot_id) || (latest?.id === root.snapshot_id ? latest : null);
   const stamp = (label: string, value: string): void => {
@@ -1235,7 +1247,11 @@ async function compareSensors(): Promise<void> {
   if (!projection || !selectedWindow || !pinVisibleWindow()) return;
   const window = selectedWindow, generation = generationToken;
   comparisonWindowId = window.id;
+  box("panel-evidence").hidden = true;
   box("comparison-panel").hidden = false;
+  switchTab("live");
+  box("comparison-title").focus();
+  box("comparison-title").scrollIntoView({ block: "nearest" });
   const concerns = window.quality.findings.filter(f => f.spike_count || f.drift_suspected || f.peer_disagreement || f.hard_excluded || f.missing > f.expected * .1);
   const examples: string[] = [];
   const segmentOf = (id: string): string | undefined => projection?.pack.sensors.find(sensor => sensor.id === id)?.segment_id;
@@ -1248,10 +1264,15 @@ async function compareSensors(): Promise<void> {
   const candidates = [...examples, ...window.quality.findings.filter(
     f => f.anomaly_count || f.spike_count || f.drift_suspected || f.peer_disagreement || f.missing || f.hard_excluded
   ).map(f => f.sensor_id)];
-  const ids = comparisonSensorIds.size ? [...comparisonSensorIds] : [...new Set(candidates)].slice(0, 4);
+  const pressureSensors = projection.pack.sensors.filter(sensor => sensor.channels.includes("pressure"));
+  const defaults = candidates.length ? candidates : [
+    ...pressureSensors.filter(sensor => sensor.id === selectedSensorId).map(sensor => sensor.id),
+    ...pressureSensors.map(sensor => sensor.id),
+  ];
+  const ids = comparisonSensorIds.size ? [...comparisonSensorIds] : [...new Set(defaults)].slice(0, 4);
   const token = ++comparisonToken;
   const container = box("comparison-charts");
-  container.replaceChildren(node("p", ids.length ? "Loading scoped pressure histories..." : "No event/fault histories selected by the current evidence."));
+  container.replaceChildren(node("p", ids.length ? "Loading scoped pressure histories..." : "No pressure sensors available for comparison."));
   text("comparison-basis", `${bounds(window.window_start, window.window_end)} · ${short(window.id)} · pinned comparison`);
   try {
     const results = await Promise.all(ids.map(async id => {
@@ -1362,6 +1383,7 @@ async function loadSensor(): Promise<void> {
   }
 }
 function renderInspectionWorkspace(): void {
+  const inspecting = activeTab === "live" && !box("panel-evidence").hidden;
   const pack = projection?.pack || null, window = selectedWindow;
   const sensor = pack?.sensors.find(item => item.id === selectedSensorId && item.channels.includes("pressure")) || null;
   const pipeline = select("inspection-pipeline"), sensors = select("inspection-sensor"), peers = select("inspection-peer");
@@ -1402,16 +1424,16 @@ function renderInspectionWorkspace(): void {
   if (peerKey !== inspectionPeerKey) {
     inspectionPeerToken++; inspectionPeer = null; inspectionPeerError = null; inspectionPeerLoading = false;
     inspectionPeerKey = peerKey;
-    if (activeTab === "evidence" && window && peerSensor && peerKey) {
+    if (inspecting && window && peerSensor && peerKey) {
       inspectionPeerLoading = true;
       void loadInspectionPeer(window, peerSensor, peerKey, inspectionPeerToken);
     }
-  } else if (activeTab === "evidence" && window && peerSensor && peerKey && !inspectionPeer
+  } else if (inspecting && window && peerSensor && peerKey && !inspectionPeer
     && !inspectionPeerLoading && !inspectionPeerError) {
     inspectionPeerLoading = true;
     void loadInspectionPeer(window, peerSensor, peerKey, inspectionPeerToken);
   }
-  if (activeTab === "evidence" && !playback.enabled && projection && window) {
+  if (inspecting && !sensorAlertsOnly() && !playback.enabled && projection && window) {
     const accepted = [...projection.tasks].filter(task => task.parent_id === null && task.result && task.answer
       && ["SUCCEEDED", "ABSTAINED"].includes(task.state)).sort((a, b) => b.created_at.localeCompare(a.created_at));
     const candidate = accepted.find(task => task.snapshot_id === window.id) || accepted[0];
@@ -1425,10 +1447,10 @@ function renderInspectionWorkspace(): void {
   }
   const root = automaticRoot();
   const container = box("sensor-inspection-workspace");
-  const reports = [inspectionReport, automaticDetail, taskDetail];
-  const recordedReport = playback.enabled ? playback.currentFrame() : null;
+  const reports = sensorAlertsOnly() ? [] : [inspectionReport, automaticDetail, taskDetail];
+  const recordedReport = !sensorAlertsOnly() && playback.enabled ? playback.currentFrame() : null;
   const pending = Boolean(!playback.enabled && root && root.snapshot_id === window?.id && ["QUEUED", "RUNNING", "WAITING_ON_CHILD"].includes(root.state));
-  const renderKey = JSON.stringify([window?.id, sensor?.id, sensorLoadedKey, sensorReadError,
+  const renderKey = JSON.stringify([sensorAlertsOnly(), window?.id, sensor?.id, sensorLoadedKey, sensorReadError,
     peerKey, Boolean(inspectionPeer), inspectionPeerLoading, inspectionPeerError, inspectionReportError, pending,
     recordedReport?.snapshot.id, recordedReport?.detail.task.id,
     reports.map(detail => [detail?.task.id, detail?.task.updated_at, detail?.task.state, detail?.output_mapping])]);
@@ -1438,7 +1460,7 @@ function renderInspectionWorkspace(): void {
     loading: Boolean(key && key !== sensorLoadedKey && !sensorReadError),
     error: sensorReadError, peer: inspectionPeer, peerSensor, peerLoading: inspectionPeerLoading,
     peerError: inspectionPeerError, reportError: inspectionReportError,
-    reports, pending, recordedReport,
+    reports, pending, recordedReport, agentAssisted: !sensorAlertsOnly(),
     openReport: id => {
       if (recordedReport?.detail.task.id === id) {
         switchTab("live");
@@ -1537,7 +1559,7 @@ async function inspectEvidence(id: string): Promise<void> {
     detail.append(node("p", "Referenced source is not embedded in this snapshot. No evidence is invented; inspect canonical records or the task’s exact basis."));
     renderRawTable();
   }
-  renderMap(); renderEvidenceChips(); switchTab("evidence");
+  renderMap(); renderEvidenceChips(); openSensorInspection();
   element("source-audit", HTMLDetailsElement).open = true;
 }
 function renderEvidenceChips(): void {
@@ -1553,19 +1575,6 @@ function renderEvidenceChips(): void {
     container.append(evidenceChip(item.id, `${item.kind} / ${item.sensor_id || "network"} / ${item.channel || "all"} / ${item.id}`));
   }
   renderInspectionWorkspace();
-}
-// Coverage is supplied usable/expected samples, not usable/received chart points.
-// Domain counts come from the snapshot, stations from pack identities, and queued/
-// model-call totals from listed tasks (not an inferred generation budget).
-function renderMetrics(): void {
-  if (!projection) return;
-  const window = selectedWindow;
-  text("sample-coverage", window ? `${window.quality.usable_samples} / ${window.quality.expected_samples} · ${(window.quality.coverage * 100).toFixed(1)}%` : "WARMING_UP / not reported");
-  text("domain-count", window ? `${window.quality.failure_domains_available} instrument domains available · ${new Set(projection.pack.sensors.map(sensor => sensor.station_id)).size} stations` : "Not reported");
-  text("window-state", `${window?.quality.status || "WARMING_UP"}${window ? ` / revision ${window.revision}` : ""}`);
-  const queued = projection.tasks.filter(task => task.state === "QUEUED").length;
-  const calls = projection.tasks.reduce((sum, task) => sum + task.model_calls, 0);
-  text("budget-usage", `${queued} queued · ${calls} model calls in listed tasks · generation model-call limit: unknown · token usage: not reported`);
 }
 function renderTasks(): void {
   const container = box("task-tree");
@@ -1684,7 +1693,7 @@ function renderTaskDetail(): void {
   const container = box("task-detail");
   container.replaceChildren(node("h3", `Public investigation ${task.id}`));
   container.append(node("p", `State ${task.state} · ${modeName(task.mode)} · pinned basis ${task.snapshot_id}`, "summary"));
-  container.append(button("Open this task’s immutable evidence basis", () => { void chooseWindow(task.snapshot_id).then(() => switchTab("evidence")); }));
+  container.append(button("Open this task’s immutable evidence basis", () => { void chooseWindow(task.snapshot_id).then(() => openSensorInspection()); }));
   for (const child of children) container.append(button(`${agentName(child.role)} / ${child.state} / ${short(child.id)}`, () => { void loadTask(child.id); }));
   if (task.result) {
     container.append(node("p", `Backend accepted result: ${task.result.outcome}. ${task.result.summary}`, "task-result"));
@@ -1925,6 +1934,7 @@ input("investigation-time").addEventListener("input", () => {
 controlButton("compare-sensors").addEventListener("click", () => { void compareSensors(); });
 controlButton("clear-comparison").addEventListener("click", () => { comparisonSensorIds.clear(); renderSensorList(); });
 select("scenario").addEventListener("change", updateControls);
+select("workflow").addEventListener("change", updateControls);
 select("map-focus").addEventListener("change", () => { mapSegment = select("map-focus").value; renderMap(); });
 controlButton("play").addEventListener("click", () => {
   void command((playback.enabled ? playback.playing : projection?.replay.state === "PLAYING") ? "pause" : "play");
@@ -1955,8 +1965,7 @@ select("inspection-peer").addEventListener("change", () => {
 });
 controlButton("follow-live").addEventListener("click", () => { void chooseWindow(""); });
 controlButton("inspect-raw").addEventListener("click", () => {
-  if (!pinVisibleWindow()) { notify("No completed window to inspect.", true); return; }
-  switchTab("evidence");
+  if (!openSensorInspection()) return;
   text("evidence-detail", selectedSensorId ? `${selectedSensorId} / pinned window ${selectedWindow?.id}. Original records and transformations are available below.` : "Choose a sensor to inspect its original observations.");
 });
 controlButton("reconnect").addEventListener("click", () => {

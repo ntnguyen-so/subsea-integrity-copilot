@@ -65,6 +65,7 @@ test("projection refreshes do not starve a slow selected investigation read", as
   const writes: string[] = [];
   page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
   await page.goto("/?replay=" + encodeURIComponent(id) + "&view=live");
+  await expect(page.locator(`#task-tree button[data-task="${child!.id}"]`)).toHaveCount(1);
   await page.locator("#investigation-technical > summary").click();
   let release = (): void => {};
   const gate = new Promise<void>(resolve => { release = resolve; });
@@ -114,11 +115,12 @@ test("recorded monitoring, sensor evidence and keyboard navigation work without 
   await expect(page.locator("#sensor-title")).not.toHaveText("Select a sensor");
   await expect(page.locator("#channel-charts svg")).not.toHaveCount(0);
   await page.locator("#inspect-raw").click();
-  await expect(page.locator("#tab-evidence")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".manual-panel #panel-evidence")).toBeVisible();
   await expect(page.locator(".inspection-samples table")).toBeVisible();
   await page.locator("#source-audit > summary").click();
   await expect(page.locator("#raw-table table")).toBeVisible();
-  await page.locator("#tab-evidence").focus();
+  await page.locator("#tab-live").focus();
   await page.keyboard.press("ArrowDown");
   await expect(page.locator("#tab-evaluation")).toHaveAttribute("aria-selected", "true");
   await page.keyboard.press("Home");

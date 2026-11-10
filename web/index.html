@@ -40,7 +40,6 @@
     <nav class="rail" aria-label="Workspaces">
       <div role="tablist" aria-label="Console workspace" aria-orientation="vertical">
         <button role="tab" id="tab-live" aria-controls="panel-live" aria-selected="true" tabindex="0" data-tab="live"><span aria-hidden="true">◈</span>Live</button>
-        <button role="tab" id="tab-evidence" aria-controls="panel-evidence" aria-selected="false" tabindex="-1" data-tab="evidence"><span aria-hidden="true">≡</span>Inspect</button>
         <button role="tab" id="tab-evaluation" aria-controls="panel-evaluation" aria-selected="false" tabindex="-1" data-tab="evaluation"><span aria-hidden="true">%</span>Evaluation</button>
       </div>
     </nav>
@@ -71,6 +70,18 @@
             <div class="panel-heading subheading"><h3>Sensors</h3><span id="sensor-list-basis" class="muted">Same window as the map and trend</span></div>
             <div id="sensor-list" class="sensor-list table-wrap" role="region" aria-label="Sensor conditions and comparison selection" tabindex="0"><p class="empty">Awaiting instrument data</p></div>
             <div class="comparison-controls"><button id="compare-sensors" type="button">Compare sensor histories</button><button id="clear-comparison" type="button">Clear selection</button></div>
+            <section id="comparison-panel" class="sensor-comparison" aria-labelledby="comparison-title" hidden><div class="panel-heading subheading"><h3 id="comparison-title" tabindex="-1">Sensor comparison</h3></div><p id="comparison-basis" class="muted">Pins the visible window. Up to four histories share UTC time and a common pressure scale.</p><div id="comparison-charts" class="comparison-grid"></div></section>
+            <section id="panel-evidence" class="sensor-inspection" aria-labelledby="sensor-inspection-title" hidden>
+              <div class="panel-heading subheading"><h3 id="sensor-inspection-title" tabindex="-1">Sensor inspection</h3><span id="inspection-mode-label" class="eyebrow">READINGS FIRST / AGENT FINDINGS ALONGSIDE</span></div>
+              <p id="inspection-intro" class="inspection-intro">Choose a sensor and measurement window, compare its pressure with another instrument, then check the agent's explanation against those readings. Orange alerts identify unusual readings, not their cause. Missing data is unknown, never zero.</p>
+              <div class="inspection-controls">
+                <div class="control"><label for="inspection-pipeline">1 · Pipeline</label><select id="inspection-pipeline"><option value="">All pipelines</option></select></div>
+                <div class="control"><label for="inspection-sensor">Sensor to inspect</label><select id="inspection-sensor" disabled><option value="">Choose a received run first</option></select></div>
+                <div class="control"><label for="inspection-peer">2 · Compare with</label><select id="inspection-peer" disabled><option value="">No comparison</option></select></div>
+              </div>
+              <div id="sensor-inspection-workspace"><p class="empty">Choose a recorded run or start monitoring. No sensor readings are invented.</p></div>
+              <details id="source-audit" class="inspection-audit"><summary>4 · Original records and calculation details (optional)</summary><p class="muted">For tracing a displayed value to its original record. Internal reference IDs and raw transformations are kept here, not required for the reading-by-reading investigation.</p><div id="evidence-detail" class="summary">Select a calculation reference to inspect its recorded source.</div><div id="evidence-chips" class="chips"></div><div id="raw-table" class="table-wrap"><p class="empty">Choose a sensor to inspect its original records.</p></div></details>
+            </section>
           </section>
         </div>
         <!-- Tasks/events supply progress; accepted reports and saved quoted mappings
@@ -95,27 +106,8 @@
             <div id="investigation-workspace"><div class="panel-heading"><h2>Investigation history and receipts</h2><button id="view-langfuse" type="button" disabled>View Langfuse run</button><span class="eyebrow">RECORDED EXECUTION / READ-ONLY</span></div><p class="muted">Inspect preserved handoffs, specialist execution and traces. No private reasoning is shown.</p><div id="answer-preview" class="answer-preview">No accepted answer loaded.</div><div id="trace-view" aria-live="polite"><p class="muted">Select an investigation to view its Langfuse run.</p></div><div id="execution-details"><div id="task-tree" class="list empty">No agent tasks loaded.</div><div id="task-detail"></div></div></div>
           </details>
         </section>
-        <section id="comparison-panel" class="panel channels-panel" hidden><div class="panel-heading"><h2>Sensor comparison</h2></div><p id="comparison-basis" class="muted">Pins the visible window. Up to four histories share UTC time and a common pressure scale.</p><div id="comparison-charts" class="comparison-grid"></div></section>
-      </section>
-      <!-- Readings-first inspection retains raw records and transformation details
-           behind the source audit; matched reports are explanatory companions. -->
-      <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
-        <div class="panel sensor-inspection">
-          <div class="panel-heading"><h2>Sensor inspection</h2><span class="eyebrow">READINGS FIRST / AGENT FINDINGS ALONGSIDE</span></div>
-          <p class="inspection-intro">Choose a sensor and measurement window, compare its pressure with another instrument, then check the agent's explanation against those readings. Orange alerts identify unusual readings, not their cause. Missing data is unknown, never zero.</p>
-          <div class="inspection-controls">
-            <div class="control"><label for="inspection-pipeline">1 · Pipeline</label><select id="inspection-pipeline"><option value="">All pipelines</option></select></div>
-            <div class="control"><label for="inspection-sensor">Sensor to inspect</label><select id="inspection-sensor" disabled><option value="">Choose a received run first</option></select></div>
-            <div class="control"><label for="inspection-peer">2 · Compare with</label><select id="inspection-peer" disabled><option value="">No comparison</option></select></div>
-          </div>
-          <div id="sensor-inspection-workspace"><p class="empty">Choose a recorded run or start monitoring. No sensor readings are invented.</p></div>
-          <details id="source-audit" class="inspection-audit"><summary>4 · Original records and calculation details (optional)</summary><p class="muted">For tracing a displayed value to its original record. Internal reference IDs and raw transformations are kept here, not required for the reading-by-reading investigation.</p><div id="evidence-detail" class="summary">Select a calculation reference to inspect its recorded source.</div><div id="evidence-chips" class="chips"></div><div id="raw-table" class="table-wrap"><p class="empty">Choose a sensor to inspect its original records.</p></div></details>
-        </div>
       </section>
       <section id="panel-evaluation" role="tabpanel" aria-labelledby="tab-evaluation" hidden><div class="panel"><div class="panel-heading"><h2>System evaluation</h2><span id="evaluation-scope-label" class="eyebrow">GROUND TRUTH / AGENT FINDINGS</span></div><div id="evaluation-results"><p class="empty">Select Evaluation to load recorded results.</p></div></div></section>
-      <details id="system-details" class="panel system-details"><summary>System details</summary>
-        <div><small>DASHBOARD CONNECTION</small><strong id="system-connection">Not connected</strong></div>
-        <div class="system-grid"><div><small>OPERATIONAL CLOCK / PROJECTION AGE</small><strong id="server-clock">Not reported</strong></div><div><small>CURRENT WINDOW [START, END)</small><strong id="live-bounds">Awaiting telemetry</strong></div><div><small>MONITOR / AGENT / OBSERVABILITY</small><strong id="health-state">Not reported</strong></div></div><p id="clock-basis" class="muted">No received telemetry</p><div class="workflow-strip" aria-label="Live monitoring and investigation workflow"><div><small>1 / SENSOR STREAM</small><strong id="stream-stage">Awaiting received telemetry</strong></div><div><small>2 / NUMERICAL DETECTORS</small><strong id="detector-stage">Awaiting a completed window</strong></div><div><small>3 / AUTOMATIC AGENT ANALYSIS</small><strong id="agent-stage">Waiting for a monitoring episode</strong></div><div><small>4 / ENGINEER REVIEW</small><strong>Verify the report; no automatic actuation</strong></div></div><div class="metrics" aria-label="Measured counters"><div><small>USABLE / EXPECTED SAMPLES</small><strong id="sample-coverage">Not reported</strong></div><div>      <small>STATIONS / FAILURE DOMAINS</small><strong id="domain-count">Not reported</strong></div><div><small>WINDOW QUALITY / REVISION</small><strong id="window-state">Not reported</strong></div><div><small>QUEUE / MODEL CALLS</small><strong id="budget-usage">Not reported</strong></div></div></details>
     </main>
   </div>
   <footer class="page-footer"><span>Subsea Lens · Engineer decision support</span><details class="data-provenance"><summary>Data provenance and operating authority</summary><p>This installation uses synthetic reference telemetry and records. Research-curated guidance supports investigation; site validation and operator approval remain required. The system does not actuate equipment or issue safety clearance.</p></details></footer>

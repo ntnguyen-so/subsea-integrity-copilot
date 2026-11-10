@@ -127,7 +127,8 @@ def main() -> None:
     spatial.add_argument("--agent-model", default="gpt-6.1-sol")
     spatial.add_argument("--evaluator-model", default="gpt-6.1-terra")
     spatial.add_argument("--output", type=Path, required=True)
-    spatial.add_argument("--suite", choices=["current", "recovery", "non_leak"], default="current")
+    spatial.add_argument("--suite", choices=["current", "recovery", "non_leak", "all"],
+                         default="current")
     spatial.add_argument(
         "--no-publish", action="store_true",
         help="Run independently without replacing the active dashboard evaluation",
@@ -242,8 +243,23 @@ def main() -> None:
                 "run_id": report["run_id"], "agent_process": report["agent_process"],
             }))
         elif args.command == "spatial-evaluation":
-            from .spatial_evaluation import run_spatial_evaluation
+            from .spatial_evaluation import run_spatial_evaluation, run_spatial_evaluations
 
+            if args.suite == "all":
+                from .temporal_evaluation import SUITE_NAMES
+
+                summary = run_spatial_evaluations(
+                    args.output,
+                    cohorts={suite: (args.seed, args.split) for suite in SUITE_NAMES},
+                    agent_model=args.agent_model, evaluator_model=args.evaluator_model,
+                    publish=not args.no_publish,
+                )
+                print(json.dumps(summary))
+                if summary["status"] != "completed" or not all(
+                    item["metrics"]["target_met"] for item in summary["suites"].values()
+                ):
+                    raise SystemExit(1)
+                return
             report = run_spatial_evaluation(
                 args.output, seed=args.seed, split=args.split,
                 agent_model=args.agent_model, evaluator_model=args.evaluator_model,

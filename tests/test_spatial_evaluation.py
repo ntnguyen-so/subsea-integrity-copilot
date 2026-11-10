@@ -598,10 +598,55 @@ def test_isolated_evaluation_starts_all_networks_without_overwriting_an_active_r
     assert all(network["status"] == "failed" for network in report["networks"])
 
 
+@pytest.mark.parametrize("failed_suite", [None, "recovery"])
+def test_parallel_suites_start_together_and_publish_from_one_writer(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Any, failed_suite: str | None,
+) -> None:
+    import threading
+
+    from subsea_copilot import spatial_evaluation as evaluation
+
+    barrier = threading.Barrier(3)
+    publications = []
+    caller = threading.get_ident()
+    cohorts = {"current": (24, "held_out"), "recovery": (9, "development"),
+               "non_leak": (9, "development")}
+
+    def run(output, *, suite, seed, split, publish, **kwargs):
+        assert not publish
+        assert output == tmp_path / "cohort" / suite
+        assert (seed, split) == cohorts[suite]
+        barrier.wait(timeout=5)
+        if suite == failed_suite:
+            raise RuntimeError("Intentional fixture failure")
+        return {
+            "suite": suite, "status": "completed", "run_id": suite,
+            "planned_cases": 1, "metrics": {"target_met": False},
+            "implementation_unchanged": True,
+        }
+
+    def publish(report, path):
+        assert threading.get_ident() == caller
+        publications.append(report["suite"])
+
+    monkeypatch.setattr(evaluation, "run_spatial_evaluation", run)
+    monkeypatch.setattr(evaluation, "publish_evaluation", publish)
+    result = evaluation.run_spatial_evaluations(tmp_path / "cohort", cohorts=cohorts)
+    assert result["status"] == ("incomplete" if failed_suite else "completed")
+    assert set(result["suites"]) == set(cohorts)
+    assert set(publications) == set(cohorts) - {failed_suite}
+    if failed_suite:
+        assert result["suites"][failed_suite]["error_code"] == "RuntimeError"
+    assert result["implementation_unchanged"]
+
+
 @pytest.mark.integration
-@pytest.mark.parametrize("duration,suite", [(120, "current"), (240, "current"), (240, "recovery")])
+@pytest.mark.parametrize("duration,suite,expired_root", [
+    (120, "current", False), (240, "current", False), (240, "recovery", False),
+    (120, "current", True),
+])
 def test_spatial_runner_records_an_early_root_before_the_fixed_checkpoint(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Any, duration: int, suite: str,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Any, duration: int, suite: str, expired_root: bool,
 ) -> None:
     import json
     import os
@@ -644,6 +689,34 @@ def test_spatial_runner_records_an_early_root_before_the_fixed_checkpoint(
             monitor, dataset, "scripted", **kwargs,
         ),
     )
+    if expired_root:
+        original_submit = AgentService.submit_question
+        original_advance = AgentService.run_once
+        original_watchdog = evaluation.ROOT_WATCHDOG_SECONDS
+        expired = False
+
+        def submit(service, *args, **kwargs):
+            root = original_submit(service, *args, **kwargs)
+            if not expired:
+                monkeypatch.setattr(evaluation, "ROOT_WATCHDOG_SECONDS", 0)
+            return root
+
+        def advance(service):
+            nonlocal expired
+            if expired:
+                return original_advance(service)
+            task = service.store.claim_task(service.owner, root_id=service.root_id)
+            assert task is not None
+            service.store.save_task(
+                task.model_copy(update={"state": "FAILED", "error_code": "deadline_exceeded"}),
+                expected_version=task.version, lease_token=task.lease_token,
+            )
+            expired = True
+            monkeypatch.setattr(evaluation, "ROOT_WATCHDOG_SECONDS", original_watchdog)
+            return False
+
+        monkeypatch.setattr(AgentService, "submit_question", submit)
+        monkeypatch.setattr(AgentService, "run_once", advance)
     held_stages = []
 
     def assert_source_held(stage: str) -> None:
@@ -679,6 +752,14 @@ def test_spatial_runner_records_an_early_root_before_the_fixed_checkpoint(
     assert early["root_count"] == 1
     assert early["admission_kind"] == "automatic_pressure_context"
     assert report["planned_cases"] == len(report["cases"])
+    if expired_root:
+        assert early["status"] == "failed"
+        assert early["error_code"] == "deadline_exceeded"
+        assert report["networks"][0]["status"] == "completed"
+        assert next(row for row in report["cases"] if row["source_seconds"] == 120)[
+            "status"
+        ] == "completed"
+        return
     if suite == "current":
         assert report["planned_cases"] == (3 if duration == 120 else 5)
     frames = report["networks"][0]["frames"]

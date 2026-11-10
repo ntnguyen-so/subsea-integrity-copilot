@@ -877,6 +877,26 @@ def test_playback_live_override_preserves_recordings_and_retries_exact_window(
         assert archived_trace.json()["trace_id"] == "b" * 32
         assert archived_trace.json()["task_id"] == archived.id
         assert archived_trace.json()["snapshot_id"] == archived.snapshot_id
+        baseline = client.post("/api/replays", headers=headers, json={
+            "scenario": "S7", "seed": 2026, "mode": "scripted", "workflow": "sensor_alerts",
+            "idempotency_key": "sensor-only-with-compatible-recordings",
+        }).json()
+        baseline_url = f"/api/replays/{baseline['id']}"
+        assert client.get(f"{baseline_url}/recordings").json()["recordings"] == []
+        for recorded_id in (task["id"], archived.id):
+            assert client.get(f"{baseline_url}/recordings/{recorded_id}").status_code == 404
+            assert client.get(
+                f"{baseline_url}/recordings/{recorded_id}/trace",
+            ).status_code == 404
+        before_ids = {row["id"] for row in client.get("/api/replays").json()["replays"]}
+        rejected = client.post(f"{baseline_url}/investigate-here", headers=headers, json={
+            "source_seconds": 100, "idempotency_key": "sensor-only-cannot-run-agents",
+        })
+        assert rejected.status_code == 409
+        assert "Agent-assisted" in rejected.json()["detail"]
+        assert {row["id"] for row in client.get("/api/replays").json()["replays"]} == before_ids
+        assert not app.state.store.list_tasks(baseline["id"])
+        assert app.state.store.get_replay(baseline["id"]).model_dump(mode="json") == baseline
         other = client.post("/api/replays", headers=headers, json={
             "scenario": "S7", "seed": 2027, "mode": "scripted",
             "idempotency_key": "unrelated-timeline",

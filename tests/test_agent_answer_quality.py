@@ -106,6 +106,8 @@ def test_quality_run_reuses_original_labels_hides_them_from_author_and_preserves
     tmp_path,
     monkeypatch,
 ):
+    import threading
+
     from subsea_copilot import qualification, reference_evaluation
     from subsea_copilot.config import Settings
     from subsea_copilot.llm.copilot_cli import ProviderError
@@ -116,6 +118,7 @@ def test_quality_run_reuses_original_labels_hides_them_from_author_and_preserves
     detection = {"run_id": "unchanged-detection", "cases": [], "metrics": {"score": 0.25}}
     public.write_text(json.dumps(detection), encoding="utf-8")
     original_detection = public.read_bytes()
+    authors_started = threading.Barrier(len(dataset.cases))
     output = tmp_path / "quality"
     monkeypatch.setattr(reference_evaluation, "PUBLIC_REPORT", public)
     monkeypatch.setattr(Settings, "from_env", lambda: object())
@@ -129,6 +132,7 @@ def test_quality_run_reuses_original_labels_hides_them_from_author_and_preserves
         def invoke(self, messages, **kwargs):
             packet = json.loads(messages[1].content)
             if self.role == "author":
+                authors_started.wait(timeout=5)
                 assert "original_ground_truth" not in packet and "expected" not in packet
                 case = next(
                     case for case in dataset.cases if case.input.model_dump(mode="json") == packet

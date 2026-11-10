@@ -24,6 +24,7 @@ export interface SensorInspection {
   reportError: string | null;
   reports: (TaskDetail | null)[];
   recordedReport?: RecordedInspection | null;
+  agentAssisted?: boolean;
   pending: boolean;
   openReport(taskId: string): void;
   inspectWindow(snapshotId: string): void;
@@ -195,5 +196,7 @@ export function renderSensorInspection(container: HTMLElement, state: SensorInsp
   const wrap = node("div", "", "table-wrap"); wrap.append(table); samples.append(wrap);
   if (!rows.length) samples.append(node("p", "No pressure records were received in this window. Absence is a data gap, not zero pressure.", "empty"));
   const grid = node("div", "", "inspection-review-grid");
-  grid.append(samples); agentCompanion(grid, state); container.append(grid);
+  grid.append(samples);
+  if (state.agentAssisted !== false) agentCompanion(grid, state);
+  container.append(grid);
 }

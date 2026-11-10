@@ -593,6 +593,8 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         from .playback import load_library
 
         replay = store.get_replay(generation_id)
+        if replay.workflow != "agent_assisted":
+            return []
         digest = recording_dataset_hash(generation_id)
         pack = monitor_service().pack_for(generation_id)
         try:
@@ -612,6 +614,8 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
     def recordings(generation_id: str, request: Request) -> dict[str, object]:
         principal(request)
         replay = store.get_replay(generation_id)
+        if replay.workflow != "agent_assisted":
+            return {"base_playback_speed": 5, "recordings": []}
         rows = [
             {"origin": "library", **row.summary()}
             for row in compatible_recordings(generation_id)
@@ -648,7 +652,8 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         snapshot = store.get_window(task.snapshot_id)
         pack = monitor_service().pack_for(generation_id)
         if (
-            task.parent_id is not None
+            replay.workflow != "agent_assisted"
+            or task.parent_id is not None
             or task.state not in {"SUCCEEDED", "ABSTAINED", "FAILED"}
             or original.scenario != replay.scenario or original.seed != replay.seed
             or original.source_version != replay.source_version
@@ -686,6 +691,10 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         from .monitoring import AUTO_QUESTION
 
         original = store.get_replay(generation_id)
+        if original.workflow != "agent_assisted":
+            raise HTTPException(
+                status_code=409, detail="Switch to Agent-assisted investigation to run agents.",
+            )
         monitor = monitor_service()
         pack = monitor.pack_for(generation_id)
         if form.source_seconds % pack.hop_seconds:

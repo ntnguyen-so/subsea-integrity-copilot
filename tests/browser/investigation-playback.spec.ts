@@ -38,7 +38,8 @@ test("S7 walkthrough renders preserved outputs next to their exact map without i
   } });
   expect(login.status()).toBe(200);
   const { replays } = await (await page.request.get("/api/replays")).json();
-  const replay = replays.find((row: { scenario: string; seed: number }) => row.scenario === "S7" && row.seed === 2026);
+  const replay = replays.find((row: { scenario: string; seed: number; workflow: string }) =>
+    row.scenario === "S7" && row.seed === 2026 && row.workflow === "agent_assisted");
   expect(replay).toBeDefined();
   const manifest = await (await page.request.get(`/api/replays/${replay.id}/recordings`)).json();
   await page.route(`**/api/replays/${replay.id}/recordings`, route => route.fulfill({
@@ -75,7 +76,7 @@ test("S7 walkthrough renders preserved outputs next to their exact map without i
     .toHaveAttribute("aria-label", /Agent instrument finding:/);
   await expect(page.locator("#simulation-policy")).toContainText("checkpoints");
   await expect(page.locator("#simulation-policy")).toContainText("preserved attempts");
-  await page.getByRole("tab", { name: "Inspect", exact: true }).click();
+  await page.locator("#inspect-raw").click();
   await expect(page.locator(".inspection-agent")).toHaveAttribute("data-status", "matched");
   await expect(page.locator(".inspection-agent")).toContainText("Compatible saved investigation");
   await expect(page.locator(".inspection-trends svg")).toHaveCount(2);
@@ -87,7 +88,7 @@ test("S7 walkthrough renders preserved outputs next to their exact map without i
   await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#automatic-title")).toBeFocused();
   await selectCheckpoint(page, 115);
-  await page.getByRole("tab", { name: "Inspect", exact: true }).click();
+  await page.locator("#inspect-raw").click();
   await expect(page.locator(".inspection-agent")).not.toHaveAttribute("data-status", "matched");
   await page.getByRole("tab", { name: "Live", exact: true }).click();
   await expect(page.locator("#topology")).toHaveAttribute("data-source-seconds", "115");
@@ -240,8 +241,8 @@ test("recorded trace selection rejects late and mismatched traces without withho
     username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
   } });
   const { replays } = await (await page.request.get("/api/replays")).json();
-  const replay = replays.find((row: { scenario: string; seed: number; state: string }) =>
-    row.scenario === "S7" && row.seed === 2026 && row.state === "PAUSED");
+  const replay = replays.find((row: { scenario: string; seed: number; state: string; workflow: string }) =>
+    row.scenario === "S7" && row.seed === 2026 && row.state === "PAUSED" && row.workflow === "agent_assisted");
   expect(replay).toBeDefined();
   const endpoint = `/api/replays/${replay.id}/recordings`;
   const { recordings }: { recordings: SavedInvestigation[] } =
@@ -303,7 +304,8 @@ test("empty recording timeline remains usable without substituting future result
     username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
   } });
   const { replays } = await (await page.request.get("/api/replays")).json();
-  const replay = replays.find((row: { scenario: string }) => row.scenario === "S7");
+  const replay = replays.find((row: { scenario: string; workflow: string }) =>
+    row.scenario === "S7" && row.workflow === "agent_assisted");
   await page.route(`**/api/replays/${replay.id}/recordings`, route => route.fulfill({
     json: { base_playback_speed: 5, recordings: [] },
   }));
@@ -393,7 +395,8 @@ test("live override stops playback and requests a separate investigation at the 
     username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
   } });
   const { replays } = await (await page.request.get("/api/replays")).json();
-  const replay = replays.find((row: { scenario: string; seed: number }) => row.scenario === "S7" && row.seed === 2026);
+  const replay = replays.find((row: { scenario: string; seed: number; workflow: string }) =>
+    row.scenario === "S7" && row.seed === 2026 && row.workflow === "agent_assisted");
   await page.goto("/?replay=" + encodeURIComponent(replay.id));
   await expect(page.locator("#source-clock")).toContainText("RECORDED PAUSED", { timeout: 30000 });
   await selectCheckpoint(page, 120);
@@ -446,7 +449,7 @@ test("entering recorded walkthrough pauses live ingestion before local playback"
   } });
   const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
   const created = await page.request.post("/api/replays", { headers, data: {
-    scenario: "S7", seed: 2026, mode: "scripted", workflow: "sensor_alerts",
+    scenario: "S7", seed: 2026, mode: "scripted", workflow: "agent_assisted",
     idempotency_key: `playback-pause-test-${Date.now()}`,
   } });
   expect(created.status()).toBe(200);
@@ -481,8 +484,8 @@ test(`recorded playback waits for ${delayed} without skipping windows or catchin
     username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
   } });
   const { replays } = await (await page.request.get("/api/replays")).json();
-  const replay = replays.find((row: { scenario: string; seed: number }) =>
-    row.scenario === "S7" && row.seed === 2026);
+  const replay = replays.find((row: { scenario: string; seed: number; workflow: string }) =>
+    row.scenario === "S7" && row.seed === 2026 && row.workflow === "agent_assisted");
   expect(replay).toBeDefined();
   await page.goto("/?replay=" + encodeURIComponent(replay.id));
   await expect(page.locator("#source-clock")).toContainText("RECORDED PAUSED", { timeout: 30000 });
@@ -509,14 +512,14 @@ test(`recorded playback waits for ${delayed} without skipping windows or catchin
     await page.clock.fastForward(2000);
     await expect.poll(() => requested).toBe(true);
     await expect(page.locator("#source-clock")).toHaveAttribute("data-seconds", "110");
-    await expect(page.locator("#clock-basis")).toContainText("Waiting for");
+    await expect(page.locator("#source-clock")).toHaveAttribute("title", /Waiting for/);
     await expect(page.locator("#step")).toBeDisabled();
     await page.clock.fastForward(10000);
     await expect(page.locator("#source-clock")).toHaveAttribute("data-seconds", "110");
   } finally {
     release();
   }
-  await expect(page.locator("#clock-basis")).toContainText("Load-aware");
+  await expect(page.locator("#source-clock")).toHaveAttribute("title", /Load-aware/);
   await expect(page.locator("#topology")).toHaveAttribute("data-source-seconds", "110");
   const snapshot = await page.locator("#topology").getAttribute("data-snapshot");
   await expect(page.locator("#channel-charts")).toHaveAttribute("data-snapshot", snapshot!);
@@ -547,6 +550,103 @@ test("starting a new run stays live despite compatible saved checkpoints", async
   await expect(page.locator("#source-clock")).not.toContainText("RECORDED");
 });
 
+test("sensor-only runs ignore compatible agent recordings and keep numerical monitoring live", async ({ page }) => {
+  test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned demo.");
+  const login = await page.request.post("/api/login", { data: {
+    username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
+  } });
+  const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
+  const created = await page.request.post("/api/replays", { headers, data: {
+    scenario: "S7", seed: 2026, mode: "scripted", workflow: "sensor_alerts",
+    idempotency_key: `sensor-only-recording-isolation-${Date.now()}`,
+  } });
+  expect(created.status()).toBe(200);
+  const replay = await created.json();
+  const url = `/api/replays/${replay.id}`;
+  for (let index = 0; index < 4; index++) {
+    expect((await page.request.post(`${url}/control`, { headers, data: {
+      action: "step", step_seconds: 30, idempotency_key: `prepare-${index}`,
+    } })).status()).toBe(200);
+  }
+  const prepared = await (await page.request.get(`${url}/projection`)).json();
+  expect(prepared.latest_window).not.toBeNull();
+  const agentReads: string[] = [];
+  page.on("request", request => {
+    if (/\/recordings(?:\/|\?|$)|\/api\/tasks\//.test(request.url())) agentReads.push(request.url());
+  });
+  // Default replay URLs used to enable recorded agent results even on this workflow.
+  await page.goto("/?replay=" + encodeURIComponent(replay.id));
+  await expect(page.locator("#topology")).toHaveAttribute("data-source-seconds", String(prepared.latest_window.end_seconds));
+  await expect(page.locator("#workflow")).toHaveValue("sensor_alerts");
+  await expect(page.locator("#source-clock")).not.toContainText("RECORDED");
+  for (const selector of [".agent-status-panel", ".investigation-time-control",
+    "#load-recording", "#review-agent-findings", "#location-summary"]) {
+    await expect(page.locator(selector)).toBeHidden();
+  }
+  await expect(page.locator("#topology .eval-leak-pattern, #topology .eval-inspection, #topology .eval-agent-issue")).toHaveCount(0);
+  await expect(page.locator('#map-legend [data-legend="pattern"], #map-legend [data-legend="inspection"], #map-legend [data-legend="agent"]')).toHaveCount(0);
+  await expect(page.locator("#topology [data-sensor].anomalous").first()).toBeVisible();
+  await expect(page.locator("#topology [data-sensor].missing").first()).toBeVisible();
+  await expect(page.locator("#monitoring-warning")).toHaveAttribute("data-kind", "sensor_alerts");
+  await page.locator("#speed").selectOption("20");
+  await page.getByRole("button", { name: "Play", exact: true }).click();
+  await expect.poll(async () => (await (await page.request.get(`${url}/projection`)).json()).replay.clock_seconds).toBeGreaterThan(120);
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect.poll(async () => (await (await page.request.get(`${url}/projection`)).json()).replay.state).toBe("PAUSED");
+  const view = await (await page.request.get(`${url}/projection`)).json();
+  expect(view.replay.speed).toBe(20);
+  expect(view.replay.state).toBe("PAUSED");
+  expect(view.tasks).toEqual([]);
+  expect(view.episodes).toEqual([]);
+  await page.locator("#inspect-raw").click();
+  await expect(page.locator(".inspection-samples tbody tr").first()).toBeVisible();
+  await expect(page.locator(".inspection-agent")).toHaveCount(0);
+  expect(agentReads).toEqual([]);
+});
+
+test("switching to a new sensor-only run discards an outstanding agent recording manifest", async ({ page }) => {
+  test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned demo.");
+  const login = await page.request.post("/api/login", { data: {
+    username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
+  } });
+  const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
+  const created = await page.request.post("/api/replays", { headers, data: {
+    scenario: "S7", seed: 2026, mode: "scripted", workflow: "agent_assisted",
+    idempotency_key: `delayed-recording-switch-${Date.now()}`,
+  } });
+  const assisted = await created.json();
+  const manifestUrl = `/api/replays/${assisted.id}/recordings`;
+  const manifest = await (await page.request.get(manifestUrl)).json();
+  expect(manifest.recordings.length).toBeGreaterThan(0);
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let requested = false;
+  await page.route(`**${manifestUrl}`, async route => {
+    requested = true;
+    await gate;
+    await route.fulfill({ json: manifest });
+  });
+  const agentReads: string[] = [];
+  page.on("request", request => {
+    if (/\/recordings(?:\/|\?|$)/.test(request.url())) agentReads.push(new URL(request.url()).pathname);
+  });
+  try {
+    await page.goto("/?replay=" + encodeURIComponent(assisted.id));
+    await expect.poll(() => requested).toBe(true);
+    await page.locator("#workflow").selectOption("sensor_alerts");
+    await page.locator("#create-replay").click();
+    await expect(page.locator("#notice")).toContainText("New generation created");
+    await expect(page.locator("#play")).toBeEnabled();
+    const response = page.waitForResponse(item => new URL(item.url()).pathname === manifestUrl);
+    release();
+    await response;
+    await expect(page.locator("#source-clock")).not.toContainText("RECORDED");
+    await expect(page.locator(".agent-status-panel")).toBeHidden();
+    await expect(page.locator(".investigation-time-control")).toBeHidden();
+    expect(agentReads).toEqual([manifestUrl]);
+  } finally { release(); }
+});
+
 test("paused recordings step backward and forward without changing the saved source", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned demo.");
   const login = await page.request.post("/api/login", { data: {
@@ -554,7 +654,7 @@ test("paused recordings step backward and forward without changing the saved sou
   } });
   const headers = { "X-CSRF-Token": (await login.json()).csrf_token };
   const replay = await (await page.request.post("/api/replays", { headers, data: {
-    scenario: "S7", seed: 2026, mode: "scripted", workflow: "sensor_alerts",
+    scenario: "S7", seed: 2026, mode: "scripted", workflow: "agent_assisted",
     idempotency_key: `paused-navigation-${Date.now()}`,
   } })).json();
   const writes: string[] = [];

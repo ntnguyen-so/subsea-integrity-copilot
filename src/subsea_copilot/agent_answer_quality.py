@@ -290,6 +290,7 @@ def run_answer_quality_evaluation(
         "implementation_sha256": implementation,
         "selected_cases": [case.id for case in cases],
         "split": split,
+        "case_workers": len(cases),
         "created_at": utc_now().isoformat(),
     }
     # The original reference and review policy are frozen before either model is constructed.
@@ -474,8 +475,7 @@ def run_answer_quality_evaluation(
                 row["judge"]["elapsed_seconds"] = round(time.monotonic() - judge_started, 3)
                 save()
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        # Bound independent case concurrency; shared report mutations/writes use the same lock.
+    with ThreadPoolExecutor(max_workers=len(cases)) as executor:
         list(executor.map(evaluate, range(len(cases))))
     with lock:
         report.update(

@@ -70,11 +70,8 @@
 .manual-panel .comparison-controls{margin-top:10px}.comparison-controls button{font-size:11px;padding:7px 10px}
 .agent-status-panel .automatic-conclusion{margin:10px 0 16px;font-size:14px;max-width:1100px}.automatic-timeline small{font-size:9px;letter-spacing:.3px}
 .automatic-actions button{min-width:130px}.agent-diagnostics{margin-top:10px}.agent-diagnostics p{font-size:11px;margin-top:8px}
-.system-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.system-grid strong{display:block;font:11px/1.7 Consolas,monospace;overflow-wrap:anywhere}
-#system-details>#clock-basis{font-size:11px;margin:12px 0}
-#system-details{margin-top:12px}#system-details>summary{cursor:pointer;color:var(--muted);font-size:12px}#system-details[open]>summary{margin-bottom:16px}
 #investigation-workspace{margin-top:18px}#investigation-workspace .answer-preview{border:0;margin:0;padding:0}.page-footer{padding:12px 25px}
-@media(max-width:900px){.map-wrap svg{max-height:390px}.manual-panel .chart svg{max-height:none}.system-grid{grid-template-columns:1fr}.run-settings-fields{right:auto;left:0}}
+@media(max-width:900px){.map-wrap svg{max-height:390px}.manual-panel .chart svg{max-height:none}.run-settings-fields{right:auto;left:0}}
 @media(max-width:480px){.clock-strip>div{align-items:start;flex-direction:column;gap:3px;padding:9px 12px}.selection-strip .control{flex-direction:column;align-items:start;width:100%}.selection-strip select{max-width:100%}.map-wrap svg{max-height:none}.sensor-list{max-height:180px}}
 .notice:empty{display:none}.toolbar>.control>label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .masthead{padding-top:8px;padding-bottom:8px}.identity p{margin-top:2px;font-size:9px}.mark{width:40px;height:40px;font-size:30px}
@@ -117,7 +114,7 @@ label{font-size:13px}.eyebrow,small,.badge,.identity p,.rail-note{font-family:Se
 .map-legend{gap:5px 12px;font-size:13px}.map-legend>span{display:inline-flex;align-items:center;gap:4px}
 .map-legend svg{width:24px;height:24px;flex-shrink:0;overflow:visible}
 .map-notes p,.topology-panel #deployment-summary,.topology-panel .summary,#location-summary{font-size:13px}
-.map-notes>summary,.agent-diagnostics>summary,.engineer-details>summary,#system-details>summary{font-size:14px;color:var(--accent)}
+.map-notes>summary,.agent-diagnostics>summary,.engineer-details>summary{font-size:14px;color:var(--accent)}
 .chart svg{background:#fff}.chart svg text{font:14px Segoe UI,system-ui,sans-serif;fill:#334155}
 .chart .grid{stroke:var(--grid)}.chart .gap{fill:var(--gap);stroke:#64748b;stroke-width:1;opacity:1}
 .chart h3{font:600 15px Segoe UI,system-ui,sans-serif;color:var(--text)}
@@ -147,7 +144,7 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 #play:hover:not(:disabled){background:#1e40af}
 .answer-preview,.task-result,.history-investigation p,.investigation-case p{font-size:16px}
 .public-record,.event-feed,.feed-row button,.history-investigation pre{font-size:13px}
-.system-grid strong,.metrics strong,.workflow-strip strong,#system-details>#clock-basis{font-size:13px}
+.metrics strong,.workflow-strip strong{font-size:13px}
 .page-footer{font-size:12px}.pilot-note{font-size:13px}
 .chart-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .chart-heading h3,.chart-heading .chart-legend{margin:0}
@@ -245,7 +242,7 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 #evaluation-results > p, #evaluation-results > h3, .evaluation-case > p { margin: .8rem 0; }
 #evaluation-results td { white-space: normal; min-width: 110px; vertical-align: top; }
 #evaluation-results td:first-child { min-width: 250px; }
-.evaluation-active .toolbar,.evaluation-active .clock-strip,.evaluation-active .selection-strip,.evaluation-active #system-details{display:none}
+.evaluation-active .toolbar,.evaluation-active .clock-strip,.evaluation-active .selection-strip{display:none}
 .evaluation-suite-selector{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .evaluation-suite-selector select{max-width:100%}
 .evaluation-suite-selector [role=tab][aria-selected=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -321,6 +318,9 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
    agent companion. Original records remain in a separate optional audit, not hidden
    by the display-only formatting applied to report prose. */
 .inspection-intro{max-width:1000px;color:var(--muted);margin-bottom:16px}
+.live-grid{align-items:start}
+.manual-panel .sensor-inspection,.manual-panel .sensor-comparison{border-top:1px solid var(--line);margin-top:16px;padding-top:8px}
+.manual-panel .inspection-trends,.manual-panel .inspection-review-grid,.manual-panel .comparison-grid{grid-template-columns:1fr}
 .inspection-controls{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0}.inspection-controls .control{flex:1;min-width:180px}
 .inspection-controls select{width:100%}
 .inspection-basis{border-left:3px solid var(--accent);background:#f1f6fb;padding:12px 16px;margin-bottom:14px}
@@ -332,6 +332,7 @@ th{background:#eaf0f7;color:#273d5c}tr.highlight td{background:#e8f0fe}
 .inspection-trends .chart-heading{flex-wrap:wrap}.inspection-trends .chart-legend{flex-wrap:wrap}
 .inspection-review-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:20px}
 .inspection-samples,.inspection-agent{min-width:0;padding:16px;border:1px solid var(--line);border-radius:6px}
+.inspection-samples:only-child{grid-column:1/-1}
 .inspection-samples h3,.inspection-agent h3{font-size:16px}.inspection-samples p,.inspection-agent p{font-size:13px;margin:10px 0}
 .inspection-agent h4{font-size:14px;margin:16px 0 8px}.inspection-agent blockquote{margin:8px 0;padding:10px 14px;border-left:3px solid #8b5fc5;background:#f7f4fc;font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
 .inspection-report-text{white-space:pre-wrap;overflow-wrap:anywhere}.inspection-agent details{margin:16px 0}.inspection-agent summary,.inspection-audit>summary{cursor:pointer;color:var(--accent);font-weight:600}

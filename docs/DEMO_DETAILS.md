@@ -30,12 +30,16 @@ has no general chat/question-entry interface.
 
 ## Dashboard recorded walkthrough
 
-Choose a scenario and seed, then **Load recorded timeline**. Use **Play**, the
+Choose **Agent-assisted investigation**, a scenario and seed, then **Load recorded timeline**. Use **Play**, the
 timeline, **Back/Forward** and **Speed** to review measurements and saved findings.
 The main selector offers **5x, 10x, 20x and 30x**, defaulting to 5x.
 Faster playback reuses the same saved investigations; it does not accelerate
 model inference. Playback waits for each selected frame to load rather than
 skipping ahead to repay loading time.
+
+Recorded investigations are exclusive to agent-assisted mode. **Sensor alerts only**
+keeps live measurement controls, anomaly/missing-value warnings and raw inspection;
+it does not load recorded reports, traces, agent overlays or investigation controls.
 
 The measurement map follows the selected source time. An agent overlay on that
 map requires matching evidence; the report retains its explicitly labelled
@@ -152,7 +156,16 @@ uv run --no-sync subsea spatial-evaluation --split development `
 # Freeze code/prompts before the separate held-out measurement run.
 uv run --no-sync subsea spatial-evaluation --split held_out `
   --seed 20261110 --output eval\results\spatial-held-out-new
+# Start all three independent suites together (eight network workers).
+uv run --no-sync subsea spatial-evaluation --suite all --split held_out `
+  --seed 20261110 --output eval\results\spatial-all-new
 ```
+
+`--suite all` starts every suite without a shared worker cap and publishes
+finished suites through one writer. Each network advances in order and holds
+source time through investigation and admission: queued future checkpoints are
+not idle workers. Independent model calls share a warm SDK runtime; only
+session-file cleanup is serialized, without serializing inference.
 
 This makes fresh hosted investigations and truth-blind report-mapping calls.
 Independent synthetic labels, missed findings, failures and withheld intervals
@@ -170,6 +183,7 @@ The eight authored factual-reference cases are in
 [`agent-reliability-cases.json`](../fixtures/synthetic/agent-reliability-cases.json).
 Factual checks and the six advisory model-review dimensions are separate.
 Judge opinions do not establish expert agreement or field reliability.
+Every selected case starts concurrently; its reviewer waits for its own answer.
 
 ### Historical comparators and specialist checks
 

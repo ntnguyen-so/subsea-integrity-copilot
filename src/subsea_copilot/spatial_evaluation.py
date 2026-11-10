@@ -17,7 +17,7 @@ import logging
 import os
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -644,7 +644,7 @@ def run_spatial_evaluation(
                                 generation_id=replay.id,
                                 tenant_id=tenant,
                             )
-                        save()
+                            save()
                     if not row:
                         continue
                     if (
@@ -674,6 +674,7 @@ def run_spatial_evaluation(
                         INSTRUMENT_REVIEW_QUESTION,
                         f"spatial-checkpoint-{end}",
                     )
+                    service.root_id = root.id
                     with lock:
                         row.update(
                             status="running_agents",
@@ -686,11 +687,16 @@ def run_spatial_evaluation(
                     for _ in range(WORKER_POLL_LIMIT):
                         if root.state in TERMINALS:
                             break
-                        if time.monotonic() - started > ROOT_WATCHDOG_SECONDS:
-                            raise RuntimeError("spatial_root_watchdog")
-                        if not service.run_once():
+                        progressed = service.run_once()
+                        if not progressed:
                             time.sleep(0.05)
                         root = store.get_task(root.id)
+                        if root.state in TERMINALS:
+                            break
+                        if time.monotonic() - started > ROOT_WATCHDOG_SECONDS:
+                            raise RuntimeError("spatial_root_watchdog")
+                        if not progressed:
+                            continue
                         tasks = [
                             task for task in store.list_tasks(replay.id)
                             if task.root_id == root.id
@@ -817,7 +823,12 @@ def run_spatial_evaluation(
             logger.exception("Spatial network %s failed: %s", recipe["id"], type(exc).__name__)
             with lock:
                 failed_at = utc_now()
-                network.update(status="failed", error_code=getattr(exc, "code", type(exc).__name__))
+                code = getattr(exc, "code", None)
+                if code is None:
+                    code = str(exc) if str(exc) in {
+                        "spatial_root_watchdog", "spatial_root_not_terminal",
+                    } else type(exc).__name__
+                network.update(status="failed", error_code=code)
                 for row in rows.values():
                     if row["status"] not in {"completed", "failed"}:
                         row.update(status="failed", error_code=network["error_code"])
@@ -844,3 +855,62 @@ def run_spatial_evaluation(
         )
         save()
     return report
+
+
+def run_spatial_evaluations(
+    output: Path, *, cohorts: dict[str, tuple[int, str]],
+    agent_model: str = "gpt-6.1-sol", evaluator_model: str = "gpt-6.1-terra",
+    publish: bool = True,
+) -> dict[str, Any]:
+    """Start every suite immediately; publish finished suites through one writer."""
+    if not cohorts or set(cohorts) - SUITE_NAMES.keys():
+        raise ValueError("Select known spatial evaluation suites")
+    if output.exists():
+        raise ValueError("Use a fresh output directory; recorded attempts are immutable")
+    output.mkdir(parents=True)
+    summary: dict[str, Any] = {
+        "version": "parallel-spatial-evaluation-v1",
+        "status": "running", "suite_workers": len(cohorts), "suites": {},
+        "implementation_sha256": evaluation_implementation_hash(),
+    }
+    write_report(output / "summary.json", summary)
+    with ThreadPoolExecutor(max_workers=len(cohorts)) as executor:
+        futures = {
+            executor.submit(
+                run_spatial_evaluation, output / suite,
+                seed=seed, split=split, suite=suite, agent_model=agent_model,
+                evaluator_model=evaluator_model, publish=False,
+            ): suite
+            for suite, (seed, split) in cohorts.items()
+        }
+        for future in as_completed(futures):
+            suite = futures[future]
+            try:
+                report = future.result()
+            except Exception as exc:
+                logger.exception("Spatial suite %s failed", suite)
+                summary["suites"][suite] = {
+                    "status": "failed",
+                    "error_code": getattr(exc, "code", type(exc).__name__),
+                }
+                write_report(output / "summary.json", summary)
+                continue
+            if publish:
+                publish_evaluation(report, PUBLIC_REPORT)
+            summary["suites"][suite] = {
+                key: report[key] for key in (
+                    "run_id", "status", "planned_cases", "metrics",
+                    "implementation_unchanged",
+                )
+            }
+            write_report(output / "summary.json", summary)
+    summary.update(
+        status="completed" if all(
+            item["status"] == "completed" for item in summary["suites"].values()
+        ) else "incomplete",
+        implementation_unchanged=summary["implementation_sha256"]
+        == evaluation_implementation_hash(),
+        completed_at=utc_now().isoformat(),
+    )
+    write_report(output / "summary.json", summary)
+    return summary

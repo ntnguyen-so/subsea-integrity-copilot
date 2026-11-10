@@ -73,6 +73,12 @@ export class InvestigationPlayback {
       this.stop(); this.seconds = 0; this.requested = ""; this.version++; this.frameLoading = false;
       this.enabled = false; this.rows = [];
     }
+    if (projection.replay.workflow !== "agent_assisted") {
+      if (!this.liveOverride || this.enabled || this.loading) this.useLive();
+      this.rows = []; this.manifestKey = ""; this.loading = false;
+      this.description = "Sensor alerts only; no recorded investigations or model calls.";
+      return;
+    }
     const key = JSON.stringify([projection.replay.id,
       projection.tasks.filter(task => !task.parent_id).map(task => [task.id, task.state])]);
     if (key !== this.manifestKey || performance.now() - this.manifestFetchedAt >= 10000) {
@@ -106,10 +112,12 @@ export class InvestigationPlayback {
 
   // Pause backend ingestion before starting the independent local navigation clock.
   async enable(): Promise<void> {
+    if (this.projection?.replay.workflow !== "agent_assisted") return;
     const replayId = this.projection?.replay.id;
     try {
       await this.services.pauseLive();
-      if (this.projection?.replay.id !== replayId) return;
+      if (this.projection?.replay.id !== replayId
+        || this.projection.replay.workflow !== "agent_assisted") return;
       this.enabled = true; this.liveOverride = false;
       this.services.changed(); this.render();
     } catch (error) {
@@ -306,7 +314,7 @@ export class InvestigationPlayback {
       `Presentation extraction: ${usage.reported_calls ? `${usage.total_tokens.toLocaleString()} additional tokens (${usage.reported_calls}/${usage.reserved_calls} calls report usage)` : "token usage unavailable"} · ${usage.cost_usd == null ? "cost unavailable" : `$${usage.cost_usd.toFixed(4)} OpenAI Standard API equivalent`}. Separate from investigation counters; recorded playback makes no new calls.`, "muted"));
   }
   async investigate(seconds = this.seconds): Promise<void> {
-    if (seconds < 60) return;
+    if (this.projection?.replay.workflow !== "agent_assisted" || seconds < 60) return;
     this.stop(); this.services.changed();
     try { await this.services.liveHere(Math.floor(seconds / 5) * 5); }
     catch (error) {

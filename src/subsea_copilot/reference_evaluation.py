@@ -50,6 +50,7 @@ from .telemetry import Telemetry
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC_REPORT = ROOT / "runtime" / "evaluation-report.json"
 logger = logging.getLogger(__name__)
+_HISTORY_LOCK = threading.RLock()
 
 
 def evaluation_implementation_hash() -> str:
@@ -202,7 +203,8 @@ def write_report(path: Path, report: dict[str, Any]) -> None:
                     and path.resolve().is_relative_to(history_root)
                 ):
                     try:
-                        rebuild_history()
+                        with _HISTORY_LOCK:
+                            rebuild_history()
                     except (OSError, ValueError, TypeError) as exc:
                         logger.error(
                             "Detection report saved, but history catalog update failed: %s",
