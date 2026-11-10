@@ -6,7 +6,8 @@
 [Dashboard (local)](http://127.0.0.1:8086/?tab=live) ·
 [Evaluation (local)](http://127.0.0.1:8086/?tab=evaluation)
 
-The local links open your own running demo after setup.
+The figures below introduce the workflow. Follow **Run the demo** to explore it
+yourself; the local links open the dashboard on your computer after setup.
 
 ## The problem
 
@@ -31,6 +32,7 @@ enough to act on. This turns each investigation into three practical questions:
 
 ## From alerts to an investigation
 
+The three questions become harder when many instruments raise alerts together.
 The illustration below shows this challenge on a simulated 11.2 km network with
 seven connected sections (P1-P7) and 112 pressure instruments. A leak on P5 occurs
 alongside sensor faults, missing data and a shared data-connection problem on P7.
@@ -52,8 +54,8 @@ Subsea Lens organizes these cross-checks with **three AI agents working in
 sequence**. Sensor Quality checks reading reliability. Event Diagnosis uses that
 assessment, pressure patterns and records to assess causes and inspection
 priorities. Operator Response assembles the findings, evidence, uncertainties
-and next checks into one report. A separate review checks the report against its
-sources.
+and next checks into one report. An additional automated review checks the report
+against its sources before the engineer receives it.
 
 ![Figure 2: suspected P5 leak and separate sensor or data concerns](docs/assets/brief-agent-assisted.png)
 
@@ -69,11 +71,14 @@ assembling the investigation from individual alerts.
 
 ## Evaluation
 
+To evaluate this handoff, we measured report-preparation time and checked whether
+the findings matched known simulated leaks and instrument problems.
+
 Subsea Lens can generate reviewed reports in about **2.5-2.8 minutes**, as observed
 in two controlled tests, helping engineers respond promptly to pipeline issues.
 
-To test the system's answers, we compared its findings with known leaks and
-instrument problems that were hidden from the agents. Across all evaluated
+For the diagnostic checks, the known answers were hidden from the agents.
+We then compared their findings with those answers. Across all evaluated
 snapshots in the held-out synthetic detection test, leak detection achieved
 **100% precision and recall, with no false leak alarms**. Identifying affected
 instruments and classifying their problems also achieved **100% precision and recall**.
@@ -85,21 +90,31 @@ supporting evidence.
 
 ## Run the demo
 
-**A Copilot account is required only to generate new AI investigations.**
+The figures above show selected moments from a dashboard you can explore yourself.
+Its **Live** workspace lets you run simulated monitoring scenarios, inspect sensor
+readings and compare their histories. Its **Evaluation** workspace lets you
+replay saved tests and compare agent findings with the known simulated outcomes.
 
-| Mode | Copilot account needed? |
-|---|---|
-| Replay recorded agent-assisted investigations | **No.** Reuses saved reports; recordings must be available locally. |
-| Run live sensor-only monitoring | **No.** Displays readings and sensor alerts without running agents. |
-| Generate new agent-assisted investigations | **Yes.** Requires a GitHub Copilot account with access to **`gpt-6.1-sol`** and Copilot CLI sign-in (step 3). |
+After setup, start with **Evaluation → Detection**, which includes the saved
+readings and reports behind the detection results above. Playback displays existing findings
+instead of calling the agents again, so **no Copilot account is needed**.
+You can also replay agent-assisted runs in Live without Copilot when their
+recordings are available locally.
 
-The included **Detection evaluation** also works without a Copilot account.
+For a new simulated run, **Sensor alerts only** shows readings and alerts for
+manual investigation, also without Copilot. Choose **Agent-assisted investigation**
+when you want the agents to generate a new report. **Only new AI investigations
+require a GitHub Copilot account**, with access to **`gpt-6.1-sol`** and Copilot CLI
+sign-in.
+
+Steps 1 and 2 below set up the dashboard for saved playback and sensor-only
+monitoring. Step 3 adds the Copilot connection for new AI reports.
 
 ### 1. Install the Windows tools
 
-Open **PowerShell as Administrator** and paste this block. Approve the
-installation and local-script prompts. It installs WSL, PowerShell 7, Git, uv,
-Node.js (including npm) and Docker Desktop.
+The demo runs locally on Windows. Open **PowerShell as Administrator** and paste
+this block. Approve the installation and local-script prompts. It installs WSL,
+PowerShell 7, Git, uv, Node.js (including npm) and Docker Desktop.
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
@@ -123,10 +138,11 @@ menu under your usual Windows account.
 
 ### 2. Install and start Subsea Lens
 
-Paste this block into PowerShell 7. Complete Docker Desktop's first-run prompts
-when it opens. The commands download the project, install Python 3.11 and the
-project dependencies, create local credentials, prepare the database and start
-the dashboard.
+With the tools installed, paste this block into the PowerShell 7 window opened
+after the restart. Complete Docker Desktop's first-run prompts when it opens.
+The commands download the project, install Python 3.11 and the project
+dependencies, create local credentials, prepare the database and start the
+dashboard.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
@@ -157,22 +173,27 @@ Write-Host "Password: $env:SUBSEA_OPERATOR_PASSWORD"
 uv run --no-sync subsea serve
 ```
 
-Keep the terminal open. Visit **http://127.0.0.1:8086** and sign in as
-**`operator`**, using the password printed in the terminal.
+When the server is ready, visit **http://127.0.0.1:8086** and sign in as
+**`operator`**, using the password printed in the terminal. This is the dashboard's
+local sign-in, separate from your GitHub account. Keep the terminal open while
+using the dashboard.
 
 Keep your credentials private. They are stored locally in
 `%LOCALAPPDATA%\SubseaCopilot\secrets.json` and reused on subsequent starts.
-The frontend builds automatically when the server starts.
+
+The dashboard is now ready for the [walkthrough below](#explore-the-demo).
+If you also want new AI reports, complete step 3 first.
 
 ### 3. Optional: install and enable AI report generation
 
-For new agent-assisted reports, use a Copilot account with access to
-**`gpt-6.1-sol`**. Investigations and the availability check below use your
-Copilot allowance.
+After exploring saved reports or sensor-only monitoring, you can connect the
+agents to investigate a new run. This requires a GitHub Copilot account with
+access to **`gpt-6.1-sol`**. New investigations and the availability check below
+use your Copilot allowance.
 
-Stop the server with **Ctrl+C** first; leave the database running. In the loaded
-repository terminal, paste the following and complete the sign-in prompts.
-The dashboard restarts after a successful model-access check:
+Press **Ctrl+C** in the server terminal from step 2; leave the database running.
+In that same terminal, paste the following and complete the Copilot sign-in
+prompts. The dashboard restarts after a successful model-access check:
 
 ```powershell
 npm install --global @github/copilot
@@ -181,9 +202,54 @@ uv run --no-sync subsea provider-check --mode live --model gpt-6.1-sol
 uv run --no-sync subsea serve
 ```
 
-### Start the demo again
+## Explore the demo
 
-For later sessions, open PowerShell 7 and paste:
+Once signed in, use the three investigation questions introduced above to guide
+your walkthrough. Begin with the included saved results, then explore the sensor
+readings, and finally try a new agent-assisted investigation if you enabled
+Copilot in step 3.
+
+For the two **Live** walkthroughs, use **S7**, seed **2026**, to explore the
+112-instrument network illustrated above. Compare the workflows using the
+**same scenario, seed and measurement window**.
+
+| Question | What to do and inspect |
+|---|---|
+| **Leak or faulty sensors?** | In **Evaluation → Detection**, select a case and play its saved timeline. Compare the known simulated outcome with the agent's findings on the two maps, then open the recorded report and supporting quotations. |
+| **Which measurements support that conclusion?** | In **Live**, choose **S7** and **Sensor alerts only**, then **Start new run** and **Play**. After warm-up, choose **Inspect this sensor** or **Compare sensor histories** in the sensor-analysis panel to review readings and their measurement window. This path makes no model calls. |
+| **Where should we inspect, and why?** | After enabling model access, choose **S7 → Agent-assisted investigation**, **Start new run** and **Play**. Open the investigation's findings and **Review evidence** to inspect the proposed area, competing explanations and supporting sources. |
+
+To replay an S1-S7 agent-assisted run in **Live**, choose **Agent-assisted
+investigation → Load recorded timeline**. This uses a locally prepared recording
+library, separate from the Detection recordings included with the project.
+The [recording guide](docs/DEMO_DETAILS.md#prepare-a-local-recording-library)
+explains how to generate that library with Copilot; replaying it afterwards makes
+no new model calls.
+
+Replay controls offer **5x, 10x, 20x and 30x** to move through simulated time.
+The simulated clock pauses while an agent investigation is being processed.
+
+For a separate review of report quality, **Evaluation → Agent reliability**
+provides additional checks. Their results are generated separately from the
+included Detection evaluation; the
+[evaluation guide](docs/DEMO_DETAILS.md#reproduce-evaluation) explains how to run
+these new AI checks with Copilot.
+
+For interviews and architecture discussions, the
+[30-minute code walkthrough](docs/REPORT.md#30-minute-technical-code-route)
+connects the screens above to their implementation and evaluation evidence.
+
+## Stop and return later
+
+When finished, press **Ctrl+C** in the server terminal. In that same terminal,
+stop the database with:
+
+```powershell
+docker compose stop db
+```
+
+Your local credentials and database are retained. For a later session, open
+PowerShell 7 and paste the following to return to the same installation:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
@@ -195,34 +261,5 @@ docker desktop start --timeout 180
 docker compose up -d --wait db
 uv run --no-sync subsea serve
 ```
-
-## Explore the demo
-
-For technical interviews, the
-[30-minute code walkthrough](docs/REPORT.md#30-minute-technical-code-route)
-connects the architecture, implementation and evaluation evidence.
-
-Use **S7**, seed **2026**, for the 112-instrument network illustrated above.
-Compare monitoring modes using the **same scenario, seed and measurement window**.
-
-| Question | What to do and inspect |
-|---|---|
-| **Leak or faulty sensors?** | In **Evaluation → Detection**, select a case and play its saved timeline. Compare the ground-truth and agent maps, then open the recorded report and supporting quotations. Playback makes no model calls. |
-| **Which measurements support that conclusion?** | In **Live**, choose **S7** and **Sensor alerts only**, then **Start new run** and **Play**. After warm-up, open **Inspect** and select a measurement window to compare paired readings, anomalies, missing/invalid values and source times. This path makes no model calls. |
-| **Where should we inspect, and why?** | After enabling model access, choose **S7 → Agent-assisted investigation**, **Start new run** and **Play**. Open the investigation's findings and **Review evidence** to inspect the proposed area, competing explanations and supporting sources. |
-
-The included recording is available under **Evaluation → Detection**.
-**Load recorded timeline** uses an optional, locally generated library; the
-[recording guide](docs/DEMO_DETAILS.md#prepare-a-local-recording-library)
-explains how to create it. Replay supports **5x, 10x, 20x and 30x**; simulated time
-pauses while agents investigate.
-
-Additional results for **Evaluation → Agent reliability** can be generated using
-the [evaluation guide](docs/DEMO_DETAILS.md#reproduce-evaluation).
-
-## Shutdown and support
-
-Stop the server with **Ctrl+C**. Run `docker compose stop db` in a loaded terminal
-to stop this demo's database; its volume preserves evidence.
 
 [Setup questions](https://github.com/ntnguyen-so/subsea-integrity-copilot/issues)
