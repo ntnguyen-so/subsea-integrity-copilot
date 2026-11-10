@@ -261,10 +261,14 @@ export class InvestigationPlayback {
     const warming = snapshot.quality.status === "WARMING_UP";
     const basis = node("p", warming
       ? `Collecting a complete ${pack.window_seconds}-second monitoring window · sensors not assessed yet · no agent findings`
-      : `Evidence +${snapshot.end_seconds}s · ${detail?.casefile ? "accepted report" : "no accepted report; measured flags only"}`, "spatial-findings-basis");
+      : `Evidence +${snapshot.end_seconds}s · ${detail?.task.state === "ABSTAINED"
+        ? "abstained report; cause and location not established"
+        : detail?.casefile ? "accepted report" : "no accepted report; measured flags only"}`, "spatial-findings-basis");
     const extraction = detail?.output_mapping;
     const mapping = extraction?.status === "completed" ? extraction.mapping : null;
     const mappingStatus = node("p", !detail?.casefile ? ""
+      : detail.task.state === "ABSTAINED"
+        ? "No diagnosis overlay: this report abstained. Measurement gaps remain visible; no map extraction is pending."
       : extraction?.status === "failed"
         ? `Agent-label extraction failed (${extraction.error_code || "invalid output"}). No instrument findings inferred from detector flags.`
         : !mapping ? "Agent-label extraction is not available yet. Measured alerts are not agent instrument diagnoses."

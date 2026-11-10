@@ -58,6 +58,13 @@ For explicit transport troubleshooting only, set
 per-call subprocess transport. There is no automatic transport fallback or replay
 of a failed model call.
 
+The main timeline supports **5x, 10x, 20x and 30x**, with new live sources defaulting
+to 5x. Select S1-S7 and **Load recorded timeline** to use a locally prepared library;
+higher speeds reuse the same 5x-basis investigations without new inference.
+Reviewed abstentions remain labelled as abstentions, not successful leak clearance.
+See the [recording commands](docs/DEMO_DETAILS.md#dashboard-recorded-walkthrough)
+to build all scenarios.
+
 ## Interview walkthrough
 
 ### 30-minute technical code route

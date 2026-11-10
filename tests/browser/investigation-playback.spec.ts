@@ -157,6 +157,83 @@ test("default S7 timeline selects genuinely accepted reports at every saved chec
   }
 });
 
+for (const scenario of ["S1", "S2", "S3", "S4", "S5", "S6"]) {
+  test(`${scenario} recorded timeline keeps reviewed results, maps and traces at all four speeds`, async ({ page }) => {
+    test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned recordings.");
+    test.setTimeout(180000);
+    const login = await page.request.post("/api/login", { data: {
+      username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
+    } });
+    expect(login.ok()).toBeTruthy();
+    const created = await page.request.post("/api/replays", {
+      headers: { "X-CSRF-Token": (await login.json()).csrf_token },
+      data: { scenario, seed: 2026, mode: "live", workflow: "agent_assisted",
+        idempotency_key: `scenario-recordings-${scenario}-${Date.now()}` },
+    });
+    expect(created.ok()).toBeTruthy();
+    const replay = await created.json();
+    expect(replay.speed).toBe(5);
+    await page.goto("/");
+    await expect(page.locator("#load-recording")).toBeEnabled();
+    await page.locator("#scenario").selectOption(scenario);
+    await page.locator(".run-settings > summary").click();
+    await page.locator("#seed").fill("2026");
+    const loaded = page.waitForResponse(new RegExp(`/api/replays/${replay.id}/projection$`));
+    await page.getByRole("button", { name: "Load recorded timeline", exact: true }).click();
+    expect((await loaded).ok()).toBeTruthy();
+    await expect(page.locator("#source-clock")).toContainText("RECORDED PAUSED");
+    await expect(page.locator("#speed")).toHaveValue("5");
+    expect(await page.locator("#speed option:not([disabled])").evaluateAll(options =>
+      options.map(option => (option as HTMLOptionElement).value))).toEqual(["5", "10", "20", "30"]);
+    const endpoint = `/api/replays/${replay.id}/recordings`;
+    const { recordings }: { recordings: SavedInvestigation[] } =
+      await (await page.request.get(endpoint)).json();
+    const writes: string[] = [];
+    page.on("request", request => {
+      if (request.method() === "POST") writes.push(request.url());
+    });
+    const points = [95, 100, 105, 110, 120, 135, 150, 180, 360];
+    if (scenario === "S1") points.push(115, 260);
+    if (scenario === "S4") points.push(155);
+    for (const point of points.sort((a, b) => a - b)) {
+      const selected = availableRecording(recordings, point)!;
+      expect(selected.source_seconds).toBe(point);
+      expect(["SUCCEEDED", "ABSTAINED"]).toContain(selected.state);
+      const response = await page.request.get(`${endpoint}/${selected.task_id}`);
+      expect(response.ok()).toBeTruthy();
+      const { snapshot, detail } = await response.json();
+      expect(detail.casefile.input_hash).toBe(snapshot.input_hash);
+      expect(detail.task.interpretation_review.rounds.at(-1).assessment.decision).toBe("accept");
+      await selectCheckpoint(page, point);
+      await expect(page.locator("#automatic-state")).toHaveAttribute("data-task", selected.task_id);
+      const map = page.getByRole("group", { name: "Dedicated agent investigation pipeline map" });
+      await expect(map).toHaveAttribute("data-source-seconds", String(point));
+      await expect(page.locator("#topology [data-sensor]")).toHaveCount(24);
+      await expect(page.locator("#automatic-langfuse")).toHaveAttribute("data-task", selected.task_id);
+      const traceResponse = await page.request.get(`${endpoint}/${selected.task_id}/trace`);
+      expect(traceResponse.ok()).toBeTruthy();
+      const trace = await traceResponse.json();
+      expect(trace.stored_trace_visible).toBe(true);
+      expect(trace.snapshot_id).toBe(snapshot.id);
+      if (selected.state === "ABSTAINED") {
+        await expect(page.locator("#agent-investigation-map")).toContainText(
+          "abstained report; cause and location not established");
+        await expect(page.locator("#agent-investigation-map")).toContainText("No diagnosis overlay");
+        await expect(map.locator(".eval-inspection")).toHaveCount(0);
+      } else {
+        expect(detail.output_mapping.status).toBe("completed");
+      }
+    }
+    const selectedTask = await page.locator("#automatic-state").getAttribute("data-task");
+    for (const speed of ["5", "10", "20", "30"]) {
+      await page.locator("#speed").selectOption(speed);
+      await expect(page.locator("#step")).toHaveText(`Forward ${speed}s`);
+      await expect(page.locator("#automatic-state")).toHaveAttribute("data-task", selectedTask!);
+    }
+    expect(writes).toEqual([]);
+  });
+}
+
 test("recorded trace selection rejects late and mismatched traces without withholding the report", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned demo.");
   await page.request.post("/api/login", { data: {
@@ -493,7 +570,7 @@ test("paused recordings step backward and forward without changing the saved sou
   await back.click();
   await expect(page.locator("#source-clock")).toHaveAttribute("data-seconds", "0");
   await expect(back).toBeDisabled();
-  for (const speed of [1, 2, 5, 10, 20, 30]) {
+  for (const speed of [5, 10, 20, 30]) {
     await page.locator("#speed").selectOption(String(speed));
     await expect(back).toHaveText(`Back ${speed}s`);
     await expect(forward).toHaveText(`Forward ${speed}s`);

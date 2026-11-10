@@ -1,6 +1,6 @@
 """Export preserved terminal synthetic investigations; never call a model."""
 
-# Inputs are S7 checkpoint manifests and the original tenants' database records.
+# Inputs are scenario checkpoint manifests and the original tenants' database records.
 # Uses the authenticated recorded-console API in process to build public casefiles,
 # then merges recordings by task ID into runtime_dir/agent-playback.json. Reruns
 # replace matching IDs, retain others and make no hosted calls; DB access is required.
@@ -18,6 +18,7 @@ from subsea_copilot.playback import (
     RecordedTrace,
     Recording,
     RecordingLibrary,
+    dataset_hash,
     load_library,
     save_library,
 )
@@ -36,9 +37,9 @@ def main() -> None:
     destination = settings.runtime_dir / "agent-playback.json"
     # Merge, do not erase other published checkpoints when exporting a subset.
     recordings = {row.task.id: row for row in load_library(destination).recordings}
-    manifests = sorted(args.runs.glob(r"S7-2026-*\manifest.json")) if args.runs else []
+    manifests = sorted(args.runs.glob(r"*\manifest.json")) if args.runs else []
     if args.runs is not None and not manifests:
-        parser.error("No preserved S7 checkpoint manifests found")
+        parser.error("No preserved scenario checkpoint manifests found")
     for path in manifests:
         manifest = json.loads(path.read_text(encoding="utf-8"))
         if manifest["state"] not in {"SUCCEEDED", "ABSTAINED", "FAILED"}:
@@ -53,6 +54,15 @@ def main() -> None:
             )
             detail_response.raise_for_status()
             detail = detail_response.json()["detail"]
+            if (
+                manifest.get("completed") and manifest["state"] == "ABSTAINED"
+                and detail["casefile"] is None
+            ):
+                # Rebuild a qualified abstention's handoff from its original validated
+                # task rather than retaining an older library's missing projection.
+                original_detail = client.get(f"/api/tasks/{manifest['root_id']}")
+                original_detail.raise_for_status()
+                detail = original_detail.json()
             projection = client.get(f"/api/replays/{manifest['generation_id']}/projection")
             projection.raise_for_status()
             with Store(
@@ -66,6 +76,15 @@ def main() -> None:
                     if child.parent_id == task.id
                 ]
                 trace_metadata = store.latest_task_trace(task.id)
+                replay = store.get_replay(task.generation_id)
+            source = client.app.state.resources["monitor"]._source(replay).dataset
+            if (
+                manifest["scenario"] != replay.scenario
+                or manifest["seed"] != replay.seed
+                or manifest["dataset_sha256"] != dataset_hash(source)
+                or manifest["source_seconds"] != snapshot.end_seconds
+            ):
+                raise ValueError(f"Manifest does not match original scenario evidence: {path}")
             row = Recording(
                 scenario=manifest["scenario"], seed=manifest["seed"],
                 dataset_sha256=manifest["dataset_sha256"],

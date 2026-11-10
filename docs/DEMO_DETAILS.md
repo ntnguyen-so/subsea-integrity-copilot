@@ -67,8 +67,9 @@ The dashboard keeps preserved investigations in a time-indexed library and shows
 their findings on a dedicated pipeline map beside the agent reports, using the
 Evaluation tab's geometry and symbols. Choose a scenario and seed, then select
 **Load recorded timeline**. On **Live**, scrub **Selected source time** or use
-**Play, Step and Speed** without launching inference. Playback defaults to **5×**;
-10×, 20× and 30× reuse exactly the same saved investigations. Live ingestion is
+**Play, Step and Speed** without launching inference. New live sources and playback
+default to **5×**; the main selector offers **5×, 10×, 20× and 30×**.
+Higher speeds reuse exactly the same saved investigations. Live ingestion is
 paused before entering the walkthrough. There is no recorded-run dropdown.
 While paused, **Back** and **Forward** move by the selected speed's source-time
 equivalent of one wall-clock second (10× → 10 seconds, 30× → 30 seconds).
@@ -96,33 +97,48 @@ does not advance or write the source replay. The main map follows measurement
 time, while saved agent findings retain their labelled investigation time.
 Agent overlays on the main map require an exact matching evidence hash.
 
-The S7 seed 2026 published timeline covers **95, 100, 105, 110, 120, 135, 150,
+The seed 2026 recording schedule covers **95, 100, 105, 110, 120, 135, 150,
 180 and 360s**; pass these endpoints explicitly when rebuilding the full set.
+All seven scenarios use their own raw-data hash and geometry: S1-S6 have 24
+instruments; S7 has 112. Explicit recording also investigates quiet and unavailable
+windows; it does not invent an automatic detector alert for those cases.
+The current local library covers all seven scenarios, with **57 new S1-S6
+recordings** added to the 25 preserved S7 entries. S1 +115/+260s and S4 +155s also
+have refreshed intermediate recordings. See the [recording receipt](evidence/all-scenario-recordings.json)
+for exact task identities, supported versus abstained outcomes and the retained
+mapper failure followed by explicit recovery.
 Between checkpoints the map and report retain their explicitly labelled original
 evidence time; later findings are never backfilled. This is not an investigation
 at every five-second window. Playback selects the latest compatible terminal trial
 at or before the selected time, including failed and abstained attempts; those
-outcomes never imply an accepted report or safety clearance.
+outcomes never imply a supported physical diagnosis or safety clearance.
 
 Each selected recording exposes **Open whole investigation in Langfuse** and
 **View Langfuse run**, bound to its original task and evidence snapshot. The link
 and trace details follow the timeline without launching inference; late responses
 cannot replace a newer selection. Missing metadata or unverifiable stored traces
 are explicitly labelled, without substituting another run or hiding the report.
-All nine selected checkpoints now have fresh accepted reports, completed
+All nine S7 checkpoints have fresh accepted reports, completed
 report-to-map extractions and verified original stored traces. The +135s checkpoint
 is included in the exported library. An older +135s attempt still has an absent
 historical trace; it remains preserved and explicitly unverified rather than
 being relabelled as the new execution.
 
-After generating the S7 investigations with the verification command below,
+After generating the investigations with the recording command below,
 export their immutable snapshots and reports without new model calls:
 
 ```powershell
 . .\tools\load-environment.ps1
-uv run python tools\verify-s7-agents.py --checkpoints 95 100 105 110 120 135 150 180 360 --workers 3 --output runtime\s7-check
-uv run python tools\prepare-agent-playback.py --runs runtime\s7-check
+uv run --no-sync python tools\verify-s7-agents.py --scenarios S1 S2 S3 S4 S5 S6 S7 --record --checkpoints 95 100 105 110 120 135 150 180 360 --workers 4 --output runtime\all-scenario-recordings
+uv run --no-sync python tools\prepare-agent-playback.py --runs runtime\all-scenario-recordings
 ```
+
+`--record` requires validated terminal reports, final grounding acceptance and
+verified stored traces. Supported reports also require completed report-to-map
+extraction. A reviewed `ABSTAINED` result is a valid recording, not a supported
+physical diagnosis: its map keeps measurements visible without inventing a
+diagnosis overlay or claiming that extraction is still pending. No classification,
+review rule or root state is changed to make a recording pass.
 
 Exports preserve original trace metadata. To backfill an existing library from
 its original scoped task stores, stop the dashboard first, then run

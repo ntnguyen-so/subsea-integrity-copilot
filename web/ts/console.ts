@@ -666,7 +666,15 @@ function renderProjection(): void {
   renderInvestigationTime();
   text("live-bounds", latest ? `${bounds(latest.window_start, latest.window_end)} · ${latest.quality.status}` : `WARMING_UP / no completed window · width ${pack.window_seconds}s + lateness ${pack.lateness_seconds}s`);
   text("health-state", `${health.monitor} / ${health.agent} / export: ${jsonText(health.observability.status)} · stored visibility: ${jsonText(health.observability.stored_trace_visibility)}`);
-  select("speed").value = String(navigationSpeed());
+  const speedControl = select("speed"), currentSpeed = String(navigationSpeed());
+  speedControl.querySelector("[data-legacy-speed]")?.remove();
+  if (!Array.from(speedControl.options).some(option => option.value === currentSpeed)) {
+    const legacy = new Option(`${currentSpeed}× (legacy)`, currentSpeed);
+    legacy.disabled = true;
+    legacy.dataset.legacySpeed = "true";
+    speedControl.add(legacy);
+  }
+  speedControl.value = currentSpeed;
   const stepSeconds = navigationSpeed();
   controlButton("step-back").textContent = `Back ${stepSeconds}s`;
   controlButton("step").textContent = `Forward ${stepSeconds}s`;

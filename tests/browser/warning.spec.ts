@@ -21,6 +21,10 @@ test("1x replay delivers a clear warning independently of the pinned investigati
   });
   expect(created.status()).toBe(200);
   const replay = await created.json();
+  const legacySpeed = await page.context().request.post(`/api/replays/${replay.id}/control`, {
+    headers, data: { action: "speed", speed: 1, idempotency_key: "historical-warning-1x" },
+  });
+  expect(legacySpeed.status()).toBe(200);
   for (let index = 0; index < 16; index++) {
     const stepped = await page.context().request.post(`/api/replays/${replay.id}/control`, {
       headers, data: { action: "step", idempotency_key: `timing-${index}` },

@@ -866,8 +866,11 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         if (
             task.role == "operator_response"
             and task.response_protocol in {"engineer-v1", "engineer-v2"}
-            and task.state in (
-                {"SUCCEEDED"} if accepted_casefile_only else {"SUCCEEDED", "ABSTAINED"}
+            and task.state in {"SUCCEEDED", "ABSTAINED"}
+            and (
+                not accepted_casefile_only or task.state == "SUCCEEDED"
+                or task.interpretation_review is not None
+                and task.interpretation_review.rounds[-1].assessment.decision == "accept"
             )
         ):
             if task.result is None:

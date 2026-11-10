@@ -1,5 +1,60 @@
 # Qualification results
 
+## All seven scenarios have recorded main-timeline investigations
+
+Added **57 fresh S1-S6 investigations**: nine seed-2026 checkpoints per scenario
+(+95, +100, +105, +110, +120, +135, +150, +180 and +360s), plus S1 +115/+260s
+and S4 +155s to refresh compatible historical intermediate checkpoints.
+All original 25 S7 library entries remain unchanged as JSON values;
+the local library now contains **82 executions**. New sources actually use **5x**
+speed, and the main UI offers **5x, 10x, 20x and 30x**. Faster recorded playback
+reuses these results without inference.
+
+All 57 reports passed final grounding review and all **684 operational checks**.
+There are **30 supported reports and 27 reviewed abstentions**, not 57 supported
+physical diagnoses. Missing telemetry, insufficient observers and unresolved causes
+remain explicit; abstained reports keep the measurement map without a diagnosis
+overlay or a misleading pending-extraction message. All original stored trace trees
+were verified, and every supported report has completed report-to-map extraction.
+The [sanitized recording receipt](evidence/all-scenario-recordings.json) preserves
+individual identities, states and the failure/recovery history.
+
+The implementation fingerprint stayed unchanged across these three recording
+cohorts. All **365 investigation model calls**, excluding the separate mapper,
+used observed `gpt-6.1-sol` through `persistent-sdk`, with observed usage and unique
+request IDs; readiness rounded to zero milliseconds on **357 calls**. Each process
+reused its owned runtime while keeping inference sessions isolated. Original
+qualification attempts took **85.844-131.594s**, median **106.828s**, excluding
+source preparation and the separately recorded mapper retry. These smaller,
+24-instrument scenarios are not a controlled latency comparison with 112-instrument
+S7, and the timings are not a production SLO.
+
+Two qualification issues remain visible in the evidence. The first six-window
+pilot's old success-only predicate incorrectly rejected three valid, reviewed
+abstentions; those original reports were revalidated without new inference or
+changed task states. S2 +135s had one malformed mapper response after its
+investigation succeeded. An explicit extraction-only retry completed in **10.531s**;
+the original failed extraction and its usage accounting remain preserved, and no
+investigation was rerun or review gate relaxed.
+
+Browser inspection also exposed a read-side parity bug: recorded views omitted
+handoff packets for independently reviewed abstentions even though live task views
+could provide them. Recorded reads now project those already-validated packets;
+export repairs missing cached packets from original task receipts. Unreviewed
+abstentions still do not acquire a reviewed handoff. This presentation repair
+followed the frozen model runs; both implementation fingerprints are in the receipt.
+Original answers, reviews, task states and inference receipts are unchanged.
+
+The 55 monitoring/playback regressions passed before that projection repair;
+focused checks then covered reviewed handoffs, missing cached packets, cross-scenario
+exports and retained unreviewed/failed history. Seven real browser cases covered
+all 57 new checkpoints and the retained S7 timeline, with exact maps, original stored
+traces, four speed choices and no playback writes or inference.
+
+Full recordings, mappings and traces remain in the owned runtime/services, not
+bundled in Git. These overlapping synthetic windows establish neither independent
+event accuracy nor field reliability, safety clearance or measured labor savings.
+
 ## Recorded timeline refreshed through actual live workers
 
 All **nine** S7 seed-2026 checkpoints (+95, +100, +105, +110, +120, +135, +150,
@@ -10,7 +65,7 @@ and every report ended in grounding acceptance. The +110/+120/+360 reports
 required revision before acceptance; no acceptance rule was relaxed.
 
 All nine report-to-map extractions completed and all nine original stored Langfuse
-trees were verified. The library now contains **25** executions: nine new recordings
+trees were verified. That refresh produced **25** executions: nine new recordings
 plus all sixteen previous entries, checked unchanged. Browser navigation selected
 the new accepted reports at every checkpoint, with their corresponding trace links.
 Playback remains based on 5x source time; faster playback reuses these same results.

@@ -204,7 +204,7 @@ test("paused live monitoring reviews a previous window then returns to the sourc
   expect(current.replay.state).toBe("PAUSED");
   expect(current.tasks).toEqual([]);
   let clock = current.replay.clock_seconds;
-  for (const speed of [1, 2, 10, 20, 30]) {
+  for (const speed of [5, 10, 20, 30]) {
     await page.locator("#speed").selectOption(String(speed));
     await expect(page.locator("#step-back")).toHaveText(`Back ${speed}s`);
     await expect(page.locator("#step")).toHaveText(`Forward ${speed}s`);

@@ -177,6 +177,7 @@ class Monitor:
                     source_version=SOURCE_VERSION,
                     seed=seed,
                     mode=mode,
+                    speed=5,
                     workflow=workflow,
                     pause_on_anomaly=pause_on_anomaly,
                     investigation_context_seconds=15

@@ -568,6 +568,163 @@ def test_sensor_alert_workflow_never_admits_agents(
         )
 
 
+@pytest.mark.parametrize("mismatched", [False, True])
+def test_recording_export_handles_multiple_scenarios_without_transplanting_evidence(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, mismatched: bool,
+) -> None:
+    import json
+    import runpy
+    import sys
+
+    monkeypatch.setattr(AgentService, "_check_provider", lambda *args: None)
+    manifests = tmp_path / "runs"
+    with TestClient(create_app(settings, start_workers=False)) as client:
+        login = client.post("/api/login", json={
+            "username": "operator", "password": settings.operator_password,
+        })
+        headers = {"X-CSRF-Token": login.json()["csrf_token"]}
+        for scenario in ("S2", "S6"):
+            original = client.post("/api/replays", headers=headers, json={
+                "scenario": scenario, "seed": 2026, "mode": "scripted",
+                "idempotency_key": "export-original-" + scenario,
+            }).json()
+            assert original["speed"] == 5
+            response = client.post(
+                f"/api/replays/{original['id']}/investigate-here", headers=headers,
+                json={"source_seconds": 100, "idempotency_key": "export-" + scenario},
+            )
+            assert response.status_code == 200, response.text
+            prepared = response.json()
+            task = client.app.state.store.claim_task(
+                "export-fixture", task_id=prepared["task"]["id"],
+            )
+            client.app.state.store.save_task(task.model_copy(update={
+                "state": "FAILED", "error_code": "synthetic_export_fixture",
+                "error_message": "Deliberately failed synthetic recording fixture.",
+            }))
+            destination = manifests / f"{scenario}-2026-100"
+            destination.mkdir(parents=True)
+            (destination / "manifest.json").write_text(json.dumps({
+                "scenario": "S1" if mismatched and scenario == "S6" else scenario,
+                "seed": 2026, "state": "FAILED", "source_seconds": 100,
+                "tenant_id": settings.tenant_id,
+                "generation_id": task.generation_id, "root_id": task.id,
+                "snapshot_id": task.snapshot_id,
+                "dataset_sha256": dataset_hash(generate_scenario(scenario, 2026)),
+            }), encoding="utf-8")
+    monkeypatch.setattr(Settings, "from_env", lambda: settings)
+    monkeypatch.setattr(sys, "argv", ["prepare-agent-playback", "--runs", str(manifests)])
+    tool = Path(__file__).parents[1] / "tools" / "prepare-agent-playback.py"
+    library_path = settings.runtime_dir / "agent-playback.json"
+    if mismatched:
+        with pytest.raises(ValueError, match="original scenario evidence"):
+            runpy.run_path(str(tool), run_name="__main__")
+        assert not library_path.exists()
+    else:
+        runpy.run_path(str(tool), run_name="__main__")
+        from subsea_copilot.playback import load_library
+
+        rows = load_library(library_path).recordings
+        assert {row.scenario for row in rows} == {"S2", "S6"}
+        assert all(row.task.state == "FAILED" and row.casefile is None for row in rows)
+
+
+def test_reviewed_abstention_keeps_its_handoff_when_recorded_and_exported(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    import json
+    import runpy
+    import sys
+
+    class AbstainingModel(ScriptedChatModel):
+        def _generate(self, *args, **kwargs):
+            generated = super()._generate(*args, **kwargs)
+            message = generated.generations[0].message
+            if (
+                self.role == "operator_response" and isinstance(message.content, str)
+                and message.content
+            ):
+                payload = json.loads(message.content)
+                if "outcome" in payload:
+                    payload["outcome"] = "insufficient_evidence"
+                    message.content = json.dumps(payload)
+            return generated
+
+    monkeypatch.setattr(AgentService, "_check_provider", lambda *args: None)
+    with TestClient(create_app(settings, start_workers=False)) as client:
+        login = client.post("/api/login", json={
+            "username": "operator", "password": settings.operator_password,
+        })
+        headers = {"X-CSRF-Token": login.json()["csrf_token"]}
+        replay = client.post("/api/replays", headers=headers, json={
+            "scenario": "S3", "seed": 2026, "mode": "scripted",
+            "idempotency_key": "reviewed-abstention",
+        }).json()
+        for index in range(37):
+            stepped = client.post(
+                f"/api/replays/{replay['id']}/control", headers=headers,
+                json={"action": "step", "idempotency_key": f"abstention-step-{index}"},
+            )
+            assert stepped.status_code == 200
+        prepared = client.post(f"/api/replays/{replay['id']}/questions", headers=headers, json={
+            "snapshot_id": stepped.json()["latest_window_id"], "mode": "scripted",
+            "question": "Assess possible leakage and instrument issues.",
+            "idempotency_key": "abstention-question",
+        })
+        assert prepared.status_code == 200
+        task_id = prepared.json()["id"]
+        service = client.app.state.resources["service"]
+        monkeypatch.setattr(service, "model_factory", lambda role, _mode:
+                            AbstainingModel(role=role))
+        for _ in range(10):
+            service.run_once()
+            task = client.app.state.store.get_task(task_id)
+            if task.state in {"SUCCEEDED", "ABSTAINED", "FAILED"}:
+                break
+        assert task.state == "ABSTAINED", task.error_code
+        assert task.interpretation_review.rounds[-1].assessment.decision == "accept"
+        live = client.get(f"/api/tasks/{task_id}").json()
+        assert live["casefile"]["state"] == "ABSTAINED"
+        saved = client.get(f"/api/replays/{replay['id']}/recordings/{task_id}").json()
+        assert saved["detail"]["casefile"] == live["casefile"]
+        save_library(settings.runtime_dir / "agent-playback.json", RecordingLibrary(recordings=[
+            Recording(
+                scenario="S3", seed=2026,
+                dataset_sha256=dataset_hash(generate_scenario("S3", 2026)),
+                pack=generate_scenario("S3", 2026, site_id=settings.site_id).pack,
+                snapshot=client.app.state.store.get_window(task.snapshot_id), task=task,
+                children=[
+                    child for child in client.app.state.store.list_tasks(replay["id"])
+                    if child.parent_id == task.id
+                ],
+                casefile=None,
+            ),
+        ]))
+        cached = client.get(f"/api/replays/{replay['id']}/recordings/{task_id}").json()
+        assert cached["detail"]["casefile"] is None
+        manifest_directory = tmp_path / "runs" / "S3-2026-180"
+        manifest_directory.mkdir(parents=True)
+        (manifest_directory / "manifest.json").write_text(json.dumps({
+            "scenario": "S3", "seed": 2026, "state": task.state, "completed": True,
+            "source_seconds": 180, "tenant_id": settings.tenant_id,
+            "generation_id": replay["id"], "root_id": task.id, "snapshot_id": task.snapshot_id,
+            "dataset_sha256": dataset_hash(generate_scenario("S3", 2026)),
+        }), encoding="utf-8")
+    monkeypatch.setattr(Settings, "from_env", lambda: settings)
+    monkeypatch.setattr(sys, "argv", [
+        "prepare-agent-playback", "--runs", str(manifest_directory.parent),
+    ])
+    runpy.run_path(
+        str(Path(__file__).parents[1] / "tools" / "prepare-agent-playback.py"),
+        run_name="__main__",
+    )
+    from subsea_copilot.playback import load_library
+
+    recording = load_library(settings.runtime_dir / "agent-playback.json").recordings[0]
+    assert recording.casefile.model_dump(mode="json") == live["casefile"]
+    assert recording.task.state == "ABSTAINED"
+
+
 def test_playback_live_preparation_cannot_interleave_with_monitor_tick(
     settings: Settings, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
