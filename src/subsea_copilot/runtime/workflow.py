@@ -1459,6 +1459,59 @@ class AgentService:
             for s in sensors
         ]
 
+    @staticmethod
+    def _validation_contract(task: AgentTask, phase: str) -> dict[str, Any]:
+        critic = phase.startswith("critic-")
+        return {
+            "why_this_check": (
+                "The model returned a candidate instead of more tool requests. "
+                "A model submission is not an accepted result; application code must "
+                "validate this phase before the workflow can advance."
+            ),
+            "execution_authority": "application_code_not_an_additional_model_call",
+            "entry_point": "runtime.workflow.AgentService._graph.validate",
+            "validator": (
+                "WorkPlan.model_validate + checked_plan_sources" if phase == "plan"
+                else "GroundingCheckBatch.model_validate + validate_assessment" if critic
+                else "apply_revision + AgentService._accept + validate_revision"
+                if phase.startswith("reflection")
+                else "AgentService._accept + validation.validate_result"
+            ),
+            "contract": (
+                "Bounded serial plan, compatible explicit reuse and required diagnosis."
+                if phase == "plan" else
+                "Every requested prose unit reviewed exactly once, with valid source "
+                "references and required corrections; then apply the review decision."
+                if critic else
+                "Result schema, pinned scope, role authority, successful required reads, "
+                "allowed claims and already-read evidence; applicable dependency, "
+                "history and interpretation requirements."
+            ),
+            "required_read_names": sorted(
+                role_policy(task.role, task.decision_policy).required
+            ) if phase != "plan" and not critic else [],
+            "on_pass": (
+                "Execute the validated plan; wait for specialist prerequisites."
+                if phase == "plan" else
+                "Apply accept/revise; valid reviewer JSON alone does not release the report."
+                if critic else
+                "Run the separate semantic review before publishing the coordinator report."
+                if task.role == "operator_response" and task.response_protocol == "engineer-v2"
+                else "Save the validated specialist result for compatible downstream use."
+                if task.role != "operator_response"
+                else "Save the validated coordinator result."
+            ),
+            "on_failure": (
+                "Return explicit validator feedback for bounded repair when calls and "
+                "deadline remain; otherwise fail this phase. Do not silently accept the draft."
+            ),
+            "does_not_prove": (
+                "Not physical confirmation, exhaustive sensor review, or proof that every "
+                "prose statement is correct. Specialist advisory prose is not independently "
+                "reviewed by another model at this gate."
+            ),
+        }
+
     def _graph(
         self,
         task: AgentTask,
@@ -1467,6 +1520,7 @@ class AgentService:
         candidate: AgentResult | None = None,
         criticism: GroundingAssessment | None = None,
         previous_candidate: AgentResult | None = None,
+        activity_span: Any = None,
     ) -> tuple[dict[str, Any], AgentTask]:
         """Run or resume one phase, fulfilling bounded interrupts and auditing every attempt."""
         gateway = self._gateway(task, snapshot)
@@ -1583,6 +1637,7 @@ class AgentService:
                         json.dumps(
                             {
                                 "status": "failed",
+                                **self._validation_contract(task, phase),
                                 **diagnostic,
                                 "repair_requested": repair_available,
                                 "repair_attempt": (
@@ -1623,6 +1678,7 @@ class AgentService:
                     "langfuse.observation.output",
                     json.dumps({
                         "status": "passed",
+                        **self._validation_contract(task, phase),
                         "meaning": "The response passed this phase's structural/domain validator.",
                         "phase": phase,
                         "resolved_rejection_ids": resolved,
@@ -1796,6 +1852,17 @@ class AgentService:
                 task, phase, inherited_prompt, json.loads(inherited_context),
                 prompt_limit=prompt_limit,
             )
+        if activity_span is not None and prior and prior.values:
+            activity_span.set_attribute("workflow.intake.input", json.dumps({
+                "status": "resumed_existing_answer_conversation",
+                "why": (
+                    "Resume the persisted graph instead of repeating upfront intake. "
+                    "Earlier intake details belong to the original attempt and receipts; "
+                    "they are not reconstructed as new calls here."
+                ),
+                "actual_call_count_this_attempt": 0,
+                "checkpoint_phase_complete": not bool(prior.next),
+            }))
         if prior and prior.values and not prior.next:
             if prior.values.get("failure"):
                 raise ValidationError(prior.values["failure"], "Previously rejected output.")
@@ -1810,6 +1877,30 @@ class AgentService:
         else:
             if phase != "plan" and not critic and not reflection:
                 intake, task = self._required_intake(task, snapshot, context, gateway)
+                if activity_span is not None:
+                    activity_span.set_attribute("workflow.intake.input", json.dumps({
+                        "authority": "application_required_intake_not_model_tool_requests",
+                        "why_before_model": (
+                            "Supply the role's minimum evidence through audited gateway "
+                            "reads before asking the model to interpret it."
+                        ),
+                        "actual_call_count": len(intake),
+                        "calls": [
+                            {"call_id": item["call_id"], "tool": item["name"]}
+                            for item in intake
+                        ],
+                        "why_this_count": (
+                            "Count actual dispatches, not distinct required tool names. "
+                            "Referenced evidence, search-hit bodies and specialist comparison "
+                            "pages add bounded reads when present. It is not a six-call quota."
+                        ),
+                        "next_step": "First answer-model turn with these completed receipts.",
+                        "scope_limit": (
+                            "Bounded intake is complete, not an exhaustive investigation. "
+                            "The model may request additional allowed reads for concrete gaps "
+                            "or submit a result with explicit limitations."
+                        ),
+                    }))
                 messages.append(
                     HumanMessage(
                         content=json.dumps(
@@ -2127,6 +2218,30 @@ class AgentService:
                                 {
                                     "turn": task.model_calls,
                                     "action": action,
+                                    "workflow_transition": {
+                                        "authority": "observed_response_and_application_routing",
+                                        "completed_read_receipts": len(receipts),
+                                        "mandatory_reads_outstanding": missing_reads,
+                                        "runtime_preferred_action": call_policy["preferred_action"],
+                                        "runtime_final_only": call_policy["final_only"],
+                                        "observed_tool_requests": len(response.tool_calls),
+                                        "next_step": (
+                                            "dispatch_requested_tools_then_call_model_again"
+                                            if response.tool_calls
+                                            else "parse_and_validate_candidate"
+                                        ),
+                                        "why": (
+                                            "The response contains tool requests; execute them "
+                                            "through the gateway before the next model turn."
+                                            if response.tool_calls else
+                                            "The response contains no tool requests, so the "
+                                            "graph routes it to this phase's validator. "
+                                            "Submit answer is a candidate, not another tool "
+                                            "call, accepted handoff or final safety verdict."
+                                        ),
+                                        "model_reason_for_stopping": "not_recorded"
+                                        if not response.tool_calls else "not_applicable",
+                                    },
                                     "repair_codes": repair_feedback,
                                     "content": response.content,
                                     "tool_calls": response.tool_calls,
@@ -2556,6 +2671,42 @@ class AgentService:
                     json.dumps(
                         {
                             "question": task.question,
+                            "execution_procedure": {
+                                "role_goal": {
+                                    "sensor_quality": "Assess reading availability and quality; "
+                                    "do not diagnose a physical leak or clear every sensor.",
+                                    "event_diagnosis": "Compare pressure, instrument dependencies "
+                                    "and operating records to assess competing causes.",
+                                    "operator_response": "Plan compatible specialist work, "
+                                    "synthesize checked evidence and answer the engineer.",
+                                }[task.role],
+                                "who_runs_the_tools": (
+                                    "Application code performs mandatory intake before the "
+                                    "first answer-model turn. Subsequent tool requests, if any, "
+                                    "come from the model. The tree alone does not distinguish them."
+                                ),
+                                "required_read_names": sorted(
+                                    role_policy(task.role, task.decision_policy).required
+                                ),
+                                "why_call_count_varies": (
+                                    "These are required tool names, not a fixed call count. "
+                                    "Evidence batches, record bodies and comparison pages add "
+                                    "reads. workflow.intake.input records the actual sequence."
+                                ),
+                                "after_intake": (
+                                    "Ask the model to interpret the completed reads. Do not "
+                                    "exhaust health pagination; request optional reads only "
+                                    "for concrete unresolved evidence gaps, otherwise submit "
+                                    "the phase schema with limitations."
+                                ),
+                                "after_model": (
+                                    "Tool requests -> gateway reads -> another model turn. "
+                                    "No tool requests -> parse candidate -> application "
+                                    "answer_check -> accepted role result or bounded repair. "
+                                    "The model does not call answer_check."
+                                ),
+                                "answer_check": self._validation_contract(task, "answer"),
+                            },
                             "role": task.role,
                             "task_id": task.id,
                             "root_id": task.root_id,
@@ -2606,7 +2757,7 @@ class AgentService:
                             ),
                         )
                         return True
-                parsed, task = self._graph(task, snapshot, "answer")
+                parsed, task = self._graph(task, snapshot, "answer", activity_span=agent_span)
                 result = AgentResult.model_validate(parsed)
                 if task.role == "operator_response" and task.response_protocol == "engineer-v2":
                     try:
@@ -2688,6 +2839,26 @@ class AgentService:
                     json.dumps(
                         {
                             "state": task.state,
+                            "execution_summary": {
+                                "why_finished": (
+                                    "The answer phase produced a validated result, not a "
+                                    "pending tool request. Save this role's supported result "
+                                    "or explicit abstention; completion is not proof of "
+                                    "exhaustive evidence or physical confirmation."
+                                ),
+                                "model_calls_total": task.model_calls,
+                                "tool_calls_total": task.tool_calls,
+                                "next_recipient": recipient,
+                                "why_this_recipient": (
+                                    "Quality is a prerequisite for the parent's diagnosis "
+                                    "step; diagnosis must revalidate this compatible handoff."
+                                    if recipient == "event_diagnosis" else
+                                    "Return the specialist result to its parent for synthesis."
+                                    if task.parent_id else
+                                    "Return the accepted coordinator result to the engineer."
+                                ),
+                                "submission_is_not_validation": True,
+                            },
                             "accepted_result": result.model_dump(mode="json"),
                             "public_output": task.answer,
                             "to_role": recipient,

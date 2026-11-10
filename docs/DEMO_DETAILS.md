@@ -208,6 +208,39 @@ The validated plan and application prerequisite order are distinct from a free
 model choice; constrained plans must not be narrated as independent model insight.
 Older traces are not rewritten when these explanations are added.
 
+#### Why does an agent read tools, submit an answer, then run a guardrail?
+
+The tree is an execution sequence, not a list of autonomous model decisions.
+Open the **parent agent Input** for `execution_procedure`: the role's job,
+mandatory read names, who executes them, allowed next steps and validation limits.
+Its **Metadata > `workflow.intake.input`** lists the actual upfront calls and
+their IDs. A resumed conversation explicitly identifies checkpoint reuse instead
+of inventing a fresh intake sequence.
+
+For S7 +120s, Sensor Quality's four required names are `ontology.neighbors`,
+`quality.conflicts`, `quality.coverage` and `quality.sensor_patterns`.
+The returned quality claims reference 26 sources, so application code adds two
+`evidence.get` batches of 24 and 2. That makes **six calls to five distinct tools**,
+all before the first model turn. Six is not a quota, an anomaly threshold or
+evidence that the model decided six reads were sufficient. The health page is
+bounded; unreviewed instruments are not declared healthy.
+
+The subsequent **Generation Output > `workflow_transition`** exposes the actual
+runtime preference, final-only constraint, outstanding mandatory reads and number
+of model tool requests. No tool requests means the graph tries to parse and
+validate the submitted candidate. **Submit answer is not another tool call or an
+accepted answer.** The model's unreported reason for stopping remains
+`not_recorded`; do not infer confidence from this route.
+
+The **answer-check Output** explains `why_this_check`, `execution_authority`,
+the validator entry point, its contract, pass/failure routing and limits.
+This guardrail executes Python validation, not another model call. It checks the
+structured result and applicable scope, receipt, source and role requirements.
+It does not independently establish that specialist prose is correct or that a
+physical fault exists. The engineer-v2 coordinator has a separate semantic
+review before publishing its report. Finally, the **agent Output >
+`execution_summary`** explains completion and the next recipient.
+
 Captured fields are redacted and capped at **524,288 characters per field**.
 Oversized captures remain valid JSON with an explicit `capture.truncated` flag,
 a redacted-content fingerprint and a partial `preview`; they are not full

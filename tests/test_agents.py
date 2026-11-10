@@ -25,6 +25,7 @@ from subsea_copilot.contracts import (
 )
 from subsea_copilot.runtime.agent import repair_model_messages
 from subsea_copilot.runtime.gateway import ToolGateway
+from subsea_copilot.runtime.registry import role_policy
 from subsea_copilot.runtime.scripted import ScriptedChatModel
 from subsea_copilot.runtime.workflow import AgentService
 from subsea_copilot.validation import ValidationError
@@ -1585,6 +1586,48 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
                 )
             decision = json.loads(model.attributes["langfuse.observation.output"])
             assert decision["tool_decisions"][0]["call_id"] == "public-read"
+            assert decision["workflow_transition"]["next_step"] == (
+                "dispatch_requested_tools_then_call_model_again"
+            )
+            agent = next(
+                span for span in spans
+                if span.name == "agent.sensor_quality"
+                and span.attributes["task_id"] == selected.attributes["task_id"]
+            )
+            procedure = json.loads(
+                agent.attributes["langfuse.observation.input"]
+            )["execution_procedure"]
+            assert procedure["required_read_names"] == sorted(
+                role_policy("sensor_quality").required
+            )
+            intake = json.loads(agent.attributes["workflow.intake.input"])
+            assert intake["actual_call_count"] == len([
+                span for span in required
+                if span.attributes["task_id"] == selected.attributes["task_id"]
+            ])
+            assert all(item["call_id"] != "public-read" for item in intake["calls"])
+            assert json.loads(agent.attributes["langfuse.observation.output"])[
+                "execution_summary"
+            ]["next_recipient"] == "event_diagnosis"
+            final_generation = next(
+                span for span in spans
+                if span.attributes.get("task_id") == selected.attributes["task_id"]
+                and span.attributes.get("model.tool_count") == 0
+            )
+            route = json.loads(final_generation.attributes["langfuse.observation.output"])[
+                "workflow_transition"
+            ]
+            assert route["next_step"] == "parse_and_validate_candidate"
+            assert route["model_reason_for_stopping"] == "not_recorded"
+            guard = next(
+                span for span in spans
+                if span.attributes.get("task_id") == selected.attributes["task_id"]
+                and span.attributes.get("validation.status") == "passed"
+            )
+            gate = json.loads(guard.attributes["langfuse.observation.output"])
+            assert gate["execution_authority"] == "application_code_not_an_additional_model_call"
+            assert gate["validator"] == "AgentService._accept + validation.validate_result"
+            assert "not independently reviewed" in gate["does_not_prove"]
             assert "available_tools" in json.loads(model.attributes["model.context.input"])
             assert any(
                 entry["call_id"] == "public-read"
@@ -1594,6 +1637,7 @@ def test_tool_trace_preserves_public_decision_and_model_link_across_graph_interr
         else:
             assert "langfuse.observation.input" not in selected.attributes
             assert "model.context.input" not in model.attributes
+            assert all("workflow.intake.input" not in span.attributes for span in spans)
         task = store.get_task(selected.attributes["task_id"])
         receipt = next(
             row for row in store.tool_receipts(task.id) if row["call_id"] == "public-read"

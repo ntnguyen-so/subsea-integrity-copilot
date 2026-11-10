@@ -1,0 +1,293 @@
+{
+  "scope": "Synthetic S7 development execution, not field qualification",
+  "baseline_commit": "23567cd5de93faa8579a94f7dedf9ffc9daa14c2",
+  "implementation_sha256": "9982efeb3d592677e36d9d8e150c3874a8a239d4753e8b062f50d072936868c4",
+  "implementation_unchanged": true,
+  "root_id": "bf38e640-b8db-5470-b73e-19d2d3696d7b",
+  "trace_id": "5e42473fe6ef434171be0f076ca34e69",
+  "url": "http://127.0.0.1:3001/project/subsea-copilot/traces/5e42473fe6ef434171be0f076ca34e69",
+  "previous_trace_id": "deb0f2468efa95763be4cad515aa10f2",
+  "previous_agent_observation_id": "aa1cb7d0111892c4",
+  "previous_gap": "Tool-level selection explanations did not explain the parent agent procedure, candidate-to-validator transition or gate authority.",
+  "input_hash": "ec4ffee81a413d9a78368b137bf29328b35704c34d76bb96a377dd4fe0177e00",
+  "state": "SUCCEEDED",
+  "all_role_agent_procedures_and_actual_intake_sequences_verified": true,
+  "all_generation_routes_match_observed_tool_requests": true,
+  "all_phase_guardrails_explain_authority_and_limits": true,
+  "stored_tool_receipts_and_model_selection_links_verified": true,
+  "all_roles": {
+    "operator_response": {
+      "agent_observation_id": "7833f207bad4b514",
+      "actual_intake": {
+        "authority": "application_required_intake_not_model_tool_requests",
+        "why_before_model": "Supply the role's minimum evidence through audited gateway reads before asking the model to interpret it.",
+        "actual_call_count": 15,
+        "calls": [
+          {
+            "call_id": "1ec7e0ac-3677-5320-9a6b-3be7de7b7359",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "79797764-cce8-5085-9e52-f3af7b729feb",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "c9c6464d-65f1-5054-9264-553e0a0bf65e",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "df57957f-af8f-5623-adbb-cd014b1671bb",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "583dfeb5-b9ee-53b8-b6c2-b54c01e04d7d",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "f61f971a-ce77-50e2-a91a-2b56bfdb6300",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "795d7b1d-76d8-5bac-a2f5-8c061a0a735d",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "f27b5a86-0af9-5415-a94f-1c151a8ef2a7",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "b11cc24e-b957-59a3-95f7-d02c75dca342",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "d37ab2ff-93af-5a2e-ad46-db3c85fa0aaa",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "59edc05a-f361-5fcc-8f4f-c69624cac72e",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "ef44f61c-7909-52a3-a318-5470f7fec649",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "066b6a9a-481d-5f0d-96b5-15069b411dd8",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "d2b902ca-cf8a-5ffc-9aaa-3fd07a2139f3",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "2d6f8974-e689-5098-aa78-d87c9e0c8bde",
+            "tool": "task.result"
+          }
+        ],
+        "why_this_count": "Count actual dispatches, not distinct required tool names. Referenced evidence, search-hit bodies and specialist comparison pages add bounded reads when present. It is not a six-call quota.",
+        "next_step": "First answer-model turn with these completed receipts.",
+        "scope_limit": "Bounded intake is complete, not an exhaustive investigation. The model may request additional allowed reads for concrete gaps or submit a result with explicit limitations."
+      }
+    },
+    "event_diagnosis": {
+      "agent_observation_id": "3a5053a5e6370088",
+      "actual_intake": {
+        "authority": "application_required_intake_not_model_tool_requests",
+        "why_before_model": "Supply the role's minimum evidence through audited gateway reads before asking the model to interpret it.",
+        "actual_call_count": 15,
+        "calls": [
+          {
+            "call_id": "da566401-b97a-5cc4-a026-324a6bcbe660",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "da91807c-208e-5919-b045-da98c9e82cc1",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "a5c78bdb-a32b-5f0d-92bd-f674e0470677",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "a0db7e37-f91a-53d5-a453-bc9db5949191",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "1ad6c9bb-0612-5f9b-801e-618aded579bf",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "3c0644e7-5528-578b-ae5b-b16af9979929",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "1481e3fe-7e32-5a90-a949-4aee2f1a6e1e",
+            "tool": "history.search"
+          },
+          {
+            "call_id": "7ebfe854-b89e-5a2f-91f1-3e0dbefbf0c0",
+            "tool": "pressure.measurements"
+          },
+          {
+            "call_id": "8ed2e40a-77be-5f07-9c40-347ab4fbf33f",
+            "tool": "task.result"
+          },
+          {
+            "call_id": "3a819fe2-8204-57a3-855c-d080147f1406",
+            "tool": "history.compare"
+          },
+          {
+            "call_id": "bddce15e-497d-5b27-bc85-d35bcadd3794",
+            "tool": "history.compare"
+          },
+          {
+            "call_id": "c752206d-4d9f-5142-a304-2b8cda324642",
+            "tool": "history.compare"
+          },
+          {
+            "call_id": "02897a0d-d08e-5123-922d-981ffcb16f64",
+            "tool": "history.compare"
+          },
+          {
+            "call_id": "3a3b80a0-3d88-5d49-bd6f-ef22de0e087b",
+            "tool": "history.compare"
+          },
+          {
+            "call_id": "70fc3c4d-49bc-5638-a377-fdc62c58a5ad",
+            "tool": "history.read"
+          }
+        ],
+        "why_this_count": "Count actual dispatches, not distinct required tool names. Referenced evidence, search-hit bodies and specialist comparison pages add bounded reads when present. It is not a six-call quota.",
+        "next_step": "First answer-model turn with these completed receipts.",
+        "scope_limit": "Bounded intake is complete, not an exhaustive investigation. The model may request additional allowed reads for concrete gaps or submit a result with explicit limitations."
+      }
+    },
+    "sensor_quality": {
+      "agent_observation_id": "8d838a433f5e3c38",
+      "actual_intake": {
+        "authority": "application_required_intake_not_model_tool_requests",
+        "why_before_model": "Supply the role's minimum evidence through audited gateway reads before asking the model to interpret it.",
+        "actual_call_count": 6,
+        "calls": [
+          {
+            "call_id": "36869196-576d-58ca-ad7d-a475f96500b2",
+            "tool": "ontology.neighbors"
+          },
+          {
+            "call_id": "6c3802d7-cb01-5991-b64b-3e5789862b13",
+            "tool": "quality.conflicts"
+          },
+          {
+            "call_id": "7a3da2fc-4659-5669-9db3-a64f051ddf5d",
+            "tool": "quality.coverage"
+          },
+          {
+            "call_id": "6e361f8c-9ba3-5464-8f87-facfcb479355",
+            "tool": "quality.sensor_patterns"
+          },
+          {
+            "call_id": "0f59c1fb-8a6e-5afd-af53-673305996c9e",
+            "tool": "evidence.get"
+          },
+          {
+            "call_id": "fab74b29-8f32-5d18-84d1-15af0110f08f",
+            "tool": "evidence.get"
+          }
+        ],
+        "why_this_count": "Count actual dispatches, not distinct required tool names. Referenced evidence, search-hit bodies and specialist comparison pages add bounded reads when present. It is not a six-call quota.",
+        "next_step": "First answer-model turn with these completed receipts.",
+        "scope_limit": "Bounded intake is complete, not an exhaustive investigation. The model may request additional allowed reads for concrete gaps or submit a result with explicit limitations."
+      }
+    }
+  },
+  "sensor_quality": {
+    "observation_id": "8d838a433f5e3c38",
+    "procedure": {
+      "role_goal": "Assess reading availability and quality; do not diagnose a physical leak or clear every sensor.",
+      "who_runs_the_tools": "Application code performs mandatory intake before the first answer-model turn. Subsequent tool requests, if any, come from the model. The tree alone does not distinguish them.",
+      "required_read_names": [
+        "ontology.neighbors",
+        "quality.conflicts",
+        "quality.coverage",
+        "quality.sensor_patterns"
+      ],
+      "why_call_count_varies": "These are required tool names, not a fixed call count. Evidence batches, record bodies and comparison pages add reads. workflow.intake.input records the actual sequence.",
+      "after_intake": "Ask the model to interpret the completed reads. Do not exhaust health pagination; request optional reads only for concrete unresolved evidence gaps, otherwise submit the phase schema with limitations.",
+      "after_model": "Tool requests -> gateway reads -> another model turn. No tool requests -> parse candidate -> application answer_check -> accepted role result or bounded repair. The model does not call answer_check.",
+      "answer_check": {
+        "why_this_check": "The model returned a candidate instead of more tool requests. A model submission is not an accepted result; application code must validate this phase before the workflow can advance.",
+        "execution_authority": "application_code_not_an_additional_model_call",
+        "entry_point": "runtime.workflow.AgentService._graph.validate",
+        "validator": "AgentService._accept + validation.validate_result",
+        "contract": "Result schema, pinned scope, role authority, successful required reads, allowed claims and already-read evidence; applicable dependency, history and interpretation requirements.",
+        "required_read_names": [
+          "ontology.neighbors",
+          "quality.conflicts",
+          "quality.coverage",
+          "quality.sensor_patterns"
+        ],
+        "on_pass": "Save the validated specialist result for compatible downstream use.",
+        "on_failure": "Return explicit validator feedback for bounded repair when calls and deadline remain; otherwise fail this phase. Do not silently accept the draft.",
+        "does_not_prove": "Not physical confirmation, exhaustive sensor review, or proof that every prose statement is correct. Specialist advisory prose is not independently reviewed by another model at this gate."
+      }
+    },
+    "completion": {
+      "why_finished": "The answer phase produced a validated result, not a pending tool request. Save this role's supported result or explicit abstention; completion is not proof of exhaustive evidence or physical confirmation.",
+      "model_calls_total": 1,
+      "tool_calls_total": 6,
+      "next_recipient": "event_diagnosis",
+      "why_this_recipient": "Quality is a prerequisite for the parent's diagnosis step; diagnosis must revalidate this compatible handoff.",
+      "submission_is_not_validation": true
+    },
+    "model_turns": [
+      {
+        "observation_id": "044bfbbadc9657bd",
+        "action": "Submit answer",
+        "transition": {
+          "authority": "observed_response_and_application_routing",
+          "completed_read_receipts": 6,
+          "mandatory_reads_outstanding": [],
+          "runtime_preferred_action": "final",
+          "runtime_final_only": false,
+          "observed_tool_requests": 0,
+          "next_step": "parse_and_validate_candidate",
+          "why": "The response contains no tool requests, so the graph routes it to this phase's validator. Submit answer is a candidate, not another tool call, accepted handoff or final safety verdict.",
+          "model_reason_for_stopping": "not_recorded"
+        }
+      }
+    ],
+    "answer_checks": [
+      {
+        "observation_id": "953c7eba8d32dae5",
+        "status": "passed",
+        "why_this_check": "The model returned a candidate instead of more tool requests. A model submission is not an accepted result; application code must validate this phase before the workflow can advance.",
+        "execution_authority": "application_code_not_an_additional_model_call",
+        "validator": "AgentService._accept + validation.validate_result",
+        "contract": "Result schema, pinned scope, role authority, successful required reads, allowed claims and already-read evidence; applicable dependency, history and interpretation requirements.",
+        "on_pass": "Save the validated specialist result for compatible downstream use.",
+        "does_not_prove": "Not physical confirmation, exhaustive sensor review, or proof that every prose statement is correct. Specialist advisory prose is not independently reviewed by another model at this gate."
+      }
+    ]
+  },
+  "validation": {
+    "frozen_agent_and_telemetry_tests": {
+      "passed": 119,
+      "skipped": 2
+    },
+    "changed_file_ruff": "passed",
+    "strict_workflow_mypy": "passed",
+    "privacy": "New intake metadata uses the input capture gate; opt-out regression passes."
+  },
+  "publication": {
+    "previous_recordings": 214,
+    "new_recordings": 1,
+    "total_recordings": 215,
+    "all_previous_recordings_unchanged_as_json_values": true,
+    "backup_sha256": "90b53c7976b6bd4e71f84acb8a64b137ce5e9b8f68b8df6e778247e26502a6e6",
+    "library_bytes": 44897563,
+    "live_api_selects_new_s7_120_and_returns_its_trace": true,
+    "demo_server_restarted_with_new_code_after_no_active_tasks_check": true,
+    "live_content_capture_enabled": true,
+    "export_inference_calls": 0
+  }
+}

@@ -7,6 +7,42 @@ are intentionally preserved in `evidence/`; some are application inputs.
 Use the [engineering report](REPORT.md) for current architecture and
 [demo reference](DEMO_DETAILS.md) for current commands.
 
+## Agent lifecycle: intake, candidate submission and answer checks
+
+The selection-reason cohort below still left the parent agent's procedure
+implicit. In particular, observation `aa1cb7d0111892c4` did not explain why
+Sensor Quality performed six reads before one model response and an answer check.
+The [lifecycle receipt](evidence/agent-lifecycle-tracing.json) records the correction
+and its verification against a fresh execution of the same S7 +120s input.
+
+Open the new [Sensor Quality agent](http://127.0.0.1:3001/project/subsea-copilot/traces/5e42473fe6ef434171be0f076ca34e69?observation=8d838a433f5e3c38):
+**Input > `execution_procedure`** explains the role and application-owned procedure.
+**Metadata > `workflow.intake.input`** records its six actual upfront calls:
+four mandatory reads, followed by two evidence batches for 26 referenced sources.
+This is six calls to five distinct tools, not six model-chosen actions or a quota.
+
+Generation `044bfbbadc9657bd` records **six completed receipts, no outstanding
+mandatory reads, preferred action `final`, `final_only: false`, and zero model
+tool requests**. Its observed transition is therefore `parse_and_validate_candidate`.
+The runtime suggested a bounded answer but did not force the model to stop at
+its final-turn budget. A model-authored reason for stopping was not provided;
+the trace explicitly says `not_recorded` instead of inventing confidence.
+
+Guardrail `953c7eba8d32dae5` explains that it is **application Python validation,
+not another model call**. Passing permits the compatible quality handoff to
+diagnosis; it does not certify every sentence or establish a physical fault.
+The same lifecycle fields cover all three roles, and each phase's guardrail
+identifies its actual validator contract. The coordinator's separate semantic
+review remains distinct from structural/domain acceptance.
+
+The frozen agent/telemetry suite passed **119 tests, with 2 integration cases
+skipped**; Ruff and strict workflow mypy passed. Actual stored traces were checked
+for all role procedures, intake sequences, model routing, guardrail authority and
+original tool/model receipt links. The new recording is published as the latest
+S7 +120s example; all previous 214 recordings remain unchanged, for **215 total**.
+The earlier 66-case cohort is retained as historical evidence, not relabeled as
+a rerun of this lifecycle-only correction.
+
 ## All-agent tool selection reasons
 
 The earlier detailed-tracing implementation below captured public model decisions
