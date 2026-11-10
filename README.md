@@ -78,41 +78,38 @@ snapshots in the held-out synthetic detection test, leak detection achieved
 **100% precision and recall, with no false leak alarms**. Identifying affected
 instruments and classifying their problems also achieved **100% precision and recall**.
 
-See the [same-input dashboard evidence](docs/evidence/brief-dashboard-comparison.json),
-[recorded detection results](docs/evidence/spatial-held-out-20261110-v1.json),
-[timing receipt](docs/evidence/agent-latency-optimization.json) and
-[qualification ledger](docs/RESULTS.md) for the measured scope and retained runs.
+See the [evaluation results](docs/RESULTS.md) for the methods, measurements and
+supporting evidence.
 
-**Synthetic data only. Read-only decision support, not a safety system.**
+**Synthetic-data demonstration. Engineers review findings before acting.**
 
 ## Documentation
 
 | Read | Purpose |
 |---|---|
 | [Customer brief](docs/ONE_PAGE_BRIEF.pdf) ([source](docs/ONE_PAGE_BRIEF.md)) | One-page problem, illustrated investigation and evaluation results. |
-| [Engineering report](docs/REPORT.md) | Architecture, data, answer checks, numerical sources and [30-minute code route](docs/REPORT.md#30-minute-technical-code-route). |
+| [Engineering report](docs/REPORT.md) | Architecture, implementation and [30-minute code walkthrough](docs/REPORT.md#30-minute-technical-code-route). |
 | [Demo reference](docs/DEMO_DETAILS.md) | Recording, evaluation, development and document-export commands. |
-| [Qualification results](docs/RESULTS.md) | Published measurements, limitations and retained historical failures. |
-| [Historical agent/fixed benchmark](docs/AGENT_EVALUATION.md) | Matched comparison under its original protocol. |
+| [Evaluation results](docs/RESULTS.md) | Test methods, measurements and supporting evidence. |
 | [Interview deck](docs/INTERVIEW_DECK.html) ([PDF](docs/INTERVIEW_DECK.pdf)) | Presentation and appendix for the full interview. |
 
 ## Run the demo
 
-Start with the model-free path: **the bundled Detection evaluation and
-sensor-only monitoring do not require a Copilot account or model calls**.
+You can explore the included Detection evaluation and run sensor-only monitoring
+**without a Copilot account**.
 
 ### Prerequisites
 
-Use **Windows and PowerShell 7 (`pwsh`)**, not Windows PowerShell 5.1. Install
+Use **Windows with PowerShell 7 (`pwsh`)**. Install
 [Git](https://git-scm.com/downloads/win), [uv](https://docs.astral.sh/uv/getting-started/installation/),
 [Node.js 22+](https://nodejs.org/en/download) (includes npm) and
 [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/).
-Start Docker Desktop and select **Linux containers**. uv will use or download
-Python 3.11; no manual virtual-environment activation is needed.
+Start Docker Desktop and select **Linux containers**. uv manages Python 3.11 and
+the project environment.
 
 ### Install dependencies
 
-Run from PowerShell 7. Stop and resolve any command failure before continuing:
+Run these commands in PowerShell 7:
 
 ```powershell
 git clone https://github.com/ntnguyen-so/subsea-integrity-copilot.git
@@ -146,44 +143,35 @@ display your generated password locally:
 $env:SUBSEA_OPERATOR_PASSWORD
 ```
 
-Credentials stay outside Git in `%LOCALAPPDATA%\SubseaCopilot\secrets.json`.
-Do not share them or commit them. Existing credentials are reused and their
-ownership is checked; bootstrap never resets them. There is no default password
-or `.env` file to copy. **Dot-source the loader in every new terminal** that runs
-database or application commands: the leading `. ` loads variables into that
-terminal. For the minimal setup, set `SUBSEA_TELEMETRY_ENABLED` to `0` again after
-loading; optional Jaeger and Langfuse services are not required.
+Keep your credentials private. They are stored locally in
+`%LOCALAPPDATA%\SubseaCopilot\secrets.json` and reused on subsequent starts.
+In each new application terminal, run `. .\tools\load-environment.ps1` and set
+`$env:SUBSEA_TELEMETRY_ENABLED = '0'` before starting the demo.
 
-The server builds the frontend before starting. Initial dependency and Docker
-image downloads need internet. `--no-sync` reuses the installed environment so
-auxiliary commands do not try to reinstall a Windows executable held by the server.
+The frontend builds automatically when the server starts.
 
-### Optional: enable fresh AI investigations
+### Optional: generate new AI reports
 
-Install the [GitHub Copilot CLI](https://github.com/github/copilot-cli) and use a
-Copilot account with access to **`gpt-6.1-sol`**. Run it under the same Windows
-account as the dashboard. Fresh investigations consume your Copilot allowance.
+For new agent-assisted reports, install the
+[GitHub Copilot CLI](https://github.com/github/copilot-cli) and sign in with access
+to **`gpt-6.1-sol`**, under the same Windows account used to run the dashboard.
+Investigations and the availability check below use your Copilot allowance.
 
 Stop the server with **Ctrl+C** first; leave the database running. In the loaded
-repository terminal, authenticate, make one explicit hosted availability check,
-then restart the dashboard:
+repository terminal, sign in and check model access. Restart the dashboard after
+the check reports `"outcome": "available"`:
 
 ```powershell
-copilot --version
 copilot login
 uv run --no-sync subsea provider-check --mode live --model gpt-6.1-sol
 uv run --no-sync subsea serve
 ```
 
-Continue only if the check reports `"outcome": "available"`. It needs the migrated
-database as well as model access. The application uses the installed CLI through
-a persistent SDK runtime with isolated sessions and no automatic transport fallback.
+## Explore the demo
 
-## Interview walkthrough
-
-Use the [30-minute technical code route](docs/REPORT.md#30-minute-technical-code-route)
-for the whiteboard discussion and source walkthrough. The report separates
-measured evidence, declared assumptions, model opinions and evaluation truth.
+For technical interviews, the
+[30-minute code walkthrough](docs/REPORT.md#30-minute-technical-code-route)
+connects the architecture, implementation and evaluation evidence.
 
 Use **S7**, seed **2026**, for the 112-instrument network illustrated above.
 Compare monitoring modes using the **same scenario, seed and measurement window**.
@@ -194,35 +182,16 @@ Compare monitoring modes using the **same scenario, seed and measurement window*
 | **Which measurements support that conclusion?** | In **Live**, choose **S7** and **Sensor alerts only**, then **Start new run** and **Play**. After warm-up, open **Inspect** and select a measurement window to compare paired readings, anomalies, missing/invalid values and source times. This path makes no model calls. |
 | **Where should we inspect, and why?** | After enabling model access, choose **S7 → Agent-assisted investigation**, **Start new run** and **Play**. Open the investigation's findings and **Review evidence** to inspect the proposed area, competing explanations and supporting sources. |
 
-On a clean clone, begin with **Evaluation → Detection**, not **Load recorded
-timeline**. The latter requires a locally generated main-timeline library,
-which is not bundled. The [recording guide](docs/DEMO_DETAILS.md#prepare-a-local-recording-library)
-explains how to create it with hosted calls. Playback speeds **5x, 10x, 20x and
-30x** change simulated time, not inference speed.
+The included recording is available under **Evaluation → Detection**.
+**Load recorded timeline** uses an optional, locally generated library; the
+[recording guide](docs/DEMO_DETAILS.md#prepare-a-local-recording-library)
+explains how to create it. Replay supports **5x, 10x, 20x and 30x**; simulated time
+pauses while agents investigate.
 
-Fresh investigations can take several minutes and have a 15-minute hard deadline.
-Numerical warnings appear independently; simulated source time pauses for an
-investigation. Replay speed does **not** make model inference faster.
-These are investigation questions answered through the workflow, not a chat interface.
+Additional results for **Evaluation → Agent reliability** can be generated using
+the [evaluation guide](docs/DEMO_DETAILS.md#reproduce-evaluation).
 
-**Evaluation → Agent reliability** explains six advisory answer-quality targets.
-A clean clone has no locally generated results for that view. See the
-[evaluation commands](docs/DEMO_DETAILS.md#reproduce-evaluation) to run hosted
-checks; these model opinions do not establish field reliability.
-The bundled Detection recording is the held-out test linked above; other retained
-attempts and their outcomes remain in the qualification ledger.
-
-## Troubleshooting and shutdown
-
-| Symptom | Action |
-|---|---|
-| Bootstrap says credentials already exist | Skip bootstrap; dot-source `tools\load-environment.ps1` in each new terminal. |
-| Script mentions missing methods or refuses to run | Use PowerShell 7 (`pwsh`). If your personal execution policy blocks local scripts, follow your machine's policy or administrator guidance; do not disable organization policy. |
-| Environment variables are missing | Run `. .\tools\load-environment.ps1` from the repository root in the **same terminal** as Compose, migration and serving. |
-| Database connection fails | Check Docker is running, then `docker compose ps` and `docker compose logs db` in the loaded terminal. Default database port: `15433`. |
-| Port `15433` or `8086` is already in use | Choose a free database port with `$env:SUBSEA_DB_PORT = '15434'` before Compose and migration; set it in every application terminal too. Start the dashboard with `uv run --no-sync subsea serve --port 8088` and use that URL instead of the default links. |
-| Authentication, quota or model error | Run `uv run --no-sync subsea provider-check --mode live --model gpt-6.1-sol` in the loaded terminal. Sensor-only monitoring and bundled Detection playback do not require inference. |
-| **Load recorded timeline** has no investigations | That library is generated locally. Use **Evaluation → Detection** for the bundled recording; see the detailed guide to create live recordings. |
+## Shutdown and support
 
 Stop the server with **Ctrl+C**. Run `docker compose stop db` in a loaded terminal
 to stop this demo's database; its volume preserves evidence.
