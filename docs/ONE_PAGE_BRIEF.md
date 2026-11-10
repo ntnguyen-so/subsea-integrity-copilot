@@ -1,4 +1,4 @@
-# Subsea Integrity Copilot - Customer Brief
+# Subsea Lens - Customer Brief
 
 Subsea pipelines carry oil and gas from offshore fields. Operators monitor pressure along these pipelines to spot possible problems and decide when to intervene. A missed leak can harm the marine environment, stop production and put operating permissions at risk. But sending a vessel or underwater inspection team to investigate faulty measurements can also be costly. The integrity engineer must therefore distinguish a real pipeline problem from a measurement problem before directing a response.
 
@@ -16,11 +16,11 @@ The illustration below shows this challenge on a simulated 11.2 km network with 
 
 Figure 1. Sensor alerts only. Orange dots show unusual pressure; dashed dots show missing or invalid readings. Question 1 requires comparing histories and records to separate the P5 leak from P7's connection problem and sensor faults. Question 2 requires tracing related pressure changes across branches to narrow the inspection area. Question 3 requires checking sensor reliability and documenting the supporting evidence. The map alone answers none of these: repeated cross-checks take time and require knowledge of pipeline behavior.
 
-Subsea Integrity Copilot helps answer these same questions as monitoring continues. Its AI agents compare measurements and records, assess causes, prioritize inspection and link findings to evidence. The engineer reviews an organized investigation rather than assembling one from individual alerts.
+Subsea Lens helps answer these same questions as monitoring continues. Its AI agents compare measurements and records, assess causes, prioritize inspection and link findings to evidence. The engineer reviews an organized investigation rather than assembling one from individual alerts.
 
 ![Dashboard crop: suspected P5 leak, report-stated inspection priority and separate instrument issues](assets/brief-agent-assisted.png)
 
-Figure 2. Agent-assisted investigation. For question 1, the report separates a suspected P5 leak (red) from sensor or data concerns (purple rings, not confirmed hardware failures). For question 2, it prioritizes inspection at 700-900 m from P5's start (green). For question 3, it provides supporting readings and records, uncertainties and further checks. The engineer reviews these findings before acting; they neither confirm an exact leak location nor authorize deployment.
+Figure 2. Agent-assisted investigation. The Sensor Quality agent checks reading reliability; Event Diagnosis compares pressure patterns and records to distinguish leakage from instrument or operating problems (question 1). Operator Response brings together the inspection priority, evidence and next checks (questions 2 and 3). Red marks a suspected P5 leak, green the report's 700-900 m inspection priority, and purple sensor/data concerns, not confirmed hardware faults. A separate review checks the explanation against its sources. The engineer can review the reasoning and evidence, rather than assemble the investigation from individual alerts. The agents do not confirm exact leak coordinates or authorize deployment.
 
 This handoff also needs to be timely. In two controlled tests of this simulated scenario, reviewed reports were ready in about 2.5-2.8 minutes of elapsed time.
 

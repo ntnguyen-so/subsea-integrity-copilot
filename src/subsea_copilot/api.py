@@ -292,7 +292,7 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
                     telemetry.close()
                     store.close()
 
-    app = FastAPI(title="Subsea Integrity Copilot", lifespan=lifespan)
+    app = FastAPI(title="Subsea Lens", lifespan=lifespan)
     app.state.store = store
     app.state.resources = resources
 

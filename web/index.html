@@ -7,14 +7,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>Subsea Integrity Copilot · Operator console</title>
+  <title>Subsea Lens · Operator console</title>
   <link rel="stylesheet" href="/assets/styles.css">
   <script src="/assets/console.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#workspace">Skip to workspace</a>
   <header class="masthead">
-    <div class="identity"><span class="mark" aria-hidden="true">≋</span><div><h1>Subsea Integrity <span>Copilot</span></h1><p>PRESSURE MONITORING / ENGINEER WORKSPACE</p></div></div>
+    <div class="identity"><span class="mark" aria-hidden="true">≋</span><div><h1>Subsea <span>Lens</span></h1><p>PRESSURE MONITORING / ENGINEER WORKSPACE</p></div></div>
     <div class="header-badges"><span class="badge">Synthetic telemetry · read-only</span><span class="badge" id="inference-mode">INFERENCE —</span></div>
     <div class="connection"><span id="connection-state">Not connected</span><button id="reconnect" type="button">Reconnect</button><span id="operator">Signed out</span></div>
   </header>
@@ -118,6 +118,6 @@
         <div class="system-grid"><div><small>OPERATIONAL CLOCK / PROJECTION AGE</small><strong id="server-clock">Not reported</strong></div><div><small>CURRENT WINDOW [START, END)</small><strong id="live-bounds">Awaiting telemetry</strong></div><div><small>MONITOR / AGENT / OBSERVABILITY</small><strong id="health-state">Not reported</strong></div></div><p id="clock-basis" class="muted">No received telemetry</p><div class="workflow-strip" aria-label="Live monitoring and investigation workflow"><div><small>1 / SENSOR STREAM</small><strong id="stream-stage">Awaiting received telemetry</strong></div><div><small>2 / NUMERICAL DETECTORS</small><strong id="detector-stage">Awaiting a completed window</strong></div><div><small>3 / AUTOMATIC AGENT ANALYSIS</small><strong id="agent-stage">Waiting for a monitoring episode</strong></div><div><small>4 / ENGINEER REVIEW</small><strong>Verify the report; no automatic actuation</strong></div></div><div class="metrics" aria-label="Measured counters"><div><small>USABLE / EXPECTED SAMPLES</small><strong id="sample-coverage">Not reported</strong></div><div>      <small>STATIONS / FAILURE DOMAINS</small><strong id="domain-count">Not reported</strong></div><div><small>WINDOW QUALITY / REVISION</small><strong id="window-state">Not reported</strong></div><div><small>QUEUE / MODEL CALLS</small><strong id="budget-usage">Not reported</strong></div></div></details>
     </main>
   </div>
-  <footer class="page-footer"><span>Subsea Integrity Copilot · Engineer decision support</span><details class="data-provenance"><summary>Data provenance and operating authority</summary><p>This installation uses synthetic reference telemetry and records. Research-curated guidance supports investigation; site validation and operator approval remain required. The system does not actuate equipment or issue safety clearance.</p></details></footer>
+  <footer class="page-footer"><span>Subsea Lens · Engineer decision support</span><details class="data-provenance"><summary>Data provenance and operating authority</summary><p>This installation uses synthetic reference telemetry and records. Research-curated guidance supports investigation; site validation and operator approval remain required. The system does not actuate equipment or issue safety clearance.</p></details></footer>
 </body>
 </html>

@@ -6,7 +6,7 @@
 
 ## Scope and design
 
-Subsea Integrity Copilot helps an integrity engineer investigate pressure alerts:
+Subsea Lens helps an integrity engineer investigate pressure alerts:
 possible leak, instrumentation/telemetry issue, operating change or unresolved
 evidence. It proposes review priorities and explains supporting measurements,
 sources and uncertainty. **All data are synthetic. This is read-only decision

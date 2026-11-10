@@ -1,4 +1,4 @@
-# Subsea Integrity Copilot
+# Subsea Lens
 
 **From pressure alerts to evidence-backed inspection decisions.**
 
