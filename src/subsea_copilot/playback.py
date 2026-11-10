@@ -9,6 +9,8 @@ from .casefile import InvestigationCase
 from .contracts import AgentTask, Contract, SitePack, WindowSnapshot, content_hash
 from .synthetic import ReplayDataset
 
+RECORDING_LIBRARY_MAX_BYTES = 128_000_000
+
 
 class RecordedTrace(Contract):
     task_id: str
@@ -119,16 +121,19 @@ class RecordingLibrary(Contract):
 def load_library(path: Path) -> RecordingLibrary:
     if not path.exists():
         return RecordingLibrary(recordings=[])
-    if path.is_symlink() or path.stat().st_size > 64_000_000:
+    if path.is_symlink() or path.stat().st_size > RECORDING_LIBRARY_MAX_BYTES:
         raise ValueError("Recording library is linked or exceeds its size bound")
     return RecordingLibrary.model_validate_json(path.read_text(encoding="utf-8"))
 
 
 def save_library(path: Path, library: RecordingLibrary) -> None:
     """Replace the library through a sibling pending file, avoiding partially written JSON."""
+    payload = library.model_dump_json().encode("utf-8")
+    if len(payload) > RECORDING_LIBRARY_MAX_BYTES:
+        raise ValueError("Recording library exceeds its size bound")
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".pending")
-    temporary.write_text(library.model_dump_json(), encoding="utf-8")
+    temporary.write_bytes(payload)
     temporary.replace(path)
 
 

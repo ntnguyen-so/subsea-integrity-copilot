@@ -6,6 +6,7 @@ import pytest
 from pydantic import ValidationError
 from test_agents import snapshot as snapshot_fixture
 
+from subsea_copilot import playback
 from subsea_copilot.casefile import InvestigationCase
 from subsea_copilot.contracts import AgentResult, AgentTask, utc_now
 from subsea_copilot.playback import (
@@ -56,6 +57,28 @@ def test_recording_roundtrip_keeps_source_time_and_excludes_execution_tokens(rec
     assert saved.snapshot == recording.snapshot
     assert saved.summary()["source_seconds"] == recording.snapshot.end_seconds
     assert "lease_token" not in saved.public_detail()["detail"]["task"]
+
+
+def test_library_writer_and_reader_share_utf8_size_bound_without_replacing_prior_data(
+    recording, tmp_path, monkeypatch,
+):
+    task = recording.task.model_copy(update={"answer": "Recorded output \u03bb"})
+    library = RecordingLibrary(recordings=[recording.model_copy(update={"task": task})])
+    payload = library.model_dump_json()
+    size = len(payload.encode("utf-8"))
+    assert size > len(payload)
+    path = tmp_path / "recordings.json"
+    monkeypatch.setattr(playback, "RECORDING_LIBRARY_MAX_BYTES", size)
+    save_library(path, library)
+    assert load_library(path) == library
+    before = path.read_bytes()
+    monkeypatch.setattr(playback, "RECORDING_LIBRARY_MAX_BYTES", size - 1)
+    with pytest.raises(ValueError, match="exceeds its size bound"):
+        save_library(path, library)
+    assert path.read_bytes() == before
+    assert not path.with_suffix(".pending").exists()
+    with pytest.raises(ValueError, match="exceeds its size bound"):
+        load_library(path)
 
 
 @pytest.mark.parametrize("field,value", [
