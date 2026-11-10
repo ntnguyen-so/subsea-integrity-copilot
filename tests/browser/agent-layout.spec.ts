@@ -6,7 +6,9 @@
 import { test, expect } from "@playwright/test";
 import { buildSync } from "esbuild";
 import { join } from "node:path";
-import type { AgentTask, ConsoleEvent, Projection, ReplaySession, TaskDetail } from "../../web/ts/types";
+import { availableRecording, type SavedInvestigation } from "../../web/ts/investigation_playback";
+import { reportText } from "../../web/ts/presentation";
+import type { AgentTask, ConsoleEvent, Projection, ReplaySession, TaskDetail, WindowSnapshot } from "../../web/ts/types";
 
 test("dashboard removes Audit and the rail note while preserving live updates and trace access", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned demo.");
@@ -79,6 +81,160 @@ function agent(role: string, text: string): AgentTask {
     result: { outcome: "complete", claim_refs: [], evidence_ids: [], limitations: [],
       hypothesis: null, recommendation_ids: [], summary: "", investigation: null, interpretation: null },
   };
+}
+
+test("specialist outputs explain accepted findings, distinguish absent from unusable, and retain exact source scope", async ({ page }) => {
+  const quality = agent("sensor_quality", "Accepted quality claim references.");
+  quality.result!.summary = "Sensor A has ten absent readings and two unusable readings. This does not diagnose hardware failure.";
+  quality.result!.claim_refs = ["coverage", "sensor-a"];
+  quality.result!.limitations = ["missing_data", "partial_health_review", "read_only"];
+  const diagnosis = agent("event_diagnosis", "Accepted diagnosis claim references.");
+  diagnosis.result!.summary = "Pressure changes may have more than one explanation. No leak is physically confirmed.";
+  diagnosis.result!.investigation = {
+    assessment: "unresolved", document_ids: ["operation"], rejected_document_ids: ["draft"],
+    comparison_call_ids: ["comparison"], next_action: "inspect_supported_interval",
+  };
+  const tasks = [quality, diagnosis, agent("operator_response", "Coordinator report.")];
+  const basis: WindowSnapshot = {
+    id: "fixture", site_id: "fixture", generation_id: "fixture",
+    window_start: "2026-01-01T00:01:00Z", window_end: "2026-01-01T00:02:00Z",
+    end_seconds: 120, revision: 1, predecessor_id: null, input_hash: "fixture",
+    pack_version: "fixture", baseline_version: "fixture", parameter_version: "fixture",
+    clock_seconds: 120, watermark_seconds: 120, created_at: "2026-01-01T00:02:00Z", canonical_count: 110,
+    quality: { status: "DEGRADED", expected_samples: 120, received_samples: 110,
+      usable_samples: 108, coverage: 0.9, failure_domains_available: 1, findings: [], conflicts: [], issues: [] },
+    event: { hypothesis: "suspected_leak", eligible_hypotheses: [], supporting_sensor_ids: [],
+      failure_domain_count: 1, persistence_seconds: 0, segment_ids: [], evidence_ids: [],
+      counterevidence: [], eligible_location: false, criteria_id: "fixture" },
+    location: null, evidence: {},
+    claims: {
+      coverage: { id: "coverage", kind: "coverage", evidence_ids: [], value: {
+        expected_samples: 120, received_samples: 110, usable_samples: 108,
+      } },
+      "sensor-a": { id: "sensor-a", kind: "sensor_health", evidence_ids: [], value: {
+        sensor_id: "A", channel: "pressure", expected: 60, received: 50, usable: 48, missing: 12, anomaly_count: 2,
+      } },
+      "uncited-sensor": { id: "uncited-sensor", kind: "sensor_health", evidence_ids: [], value: {
+        sensor_id: "UNCITED", expected: 60, received: 60, usable: 60, anomaly_count: 50,
+      } },
+    },
+  };
+  const bundle = buildSync({
+    stdin: { contents: 'export { renderAgentWork } from "./web/ts/agentwork";', resolveDir: process.cwd(), loader: "ts" },
+    bundle: true, write: false, format: "iife", globalName: "SpecialistFixture",
+  }).outputFiles[0].text;
+  await page.setContent('<main><div id="progress" class="agent-roles"></div><div id="findings"></div></main>');
+  await page.addStyleTag({ path: join(process.cwd(), "web", "styles.css") });
+  await page.addScriptTag({ content: `${bundle}
+    window.specialistTasks = ${JSON.stringify(tasks)};
+    window.specialistBasis = ${JSON.stringify(basis)};
+    window.renderSpecialists = () => SpecialistFixture.renderAgentWork(
+      document.getElementById("progress"), document.getElementById("findings"),
+      window.specialistTasks[2], window.specialistTasks, null, window.specialistBasis, null, () => {}, []);
+    window.renderSpecialists();` });
+  const reader = page.locator(".agent-output-panel:visible");
+  await page.getByRole("tab", { name: "Sensor Quality Agent output" }).click();
+  await expect(reader).toContainText("108 of 120 expected readings could be used (90.0%)");
+  await expect(reader).toContainText("10 did not arrive; 2 arrived but could not be used");
+  await expect(reader.locator(".agent-specialist-findings")).toContainText(quality.result!.summary);
+  await expect(reader).toContainText("1 sensor-level finding cited");
+  await expect(reader).toContainText("other sensors are not cleared");
+  const sensors = reader.locator('[data-section="specialist-sensors:sensor_quality"]');
+  await sensors.locator("summary").click();
+  const row = sensors.locator("tbody tr");
+  await expect(row).toHaveCount(1);
+  await expect(row.locator("th, td")).toHaveText(["A / pressure", "48 / 60", "10", "2", "2"]);
+  await expect(sensors).not.toContainText("UNCITED");
+  const original = reader.locator('[data-section="specialist-original:sensor_quality"]');
+  await original.locator("summary").click();
+  await expect(original.locator("pre")).toContainText('"claim_refs":');
+  await expect(original.locator("pre")).toContainText(quality.answer!);
+  await page.evaluate(() => {
+    const fixture = window as typeof window & { specialistTasks: AgentTask[]; renderSpecialists: () => void };
+    fixture.specialistTasks[0].updated_at = "2026-01-01T00:03:00Z"; fixture.renderSpecialists();
+  });
+  await expect(sensors).toHaveAttribute("open");
+  await expect(original).toHaveAttribute("open");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.getByRole("tab", { name: "Event Diagnosis Agent output" }).click();
+  await expect(reader.locator(".agent-specialist-findings")).toContainText(diagnosis.result!.summary);
+  await expect(reader).toContainText("operating-history check did not settle the cause");
+  await expect(reader).toContainText("1 source document(s) cited; 1 read document(s) excluded");
+  await expect(reader).toContainText("1 executed sensor comparison(s) cited");
+  await expect(reader).toContainText("Plan an engineering inspection");
+  await expect(reader).toContainText("not an authorized action");
+  await page.evaluate(() => {
+    const fixture = window as typeof window & {
+      specialistBasis: WindowSnapshot; specialistTasks: AgentTask[]; renderSpecialists: () => void;
+    };
+    fixture.specialistBasis = { ...fixture.specialistBasis, id: "different-window" };
+    fixture.specialistTasks[0].state = "ABSTAINED"; fixture.renderSpecialists();
+  });
+  await page.getByRole("tab", { name: "Sensor Quality Agent output" }).click();
+  await expect(reader).toContainText("could not reach a supported conclusion");
+  await expect(reader).toContainText("exact source window is not loaded");
+  await expect(reader.getByText("108 of 120 expected readings", { exact: false })).toHaveCount(0);
+  await expect(reader.locator("table")).toHaveCount(0);
+  await page.evaluate(() => {
+    const fixture = window as typeof window & { specialistTasks: AgentTask[]; renderSpecialists: () => void };
+    fixture.specialistTasks[0].state = "FAILED"; fixture.renderSpecialists();
+  });
+  await expect(reader.locator(".agent-handoff-output")).toHaveCount(0);
+  await expect(reader).toContainText("No accepted output is available");
+});
+
+for (const scenario of ["S7", "S3"]) {
+  test(`${scenario} saved specialist findings are readable on Live without new inference`, async ({ page }) => {
+    test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned recordings.");
+    const login = await page.request.post("/api/login", { data: {
+      username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
+    } });
+    expect(login.ok()).toBeTruthy();
+    const { replays }: { replays: ReplaySession[] } = await (await page.request.get("/api/replays")).json();
+    const replay = replays.find(row => row.scenario === scenario && row.seed === 2026 && row.workflow === "agent_assisted");
+    expect(replay).toBeDefined();
+    const endpoint = `/api/replays/${replay!.id}/recordings`;
+    const { recordings }: { recordings: SavedInvestigation[] } = await (await page.request.get(endpoint)).json();
+    const selected = availableRecording(recordings, 120)!;
+    expect(selected.source_seconds).toBe(120);
+    const frame: { detail: TaskDetail } = await (await page.request.get(`${endpoint}/${selected.task_id}`)).json();
+    const writes: string[] = [], errors: string[] = [];
+    page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
+    page.on("pageerror", error => errors.push(error.message));
+    await page.goto("/?replay=" + encodeURIComponent(replay!.id) + "&view=live");
+    const mode = page.getByRole("switch", { name: /switch to/ });
+    await expect(mode).toBeEnabled();
+    if (await mode.getAttribute("aria-checked") === "true") await mode.click();
+    await expect(mode).toHaveAttribute("aria-checked", "false");
+    const slider = page.getByRole("slider", { name: "Selected source time" });
+    await expect(slider).toBeEnabled();
+    await slider.evaluate(element => {
+      if (!(element instanceof HTMLInputElement)) throw new Error("Expected source-time input");
+      element.value = "120"; element.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await expect(page.locator("#automatic-state")).toHaveAttribute("data-task", selected.task_id);
+    for (const role of ["sensor_quality", "event_diagnosis"]) {
+      const task = frame.detail.children.find(child => child.role === role)!;
+      expect(task.state).toMatch(/^(SUCCEEDED|ABSTAINED)$/);
+      expect(task.result!.summary.trim()).not.toBe("");
+      await page.locator(`#agent-output-tab-${role}`).click();
+      const panel = page.locator("#automatic-progress .agent-output-panel:visible");
+      await expect(panel.locator(".agent-specialist-findings")).toContainText(reportText(
+        task.result!.summary, [...task.result!.claim_refs, ...task.result!.evidence_ids],
+      ), { useInnerText: true });
+      await expect(panel.getByRole("heading", { name: "Limits and handoff" })).toBeVisible();
+      await expect(panel.getByText("Original technical handoff and source references", { exact: true })).toBeVisible();
+      if (role === "sensor_quality") {
+        await expect(panel).toContainText("did not arrive");
+        await expect(panel).toContainText("arrived but could not be used");
+        await expect(panel).not.toContainText("exact source window is not loaded");
+      } else await expect(panel).toContainText("Response Coordinator");
+    }
+    await expect(page.locator("#tab-live")).toHaveAttribute("aria-selected", "true");
+    expect(writes).toEqual([]);
+    expect(errors).toEqual([]);
+  });
 }
 
 test("withheld report identifies reviewer stage and shows actionable corrections from saved events", async ({ page }) => {

@@ -5,7 +5,7 @@
  */
 import { button, friendly, node } from "./dom";
 import { reportText } from "./presentation";
-import type { AgentTask, ConsoleEvent, Json, TaskDetail, WindowSnapshot } from "./types";
+import type { AgentResult, AgentTask, ConsoleEvent, Json, TaskDetail, WindowSnapshot } from "./types";
 
 const agents = [
   ["sensor_quality", "Sensor Quality Agent", "Are the readings usable? Missing values stay unknown."],
@@ -113,6 +113,10 @@ function linked(root: AgentTask, tasks: AgentTask[], reusedIds: readonly string[
     || reusedIds.includes(task.id) && task.site_id === root.site_id
       && task.generation_id === root.generation_id && task.snapshot_id === root.snapshot_id);
 }
+function sourceWindow(task: AgentTask, basis: WindowSnapshot | null): WindowSnapshot | null {
+  return basis?.id === task.snapshot_id && basis.site_id === task.site_id
+    && basis.generation_id === task.generation_id ? basis : null;
+}
 function readableOutput(container: HTMLElement, text: string, references: readonly string[] = [],
   extraction: TaskDetail["output_mapping"] = null): void {
   const headings = new Set(["Leak assessment", "Why this location", "Instrument findings",
@@ -139,6 +143,109 @@ function readableOutput(container: HTMLElement, text: string, references: readon
       if (lines.length > 1) container.append(node("p", lines.slice(1).join("\n")));
     } else container.append(node("p", paragraph));
   }
+}
+function readingCounts(value: Record<string, Json>, expectedKey: string, receivedKey: string,
+  usableKey: string): { expected: number; received: number; usable: number } | null {
+  const expected = value[expectedKey], received = value[receivedKey], usable = value[usableKey];
+  if (typeof expected !== "number" || typeof received !== "number" || typeof usable !== "number"
+    || ![expected, received, usable].every(Number.isSafeInteger)
+    || usable < 0 || received < usable || expected < received) return null;
+  return { expected, received, usable };
+}
+function specialistOutput(container: HTMLElement, task: AgentTask, result: AgentResult, basis: WindowSnapshot | null,
+  opened: Set<string | undefined>): void {
+  const references = [...result.claim_refs, ...result.evidence_ids,
+    ...(result.interpretation?.answer.references || [])];
+  if (task.state === "ABSTAINED") container.append(node("p",
+    "The agent could not reach a supported conclusion. Its bounded findings are retained; this is not an all-clear.", "summary"));
+  const scoped = sourceWindow(task, basis);
+  if (task.role === "sensor_quality") {
+    container.append(node("h4", "Reading quality at a glance"));
+    if (scoped) {
+      container.append(node("p", `Source window: ${scoped.window_start} to ${scoped.window_end}. Counts describe this saved window, not a current outage.`, "muted"));
+      const claims = result.claim_refs.flatMap(id => scoped.claims[id] ? [scoped.claims[id]] : []);
+      const coverage = claims.find(claim => claim.kind === "coverage");
+      const value = coverage && record(coverage.value);
+      const counts = value && readingCounts(value, "expected_samples", "received_samples", "usable_samples");
+      if (counts) container.append(node("p",
+        `${counts.usable} of ${counts.expected} expected readings could be used${counts.expected ? ` (${(100 * counts.usable / counts.expected).toFixed(1)}%)` : ""}. `
+        + `${counts.expected - counts.received} did not arrive; ${counts.received - counts.usable} arrived but could not be used.`));
+      else container.append(node("p", "No complete coverage counts are included in this agent's cited findings."));
+      const health = claims.filter(claim => claim.kind === "sensor_health");
+      container.append(node("p", `${health.length} sensor-level finding${health.length === 1 ? "" : "s"} cited in this handoff. This is not a full instrument audit; sensors not covered here are not declared healthy.`));
+      if (health.length) {
+        const sensors = node("details");
+        sensors.dataset.section = `specialist-sensors:${task.id}`; sensors.open = opened.has(sensors.dataset.section);
+        sensors.append(node("summary", "Sensor-by-sensor readings cited by this agent"));
+        const wrap = node("div", "", "table-wrap");
+        const table = node("table");
+        table.append(node("caption", "Cited measurement-quality evidence, not diagnosed hardware faults"));
+        const head = node("thead"), headings = node("tr");
+        for (const label of ["Sensor / channel", "Readings usable", "Readings not received", "Received but unusable", "Anomalous readings"]) {
+          const cell = node("th", label); cell.scope = "col"; headings.append(cell);
+        }
+        head.append(headings); table.append(head);
+        const body = node("tbody");
+        for (const claim of health) {
+          const finding = record(claim.value);
+          const counts = finding && readingCounts(finding, "expected", "received", "usable");
+          const row = node("tr");
+          const sensor = node("th", finding && typeof finding.sensor_id === "string"
+            ? `${finding.sensor_id}${typeof finding.channel === "string" ? ` / ${finding.channel}` : ""}` : "Sensor not specified");
+          sensor.scope = "row"; row.append(sensor);
+          row.append(node("td", counts ? `${counts.usable} / ${counts.expected}` : "Not reported"),
+            node("td", counts ? String(counts.expected - counts.received) : "Not reported"),
+            node("td", counts ? String(counts.received - counts.usable) : "Not reported"),
+            node("td", typeof finding?.anomaly_count === "number" ? String(finding.anomaly_count) : "Not reported"));
+          body.append(row);
+        }
+        table.append(body); wrap.append(table); sensors.append(wrap,
+          node("p", "Anomalous readings can still be usable. A gap or unusual value alone does not establish a failed sensor or a leak.", "muted"));
+        container.append(sensors);
+      }
+    } else container.append(node("p", "The exact source window is not loaded. Coverage and sensor counts are not inferred from another window."));
+  }
+  container.append(node("h4", "What this agent found"));
+  const narrative = node("div", "", "agent-specialist-findings");
+  readableOutput(narrative, result.summary.trim() || result.interpretation?.answer.text
+    || task.answer || "No narrative findings were included in this accepted handoff.", references);
+  container.append(narrative);
+  if (task.role === "event_diagnosis" && result.investigation) {
+    const history = result.investigation;
+    const assessments = {
+      operating_change_plausible: "An operating change is a plausible explanation; this is not a confirmed cause.",
+      instrumentation_context: "Instrument or maintenance context was found; this is not confirmation of hardware failure.",
+      unresolved: "The operating-history check did not settle the cause.",
+    };
+    const actions: Record<string, string> = {
+      check_operating_records: "Verify operating records.",
+      review_instrumentation: "Review instrument readings and maintenance records.",
+      inspect_supported_interval: "Plan an engineering inspection of the supported interval.",
+      restore_telemetry: "Restore telemetry before drawing stronger conclusions.",
+      human_review: "Request engineering review.",
+    };
+    container.append(node("h4", "Operating-history check"),
+      node("p", assessments[history.assessment]),
+      node("p", `${history.document_ids.length} source document(s) cited; ${history.rejected_document_ids.length} read document(s) excluded as inadmissible; ${history.comparison_call_ids.length} executed sensor comparison(s) cited.`),
+      node("p", `Suggested next step: ${actions[history.next_action] || friendly(history.next_action)} This is advice, not an authorized action.`));
+  }
+  container.append(node("h4", "Limits and handoff"));
+  const limits: Record<string, string> = {
+    partial_health_review: "Only part of the instrument population was reviewed; other sensors are not cleared.",
+    missing_data: "Some readings are missing or unusable. Unknown values are not filled in.",
+    read_only: "Read-only assessment: no dispatch, repair or operating change is authorized.",
+    SYNTHETIC_UNCALIBRATED: "Demonstration evidence and an uncalibrated model; not safety clearance.",
+  };
+  const list = node("ul");
+  for (const limit of result.limitations) list.append(node("li", limits[limit] || `Recorded limit: ${friendly(limit).toLowerCase()}`));
+  container.append(list, node("p", task.role === "sensor_quality"
+    ? "Passed to Event Diagnosis and the Response Coordinator as measurement-quality evidence, not a leak or hardware diagnosis."
+    : "Passed to the Response Coordinator to combine with measurement-quality findings. An inspection focus is not a confirmed leak location."));
+  const original = node("details");
+  original.dataset.section = `specialist-original:${task.id}`; original.open = opened.has(original.dataset.section);
+  original.append(node("summary", "Original technical handoff and source references"),
+    node("pre", JSON.stringify({ answer: task.answer, result }, null, 2), "public-record"));
+  container.append(original);
 }
 function organizeAgentWorkspace(progress: HTMLElement, reviewOpen = false): void {
   const reviewer = progress.querySelector<HTMLElement>('.agent-role[data-role="grounding_reviewer"]');
@@ -284,14 +391,16 @@ export function renderAgentWork(progress: HTMLElement, findings: HTMLElement, ro
       : reused ? "Reuse selected · inspect linked receipts" : "Not started"));
     if (task && reusedIds.includes(task.id)) card.append(node("span", "Reused recorded handoff · no new specialist calls"));
     if (task && accepted(task) && task.result) {
-      const count = task.result.claim_refs.filter(id => basis?.claims[id]?.kind === "sensor_health").length;
+      const source = sourceWindow(task, basis);
+      const count = task.result.claim_refs.filter(id => source?.claims[id]?.kind === "sensor_health").length;
       if (role === "sensor_quality") card.append(node("span",
-        `${basis ? `${count} sensor-health claims checked` : "Loading checked claim scope"}${task.result.limitations.includes("partial_health_review") ? " · partial, not exhaustive" : ""}`));
+        `${source ? `${count} sensor-health claims cited` : "Source window not loaded"}${task.result.limitations.includes("partial_health_review") ? " · partial, not exhaustive" : ""}`));
       const result = node("div", "", "agent-handoff-output");
       result.append(node("h4", role === "operator_response" ? "Accepted incident assessment" : "Checked specialist output"));
       const answer = task.result.interpretation?.answer;
-      readableOutput(result, answer?.text || task.answer || "Checked findings are loading.",
-        answer?.references, role === "operator_response" ? detail?.output_mapping : null);
+      if (role === "operator_response") readableOutput(result,
+        answer?.text || task.answer || "Checked findings are loading.", answer?.references, detail?.output_mapping);
+      else specialistOutput(result, task, task.result, basis, opened);
       result.append(button("Open executed receipts", () => open(task.id)));
       card.append(result);
     }
