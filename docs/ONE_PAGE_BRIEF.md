@@ -20,7 +20,7 @@ Subsea Lens organizes these cross-checks with **three AI agents working in seque
 
 ![Figure 2: suspected P5 leak and separate sensor or data concerns](assets/brief-agent-assisted.png)
 
-Figure 2. The agents add an explanation to the alerts in Figure 1. Red highlights P5 because the report finds evidence of a possible leak there. Green narrows the inspection priority to 700-900 m from P5's start; it does not mark a confirmed leak point. Purple rings identify separate sensor or data concerns, not proven hardware failures. These markings summarize the report, rather than replace it. The report explains which readings and records support each finding, considers other possible causes and lists the next checks. The engineer can follow those references, challenge the reasoning and decide what to inspect, instead of assembling the investigation from individual alerts.
+Figure 2. The agents add an explanation to the alerts in Figure 1. Red highlights P5 because the report finds evidence of a possible leak there. Green narrows the inspection priority to 700-900 m from P5's start. Purple rings identify separate sensor or data concerns. These markings summarize the report. The report explains which readings and records support each finding, considers other possible causes and lists the next checks. The engineer can follow those references, challenge the reasoning and decide what to inspect, instead of assembling the investigation from individual alerts.
 
 This handoff also needs to be timely. In two controlled tests of this simulated scenario, reviewed reports were ready in about 2.5-2.8 minutes of elapsed time.
 
