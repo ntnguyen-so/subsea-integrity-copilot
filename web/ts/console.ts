@@ -15,6 +15,7 @@ import { reportText } from "./presentation";
 import { mapLegend, reportedInspectionIntervals, sensorAssessment, sensorSymbol } from "./evaluation_maps";
 import { InvestigationPlayback } from "./investigation_playback";
 import { ExecutionMetrics } from "./execution_metrics";
+import { MaintenancePanel } from "./maintenance";
 import type { AgentTask, CanonicalObservation, ConsoleEvent, InvestigationCase, Json, Mode, Point, Projection, ReplaySession, Sensor, Session, Speed, TaskDetail, WindowSnapshot, Workflow } from "./types";
 
 const select = (id: string): HTMLSelectElement => element(id, HTMLSelectElement);
@@ -65,7 +66,8 @@ let connectionState = "Not connected";
 let createRetry: { bodyKey: string; id: string } | null = null;
 let controlRetry: { bodyKey: string; id: string } | null = null;
 let liveHereRetry: { bodyKey: string; id: string } | null = null;
-let activeTab = new URLSearchParams(location.search).get("tab") === "evaluation" ? "evaluation" : "live";
+const requestedTab = new URLSearchParams(location.search).get("tab");
+let activeTab = requestedTab === "evaluation" || requestedTab === "maintenance" ? requestedTab : "live";
 let recordedAnchor: { id: string; seconds: number; speed: number } | null = null;
 let liveSelection: number | null = null;
 let sourceHistory = false;
@@ -81,6 +83,8 @@ let comparisonToken = 0;
 const comparisonSensorIds = new Set<string>();
 const currentSource = "pressure-v3";
 const executionMetrics = new ExecutionMetrics();
+const maintenance = new MaintenancePanel(box("maintenance-records"),
+  <T>(path: string, signal: AbortSignal) => request<T>(path, undefined, signal));
 // Recorded playback is local navigation over preserved outputs. "Live here" is an
 // explicit server mutation creating separate work, not a reinterpretation of a recording.
 const playback = new InvestigationPlayback({
@@ -197,6 +201,8 @@ function updateSession(): void {
   text("operator", session.authenticated ? session.username || "Operator" : "Signed out");
   updateControls();
   if (session.authenticated && activeTab === "evaluation") void loadEvaluation();
+  if (!session.authenticated) maintenance.clear("Sign in to view maintenance records.");
+  else if (activeTab === "maintenance") loadMaintenance();
 }
 function setConnection(value: string): void {
   connectionState = value;
@@ -265,7 +271,17 @@ function switchTab(name: string, focus = false): void {
     if (selected && focus) tab.focus();
   }
   if (name === "evaluation") void loadEvaluation();
+  if (name === "maintenance") loadMaintenance();
   renderBasis();
+}
+function loadMaintenance(): void {
+  if (!session.authenticated) {
+    maintenance.clear("Sign in to view maintenance records.");
+  } else if (!projection) {
+    maintenance.clear("Select a run to view maintenance records.");
+  } else {
+    void maintenance.load(projection.replay.id, Math.floor(timelineSeconds()));
+  }
 }
 function openSensorInspection(): boolean {
   if (!pinVisibleWindow()) { notify("No completed window to inspect.", true); return false; }
@@ -472,6 +488,7 @@ async function chooseReplay(id: string, recorded = true, preserveTimeline = fals
   if (currentReplayId === id && projection) connectStream(id, generationToken);
 }
 function resetView(): void {
+  maintenance.clear("Loading the selected run. Previous maintenance records withheld.");
   executionMetrics.set(null, null, false, new Date().toISOString());
   text("agent-investigation-map", "Loading selected run evidence.");
   mapSegment = ""; select("map-focus").value = "";
@@ -649,6 +666,7 @@ function renderProjection(): void {
   if (!projection) return;
   const { replay, pack, latest_window: latest } = projection;
   playback.load(projection);
+  if (activeTab === "maintenance") loadMaintenance();
   const sensorOnly = sensorAlertsOnly();
   document.querySelector<HTMLElement>(".investigation-time-control")!.hidden = sensorOnly;
   document.querySelector<HTMLElement>(".agent-status-panel")!.hidden = sensorOnly;
@@ -813,7 +831,7 @@ function renderBasis(): void {
   const window = selectedWindow, latest = projection?.latest_window;
   const newer = window && latest && window.id !== latest.id;
   const held = Boolean(projection?.replay.investigation_window_id);
-  box("evidence-selection").hidden = activeTab === "live"
+  box("evidence-selection").hidden = activeTab === "maintenance" || activeTab === "live"
     && (playback.enabled || liveSelection !== null)
     && box("panel-evidence").hidden && box("comparison-panel").hidden;
   box("evidence-selection").dataset.following = String(followCurrent);
@@ -1888,7 +1906,7 @@ controlButton("view-langfuse").addEventListener("click", () => {
   }
 });
 bindTabs();
-if (activeTab === "evaluation") switchTab(activeTab);
+if (activeTab !== "live") switchTab(activeTab);
 element("login-form", HTMLFormElement).addEventListener("submit", event => {
   event.preventDefault();
   const password = input("password").value;

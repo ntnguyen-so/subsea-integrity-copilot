@@ -40,7 +40,7 @@ test("dashboard removes Audit and the rail note while preserving live updates an
   await expect.poll(() => projections).toBeGreaterThan(1);
   await expect(page.locator("#connection-state")).toContainText("reconnecting");
   await expect(page.locator("#notice")).not.toContainText(/Malformed backend event|Event scope mismatch|Required console element missing/);
-  await expect(page.locator(".rail [role=tab]")).toContainText(["Live", "Evaluation"]);
+  await expect(page.locator(".rail [role=tab]")).toContainText(["Live", "Maintenance", "Evaluation"]);
   await expect(page.locator("#tab-audit, #panel-audit, #tab-agents, #panel-agents, #event-feed, .rail-note")).toHaveCount(0);
   await page.locator("#tab-evaluation").focus();
   await page.keyboard.press("Home");

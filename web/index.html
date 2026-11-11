@@ -40,6 +40,7 @@
     <nav class="rail" aria-label="Workspaces">
       <div role="tablist" aria-label="Console workspace" aria-orientation="vertical">
         <button role="tab" id="tab-live" aria-controls="panel-live" aria-selected="true" tabindex="0" data-tab="live"><span aria-hidden="true">◈</span>Live</button>
+        <button role="tab" id="tab-maintenance" aria-controls="panel-maintenance" aria-selected="false" tabindex="-1" data-tab="maintenance"><span aria-hidden="true">M</span>Maintenance</button>
         <button role="tab" id="tab-evaluation" aria-controls="panel-evaluation" aria-selected="false" tabindex="-1" data-tab="evaluation"><span aria-hidden="true">%</span>Evaluation</button>
       </div>
     </nav>
@@ -107,6 +108,7 @@
           </details>
         </section>
       </section>
+      <section id="panel-maintenance" role="tabpanel" aria-labelledby="tab-maintenance" hidden><div class="panel"><div class="panel-heading"><h2>Maintenance &amp; pressure investigation</h2><span class="eyebrow">SOURCE RECORDS / ADVISORY KNOWLEDGE</span></div><p class="muted">Inspect maintenance context alongside pressure-investigation guidance. Records, domain knowledge and incident conclusions are different kinds of information; none authorizes physical intervention.</p><div id="maintenance-records" aria-live="polite"><p class="empty">Select a run and sign in to view maintenance records and investigation knowledge.</p></div></div></section>
       <section id="panel-evaluation" role="tabpanel" aria-labelledby="tab-evaluation" hidden><div class="panel"><div class="panel-heading"><h2>System evaluation</h2><span id="evaluation-scope-label" class="eyebrow">GROUND TRUTH / AGENT FINDINGS</span></div><div id="evaluation-results"><p class="empty">Select Evaluation to load recorded results.</p></div></div></section>
     </main>
   </div>

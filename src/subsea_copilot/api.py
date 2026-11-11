@@ -44,6 +44,7 @@ from .contracts import (
 from .diagnostics import analyze_window
 from .ingest import normalize_records, parse_timestamp
 from .llm.copilot_cli import CopilotCLIChatModel
+from .maintenance import maintenance_catalog
 from .monitoring import Monitor
 from .playback import Recording
 from .report_mapping import load_report_mapping, prepare_report_mapping
@@ -59,7 +60,7 @@ from .security import (
     SessionManager,
 )
 from .store import TERMINAL, Store, StoreError
-from .synthetic import CUSTOMER_QUESTIONS, SCENARIOS, generate_pack
+from .synthetic import CUSTOMER_QUESTIONS, SCENARIOS, SOURCE_VERSION, generate_pack
 from .telemetry import Telemetry
 from .validation import ValidationError as AgentValidationError
 from .validation import validate_result
@@ -499,6 +500,25 @@ def create_app(settings: Settings, *, start_workers: bool = True) -> FastAPI:
         principal(request)
         store.get_replay(generation_id)
         return {"windows": store.list_windows(generation_id, limit=120)}
+
+    @app.get("/api/replays/{generation_id}/maintenance")
+    def maintenance(
+        generation_id: str, request: Request, source_seconds: int | None = None,
+    ) -> dict[str, object]:
+        principal(request)
+        replay = store.get_replay(generation_id)
+        if replay.source_version != SOURCE_VERSION:
+            raise HTTPException(
+                status_code=404, detail="No maintenance reference corpus for this source version",
+            )
+        seconds = int(replay.clock_seconds) if source_seconds is None else source_seconds
+        if not 0 <= seconds <= replay.duration_seconds:
+            raise HTTPException(
+                status_code=422, detail="Source time must be within the selected replay",
+            )
+        return maintenance_catalog(
+            replay, monitor_service().pack_for(generation_id).version, seconds,
+        )
 
     playback_hashes: dict[str, str] = {}
     timeline_frames: dict[str, WindowSnapshot] = {}
