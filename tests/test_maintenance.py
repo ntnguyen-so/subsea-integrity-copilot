@@ -25,16 +25,15 @@ def replay():
     )
 
 
-def test_maintenance_catalog_withholds_future_records_and_preserves_original_revisions(replay):
+def test_maintenance_catalog_shows_only_effective_records_and_preserves_original_content(replay):
     before = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 79)
-    assert {row["id"] for row in before["records"]} == {"MAINT-P7-GW-001"}
+    assert before["records"] == []
     catalog = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 80)
     by_id = {row["id"]: row for row in catalog["records"]}
-    approved, superseded = by_id["MAINT-P7-GW-002"], by_id["MAINT-P7-GW-001"]
+    assert set(by_id) == {"MAINT-P7-GW-002"}
+    approved = by_id["MAINT-P7-GW-002"]
     assert approved["admissible"] is True and approved["exclusion_reason"] is None
-    assert approved["supersedes"] == superseded["id"]
-    assert superseded["admissible"] is False
-    assert "Superseded" in superseded["exclusion_reason"]
+    assert approved["supersedes"] == "MAINT-P7-GW-001"
     originals = {row["id"]: row for row in history_index_rows(EXTENDED_HISTORY_PATH)}
     for row in by_id.values():
         assert row["body"] == originals[row["id"]]["body"]
@@ -43,6 +42,28 @@ def test_maintenance_catalog_withholds_future_records_and_preserves_original_rev
     assert catalog["generation_id"] == replay.id
     assert catalog["source_seconds"] == 80
     assert catalog["as_of"] == "2026-01-01T00:01:20+00:00"
+
+
+@pytest.mark.parametrize(("changes", "visible"), [
+    ({"status": "draft"}, False),
+    ({"status": "superseded"}, False),
+    ({"effective_to": "2026-01-01T00:01:59Z"}, False),
+    ({"effective_to": "2026-01-01T00:02:00Z"}, True),
+    ({"effective_from": "2026-01-01T00:02:01Z"}, False),
+    ({"available_at": "2026-01-01T00:02:01Z"}, False),
+])
+def test_maintenance_catalog_enforces_approval_and_effective_period(
+    replay, monkeypatch, changes, visible,
+):
+    original = next(
+        row for row in history_index_rows(EXTENDED_HISTORY_PATH)
+        if row["id"] == "MAINT-P7-GW-002"
+    )
+    monkeypatch.setattr(
+        "subsea_copilot.maintenance.history_index_rows", lambda _: [{**original, **changes}],
+    )
+    records = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 120)["records"]
+    assert [row["id"] for row in records] == (["MAINT-P7-GW-002"] if visible else [])
 
 
 def test_maintenance_catalog_is_layout_and_scenario_scoped(replay):
@@ -101,7 +122,7 @@ def test_maintenance_api_authenticates_scopes_and_reads_without_creating_agent_w
         response = client.get(endpoint, params={"source_seconds": 120})
         assert response.status_code == 200
         assert {row["id"] for row in response.json()["records"]} == {
-            "MAINT-P7-GW-001", "MAINT-P7-GW-002",
+            "MAINT-P7-GW-002",
         }
         assert client.get(endpoint, params={"source_seconds": 361}).status_code == 422
         assert client.get(endpoint, params={"source_seconds": "invalid"}).status_code == 422

@@ -52,33 +52,32 @@ export class MaintenancePanel {
   }
 
   private render(catalog: MaintenanceCatalog): void {
+    const effectiveRecords = catalog.records.filter(record => record.admissible);
     const basis = node("p",
-      `Source time +${catalog.source_seconds}s · ${time(catalog.as_of)} · ${catalog.records.length} visible maintenance record(s).`, "summary");
+      `Source time +${catalog.source_seconds}s · ${time(catalog.as_of)} · ${effectiveRecords.length} effective maintenance record(s).`, "summary");
     basis.dataset.generation = catalog.generation_id;
     basis.dataset.sourceSeconds = String(catalog.source_seconds);
     const records = node("section");
     records.setAttribute("aria-labelledby", "maintenance-documents-title");
     const heading = node("h3", "Maintenance records"); heading.id = "maintenance-documents-title";
     records.append(heading, basis, node("p",
-      "Reference catalog, not an inventory of documents read by an agent. Future records are withheld. Change the source time in Live to inspect another point.", "muted"));
+      "Reference catalog, not an inventory of documents read by an agent. Only approved records effective at this source time are shown; draft, superseded, expired and future records are withheld. Change the source time in Live to inspect another point.", "muted"));
     this.container.replaceChildren(records);
-    if (!catalog.records.length) records.append(node("p",
-      "No maintenance records are visible in this reference corpus at the selected time. This does not establish that no maintenance occurred.", "empty"));
-    for (const record of catalog.records) {
+    if (!effectiveRecords.length) records.append(node("p",
+      "No effective maintenance records are available in this reference corpus at the selected time. This does not establish that no maintenance occurred.", "empty"));
+    for (const record of effectiveRecords) {
       const card = node("article", "", "history-investigation");
       card.dataset.document = record.id;
       card.dataset.admissible = String(record.admissible);
       const title = node("h3"); title.textContent = record.title;
       card.append(title, node("p", `${record.id} · revision ${record.revision} · ${record.status}`),
-        node("p", record.admissible
-          ? "Approved and within its effective period at this source time. Approval alone does not prove that work was executed."
-          : record.exclusion_reason || "Not admissible as current operational authority.", "summary"),
+        node("p", "Approved and within its effective period at this source time. Approval alone does not prove that work was executed.", "summary"),
         node("p", `Assets: ${record.asset_ids.join(", ")}`),
         node("p", `Authored: ${time(record.authored_at)} · Available: ${time(record.available_at)}`, "muted"),
         node("p", `Effective: ${time(record.effective_from)} to ${record.effective_to ? time(record.effective_to) : "no recorded end"}`, "muted"));
       if (record.supersedes) card.append(node("p", `Replaces revision: ${record.supersedes}`));
       const body = node("details");
-      body.open = record.admissible;
+      body.open = true;
       body.append(node("summary", "Original maintenance record"), node("pre", record.body));
       card.append(body); records.append(card);
     }
@@ -128,12 +127,8 @@ export class MaintenancePanel {
       article.append(details); section.append(article);
     }
     const provenance = node("details");
-    provenance.append(node("summary", "Knowledge version and excluded guidance"),
+    provenance.append(node("summary", "Knowledge version and authority"),
       node("p", `${packet.version} · authority: ${friendly(packet.authority)}`, "public-record"));
-    const excluded = node("ul");
-    for (const [id, reason] of Object.entries(packet.excluded)) excluded.append(node("li", `${id}: ${friendly(reason)}`));
-    if (!excluded.childElementCount) provenance.append(node("p", "No guidance cards excluded by this selection."));
-    else provenance.append(excluded);
     section.append(provenance); this.container.append(section);
   }
 }

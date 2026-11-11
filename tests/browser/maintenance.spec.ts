@@ -35,7 +35,7 @@ const bundle = () => buildSync({
   bundle: true, write: false, format: "iife", globalName: "MaintenanceFixture",
 }).outputFiles[0].text;
 
-test("maintenance cards preserve original bodies and distinguish approval from execution and supersession", async ({ page }) => {
+test("maintenance shows only effective records and guidance while preserving original content", async ({ page }) => {
   await page.setContent('<main><div id="records"></div></main>');
   await page.addStyleTag({ path: join(process.cwd(), "web", "styles.css") });
   await page.addScriptTag({ content: `${bundle()}
@@ -50,8 +50,8 @@ test("maintenance cards preserve original bodies and distinguish approval from e
   await expect(record).toContainText("does not prove that work was executed");
   await expect(record).toContainText("Replaces revision: MAINT-001");
   await expect(record.locator("details")).toHaveAttribute("open");
-  await expect(page.locator('[data-document="MAINT-001"]')).toHaveAttribute("data-admissible", "false");
-  await expect(page.locator('[data-document="MAINT-001"] details')).not.toHaveAttribute("open");
+  await expect(page.locator('[data-document="MAINT-001"]')).toHaveCount(0);
+  await expect(page.locator("#records")).toContainText("1 effective maintenance record(s)");
   await expect(page.locator("#records")).toContainText("not an inventory of documents read by an agent");
   const knowledge = page.locator('[aria-labelledby="pressure-knowledge-title"]');
   await expect(knowledge).toContainText("not incident evidence");
@@ -60,6 +60,8 @@ test("maintenance cards preserve original bodies and distinguish approval from e
   await expect(knowledge).toContainText("Compare synchronized independent observers.");
   await expect(knowledge).toContainText("An operating change may coexist with a leak.");
   await expect(knowledge).toContainText("Evidence boundary: Not a site validation.");
+  await expect(knowledge).not.toContainText("KN-DRAFT");
+  await expect(knowledge).not.toContainText("excluded guidance");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
@@ -74,7 +76,7 @@ test("maintenance navigation withholds stale responses and exposes failures with
       : Promise.resolve({ ...window.oldCatalog, generation_id: "new", records: [] }));
     window.panel.load("old", 120);
     window.panel.load("new", 120);` });
-  await expect(page.locator("#records")).toContainText("No maintenance records are visible");
+  await expect(page.locator("#records")).toContainText("No effective maintenance records are available");
   await page.evaluate(() => {
     const fixture = window as typeof window & {
       finishOld: (value: MaintenanceCatalog) => void; oldCatalog: MaintenanceCatalog;
@@ -121,11 +123,13 @@ test("top-level Maintenance tab follows S7 source time and starts no inference",
     await page.locator("#tab-maintenance").click();
     await expect(page.locator("#maintenance-records [data-source-seconds]")).toHaveAttribute("data-source-seconds", String(seconds));
     await expect(page.locator('#maintenance-records [data-document="MAINT-P7-GW-002"]')).toHaveCount(seconds < 80 ? 0 : 1);
-    await expect(page.locator('#maintenance-records [data-document="MAINT-P7-GW-001"]')).toHaveAttribute("data-admissible", "false");
+    await expect(page.locator('#maintenance-records [data-document="MAINT-P7-GW-001"]')).toHaveCount(0);
+    if (seconds < 80) await expect(page.locator("#maintenance-records")).toContainText("No effective maintenance records are available");
   }
   const response = await page.request.get(`/api/replays/${replay!.id}/maintenance?source_seconds=80`);
   expect(response.ok()).toBeTruthy();
   const source: MaintenanceCatalog = await response.json();
+  expect(source.records.map(record => record.id)).toEqual(["MAINT-P7-GW-002"]);
   const original = source.records.find(record => record.id === "MAINT-P7-GW-002")!;
   await expect(page.locator('[data-document="MAINT-P7-GW-002"] pre')).toHaveText(original.body);
   await expect(page.locator('[data-document="MAINT-P7-GW-002"]')).toHaveAttribute("data-admissible", "true");

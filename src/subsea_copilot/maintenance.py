@@ -1,4 +1,4 @@
-"""Read-only maintenance reference catalog with the agent history's visibility rules."""
+"""Read-only maintenance reference catalog containing only currently effective records."""
 
 from datetime import timedelta
 
@@ -42,14 +42,10 @@ def maintenance_catalog(
     records = []
     for document in visible:
         public = document.model_dump(mode="json")
-        allowed = admissible(public, as_of)
-        public["admissible"] = allowed
-        public["exclusion_reason"] = None if allowed else (
-            "Draft: not approved as operational authority." if document.status == "draft"
-            else "Superseded revision: not current operational authority."
-            if document.status == "superseded"
-            else "Expired at the selected source time."
-        )
+        if not admissible(public, as_of):
+            continue
+        public["admissible"] = True
+        public["exclusion_reason"] = None
         records.append(public)
     return {
         "generation_id": replay.id,
