@@ -10,6 +10,7 @@ export interface MaintenanceRecord {
 export interface MaintenanceCatalog {
   generation_id: string; site_id: string; pack_version: string; source_seconds: number;
   scenario: string; duration_seconds: number; next_effective_seconds: number | null;
+  source_file: string; knowledge_source_file: string;
   as_of: string; corpus_version: string; records: MaintenanceRecord[]; knowledge: KnowledgePacket;
 }
 
@@ -62,6 +63,8 @@ export class MaintenancePanel {
     basis.dataset.sourceSeconds = String(catalog.source_seconds);
     const records = node("section");
     const heading = node("h3", "Maintenance records"); heading.id = "maintenance-documents-title";
+    const sourceFile = node("p", "", "public-record");
+    sourceFile.textContent = `Source file (repository-relative): ${catalog.source_file}`;
     const controls = node("div", "", "investigation-time-control");
     const label = node("label", "Maintenance source time"); label.htmlFor = "maintenance-source-time";
     const sliderRow = node("div", "", "investigation-time-slider");
@@ -74,7 +77,7 @@ export class MaintenancePanel {
     sliderRow.append(slider, selectedTime);
     controls.append(label, sliderRow, node("p",
       "Changes the selected source time, not the live run. Browsing records does not start agents.", "muted"));
-    records.append(heading, controls, basis, node("p",
+    records.append(heading, sourceFile, controls, basis, node("p",
       "Reference catalog, not an inventory of documents read by an agent. Only approved records effective at this source time are shown; draft, superseded, expired and future records are withheld.", "muted"));
     if (!effectiveRecords.length) {
       records.append(node("p",
@@ -90,7 +93,9 @@ export class MaintenancePanel {
       card.dataset.admissible = String(record.admissible);
       const title = node("h3"); title.textContent = record.title;
       const body = node("p"); body.textContent = record.body; body.dataset.maintenanceBody = record.id;
-      card.append(title, node("p", `Applies to: ${record.asset_ids.join(", ")}`, "muted"), body,
+      const sourceRecord = node("p", "", "public-record");
+      sourceRecord.textContent = `Source JSON record: records[].id = ${record.id}`;
+      card.append(title, sourceRecord, node("p", `Applies to: ${record.asset_ids.join(", ")}`, "muted"), body,
         node("p", "Approved and within its effective period at this source time. Approval alone does not prove that work was executed.", "summary"),
         node("p", `Document effective from ${time(record.effective_from)} to ${record.effective_to ? time(record.effective_to) : "no recorded end"}. Activity timing is described in the record above.`, "muted"));
       const metadata = node("details");
@@ -105,7 +110,7 @@ export class MaintenancePanel {
       node("p", `Corpus version: ${catalog.corpus_version} · Layout: ${catalog.pack_version}`, "public-record"),
       node("p", "Synthetic reference records; not a live maintenance-management feed. The catalog does not prove a sensor fault, a pressure-event cause, completed work or safety clearance.", "muted"));
     records.append(provenance);
-    const panels = [records, this.renderKnowledge(catalog.knowledge)];
+    const panels = [records, this.renderKnowledge(catalog.knowledge, catalog.knowledge_source_file)];
     const tabs = node("div", "", "evaluation-suite-selector");
     tabs.setAttribute("role", "tablist"); tabs.setAttribute("aria-label", "Knowledge topics");
     const selectTopic = (index: number, focus = false): void => {
@@ -136,10 +141,12 @@ export class MaintenancePanel {
     selectTopic(this.activeTopic === "maintenance" ? 0 : 1);
   }
 
-  private renderKnowledge(packet: KnowledgePacket): HTMLElement {
+  private renderKnowledge(packet: KnowledgePacket, sourcePath: string): HTMLElement {
     const section = node("section", "", "history-investigation");
     const heading = node("h3", "Pressure Investigation Knowledge"); heading.id = "pressure-knowledge-title";
-    section.append(heading, node("p",
+    const sourceFile = node("p", "", "public-record");
+    sourceFile.textContent = `Source file (repository-relative): ${sourcePath}`;
+    section.append(heading, sourceFile, node("p",
       "Applicable domain guidance from the same versioned knowledge corpus used by the agents. It suggests checks; it is not incident evidence, a diagnosis or a field-approved operating procedure.", "summary"),
     node("p", `Knowledge selected at ${time(packet.selected_at)} (wall clock), not the simulated maintenance-source clock. This is the current applicable reference, not a saved investigation's historical knowledge packet.`, "muted"));
     if (!packet.cards.length) section.append(node("p",

@@ -7,8 +7,13 @@ from pydantic import JsonValue
 
 from .contracts import ReplaySession, content_hash, utc_now
 from .history import admissible
-from .history_data import EXTENDED_HISTORY_PATH, HistoryDocument, history_index_rows
-from .knowledge import load_knowledge, select_knowledge
+from .history_data import (
+    DEFAULT_HISTORY_PATH,
+    EXTENDED_HISTORY_PATH,
+    HistoryDocument,
+    history_index_rows,
+)
+from .knowledge import DEFAULT_KNOWLEDGE_PATH, load_knowledge, select_knowledge
 from .synthetic import EXTENDED_PACK_VERSION
 
 
@@ -17,9 +22,10 @@ def maintenance_catalog(
 ) -> dict[str, object]:
     if not 0 <= source_seconds <= replay.duration_seconds:
         raise ValueError("Source time must be within the selected replay")
-    rows = history_index_rows(
-        EXTENDED_HISTORY_PATH if pack_version == EXTENDED_PACK_VERSION else None,
+    history_path = (
+        EXTENDED_HISTORY_PATH if pack_version == EXTENDED_PACK_VERSION else DEFAULT_HISTORY_PATH
     )
+    rows = history_index_rows(history_path)
     documents = [HistoryDocument.model_validate(row) for row in rows]
     layout_workload = (
         pack_version == EXTENDED_PACK_VERSION and replay.scenario.startswith("frozen-pressure-")
@@ -62,6 +68,10 @@ def maintenance_catalog(
     return {
         "generation_id": replay.id,
         "site_id": replay.site_id,
+        "source_file": "\\".join(history_path.relative_to(DEFAULT_HISTORY_PATH.parents[2]).parts),
+        "knowledge_source_file": "\\".join(
+            DEFAULT_KNOWLEDGE_PATH.relative_to(DEFAULT_HISTORY_PATH.parents[2]).parts,
+        ),
         "scenario": replay.scenario,
         "pack_version": pack_version,
         "source_seconds": source_seconds,
@@ -71,6 +81,7 @@ def maintenance_catalog(
         "corpus_version": content_hash(encoded),
         "records": records,
         "knowledge": select_knowledge(
-            load_knowledge(), site_id=replay.site_id, pack_version=pack_version, as_of=utc_now(),
+            load_knowledge(DEFAULT_KNOWLEDGE_PATH),
+            site_id=replay.site_id, pack_version=pack_version, as_of=utc_now(),
         ).model_dump(mode="json"),
     }

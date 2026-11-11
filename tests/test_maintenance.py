@@ -78,6 +78,9 @@ def test_maintenance_catalog_is_layout_and_scenario_scoped(replay):
     small = maintenance_catalog(other, generate_pack("northsea").version, 120)
     extended = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 120)
     assert small["corpus_version"] != extended["corpus_version"]
+    assert small["source_file"] == r"fixtures\synthetic\operational-history.json"
+    assert extended["source_file"] == r"fixtures\synthetic\extended-operational-history.json"
+    assert extended["knowledge_source_file"] == r"fixtures\knowledge\pressure-investigation.json"
     assert all("P7" not in row["asset_ids"] for row in small["records"])
 
 

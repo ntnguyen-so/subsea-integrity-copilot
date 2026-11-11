@@ -15,6 +15,8 @@ const approved: MaintenanceRecord = {
 const catalog: MaintenanceCatalog = {
   generation_id: "fixture", site_id: "northsea", pack_version: "fixture", source_seconds: 120,
   scenario: "S7", duration_seconds: 360, next_effective_seconds: null,
+  source_file: "fixtures\\synthetic\\extended-operational-history.json",
+  knowledge_source_file: "fixtures\\knowledge\\pressure-investigation.json",
   as_of: "2026-01-01T00:02:00Z", corpus_version: "fixture-corpus",
   records: [approved, { ...approved, id: "MAINT-001", revision: 1, supersedes: null,
     status: "superseded", admissible: false, exclusion_reason: "Superseded revision." }],
@@ -47,6 +49,8 @@ test("maintenance shows only effective records and guidance while preserving ori
   await expect(record).toHaveAttribute("data-admissible", "true");
   await expect(record.locator("[data-maintenance-body]")).toHaveText(approved.body);
   await expect(record.locator("h3")).toHaveText(approved.title);
+  await expect(page.getByText(`Source file (repository-relative): ${catalog.source_file}`, { exact: true })).toBeVisible();
+  await expect(record).toContainText(`Source JSON record: records[].id = ${approved.id}`);
   await expect(record.locator("img")).toHaveCount(0);
   await expect(record).toContainText("does not prove that work was executed");
   await expect(record).toContainText("Replaces revision: MAINT-001");
@@ -66,6 +70,7 @@ test("maintenance shows only effective records and guidance while preserving ori
   await pressureTab.click();
   await expect(pressureTab).toHaveAttribute("aria-selected", "true");
   await expect(knowledge).toBeVisible();
+  await expect(knowledge.getByText(`Source file (repository-relative): ${catalog.knowledge_source_file}`, { exact: true })).toBeVisible();
   await expect(record).toBeHidden();
   await expect(knowledge).toContainText("not incident evidence");
   await expect(knowledge).toContainText("wall clock");
@@ -146,6 +151,7 @@ test("top-level Knowledge workspace separates two topics, follows S7 source time
   if (await mode.getAttribute("aria-checked") === "true") await mode.click();
   await page.locator("#tab-maintenance").click();
   const slider = page.getByRole("slider", { name: "Maintenance source time" });
+  await expect(page.getByText(`Source file (repository-relative): ${catalog.source_file}`, { exact: true })).toBeVisible();
   for (const seconds of [0, 79, 80]) {
     await slider.evaluate((element, value) => {
       if (!(element instanceof HTMLInputElement)) throw new Error("Expected source-time input");
@@ -175,6 +181,7 @@ test("top-level Knowledge workspace separates two topics, follows S7 source time
   const original = source.records.find(record => record.id === "MAINT-P7-GW-002")!;
   await expect(page.locator('[data-maintenance-body="MAINT-P7-GW-002"]')).toHaveText(original.body);
   await expect(page.locator('[data-maintenance-body="MAINT-P7-GW-002"]')).toBeVisible();
+  await expect(page.locator('[data-document="MAINT-P7-GW-002"]')).toContainText("Source JSON record: records[].id = MAINT-P7-GW-002");
   await expect(page.locator('[data-document="MAINT-P7-GW-002"]')).toHaveAttribute("data-admissible", "true");
   await expect(page.getByRole("heading", { name: "Pressure Investigation Knowledge", exact: true })).toBeHidden();
   await page.getByRole("tab", { name: "Pressure Investigation", exact: true }).click();
