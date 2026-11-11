@@ -85,7 +85,7 @@ const comparisonSensorIds = new Set<string>();
 const currentSource = "pressure-v3";
 const executionMetrics = new ExecutionMetrics();
 const maintenance = new MaintenancePanel(box("maintenance-records"),
-  <T>(path: string, signal: AbortSignal) => request<T>(path, undefined, signal));
+  <T>(path: string, signal: AbortSignal) => request<T>(path, undefined, signal), selectSourceTime);
 // Recorded playback is local navigation over preserved outputs. "Live here" is an
 // explicit server mutation creating separate work, not a reinterpretation of a recording.
 const playback = new InvestigationPlayback({
@@ -1940,8 +1940,7 @@ element("review-agent-findings", HTMLAnchorElement).addEventListener("click", ev
   heading.focus();
   heading.scrollIntoView({ block: "start" });
 });
-input("investigation-time").addEventListener("input", () => {
-  const seconds = Number(input("investigation-time").value);
+function selectSourceTime(seconds: number): void {
   if (playback.enabled) playback.seek(seconds);
   else {
     liveSelection = seconds;
@@ -1949,6 +1948,9 @@ input("investigation-time").addEventListener("input", () => {
     if (recordedAnchor) recordedAnchor.seconds = seconds;
     renderProjection();
   }
+}
+input("investigation-time").addEventListener("input", () => {
+  selectSourceTime(Number(input("investigation-time").value));
 });
 controlButton("compare-sensors").addEventListener("click", () => { void compareSensors(); });
 controlButton("clear-comparison").addEventListener("click", () => { comparisonSensorIds.clear(); renderSensorList(); });

@@ -1,4 +1,4 @@
-import { friendly, node, time } from "./dom";
+import { button, friendly, node, time } from "./dom";
 import type { KnowledgePacket } from "./types";
 
 export interface MaintenanceRecord {
@@ -9,6 +9,7 @@ export interface MaintenanceRecord {
 }
 export interface MaintenanceCatalog {
   generation_id: string; site_id: string; pack_version: string; source_seconds: number;
+  scenario: string; duration_seconds: number; next_effective_seconds: number | null;
   as_of: string; corpus_version: string; records: MaintenanceRecord[]; knowledge: KnowledgePacket;
 }
 
@@ -19,7 +20,8 @@ export class MaintenancePanel {
   private activeTopic = "maintenance";
 
   constructor(private readonly container: HTMLElement,
-    private readonly get: <T>(path: string, signal: AbortSignal) => Promise<T>) {}
+    private readonly get: <T>(path: string, signal: AbortSignal) => Promise<T>,
+    private readonly selectTime: (seconds: number) => void) {}
 
   clear(message: string): void {
     this.pending?.abort(); this.pending = null; this.version++; this.key = "";
@@ -55,30 +57,48 @@ export class MaintenancePanel {
   private render(catalog: MaintenanceCatalog): void {
     const effectiveRecords = catalog.records.filter(record => record.admissible);
     const basis = node("p",
-      `Source time +${catalog.source_seconds}s · ${time(catalog.as_of)} · ${effectiveRecords.length} effective maintenance record(s).`, "summary");
+      `${catalog.scenario} · Source time +${catalog.source_seconds}s · ${time(catalog.as_of)} · ${effectiveRecords.length} effective maintenance record(s).`, "summary");
     basis.dataset.generation = catalog.generation_id;
     basis.dataset.sourceSeconds = String(catalog.source_seconds);
     const records = node("section");
     const heading = node("h3", "Maintenance records"); heading.id = "maintenance-documents-title";
-    records.append(heading, basis, node("p",
-      "Reference catalog, not an inventory of documents read by an agent. Only approved records effective at this source time are shown; draft, superseded, expired and future records are withheld. Change the source time in Live to inspect another point.", "muted"));
-    if (!effectiveRecords.length) records.append(node("p",
-      "No effective maintenance records are available in this reference corpus at the selected time. This does not establish that no maintenance occurred.", "empty"));
+    const controls = node("div", "", "investigation-time-control");
+    const label = node("label", "Maintenance source time"); label.htmlFor = "maintenance-source-time";
+    const sliderRow = node("div", "", "investigation-time-slider");
+    const slider = node("input"); slider.id = label.htmlFor; slider.type = "range";
+    slider.min = "0"; slider.max = String(catalog.duration_seconds); slider.step = "1";
+    slider.value = String(catalog.source_seconds);
+    const selectedTime = node("output", `+${catalog.source_seconds}s`);
+    slider.addEventListener("input", () => { selectedTime.value = `+${slider.value}s`; });
+    slider.addEventListener("change", () => this.selectTime(Number(slider.value)));
+    sliderRow.append(slider, selectedTime);
+    controls.append(label, sliderRow, node("p",
+      "Changes the selected source time, not the live run. Browsing records does not start agents.", "muted"));
+    records.append(heading, controls, basis, node("p",
+      "Reference catalog, not an inventory of documents read by an agent. Only approved records effective at this source time are shown; draft, superseded, expired and future records are withheld.", "muted"));
+    if (!effectiveRecords.length) {
+      records.append(node("p",
+        `No effective maintenance records are available for ${catalog.scenario} at +${catalog.source_seconds}s. This does not establish that no maintenance occurred.`, "empty"));
+      const next = catalog.next_effective_seconds;
+      if (next !== null) records.append(node("p",
+        `The next eligible reference is available at +${next}s. Its contents remain hidden until you select that time.`, "summary"),
+      button(`View records at +${next}s`, () => this.selectTime(next)));
+    }
     for (const record of effectiveRecords) {
       const card = node("article", "", "history-investigation");
       card.dataset.document = record.id;
       card.dataset.admissible = String(record.admissible);
       const title = node("h3"); title.textContent = record.title;
-      card.append(title, node("p", `${record.id} · revision ${record.revision} · ${record.status}`),
+      const body = node("p"); body.textContent = record.body; body.dataset.maintenanceBody = record.id;
+      card.append(title, node("p", `Applies to: ${record.asset_ids.join(", ")}`, "muted"), body,
         node("p", "Approved and within its effective period at this source time. Approval alone does not prove that work was executed.", "summary"),
-        node("p", `Assets: ${record.asset_ids.join(", ")}`),
-        node("p", `Authored: ${time(record.authored_at)} · Available: ${time(record.available_at)}`, "muted"),
-        node("p", `Effective: ${time(record.effective_from)} to ${record.effective_to ? time(record.effective_to) : "no recorded end"}`, "muted"));
-      if (record.supersedes) card.append(node("p", `Replaces revision: ${record.supersedes}`));
-      const body = node("details");
-      body.open = true;
-      body.append(node("summary", "Original maintenance record"), node("pre", record.body));
-      card.append(body); records.append(card);
+        node("p", `Document effective from ${time(record.effective_from)} to ${record.effective_to ? time(record.effective_to) : "no recorded end"}. Activity timing is described in the record above.`, "muted"));
+      const metadata = node("details");
+      metadata.append(node("summary", "Record identity and provenance"),
+        node("p", `${record.id} · revision ${record.revision} · ${record.status}`),
+        node("p", `Authored: ${time(record.authored_at)} · Available: ${time(record.available_at)}`, "muted"));
+      if (record.supersedes) metadata.append(node("p", `Replaces revision: ${record.supersedes}`));
+      card.append(metadata); records.append(card);
     }
     const provenance = node("details");
     provenance.append(node("summary", "Reference corpus and evidence boundary"),

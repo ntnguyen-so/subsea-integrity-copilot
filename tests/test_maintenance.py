@@ -28,9 +28,13 @@ def replay():
 def test_maintenance_catalog_shows_only_effective_records_and_preserves_original_content(replay):
     before = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 79)
     assert before["records"] == []
+    assert before["scenario"] == "S7"
+    assert before["next_effective_seconds"] == 80
+    assert before["duration_seconds"] == replay.duration_seconds
     catalog = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 80)
     by_id = {row["id"]: row for row in catalog["records"]}
     assert set(by_id) == {"MAINT-P7-GW-002"}
+    assert catalog["next_effective_seconds"] is None
     approved = by_id["MAINT-P7-GW-002"]
     assert approved["admissible"] is True and approved["exclusion_reason"] is None
     assert approved["supersedes"] == "MAINT-P7-GW-001"
@@ -68,11 +72,32 @@ def test_maintenance_catalog_enforces_approval_and_effective_period(
 
 def test_maintenance_catalog_is_layout_and_scenario_scoped(replay):
     other = replay.model_copy(update={"scenario": "S1"})
-    assert maintenance_catalog(other, EXTENDED_PACK_VERSION, 120)["records"] == []
+    unrelated = maintenance_catalog(other, EXTENDED_PACK_VERSION, 0)
+    assert unrelated["records"] == []
+    assert unrelated["next_effective_seconds"] is None
     small = maintenance_catalog(other, generate_pack("northsea").version, 120)
     extended = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 120)
     assert small["corpus_version"] != extended["corpus_version"]
     assert all("P7" not in row["asset_ids"] for row in small["records"])
+
+
+@pytest.mark.parametrize("changes", [
+    {"status": "draft"},
+    {"status": "superseded"},
+    {"available_at": "2026-01-01T00:02:00Z", "effective_to": "2026-01-01T00:01:59Z"},
+    {"available_at": "2026-01-01T00:06:01Z"},
+])
+def test_maintenance_navigation_does_not_offer_ineligible_records(replay, monkeypatch, changes):
+    original = next(
+        row for row in history_index_rows(EXTENDED_HISTORY_PATH)
+        if row["id"] == "MAINT-P7-GW-002"
+    )
+    monkeypatch.setattr(
+        "subsea_copilot.maintenance.history_index_rows", lambda _: [{**original, **changes}],
+    )
+    catalog = maintenance_catalog(replay, EXTENDED_PACK_VERSION, 0)
+    assert catalog["records"] == []
+    assert catalog["next_effective_seconds"] is None
 
 
 def test_pressure_knowledge_uses_applicable_wall_clock_guidance_not_simulated_record_time(

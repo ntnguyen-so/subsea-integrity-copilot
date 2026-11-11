@@ -1,6 +1,7 @@
 """Read-only maintenance reference catalog containing only currently effective records."""
 
 from datetime import timedelta
+from math import ceil
 
 from pydantic import JsonValue
 
@@ -28,11 +29,14 @@ def maintenance_catalog(
     ordered = sorted(rows, key=lambda row: str(row["id"]))
     encoded: list[JsonValue] = list(ordered)
     as_of = replay.epoch + timedelta(seconds=source_seconds)
-    visible = [
+    scoped = [
         document for document in documents
         if document.type == "maintenance"
         and (layout_workload or not document.scenarios or replay.scenario in document.scenarios)
-        and document.available_at <= as_of
+    ]
+    visible = [
+        document for document in scoped
+        if document.available_at <= as_of
         and document.authored_at <= as_of
         and document.effective_from <= as_of
     ]
@@ -47,11 +51,22 @@ def maintenance_catalog(
         public["admissible"] = True
         public["exclusion_reason"] = None
         records.append(public)
+    next_times = []
+    for document in scoped:
+        first_time = max(document.available_at, document.authored_at, document.effective_from)
+        seconds = ceil((first_time - replay.epoch).total_seconds())
+        if source_seconds < seconds <= replay.duration_seconds and admissible(
+            document.model_dump(mode="json"), replay.epoch + timedelta(seconds=seconds),
+        ):
+            next_times.append(seconds)
     return {
         "generation_id": replay.id,
         "site_id": replay.site_id,
+        "scenario": replay.scenario,
         "pack_version": pack_version,
         "source_seconds": source_seconds,
+        "duration_seconds": replay.duration_seconds,
+        "next_effective_seconds": min(next_times, default=None),
         "as_of": as_of.isoformat(),
         "corpus_version": content_hash(encoded),
         "records": records,

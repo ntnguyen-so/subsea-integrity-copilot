@@ -14,6 +14,7 @@ const approved: MaintenanceRecord = {
 };
 const catalog: MaintenanceCatalog = {
   generation_id: "fixture", site_id: "northsea", pack_version: "fixture", source_seconds: 120,
+  scenario: "S7", duration_seconds: 360, next_effective_seconds: null,
   as_of: "2026-01-01T00:02:00Z", corpus_version: "fixture-corpus",
   records: [approved, { ...approved, id: "MAINT-001", revision: 1, supersedes: null,
     status: "superseded", admissible: false, exclusion_reason: "Superseded revision." }],
@@ -40,16 +41,17 @@ test("maintenance shows only effective records and guidance while preserving ori
   await page.addStyleTag({ path: join(process.cwd(), "web", "styles.css") });
   await page.addScriptTag({ content: `${bundle()}
     window.panel = new MaintenanceFixture.MaintenancePanel(
-      document.getElementById("records"), () => Promise.resolve(${JSON.stringify(catalog)}));
+      document.getElementById("records"), () => Promise.resolve(${JSON.stringify(catalog)}), () => {});
     window.panel.load("fixture", 120);` });
   const record = page.locator('[data-document="MAINT-002"]');
   await expect(record).toHaveAttribute("data-admissible", "true");
-  await expect(record.locator("pre")).toHaveText(approved.body);
+  await expect(record.locator("[data-maintenance-body]")).toHaveText(approved.body);
   await expect(record.locator("h3")).toHaveText(approved.title);
   await expect(record.locator("img")).toHaveCount(0);
   await expect(record).toContainText("does not prove that work was executed");
   await expect(record).toContainText("Replaces revision: MAINT-001");
-  await expect(record.locator("details")).toHaveAttribute("open");
+  await expect(record.locator("[data-maintenance-body]")).toBeVisible();
+  await expect(record.locator("details")).not.toHaveAttribute("open");
   await expect(page.locator('[data-document="MAINT-001"]')).toHaveCount(0);
   await expect(page.locator("#records")).toContainText("1 effective maintenance record(s)");
   await expect(page.locator("#records")).toContainText("not an inventory of documents read by an agent");
@@ -101,7 +103,7 @@ test("maintenance navigation withholds stale responses and exposes failures with
     window.panel = new MaintenanceFixture.MaintenancePanel(document.getElementById("records"), path =>
       path.includes("old") ? new Promise(resolve => window.finishOld = resolve)
       : path.includes("failed") ? Promise.reject(new Error("Service unavailable"))
-      : Promise.resolve({ ...window.oldCatalog, generation_id: "new", records: [] }));
+      : Promise.resolve({ ...window.oldCatalog, generation_id: "new", records: [] }), () => {});
     window.panel.load("old", 120);
     window.panel.load("new", 120);` });
   await expect(page.locator("#records")).toContainText("No effective maintenance records are available");
@@ -142,25 +144,37 @@ test("top-level Knowledge workspace separates two topics, follows S7 source time
   const mode = page.getByRole("switch", { name: /switch to/ });
   await expect(mode).toBeEnabled();
   if (await mode.getAttribute("aria-checked") === "true") await mode.click();
-  const slider = page.getByRole("slider", { name: "Selected source time" });
-  for (const seconds of [79, 80]) {
-    await page.locator("#tab-live").click();
+  await page.locator("#tab-maintenance").click();
+  const slider = page.getByRole("slider", { name: "Maintenance source time" });
+  for (const seconds of [0, 79, 80]) {
     await slider.evaluate((element, value) => {
       if (!(element instanceof HTMLInputElement)) throw new Error("Expected source-time input");
-      element.value = String(value); element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.value = String(value); element.dispatchEvent(new Event("change", { bubbles: true }));
     }, seconds);
-    await page.locator("#tab-maintenance").click();
     await expect(page.locator("#maintenance-records [data-source-seconds]")).toHaveAttribute("data-source-seconds", String(seconds));
     await expect(page.locator('#maintenance-records [data-document="MAINT-P7-GW-002"]')).toHaveCount(seconds < 80 ? 0 : 1);
     await expect(page.locator('#maintenance-records [data-document="MAINT-P7-GW-001"]')).toHaveCount(0);
-    if (seconds < 80) await expect(page.locator("#maintenance-records")).toContainText("No effective maintenance records are available");
+    if (seconds < 80) {
+      await expect(page.locator("#maintenance-records")).toContainText("No effective maintenance records are available");
+      await expect(page.getByRole("button", { name: "View records at +80s", exact: true })).toBeVisible();
+      await expect(page.locator("#maintenance-records")).not.toContainText("approximately -0.75 bar offset");
+    }
   }
+  await slider.evaluate(element => {
+    if (!(element instanceof HTMLInputElement)) throw new Error("Expected source-time input");
+    element.value = "0"; element.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await page.getByRole("button", { name: "View records at +80s", exact: true }).click();
+  await expect(slider).toHaveValue("80");
+  await expect(page.locator("#maintenance-records [data-source-seconds]")).toHaveAttribute("data-source-seconds", "80");
+  await expect(page.locator("#source-clock")).toContainText("+80");
   const response = await page.request.get(`/api/replays/${replay!.id}/maintenance?source_seconds=80`);
   expect(response.ok()).toBeTruthy();
   const source: MaintenanceCatalog = await response.json();
   expect(source.records.map(record => record.id)).toEqual(["MAINT-P7-GW-002"]);
   const original = source.records.find(record => record.id === "MAINT-P7-GW-002")!;
-  await expect(page.locator('[data-document="MAINT-P7-GW-002"] pre')).toHaveText(original.body);
+  await expect(page.locator('[data-maintenance-body="MAINT-P7-GW-002"]')).toHaveText(original.body);
+  await expect(page.locator('[data-maintenance-body="MAINT-P7-GW-002"]')).toBeVisible();
   await expect(page.locator('[data-document="MAINT-P7-GW-002"]')).toHaveAttribute("data-admissible", "true");
   await expect(page.getByRole("heading", { name: "Pressure Investigation Knowledge", exact: true })).toBeHidden();
   await page.getByRole("tab", { name: "Pressure Investigation", exact: true }).click();
