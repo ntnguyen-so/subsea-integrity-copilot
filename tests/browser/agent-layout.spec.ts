@@ -145,16 +145,14 @@ test("specialist outputs explain accepted findings, distinguish absent from unus
   await expect(row).toHaveCount(1);
   await expect(row.locator("th, td")).toHaveText(["A / pressure", "48 / 60", "10", "2", "2"]);
   await expect(sensors).not.toContainText("UNCITED");
-  const original = reader.locator('[data-section="specialist-original:sensor_quality"]');
-  await original.locator("summary").click();
-  await expect(original.locator("pre")).toContainText('"claim_refs":');
-  await expect(original.locator("pre")).toContainText(quality.answer!);
+  await expect(reader.getByText("Original technical handoff and source references", { exact: true })).toHaveCount(0);
+  await expect(reader.locator('[data-section^="specialist-original:"]')).toHaveCount(0);
   await page.evaluate(() => {
     const fixture = window as typeof window & { specialistTasks: AgentTask[]; renderSpecialists: () => void };
     fixture.specialistTasks[0].updated_at = "2026-01-01T00:03:00Z"; fixture.renderSpecialists();
   });
   await expect(sensors).toHaveAttribute("open");
-  await expect(original).toHaveAttribute("open");
+  await expect(reader.locator('[data-section^="specialist-original:"]')).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.getByRole("tab", { name: "Event Diagnosis Agent output" }).click();
@@ -164,6 +162,8 @@ test("specialist outputs explain accepted findings, distinguish absent from unus
   await expect(reader).toContainText("1 executed sensor comparison(s) cited");
   await expect(reader).toContainText("Plan an engineering inspection");
   await expect(reader).toContainText("not an authorized action");
+  await expect(reader.getByText("Original technical handoff and source references", { exact: true })).toHaveCount(0);
+  await expect(reader.locator('[data-section^="specialist-original:"]')).toHaveCount(0);
   await page.evaluate(() => {
     const fixture = window as typeof window & {
       specialistBasis: WindowSnapshot; specialistTasks: AgentTask[]; renderSpecialists: () => void;
@@ -224,7 +224,8 @@ for (const scenario of ["S7", "S3"]) {
         task.result!.summary, [...task.result!.claim_refs, ...task.result!.evidence_ids],
       ), { useInnerText: true });
       await expect(panel.getByRole("heading", { name: "Limits and handoff" })).toBeVisible();
-      await expect(panel.getByText("Original technical handoff and source references", { exact: true })).toBeVisible();
+      await expect(panel.getByText("Original technical handoff and source references", { exact: true })).toHaveCount(0);
+      await expect(panel.locator('[data-section^="specialist-original:"]')).toHaveCount(0);
       if (role === "sensor_quality") {
         await expect(panel).toContainText("did not arrive");
         await expect(panel).toContainText("arrived but could not be used");

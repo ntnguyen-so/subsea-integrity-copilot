@@ -241,11 +241,6 @@ function specialistOutput(container: HTMLElement, task: AgentTask, result: Agent
   container.append(list, node("p", task.role === "sensor_quality"
     ? "Passed to Event Diagnosis and the Response Coordinator as measurement-quality evidence, not a leak or hardware diagnosis."
     : "Passed to the Response Coordinator to combine with measurement-quality findings. An inspection focus is not a confirmed leak location."));
-  const original = node("details");
-  original.dataset.section = `specialist-original:${task.id}`; original.open = opened.has(original.dataset.section);
-  original.append(node("summary", "Original technical handoff and source references"),
-    node("pre", JSON.stringify({ answer: task.answer, result }, null, 2), "public-record"));
-  container.append(original);
 }
 function organizeAgentWorkspace(progress: HTMLElement, reviewOpen = false): void {
   const reviewer = progress.querySelector<HTMLElement>('.agent-role[data-role="grounding_reviewer"]');
