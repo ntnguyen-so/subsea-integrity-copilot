@@ -1,6 +1,6 @@
 /**
- * Read-only evaluation UI: recorded detection/reference metrics and a separate
- * frozen-packet answer-quality benchmark. Opening tabs/archives never runs inference.
+ * Read-only dashboard evaluation UI: recorded detection metrics. The frozen-packet
+ * answer-quality benchmark is not exposed here. Opening archives never runs inference.
  * Backend metric rates retain their numerator, denominator and uncertainty; spatial
  * playback additionally computes explicit recorded-window coverage in evaluation_maps.
  */
@@ -260,6 +260,7 @@ const suiteNames: Record<string, string> = {
   current: "Leak and sensor-issue detection", recovery: "Leak recovery and new leaks",
   non_leak: "No-leak scenarios and false alarms",
 };
+const evaluationTabs = [["detection", "Detection"]] as const;
 
 /** Preserve reader expansion while switching suites/archives; cancel obsolete archive selection reads. */
 export function renderEvaluation(
@@ -281,7 +282,7 @@ export function renderEvaluation(
   container.replaceChildren();
   const tabs = raw("div", "", "evaluation-suite-selector");
   tabs.setAttribute("role", "tablist"); tabs.setAttribute("aria-label", "Evaluation approaches");
-  for (const [key, label] of [["detection", "Detection"], ["agent", "Agent reliability"]]) {
+  for (const [index, [key, label]] of evaluationTabs.entries()) {
     const button = raw("button", label); button.type = "button";
     button.tabIndex = key === selectedEvaluationTab ? 0 : -1;
     button.setAttribute("role", "tab"); button.setAttribute("aria-selected", String(key === selectedEvaluationTab));
@@ -294,8 +295,10 @@ export function renderEvaluation(
     button.addEventListener("keydown", event => {
       if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
       event.preventDefault();
-      selectedEvaluationTab = event.key === "Home" ? "detection" :
-        event.key === "End" ? "agent" : key === "detection" ? "agent" : "detection";
+      const direction = event.key === "ArrowLeft" ? -1 : 1;
+      const target = event.key === "Home" ? 0 : event.key === "End" ? evaluationTabs.length - 1 :
+        (index + direction + evaluationTabs.length) % evaluationTabs.length;
+      selectedEvaluationTab = evaluationTabs[target][0];
       renderEvaluation(report);
       document.getElementById(`evaluation-${selectedEvaluationTab}-tab`)?.focus();
     });

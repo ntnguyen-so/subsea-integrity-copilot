@@ -164,7 +164,7 @@ function historyRecording(): EvaluationReport {
   return report;
 }
 
-test("evaluation approaches start collapsed below the selectors and retain expansion across tab and suite changes", async ({ page }) => {
+test("detection approach starts collapsed below the selectors and retains expansion across suite changes", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Explicit local UI opt-in.");
   await page.request.post("/api/login", {
     data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD },
@@ -190,31 +190,12 @@ test("evaluation approaches start collapsed below the selectors and retain expan
   await suite.selectOption("recovery");
   await expect(detection).toHaveJSProperty("open", true);
   await detection.locator(":scope > summary").click();
-  await page.getByRole("tab", { name: "Agent reliability", exact: true }).click();
-  await expect(page.locator("#evaluation-scope-label")).toHaveText("FROZEN REFERENCES / RECORDED ANSWERS");
-  const agent = page.getByLabel("Agent reliability evaluation approach", { exact: true });
-  await expect(page.locator("#evaluation-approach-panel > details").first()).toHaveAttribute("id", "agent-reference-method");
-  await expect(agent.locator(":scope > summary")).toHaveText("Agent reliability: approach and ground truth");
-  await expect(agent).toHaveJSProperty("open", false);
-  await expect(agent.locator("p").first()).toBeHidden();
-  const summary = agent.locator(":scope > summary");
-  await summary.focus();
-  await summary.press("Enter");
-  await expect(agent.locator("p").first()).toBeVisible();
-  await expect(agent.getByRole("heading", { name: "What this evaluates", exact: true })).toBeVisible();
-  await expect(agent.getByRole("heading", { name: "Goal", exact: true })).toBeVisible();
-  await expect(agent).toContainText("controlled answer-quality component benchmark");
-  await expect(agent).toContainText("advisory model judgments, not engineer-authored gold answers");
-  await expect(agent).not.toContainText("withdrawn");
-  await expect(agent).not.toContainText("reused unchanged");
+  await expect(page.getByRole("tab", { name: "Agent reliability", exact: true })).toHaveCount(0);
   await page.getByRole("tab", { name: "Detection", exact: true }).click();
   await expect(page.locator("#evaluation-scope-label")).toHaveText("GROUND TRUTH / AGENT FINDINGS");
   await expect(detection).toHaveJSProperty("open", false);
-  await page.getByRole("tab", { name: "Agent reliability", exact: true }).click();
-  await expect(agent).toHaveJSProperty("open", true);
-  await summary.focus();
-  await summary.press("Enter");
-  await expect(agent).toHaveJSProperty("open", false);
+  await suite.selectOption("current");
+  await expect(detection).toHaveJSProperty("open", false);
 });
 
 test("history dropdown loads original reports and recorded scores without inference and restores latest", async ({ page }) => {
@@ -964,7 +945,7 @@ test("detailed tables expose every case and snapshot without crediting later rep
   await expect(snapshots).toHaveText(before, { useInnerText: true });
 });
 
-test("withdrawn agent audits stay hidden and reference evaluation starts explicitly unrun", async ({ page }) => {
+test("withdrawn agent audits and the reference benchmark stay hidden", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Explicit local UI opt-in.");
   await page.request.post("/api/login", { data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD } });
   const report = recording();
@@ -993,10 +974,9 @@ test("withdrawn agent audits stay hidden and reference evaluation starts explici
     await expect(page.locator("#evaluation-results")).toContainText("Not run: no live agent results");
     await expect(page.locator(".spatial-scorecards")).toHaveCount(0);
   }
-  await page.getByRole("tab", { name: "Agent reliability", exact: true }).click();
-  await expect(page.locator("#evaluation-results")).toContainText("independently authored factual references");
+  await expect(page.getByRole("tab", { name: "Agent reliability", exact: true })).toHaveCount(0);
   await expect(page.locator("#evaluation-results")).not.toContainText("withdrawn");
-  await expect(page.locator("#evaluation-results")).toContainText("Not run: no dataset-based");
+  await expect(page.locator("#agent-reference-method")).toHaveCount(0);
   await expect(page.getByRole("row").filter({ hasText: "Mapped final reports delivered" })).toHaveCount(0);
   await expect(page.locator("#evaluation-results")).not.toContainText("50.0% (1/2)");
   await page.getByRole("tab", { name: "Detection", exact: true }).click();
@@ -1007,7 +987,7 @@ test("withdrawn agent audits stay hidden and reference evaluation starts explici
 });
 
 for (const reviewMode of ["legacy", "quality", "failed-review"]) {
-test(`agent answer quality preserves original references and explicit failure accounting: ${reviewMode}`, async ({ page }) => {
+test(`agent answer-quality records remain off the dashboard: ${reviewMode}`, async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Explicit local UI opt-in.");
   await page.request.post("/api/login", { data: { username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD } });
   const report = recording();
@@ -1080,64 +1060,11 @@ test(`agent answer quality preserves original references and explicit failure ac
   await page.route("**/api/evaluation", route => route.fulfill({ json: report }));
   await page.goto("/");
   await page.getByRole("tab", { name: "Evaluation" }).click();
-  await page.getByRole("tab", { name: "Agent reliability", exact: true }).click();
-  const overview = page.getByLabel("Agent reference evaluation overview", { exact: true });
-  await expect(overview.getByRole("article", { name: "Answers reviewed", exact: true }))
-    .toContainText(reviewMode === "legacy" ? "0/3" : reviewMode === "failed-review" ? "1/3" : "2/3");
-  await expect(overview.getByRole("article", { name: "Reviews without concerns", exact: true }))
-    .toContainText(reviewMode === "legacy" ? "Not assessed" : reviewMode === "failed-review" ? "0/1" : "1/2");
-  await expect(overview.getByRole("article", { name: "Answer execution/output failures", exact: true }).getByText("1", { exact: true })).toBeVisible();
-  await expect(page.locator("#evaluation-results")).toContainText("frozen-reference-hash");
-  await expect(page.getByRole("row").filter({ hasText: "AR-D2" })).toContainText("failed: timeout");
-  const aggregate = page.getByLabel("Aggregate answer quality", { exact: true });
-  if (reviewMode === "legacy") {
-    await expect(overview).toContainText("no six-dimensional answer-quality reviews");
-    await expect(aggregate.getByRole("cell", { name: "Not scored", exact: true })).toHaveCount(6);
-    await expect(aggregate).not.toContainText("/5");
-  } else {
-    await expect(aggregate.getByRole("row").filter({ hasText: "Numerical accuracy" }))
-      .toContainText(reviewMode === "failed-review" ? "5.00/5 · 1 scored" : "3.50/5 · 2 scored");
-    await expect(aggregate.getByRole("row").filter({ hasText: "Actionable usefulness" }))
-      .toContainText(reviewMode === "failed-review" ? "Not scored" : "5.00/5 · 1 scored");
-    if (reviewMode === "failed-review") {
-      await expect(overview.getByRole("article", { name: "Review execution failures", exact: true })).toContainText("1");
-      await expect(page.getByRole("row").filter({ hasText: "AR-H1" })).toContainText("invalid_citation");
-    }
-  }
-  await aggregate.getByText("Supporting ground-truth checks · frozen dataset", { exact: true }).click();
-  await expect(aggregate).toContainText("Measurement facts (1 delivered answer)");
-  await expect(aggregate.getByRole("row").filter({ hasText: "held_out" })).toContainText("0");
-  const method = page.getByLabel("Agent reliability evaluation approach", { exact: true });
-  await expect(method).toHaveJSProperty("open", false);
-  const overviewBounds = await overview.boundingBox(), resultBounds = await page.locator("#agent-reference-results").boundingBox();
-  const methodBounds = await method.boundingBox();
-  if (!overviewBounds || !resultBounds || !methodBounds) throw new Error("Missing reference evaluation sections");
-  expect(overviewBounds.y).toBeLessThan(resultBounds.y);
-  expect(methodBounds.y).toBeLessThan(overviewBounds.y);
-  await page.getByRole("link", { name: "Inspect reference case AR-D1", exact: true }).click();
-  const detail = page.locator('.evaluation-case[data-reference-case="AR-D1"]');
-  await expect(detail).toHaveJSProperty("open", true);
-  await expect(detail.getByText("Ground truth fixed before inference", { exact: true })).toBeVisible();
-  await expect(detail.getByText("Actual agent output", { exact: true })).toBeVisible();
-  if (reviewMode !== "legacy") {
-    await expect(detail.getByText("Saved investigation answer", { exact: true })).toBeVisible();
-    await expect(detail).toContainText("Compare an independent measurement.");
-    await expect(detail).toContainText("Frozen evidence IDs: M1");
-    await expect(detail.getByRole("row").filter({ hasText: "Actionable usefulness" })).toContainText("Not scored");
-    await expect(detail.locator("blockquote").first()).toHaveText("The reading is 80 bar.");
-  }
-  await detail.getByText("Frozen agent input", { exact: true }).click();
-  await expect(detail.locator("pre").filter({ hasText: '"pressure_kPa": 8000' })).toBeVisible();
-  await page.getByRole("link", { name: "How the evaluation works", exact: true }).click();
-  await expect(method).toHaveJSProperty("open", true);
-  await expect(page.locator("#evaluation-results")).toContainText("does not run the production planner");
-  await page.setViewportSize({ width: 480, height: 900 });
-  const comparison = detail.locator(".agent-reference-comparison");
-  const panes = comparison.locator(":scope > section");
-  const expectedBounds = await panes.nth(0).boundingBox(), actualBounds = await panes.nth(1).boundingBox();
-  if (!expectedBounds || !actualBounds) throw new Error("Missing reference comparison");
-  expect(expectedBounds.x).toBe(actualBounds.x);
-  expect(expectedBounds.y).toBeLessThan(actualBounds.y);
+  await expect(page.getByRole("tab", { name: "Agent reliability", exact: true })).toHaveCount(0);
+  await expect(page.locator("#agent-reference-method, #agent-reference-results")).toHaveCount(0);
+  await expect(page.locator("#evaluation-results")).not.toContainText("frozen-reference-hash");
+  await expect(page.getByLabel("Detection evaluation approach", { exact: true })).toBeVisible();
+  await expect(page.locator(".spatial-scorecards")).toBeVisible();
 });
 }
 

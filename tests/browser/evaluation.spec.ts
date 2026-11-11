@@ -6,6 +6,55 @@
 import { test, expect } from "@playwright/test";
 import type { EvaluationReport } from "../../web/ts/evaluation";
 
+for (const hasReference of [false, true]) {
+  test(`dashboard exposes only Detection, including keyboard navigation, with reference results=${hasReference}`, async ({ page }) => {
+    const report: EvaluationReport = {
+      status: "not_run", cases: [], metrics: null,
+      agent_reference_evaluation: hasReference ? {
+        version: "agent-reference-evaluation-v1", status: "completed", run_id: "hidden-benchmark",
+        split: "held_out", dataset_sha256: "hidden-reference-hash", policy_version: "v1",
+        policy_sha256: "policy-hash", requested_model: "test-model", scope: "Component benchmark",
+        reference_origin: "Authored before inference", ground_truth_supplied_to_agent: false,
+        metrics: { planned: 1, completed: 1, failed: 0, all_checks_passed: 1,
+          checks: { measurement_facts: { passed: 1, denominator: 1 } } },
+        cases: [{ id: "AR-HIDDEN", name: "Hidden benchmark case", family: "facts", split: "held_out",
+          status: "completed", input: { pressure_kPa: 8000 }, expected: { pressure_bar: 80 },
+          actual: { pressure_bar: 80 }, checks: { measurement_facts: true }, elapsed_seconds: 1 }],
+      } : undefined,
+    };
+    const posts: string[] = [];
+    page.on("request", request => { if (request.method() === "POST") posts.push(request.url()); });
+    await page.route("**/api/**", route => {
+      const path = new URL(route.request().url()).pathname;
+      if (path === "/api/session") return route.fulfill({
+        json: { authenticated: true, csrf_token: "test-csrf", username: "operator" },
+      });
+      if (path === "/api/evaluation") return route.fulfill({ json: report });
+      if (path === "/api/replays") return route.fulfill({ json: { replays: [] } });
+      return route.fulfill({ status: 503, json: { detail: "No live services in this test." } });
+    });
+    await page.goto("/?tab=evaluation");
+    const tabs = page.getByRole("tablist", { name: "Evaluation approaches", exact: true });
+    const detection = tabs.getByRole("tab", { name: "Detection", exact: true });
+    await expect(tabs.getByRole("tab")).toHaveCount(1);
+    await expect(detection).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("tab", { name: "Agent reliability", exact: true })).toHaveCount(0);
+    await detection.focus();
+    for (const key of ["End", "ArrowRight", "ArrowLeft", "Home"]) {
+      await page.keyboard.press(key);
+      await expect(detection).toBeFocused();
+      await expect(detection).toHaveAttribute("aria-selected", "true");
+      await expect(page.locator("#evaluation-scope-label")).toHaveText("GROUND TRUTH / AGENT FINDINGS");
+      await expect(page.locator("#agent-reference-method, #agent-reference-results")).toHaveCount(0);
+    }
+    await page.getByRole("tab", { name: "Live", exact: true }).click();
+    await page.getByRole("tab", { name: "Evaluation", exact: true }).click();
+    await expect(detection).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#evaluation-results")).not.toContainText("AR-HIDDEN");
+    expect(posts).toEqual([]);
+  });
+}
+
 test("evaluation deep link opens the workspace and retains it through sign-in", async ({ page }) => {
   let evaluationReads = 0;
   await page.route("**/api/**", async route => {
@@ -118,8 +167,8 @@ test("evaluation opens authenticated recordings without submitting inference or 
   const reportOnly = accepted.filter(item => item.extraction?.status === "completed"
     && item.extraction.source_text_scope === "incident-answer-only-v1").length;
   await expect(provenance).toContainText(`${reportOnly}/${accepted.length} accepted reports`);
-  await page.getByRole("tab", { name: "Agent reliability", exact: true }).click();
-  await expect(page.locator("#evaluation-scope-label")).toHaveText("FROZEN REFERENCES / RECORDED ANSWERS");
+  await expect(page.getByRole("tab", { name: "Agent reliability", exact: true })).toHaveCount(0);
+  await expect(page.locator("#evaluation-scope-label")).toHaveText("GROUND TRUTH / AGENT FINDINGS");
   await page.getByRole("tab", { name: "Detection", exact: true }).click();
   for (const name of ["Live", "Inspect"]) {
     await page.getByRole("tab", { name, exact: true }).click();
