@@ -53,7 +53,18 @@ test("maintenance shows only effective records and guidance while preserving ori
   await expect(page.locator('[data-document="MAINT-001"]')).toHaveCount(0);
   await expect(page.locator("#records")).toContainText("1 effective maintenance record(s)");
   await expect(page.locator("#records")).toContainText("not an inventory of documents read by an agent");
-  const knowledge = page.locator('[aria-labelledby="pressure-knowledge-title"]');
+  const tabs = page.getByRole("tablist", { name: "Knowledge topics" });
+  const maintenanceTab = tabs.getByRole("tab", { name: "Maintenance", exact: true });
+  const pressureTab = tabs.getByRole("tab", { name: "Pressure Investigation", exact: true });
+  const knowledge = page.locator("#knowledge-pressure-panel");
+  await expect(tabs.getByRole("tab")).toHaveCount(2);
+  await expect(maintenanceTab).toHaveAttribute("aria-selected", "true");
+  await expect(record).toBeVisible();
+  await expect(knowledge).toBeHidden();
+  await pressureTab.click();
+  await expect(pressureTab).toHaveAttribute("aria-selected", "true");
+  await expect(knowledge).toBeVisible();
+  await expect(record).toBeHidden();
   await expect(knowledge).toContainText("not incident evidence");
   await expect(knowledge).toContainText("wall clock");
   await expect(knowledge.locator('[data-knowledge="KN-PROCEDURE"] details')).toHaveAttribute("open");
@@ -62,7 +73,24 @@ test("maintenance shows only effective records and guidance while preserving ori
   await expect(knowledge).toContainText("Evidence boundary: Not a site validation.");
   await expect(knowledge).not.toContainText("KN-DRAFT");
   await expect(knowledge).not.toContainText("excluded guidance");
+  await page.addScriptTag({ content: 'window.panel.clear("Loading another source time."); window.panel.load("fixture", 120);' });
+  await expect(pressureTab).toHaveAttribute("aria-selected", "true");
+  await expect(knowledge).toBeVisible();
+  await pressureTab.focus();
+  for (const [key, selected] of [
+    ["Home", maintenanceTab], ["End", pressureTab], ["ArrowRight", maintenanceTab], ["ArrowLeft", pressureTab],
+  ] as const) {
+    await page.keyboard.press(key);
+    await expect(selected).toBeFocused();
+    await expect(selected).toHaveAttribute("aria-selected", "true");
+    await expect(selected).toHaveAttribute("tabindex", "0");
+    await expect(tabs.locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
+  }
   await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await maintenanceTab.click();
+  await expect(record).toBeVisible();
+  await expect(knowledge).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
@@ -91,7 +119,7 @@ test("maintenance navigation withholds stale responses and exposes failures with
   await expect(page.locator("#records")).toContainText("scope mismatch");
 });
 
-test("top-level Maintenance tab follows S7 source time and starts no inference", async ({ page }) => {
+test("top-level Knowledge workspace separates two topics, follows S7 source time and starts no inference", async ({ page }) => {
   test.skip(!process.env.SUBSEA_OPERATOR_PASSWORD, "Requires local owned reference records.");
   const login = await page.request.post("/api/login", { data: {
     username: "operator", password: process.env.SUBSEA_OPERATOR_PASSWORD,
@@ -103,7 +131,8 @@ test("top-level Maintenance tab follows S7 source time and starts no inference",
   const writes: string[] = [], errors: string[] = [];
   page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
   page.on("pageerror", error => errors.push(error.message));
-  await page.goto("/?replay=" + encodeURIComponent(replay!.id) + "&tab=maintenance");
+  await page.goto("/?replay=" + encodeURIComponent(replay!.id) + "&tab=knowledge");
+  await expect(page.locator(".rail [role=tab]")).toContainText(["Live", "Knowledge", "Evaluation"]);
   await expect(page.locator("#tab-maintenance")).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#panel-maintenance")).toBeVisible();
   await expect(page.locator("#evidence-selection")).toBeHidden();
@@ -133,6 +162,9 @@ test("top-level Maintenance tab follows S7 source time and starts no inference",
   const original = source.records.find(record => record.id === "MAINT-P7-GW-002")!;
   await expect(page.locator('[data-document="MAINT-P7-GW-002"] pre')).toHaveText(original.body);
   await expect(page.locator('[data-document="MAINT-P7-GW-002"]')).toHaveAttribute("data-admissible", "true");
+  await expect(page.getByRole("heading", { name: "Pressure Investigation Knowledge", exact: true })).toBeHidden();
+  await page.getByRole("tab", { name: "Pressure Investigation", exact: true }).click();
+  await expect(page.locator('[data-document="MAINT-P7-GW-002"]')).toBeHidden();
   await expect(page.getByRole("heading", { name: "Pressure Investigation Knowledge", exact: true })).toBeVisible();
   await expect(page.locator("[data-knowledge]")).toHaveCount(5);
   const program = page.locator('[data-knowledge="KN-INVESTIGATION-PROGRAM-R1"]');
@@ -142,6 +174,11 @@ test("top-level Maintenance tab follows S7 source time and starts no inference",
   await page.locator("#tab-maintenance").focus();
   await page.keyboard.press("End");
   await expect(page.locator("#tab-evaluation")).toBeFocused();
+  await page.locator("#tab-maintenance").click();
+  await expect(page.getByRole("tab", { name: "Pressure Investigation", exact: true })).toHaveAttribute("aria-selected", "true");
+  await page.goto("/?replay=" + encodeURIComponent(replay!.id) + "&tab=maintenance");
+  await expect(page.getByRole("tab", { name: "Knowledge", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Maintenance", exact: true })).toHaveAttribute("aria-selected", "true");
   expect(writes).toEqual([]);
   expect(errors).toEqual([]);
 });

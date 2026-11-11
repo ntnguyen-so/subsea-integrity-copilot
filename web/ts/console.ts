@@ -67,7 +67,8 @@ let createRetry: { bodyKey: string; id: string } | null = null;
 let controlRetry: { bodyKey: string; id: string } | null = null;
 let liveHereRetry: { bodyKey: string; id: string } | null = null;
 const requestedTab = new URLSearchParams(location.search).get("tab");
-let activeTab = requestedTab === "evaluation" || requestedTab === "maintenance" ? requestedTab : "live";
+let activeTab = requestedTab === "knowledge" ? "maintenance"
+  : requestedTab === "evaluation" || requestedTab === "maintenance" ? requestedTab : "live";
 let recordedAnchor: { id: string; seconds: number; speed: number } | null = null;
 let liveSelection: number | null = null;
 let sourceHistory = false;

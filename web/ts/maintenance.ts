@@ -16,6 +16,7 @@ export class MaintenancePanel {
   private key = "";
   private pending: AbortController | null = null;
   private version = 0;
+  private activeTopic = "maintenance";
 
   constructor(private readonly container: HTMLElement,
     private readonly get: <T>(path: string, signal: AbortSignal) => Promise<T>) {}
@@ -58,11 +59,9 @@ export class MaintenancePanel {
     basis.dataset.generation = catalog.generation_id;
     basis.dataset.sourceSeconds = String(catalog.source_seconds);
     const records = node("section");
-    records.setAttribute("aria-labelledby", "maintenance-documents-title");
     const heading = node("h3", "Maintenance records"); heading.id = "maintenance-documents-title";
     records.append(heading, basis, node("p",
       "Reference catalog, not an inventory of documents read by an agent. Only approved records effective at this source time are shown; draft, superseded, expired and future records are withheld. Change the source time in Live to inspect another point.", "muted"));
-    this.container.replaceChildren(records);
     if (!effectiveRecords.length) records.append(node("p",
       "No effective maintenance records are available in this reference corpus at the selected time. This does not establish that no maintenance occurred.", "empty"));
     for (const record of effectiveRecords) {
@@ -86,12 +85,39 @@ export class MaintenancePanel {
       node("p", `Corpus version: ${catalog.corpus_version} · Layout: ${catalog.pack_version}`, "public-record"),
       node("p", "Synthetic reference records; not a live maintenance-management feed. The catalog does not prove a sensor fault, a pressure-event cause, completed work or safety clearance.", "muted"));
     records.append(provenance);
-    this.renderKnowledge(catalog.knowledge);
+    const panels = [records, this.renderKnowledge(catalog.knowledge)];
+    const tabs = node("div", "", "evaluation-suite-selector");
+    tabs.setAttribute("role", "tablist"); tabs.setAttribute("aria-label", "Knowledge topics");
+    const selectTopic = (index: number, focus = false): void => {
+      this.activeTopic = index === 0 ? "maintenance" : "pressure";
+      buttons.forEach((tab, position) => {
+        const selected = position === index;
+        tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1;
+        panels[position].hidden = !selected;
+        if (selected && focus) tab.focus();
+      });
+    };
+    const buttons = [["maintenance", "Maintenance"], ["pressure", "Pressure Investigation"]].map(([key, label], index) => {
+      const tab = node("button", label); tab.type = "button"; tab.setAttribute("role", "tab");
+      tab.id = `knowledge-${key}-tab`; tab.setAttribute("aria-controls", `knowledge-${key}-panel`);
+      panels[index].id = `knowledge-${key}-panel`; panels[index].setAttribute("role", "tabpanel");
+      panels[index].setAttribute("aria-labelledby", tab.id);
+      tab.addEventListener("click", () => selectTopic(index));
+      tab.addEventListener("keydown", event => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        selectTopic(event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length, true);
+      });
+      return tab;
+    });
+    tabs.append(...buttons);
+    this.container.replaceChildren(tabs, ...panels);
+    selectTopic(this.activeTopic === "maintenance" ? 0 : 1);
   }
 
-  private renderKnowledge(packet: KnowledgePacket): void {
+  private renderKnowledge(packet: KnowledgePacket): HTMLElement {
     const section = node("section", "", "history-investigation");
-    section.setAttribute("aria-labelledby", "pressure-knowledge-title");
     const heading = node("h3", "Pressure Investigation Knowledge"); heading.id = "pressure-knowledge-title";
     section.append(heading, node("p",
       "Applicable domain guidance from the same versioned knowledge corpus used by the agents. It suggests checks; it is not incident evidence, a diagnosis or a field-approved operating procedure.", "summary"),
@@ -129,6 +155,6 @@ export class MaintenancePanel {
     const provenance = node("details");
     provenance.append(node("summary", "Knowledge version and authority"),
       node("p", `${packet.version} · authority: ${friendly(packet.authority)}`, "public-record"));
-    section.append(provenance); this.container.append(section);
+    section.append(provenance); return section;
   }
 }
